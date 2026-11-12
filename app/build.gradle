@@ -1,0 +1,46 @@
+plugins {
+    id 'com.android.application'
+}
+
+android {
+    namespace 'com.busbattle.app'
+    compileSdk 34
+
+    defaultConfig {
+        applicationId 'com.busbattle.app'
+        minSdk 24
+        targetSdk 34
+        versionCode((System.getenv('GITHUB_RUN_NUMBER') ?: '1') as int)
+        versionName "1.0.${System.getenv('GITHUB_RUN_NUMBER') ?: '0'}"
+    }
+
+    // CI creates a signing key once and keeps it in the build cache (it is never committed), so each new APK
+    // installs over the previous one. Without that key (e.g. a local build) the standard debug key is used.
+    def ciKey = file(System.getenv('BUS_KEYSTORE') ?: 'none')
+    if (ciKey.exists()) {
+        signingConfigs {
+            ci {
+                storeFile ciKey
+                storePassword System.getenv('BUS_KEYSTORE_PASS')
+                keyAlias 'bus'
+                keyPassword System.getenv('BUS_KEYSTORE_PASS')
+            }
+        }
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            signingConfig ciKey.exists() ? signingConfigs.ci : signingConfigs.debug
+        }
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+}
+
+dependencies {
+    implementation 'com.squareup.okhttp3:okhttp:4.12.0'
+}
