@@ -319,7 +319,7 @@ public final class TikTokLive {
         int repeat = 0, repeatEnd = 0;
         Who who = null;
         boolean hasGift = false;
-        String name = "";
+        String name = "", img = "";
         int type = 0, diamonds = 0;
         Proto.Reader r = new Proto.Reader(body);
         while (r.next()) {
@@ -335,6 +335,7 @@ public final class TikTokLive {
                     if (g.field == 11 && g.wire == 0) type = (int) g.varint();
                     else if (g.field == 12 && g.wire == 0) diamonds = (int) g.varint();
                     else if (g.field == 16 && g.wire == 2) name = g.string();
+                    else if (g.field == 1 && g.wire == 2 && img.isEmpty()) img = Who.firstUrl(g.bytes());
                     else g.skip();
                 }
             } else r.skip();
@@ -368,7 +369,8 @@ public final class TikTokLive {
         log("Regalo " + who.nick + ": " + name + " x" + count + (end ? " fin" : "") + " → +" + delta);
         if (delta <= 0) return;
         try {
-            JSONObject o = who.json().put("type", "gift").put("gift", name).put("count", delta).put("coins", coins);
+            JSONObject o = who.json().put("type", "gift").put("gift", name).put("count", delta).put("coins", coins)
+                    .put("giftId", String.valueOf(giftId)).put("img", img.startsWith("https://") ? img : "");
             out.onEvent(o.toString());
         } catch (Exception ignored) {}
     }
@@ -408,7 +410,7 @@ public final class TikTokLive {
             return w;
         }
 
-        private static String firstUrl(byte[] image) {
+        static String firstUrl(byte[] image) {
             Proto.Reader r = new Proto.Reader(image);
             while (r.next()) { if (r.field == 1 && r.wire == 2) return r.string(); r.skip(); }
             return "";

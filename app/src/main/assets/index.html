@@ -177,6 +177,9 @@ input[type=color]{width:40px;height:36px;border:0;background:none;padding:0}
     <div class="pane" id="pGifts" hidden>
       <p class="note">«Nombre en TikTok» es el nombre del regalo en TikTok, en inglés (Rose, TikTok, Doughnut…). «Texto en pantalla» es lo que ve tu público.</p>
       <div id="gRows"></div>
+      <div class="grp"><h3>Regalos recibidos en el directo</h3>
+        <p class="note">Cada regalo que llega aparece aquí con su imagen y sus monedas. Toca un equipo para que ese regalo empuje sus buses (1 bus por moneda; puedes cambiarlo arriba).</p>
+        <div id="seenRows"></div></div>
       <div class="row"><button class="btn sm" id="gAdd">Añadir regalo</button></div>
       <div class="grp">
         <label class="row"><input type="checkbox" id="oOther"><span>Otros regalos: 1 bus por moneda para el equipo del espectador</span></label>
@@ -326,6 +329,7 @@ function onEvent(e){if(!e||!e.type)return;
     if(!G.joined[uid]){G.joined[uid]=1;credit(t,1,uid,nick,av);note(t,nick,av,"se une a "+cfg.teams[t].name,"+1");snd.blip(t)}
     else if(had!==t)note(t,nick,av,"se cambia a "+cfg.teams[t].name,"");
     return}
+  if(e.type==="gift"&&e.img!==undefined)try{seenAdd(e)}catch(x){}
   if(e.type==="gift"){var cnt=Math.max(1,e.count|0),name=String(e.gift||"").trim(),k=norm(name),m=null;
     cfg.gifts.forEach(function(g){if(g.name&&norm(g.name)===k)m=g});
     if(m){var n=m.n*cnt,lb=gInfo(m).lb;setTeam(uid,m.team,nick,av);credit(m.team,n,uid,nick,av);giftToast(uid,m.team,nick,av,lb,cnt,n);fxGift(m.team,n,nick,lb)}
@@ -543,6 +547,19 @@ function buildTeams(){var h="";[0,1].forEach(function(t){var Tm=cfg.teams[t];
     $("tr"+t).onclick=function(){Tm.logo="";imgs[t]=null;upd()};
     $("tx"+t).onclick=function(){Tm.hero="";heros[t]=null;save();heroPrev(t)};
     $("tf"+t).onchange=pick(t,"logo",240);$("th"+t).onchange=pick(t,"hero",560)})}
+function seenAdd(e){var k=norm(e.gift);if(!k)return;var S=cfg.seen||(cfg.seen=[]),x=null;
+  for(var i=0;i<S.length;i++)if(norm(S[i].name)===k){x=S.splice(i,1)[0];break}
+  x=x||{name:String(e.gift),img:"",coins:1,n:0};if(e.img)x.img=String(e.img);x.coins=Math.max(1,e.coins|0);x.n+=Math.max(1,e.count|0);
+  S.unshift(x);if(S.length>40)S.length=40;save();if(!$("sheet").hidden&&!$("pGifts").hidden)buildSeen()}
+function buildSeen(){var box=$("seenRows");if(!box)return;box.innerHTML="";var S=cfg.seen||[];
+  if(!S.length){box.innerHTML='<p class="note">Todavía no ha llegado ningún regalo.</p>';return}
+  S.forEach(function(x){var m=null;cfg.gifts.forEach(function(g){if(g.name&&norm(g.name)===norm(x.name))m=g});
+    var r=document.createElement("div");r.className="row";
+    r.innerHTML=(x.img?'<img src="'+esc(x.img)+'" alt="" width="34" height="34" style="border-radius:6px;flex:none">':'<span style="font-size:26px;width:34px;text-align:center">🎁</span>')+
+      '<span class="grow"><b>'+esc(x.name)+'</b><br><small>'+fmt(x.coins)+' moneda'+(x.coins===1?'':'s')+' · recibido ×'+fmt(x.n)+'</small></span>';
+    [0,1].forEach(function(t){var b=document.createElement("button");b.className="btn sm"+(m&&m.team===t?" go":"");b.textContent=cfg.teams[t].name;
+      b.onclick=function(){if(m)m.team=t;else cfg.gifts.push({name:x.name,label:"",team:t,n:x.coins});save();buildGifts();paintHud()};r.appendChild(b)});
+    box.appendChild(r)})}
 function buildGifts(){var box=$("gRows");box.innerHTML="";cfg.gifts.forEach(function(g,i){var r=document.createElement("div");r.className="grp";
   r.innerHTML='<div class="row"><input type="text" class="grow" id="gn'+i+'" value="'+esc(g.name)+'" placeholder="Nombre en TikTok (Rose)" aria-label="Nombre en TikTok">'+
     '<input type="text" class="grow" id="gl'+i+'" value="'+esc(g.label||"")+'" placeholder="Texto en pantalla" aria-label="Texto en pantalla"></div>'+
@@ -555,7 +572,7 @@ function buildGifts(){var box=$("gRows");box.innerHTML="";cfg.gifts.forEach(func
   $("gt"+i).onchange=function(){g.team=+this.value;save();paintHud()};
   $("gc"+i).oninput=function(){g.n=Math.max(1,this.value|0);save();paintHud()};
   $("gd"+i).onclick=function(){cfg.gifts.splice(i,1);save();buildGifts();paintHud()}});
-  $("oOther").checked=cfg.other;$("oChat").checked=cfg.chat}
+  $("oOther").checked=cfg.other;$("oChat").checked=cfg.chat;buildSeen()}
 $("gAdd").onclick=function(){cfg.gifts.push({name:"",label:"",team:0,n:1});save();buildGifts()};
 $("oOther").onchange=function(){cfg.other=this.checked;save();ctaT=0};
 $("oChat").onchange=function(){cfg.chat=this.checked;save();paintHud();ctaT=0};
