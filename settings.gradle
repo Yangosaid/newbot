@@ -6,4 +6,4 @@ dependencyResolutionManagement {
     repositories { google(); mavenCentral() }
 }
 rootProject.name = "BusBattle"
-include ":app"
+include ":app", ":downloader"
