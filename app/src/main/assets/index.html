@@ -154,6 +154,7 @@ input[type=color]{width:40px;height:36px;border:0;background:none;padding:0}
   <div id="big" hidden><div class="n" id="bigN"></div><div class="v" id="bigV"></div></div>
   <div id="chip" hidden>MODO DEMO · REGALOS DE PRUEBA</div>
   <button id="gear" aria-label="Ajustes">⚙<i id="dot" hidden></i></button>
+  <button id="toParty" aria-label="Fiesta 3D" style="position:absolute;right:calc(max(16px,env(safe-area-inset-right,0px)) + 54px);bottom:calc(10px + env(safe-area-inset-bottom,0px));width:44px;height:44px;border-radius:50%;border:1px solid rgba(255,255,255,.18);background:rgba(7,11,24,.7);font-size:22px;line-height:1;cursor:pointer;opacity:.85">🕺</button>
 
   <div id="sheet" hidden>
     <div id="tabs" role="tablist">
@@ -209,7 +210,7 @@ input[type=color]{width:40px;height:36px;border:0;background:none;padding:0}
 "use strict";
 var $=function(id){return document.getElementById(id)};
 var APP=!!window.BusApp;                                                      /* running inside the Android app */
-try{if(APP&&localStorage.getItem("game")==="party"){location.replace("party.html");return}}catch(e){}
+try{if(APP&&localStorage.getItem("game")!=="bus"){location.replace("party.html");return}}catch(e){}   /* the 3D hall is the default */
 var SRC=APP&&BusApp.getSource?String(BusApp.getSource()):"tiktok",YT=SRC==="youtube";
 var LOCAL=APP||/^(localhost|127\.0\.0\.1)$/.test(location.hostname);
 var DEF={teams:[
@@ -609,7 +610,7 @@ $("bNew").onclick=function(){G.pend=[];newRound()};
 $("bZero").onclick=function(){G.wins=[0,0];G.streak=0;G.last=-1;paintHud()};
 function setDemo(v){G.demo=v;$("chip").hidden=!v;$("bDemo").textContent=v?"Parar demo":"Demo"}
 $("bDemo").onclick=function(){setDemo(!G.demo)};
-$("bParty").onclick=function(){try{localStorage.setItem("game","party")}catch(e){}location.href="party.html"};
+$("toParty").onclick=$("bParty").onclick=function(){try{localStorage.setItem("game","party")}catch(e){}location.href="party.html"};
 function sndLabel(){$("bSnd").textContent=cfg.sound?"Sonido: sí":"Sonido: no"}
 $("bSnd").onclick=function(){cfg.sound=!cfg.sound;save();sndLabel();if(cfg.sound){snd.unlock();setTimeout(function(){snd.blip(0)},80)}};
 $("bFull").onclick=function(){try{var p=document.documentElement.requestFullscreen&&document.documentElement.requestFullscreen();p&&p.catch&&p.catch(function(){})}catch(e){}};
