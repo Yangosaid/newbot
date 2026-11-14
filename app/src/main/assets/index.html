@@ -325,6 +325,8 @@ function keysOf(t){var T=cfg.teams[t],a=String(T.keys||"").split(",").map(functi
 function emojiKeys(t){return String(cfg.teams[t].keys||"").split(",").map(function(k){return k.trim()}).filter(function(k){return k&&!/[a-z0-9]/i.test(norm(k))})}
 function teamOf(text){var w=norm(text).split(/[^a-z0-9]+/).map(squeeze),hit=[false,false];
   for(var et=0;et<2;et++)emojiKeys(et).forEach(function(k){if(String(text).indexOf(k)>=0)hit[et]=true});
+  var whole=squeeze(norm(text).replace(/[^a-z0-9]+/g,""));                       /* "P.S.O.E", "v o x" */
+  for(var ct=0;ct<2;ct++)if(whole&&keysOf(ct).indexOf(whole)>=0)hit[ct]=true;
   for(var t=0;t<2;t++){var ks=keysOf(t);for(var i=0;i<w.length&&!hit[t];i++){if(!w[i])continue;
     for(var k=0;k<ks.length;k++)if(w[i]===ks[k]||(ks[k].length>=5&&w[i].indexOf(ks[k])===0)){hit[t]=true;break}}}
   return hit[0]===hit[1]?-1:(hit[0]?0:1)}

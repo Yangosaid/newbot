@@ -1,9 +1,21 @@
 {
   "teams": [
-    {"name": "VOX", "c1": "#5bc236", "c2": "#ffffff", "logo": "logos/vox.png", "hero": "logos/vox-hero.png",
-     "keys": "vox, abascal, verde, 💚, 🟢"},
-    {"name": "PSOE", "c1": "#e30613", "c2": "#ffffff", "logo": "logos/psoe.png", "hero": "logos/psoe-hero.png",
-     "keys": "psoe, sanchez, socialista, rojo, 🌹, ❤️, 🔴"}
+    {
+      "name": "VOX",
+      "c1": "#5bc236",
+      "c2": "#ffffff",
+      "logo": "logos/vox.png",
+      "hero": "logos/vox-hero.png",
+      "keys": "vox, v0x, voks, vocs, vok, voxs, vax, vix, vpx, bocs, vxo, ovx, voxe, voxistas, voxista, vozx, abascal, abaskal, avascal, abazcal, abascar, abascl, abscal, abasca, abasal, avaskal, verde, verdes, 💚, 🟢, 🟩"
+    },
+    {
+      "name": "PSOE",
+      "c1": "#e30613",
+      "c2": "#ffffff",
+      "logo": "logos/psoe.png",
+      "hero": "logos/psoe-hero.png",
+      "keys": "psoe, ps0e, pso, psoes, pseo, psue, psoa, psor, psie, pdoe, psoi, osoe, pzoe, psoee, pesoe, peseoe, psoeo, ppsoe, pspe, socialista, socialistas, sociata, sociatas, socialismo, sozialista, sosialista, socilista, socialita, socialisa, sanchez, sanches, sanxez, sanchz, sancez, sachez, snchez, sanchis, sanchezz, pedrosanchez, rojo, rojos, 🌹, ❤️, ♥️, 🔴, 🟥"
+    }
   ],
   "gifts": [],
   "other": true,
