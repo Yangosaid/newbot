@@ -50,9 +50,16 @@ public class MainActivity extends Activity {
         if (Build.VERSION.SDK_INT >= 28)
             getWindow().getAttributes().layoutInDisplayCutoutMode = WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES;
         prefs = getSharedPreferences("bus", MODE_PRIVATE);
+        highRefreshRate();
+        // Keep the GPU at a steady clock during a long live (only on phones that support it).
+        if (Build.VERSION.SDK_INT >= 24) {
+            android.os.PowerManager pm = (android.os.PowerManager) getSystemService(POWER_SERVICE);
+            if (pm != null && pm.isSustainedPerformanceModeSupported()) getWindow().setSustainedPerformanceMode(true);
+        }
 
         web = new WebView(this);
         web.setBackgroundColor(0xff070b18);
+        web.setLayerType(View.LAYER_TYPE_HARDWARE, null);
         setContentView(web);
         immersive();
 
@@ -195,6 +202,23 @@ public class MainActivity extends Activity {
     }
 
     // ------------------------------------------------------------ activity plumbing
+
+    /** Ask for the display's fastest mode at the current resolution (120 Hz on phones like the Honor 400). */
+    private void highRefreshRate() {
+        if (Build.VERSION.SDK_INT < 23) return;
+        try {
+            android.view.Display d = Build.VERSION.SDK_INT >= 30 ? getDisplay() : getWindowManager().getDefaultDisplay();
+            if (d == null) return;
+            android.view.Display.Mode cur = d.getMode(), best = cur;
+            for (android.view.Display.Mode m : d.getSupportedModes())
+                if (m.getPhysicalWidth() == cur.getPhysicalWidth() && m.getPhysicalHeight() == cur.getPhysicalHeight()
+                        && m.getRefreshRate() > best.getRefreshRate()) best = m;
+            WindowManager.LayoutParams lp = getWindow().getAttributes();
+            lp.preferredDisplayModeId = best.getModeId();
+            if (Build.VERSION.SDK_INT >= 30) lp.preferredRefreshRate = best.getRefreshRate();
+            getWindow().setAttributes(lp);
+        } catch (Exception ignored) {}
+    }
 
     private void immersive() {
         web.setSystemUiVisibility(View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY | View.SYSTEM_UI_FLAG_FULLSCREEN | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
