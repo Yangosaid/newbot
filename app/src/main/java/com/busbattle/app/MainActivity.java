@@ -145,6 +145,37 @@ public class MainActivity extends Activity {
             } catch (Exception e) { return ""; }
         }
 
+        /**
+         * Fetches a profile picture natively and hands it to the page as a data: URL. WebGL can only use pictures
+         * that are not cross-origin, and TikTok / YouTube avatar servers do not all allow that.
+         */
+        @JavascriptInterface public void image(final String url, final String id) {
+            if (url == null || !(url.startsWith("https://") || url.startsWith("http://"))) return;
+            new Thread(() -> {
+                String data = "";
+                try {
+                    java.net.HttpURLConnection c = (java.net.HttpURLConnection) new java.net.URL(url).openConnection();
+                    c.setConnectTimeout(8000);
+                    c.setReadTimeout(8000);
+                    c.setRequestProperty("User-Agent", "Mozilla/5.0 (Linux; Android) AppleWebKit/537.36 Chrome/129 Mobile Safari/537.36");
+                    if (c.getResponseCode() == 200) {
+                        String type = c.getContentType();
+                        type = type != null && type.startsWith("image/") ? type.split(";")[0] : "image/jpeg";
+                        try (java.io.InputStream in = c.getInputStream()) {
+                            java.io.ByteArrayOutputStream o = new java.io.ByteArrayOutputStream();
+                            byte[] b = new byte[16384];
+                            int n;
+                            while ((n = in.read(b)) > 0 && o.size() < 3_000_000) o.write(b, 0, n);
+                            data = "data:" + type + ";base64," + android.util.Base64.encodeToString(o.toByteArray(), android.util.Base64.NO_WRAP);
+                        }
+                    }
+                    c.disconnect();
+                } catch (Exception ignored) {}
+                final String code = "window.__busImg&&window.__busImg(" + JSONObject.quote(id) + "," + JSONObject.quote(data) + ")";
+                ui.post(() -> { if (web != null) web.evaluateJavascript(code, null); });
+            }, "avatar").start();
+        }
+
         @JavascriptInterface public void connect(String user, String key) {
             prefs.edit().putString("user", YOUTUBE ? user.trim() : TikTokLive.normalize(user)).putString("key", key == null ? "" : key.trim()).apply();
             synchronized (logLines) { logLines.clear(); }
