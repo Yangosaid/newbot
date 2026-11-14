@@ -168,6 +168,7 @@ input[type=color]{width:40px;height:36px;border:0;background:none;padding:0}
       <div class="grp"><h3 id="ctlB"></h3><div class="row"><span class="lab">Sumar buses a mano</span><button class="btn" data-add="1,1">+1</button><button class="btn" data-add="1,10">+10</button><button class="btn" data-add="1,50">+50</button></div></div>
       <div class="row"><button class="btn go" id="bNew">Nueva ronda</button><button class="btn" id="bZero">Marcador a 0</button><button class="btn" id="bFull">Pantalla completa</button>
         <button class="btn" id="bSnd"></button><button class="btn" id="bDemo"></button></div>
+      <div class="row"><button class="btn go" id="bParty">🕺 Ir a la Fiesta de Fans</button></div>
       <div class="grp">
         <div class="row"><label for="oDur">Duración de la ronda</label><select id="oDur"><option value="120">2 min</option><option value="180">3 min</option><option value="300">5 min</option><option value="600">10 min</option><option value="0">Sin límite</option></select></div>
         <label class="row"><input type="checkbox" id="oSafe"><span>Dejar libre la zona que tapa TikTok (barra de arriba y chat)</span></label>
@@ -208,6 +209,7 @@ input[type=color]{width:40px;height:36px;border:0;background:none;padding:0}
 "use strict";
 var $=function(id){return document.getElementById(id)};
 var APP=!!window.BusApp;                                                      /* running inside the Android app */
+try{if(APP&&localStorage.getItem("game")==="party"){location.replace("party.html");return}}catch(e){}
 var SRC=APP&&BusApp.getSource?String(BusApp.getSource()):"tiktok",YT=SRC==="youtube";
 var LOCAL=APP||/^(localhost|127\.0\.0\.1)$/.test(location.hostname);
 var DEF={teams:[
@@ -607,6 +609,7 @@ $("bNew").onclick=function(){G.pend=[];newRound()};
 $("bZero").onclick=function(){G.wins=[0,0];G.streak=0;G.last=-1;paintHud()};
 function setDemo(v){G.demo=v;$("chip").hidden=!v;$("bDemo").textContent=v?"Parar demo":"Demo"}
 $("bDemo").onclick=function(){setDemo(!G.demo)};
+$("bParty").onclick=function(){try{localStorage.setItem("game","party")}catch(e){}location.href="party.html"};
 function sndLabel(){$("bSnd").textContent=cfg.sound?"Sonido: sí":"Sonido: no"}
 $("bSnd").onclick=function(){cfg.sound=!cfg.sound;save();sndLabel();if(cfg.sound){snd.unlock();setTimeout(function(){snd.blip(0)},80)}};
 $("bFull").onclick=function(){try{var p=document.documentElement.requestFullscreen&&document.documentElement.requestFullscreen();p&&p.catch&&p.catch(function(){})}catch(e){}};
