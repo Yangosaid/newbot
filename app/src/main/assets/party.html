@@ -132,16 +132,17 @@ input[type=checkbox]{width:20px;height:20px;accent-color:var(--hot)}
       <div class="grp"><h3>Regalos</h3>
         <div class="ln"><label for="oPer">Monedas por bailarín</label><input type="number" id="oPer" min="1" inputmode="numeric"></div>
         <div class="ln"><label for="oMaxG">Máximo de bailarines por regalo</label><input type="number" id="oMaxG" min="1" inputmode="numeric"></div>
-        <label class="ln"><input type="checkbox" id="oGiant"><span>El bailarín principal crece con las monedas del espectador</span></label>
+        <div class="ln"><label for="oSec">Segundos de baile por moneda</label><input type="number" id="oSec" min="1" inputmode="numeric"></div>
       </div>
       <div class="grp"><h3>Comentarios</h3>
         <label class="ln"><input type="checkbox" id="oJoin"><span>Escribir una palabra de la lista añade un bailarín con su foto</span></label>
         <div class="ln"><label for="oWords">Palabras (vacío = cualquier comentario)</label><input type="text" id="oWords" class="grow"></div>
         <label class="ln"><input type="checkbox" id="oEach"><span>Cada comentario añade otro bailarín (no solo el primero)</span></label>
+        <div class="ln"><label for="oJs">Segundos de baile por comentario</label><input type="number" id="oJs" min="1" inputmode="numeric"></div>
         <div class="ln"><label for="oCd">Espera por espectador</label><select id="oCd"><option value="3">3 s</option><option value="5">5 s</option><option value="10">10 s</option><option value="30">30 s</option></select></div>
       </div>
       <div class="grp"><h3>Pista</h3>
-        <div class="ln"><label for="oLife">Cuánto baila cada bailarín</label><select id="oLife"><option value="45">45 s</option><option value="90">1,5 min</option><option value="180">3 min</option><option value="300">5 min</option><option value="0">Hasta vaciar</option></select></div>
+        <div class="ln"><label for="oMin">Tiempo mínimo en la pista</label><select id="oMin"><option value="15">15 s</option><option value="30">30 s</option><option value="60">1 min</option><option value="120">2 min</option></select></div>
         <div class="ln"><label for="oMax">Máximo en pantalla</label><select id="oMax"><option value="60">60</option><option value="100">100</option><option value="150">150</option><option value="220">220</option></select></div>
         <div class="ln"><label for="oBpm">Ritmo</label><select id="oBpm"><option value="100">100 BPM</option><option value="118">118 BPM</option><option value="128">128 BPM</option><option value="140">140 BPM</option></select></div>
       </div>
@@ -168,8 +169,8 @@ var SRC=APP&&BusApp.getSource?String(BusApp.getSource()):"tiktok",YT=SRC==="yout
 try{localStorage.setItem("game","party")}catch(e){}
 
 /* ---------- settings ---------- */
-var DEF={per:1,maxGift:25,giant:true,join:true,words:YT?"":"baila, bailar, bailo, dance, join, katil, katıl, entro, entrar, unirme, me uno, 💃, 🕺",
-  each:YT,cd:5,life:90,max:150,bpm:118,music:true,safe:true};
+var DEF={per:1,maxGift:25,secCoin:10,minLife:30,joinSec:30,join:true,words:YT?"":"baila, bailar, bailo, dance, join, katil, katıl, entro, entrar, unirme, me uno, 💃, 🕺",
+  each:YT,cd:5,max:150,bpm:118,music:true,safe:true};
 var cfg=Object.assign({},DEF);
 try{var sv=JSON.parse(localStorage.getItem("partyCfg")||"null");if(sv)cfg=Object.assign(cfg,sv)}catch(e){}
 function save(){try{localStorage.setItem("partyCfg",JSON.stringify(cfg))}catch(e){}}
@@ -186,7 +187,7 @@ function rnd(a,b){return a+Math.random()*(b-a)}
 /* ---------- supporters and dancers ---------- */
 var users={},dancers=[],parts=[];
 function userOf(e){var uid=String(e.user||e.nick||"?"),u=users[uid];
-  if(!u){u=users[uid]={uid:uid,nick:String(e.nick||e.user||"Fan"),av:"",disc:null,coins:0,hue:hashHue(uid),count:0,lastChat:0,bump:0}}
+  if(!u){u=users[uid]={uid:uid,nick:String(e.nick||e.user||"Fan"),av:"",disc:null,coins:0,hue:hashHue(uid),count:0,lastChat:0,bump:0,until:0}}
   if(e.nick)u.nick=String(e.nick);
   if(e.avatar&&e.avatar!==u.av){u.av=String(e.avatar);loadDisc(u)}
   return u}
@@ -208,30 +209,35 @@ function spawn(u,n,opts){opts=opts||{};var now=perf();
     var p=floorPoint(),o=OUTFIT[(Math.random()*OUTFIT.length)|0];
     var d={u:u,x:p.x,y:p.y,tx:p.x,ty:p.y,next:now+rnd(1500,5000),style:(Math.random()*STYLES)|0,off:Math.random(),
       out:"hsl("+((o[0]+rnd(-12,12)+360)%360)+","+o[1]+"%,"+o[2]+"%)",pants:"hsl("+((o[0]+200)%360)+",25%,"+(o[2]>80?30:18)+"%)",
-      skin:SKIN[(Math.random()*SKIN.length)|0],born:now+i*70,die:cfg.life>0?now+cfg.life*1000+i*70:Infinity,main:false,z:-1,vz:0,leaving:0};
+      skin:SKIN[(Math.random()*SKIN.length)|0],born:now+i*70,main:false,z:-1,vz:0,leaving:0};
     dancers.push(d);u.count++}
   ensureMain(u)}
 function ensureMain(u){var has=false,first=null;dancers.forEach(function(d){if(d.u===u&&!d.leaving){if(d.main)has=true;if(!first)first=d}});if(!has&&first)first.main=true}
 /* the floor is full: the dancer of the smallest supporter (oldest first) makes room */
 function evict(keep){var best=-1,bv=Infinity;for(var i=0;i<dancers.length;i++){var d=dancers[i];if(d.leaving)continue;
-    var v=(d.u.coins+(d.u===keep?1e9:0))*1e6+(d.main?5e5:0)+d.born/1e3;if(v<bv){bv=v;best=i}}
+    var v=(left(d.u)+(d.u===keep?1e9:0))*1e6+(d.main?5e5:0)+d.born/1e3;if(v<bv){bv=v;best=i}}
   if(best>=0)remove(best)}
 function remove(i){var d=dancers[i];if(!d)return;dancers.splice(i,1);d.u.count--;if(d.main)ensureMain(d.u)}
 
 /* ---------- events from the live ---------- */
+/* support buys time: every coin keeps all of that supporter's dancers on the floor a little longer */
+function addTime(u,sec){var now=perf();u.until=Math.max(now,u.until)+sec*1000;u.until=Math.max(u.until,now+Math.max(5,+cfg.minLife||30)*1000)}
+function left(u){return Math.max(0,(u.until-perf())/1000)}
+function clock(s){s=Math.ceil(s);if(s>=3600)return Math.floor(s/3600)+"h "+("0"+Math.floor(s%3600/60)).slice(-2)+"m";return Math.floor(s/60)+":"+("0"+s%60).slice(-2)}
 function coinsToDancers(c){return clamp(Math.ceil(c/Math.max(1,cfg.per)),1,Math.max(1,cfg.maxGift|0))}
 function onEvent(e){if(!e||!e.type)return;
   if(e.type==="status"){setStatus(e.ok,e.text);return}
   if(e.type==="gift"){var u=userOf(e),cnt=Math.max(1,e.count|0),coins=Math.max(1,e.coins|0)*cnt,n=coinsToDancers(coins),label=String(e.label||e.gift||"Regalo");
-    u.coins+=coins;u.bump=perf();spawn(u,n);toast(u,"envió "+label+(cnt>1?" ×"+cnt:""),"+"+n+" 🕺");sfxGift(n);
-    if(coins>=100||n>=15)big(u,label,n,coins);else if(n>=5)burst(u,18);
+    var sec=coins*Math.max(1,+cfg.secCoin||10);u.coins+=coins;u.bump=perf();addTime(u,sec);spawn(u,n);
+    toast(u,"envió "+label+(cnt>1?" ×"+cnt:"")+" · +"+clock(sec),"+"+n+" 🕺");sfxGift(n);
+    if(coins>=100||n>=15)big(u,label,n,sec);else if(n>=5)burst(u,18);
     started=true;return}
   if(e.type==="chat"&&cfg.join){var t=norm(e.text||""),ok=!String(cfg.words||"").trim();
     if(!ok)ok=String(cfg.words).split(",").some(function(w){w=norm(w);return w&&(/[a-z0-9]/.test(w)?(" "+t.replace(/[^a-z0-9]+/g," ")+" ").indexOf(" "+w+" ")>=0:t.indexOf(w)>=0)});
     if(!ok)return;var u2=userOf(e),now=perf();
     if(u2.count>0&&!cfg.each)return;
     if(now-u2.lastChat<Math.max(0,+cfg.cd||0)*1000)return;
-    u2.lastChat=now;spawn(u2,1);if(u2.count===1)toast(u2,"se une a la fiesta","+1 🕺");sfxJoin();started=true}}
+    u2.lastChat=now;addTime(u2,Math.max(1,+cfg.joinSec||30));spawn(u2,1);if(u2.count===1)toast(u2,"se une a la fiesta","+1 🕺");sfxJoin();started=true}}
 
 /* ---------- canvas, layout ---------- */
 var cv=$("cv"),c=cv.getContext("2d"),W=0,H=0,DPR=1,F={};
@@ -287,7 +293,6 @@ function arm(sx,sy,a1,a2,L,w,col,skin){var ex=sx+Math.sin(a1)*L,ey=sy+Math.cos(a
 function drawDancer(d,now,b,rank){
   var age=(now-d.born)/1000;if(age<0)return;
   var dep=depth(d.y),scale=lerp(0.55,1.12,dep),size=1;
-  if(d.main&&cfg.giant)size=1+clamp(Math.log(1+d.u.coins)/Math.LN10*0.42,0,1.35);
   var h=Math.min(W,H)*0.15*scale*size;
   var m=h*0.32;if(d.x<m)d.x+=(m-d.x)*0.2;if(d.x>W-m)d.x-=(d.x-(W-m))*0.2;
   /* drop-in with a bounce, leave with a shrink */
@@ -328,7 +333,7 @@ function drawDancer(d,now,b,rank){
   if(d.main)tags.push({d:d,x:hx,y:hy-hr-(rank===1?hr*1.05:0),hr:hr,rank:rank,a:fade});
   c.globalAlpha=1}
 var tags=[];
-function drawTags(){tags.forEach(function(t){var fs=Math.max(10,Math.min(20,t.hr*0.75)),nick=t.d.u.nick,nm=nick.length>14?nick.slice(0,13)+"…":nick;
+function drawTags(){tags.forEach(function(t){var fs=Math.max(10,Math.min(20,t.hr*0.75)),nick=t.d.u.nick,nm=(nick.length>14?nick.slice(0,13)+"…":nick)+"  ⏱"+clock(left(t.d.u));
     c.globalAlpha=t.a;c.font="700 "+fs+"px 'Barlow Condensed',Arial,sans-serif";var tw2=c.measureText(nm).width+fs*0.9,ty=t.y-fs*0.95;
     var x=clamp(t.x,tw2/2+4,W-tw2/2-4);
     c.fillStyle=t.rank===1?"rgba(150,100,0,.9)":"rgba(0,0,0,.62)";roundRect(x-tw2/2,ty-fs*0.62,tw2,fs*1.24,fs*0.62);c.fill();
@@ -351,7 +356,7 @@ function step(){var now=perf(),dt=Math.min(0.05,(now-last)/1000);last=now;
   /* move, expire */
   for(var i=dancers.length-1;i>=0;i--){var d=dancers[i];
     if(d.leaving){if(now-d.leaving>500)remove(i);continue}
-    if(now>d.die){d.leaving=now;continue}
+    if(now>d.u.until){d.leaving=now;continue}
     if(now>d.next){var p=floorPoint();d.tx=clamp(d.x+rnd(-W*0.18,W*0.18),W*0.04,W*0.96);d.ty=clamp(d.y+rnd(-H*0.05,H*0.05),F.y0,F.y1);d.next=now+rnd(2500,7000);if(Math.random()<0.25)d.style=(Math.random()*STYLES)|0}
     d.x+=(d.tx-d.x)*dt*0.5;d.y+=(d.ty-d.y)*dt*0.5}
   var rk=ranking(),rankOf={};rk.slice(0,3).forEach(function(u,i){rankOf[u.uid]=i+1});
@@ -366,14 +371,14 @@ function step(){var now=perf(),dt=Math.min(0.05,(now-last)/1000);last=now;
 
 /* ---------- leaderboard ---------- */
 var boardT=0;
-function ranking(){var a=[];for(var k in users){var u=users[k];if(u.count>0)a.push(u)}a.sort(function(x,y){return y.count-x.count||y.coins-x.coins});return a}
+function ranking(){var a=[];for(var k in users){var u=users[k];if(u.count>0)a.push(u)}a.sort(function(x,y){return y.until-x.until||y.count-x.count});return a}
 function avHtml(u,cls){return u.av?'<img class="'+(cls||"")+'" src="'+esc(u.av)+'" alt="" referrerpolicy="no-referrer">':'<span class="av" style="background:hsl('+u.hue+',70%,45%)">'+esc(initial(u.nick))+'</span>'}
 var lastBoard="";
 function paintBoard(rk){var top=rk.slice(0,cfg.safe?3:5),html="",now=perf();
   $("bTotal").textContent=dancers.length?fmt(dancers.length)+" 🕺 en la pista":"";
   if(!top.length)html='<div id="empty">'+(YT?"Comenta para que <b>tu foto</b> baile en la pista":"Envía una <b>🌹 Rosa</b> y <b>tu foto</b> baila en la pista")+'</div>';
   else top.forEach(function(u,i){html+='<div class="row r'+(i+1)+(now-u.bump<400?" bump":"")+'"><span class="rk">'+(i===0?"👑":i+1)+'</span>'+avHtml(u)+
-    '<span class="nm">'+esc(u.nick)+'</span><span class="ds">'+fmt(u.count)+' 🕺</span><span class="cn">'+(u.coins?fmt(u.coins)+(YT?" pts":" 🪙"):"")+'</span></div>'});
+    '<span class="nm">'+esc(u.nick)+'</span><span class="ds">⏱ '+clock(left(u))+'</span><span class="cn">'+fmt(u.count)+' 🕺</span></div>'});
   if(html!==lastBoard){$("rows").innerHTML=html;lastBoard=html}}
 
 /* ---------- call to action ---------- */
@@ -382,9 +387,9 @@ function ctas(){var L=[],w=String(cfg.words||"").split(",").map(function(s){retu
   if(YT){L.push(cfg.join?(w.length?"Escribe <b>"+esc(w[0])+"</b> y tu foto baila":"Comenta y <b>tu foto baila</b> en la pista"):"Envía un <b>Super Chat</b> y llena la pista");
     L.push("Un <b>Super Chat</b> = muchos bailarines con tu cara")}
   else{L.push("Cada <b>🌹 Rosa</b> = <b>1 bailarín</b> con tu foto");if(cfg.join&&w.length)L.push("Escribe <b>"+esc(w[0])+"</b> para entrar a la fiesta");
-    L.push("Regalos grandes = <b>bailarines gigantes</b>")}
-  L.push("El que más baila lleva la <b>👑 corona</b>");
-  var rk=ranking();if(rk[1])L.push("<b>"+esc(rk[1].nick)+"</b> está a <b>"+fmt(rk[0].count-rk[1].count+1)+"</b> 🕺 de la corona");
+    L.push("Cada moneda = <b>"+fmt(cfg.secCoin)+" s más</b> bailando")}
+  L.push("Quien más tiempo baila lleva la <b>👑 corona</b>");
+  var rk=ranking();if(rk[1])L.push("<b>"+esc(rk[1].nick)+"</b> necesita <b>"+clock(left(rk[0])-left(rk[1])+1)+"</b> más para la corona");
   return L}
 function nextCta(){var L=ctas(),el=$("cta");ctaI=(ctaI+1)%L.length;el.innerHTML=L[ctaI];el.classList.remove("sw");void el.offsetWidth;el.classList.add("sw")}
 
@@ -397,7 +402,7 @@ function toast(u,sub,x){var key=u.uid+"|"+sub,m=tmap[key],now=perf();
     m=tmap[key]={el:el,t:now,n:parseInt(x.replace(/\D/g,""),10)||0}}
   m.h=setTimeout(function(){m.el.classList.add("out");setTimeout(function(){if(m.el.parentNode)m.el.parentNode.removeChild(m.el)},420);if(tmap[key]===m)delete tmap[key]},4200)}
 var bigH=0;
-function big(u,label,n,coins){var el=$("big");el.innerHTML=avHtml(u)+'<div class="n">'+esc(u.nick)+' · '+esc(label)+'</div><div class="v">¡+'+fmt(n)+' bailarines!</div>';
+function big(u,label,n,sec){var el=$("big");el.innerHTML=avHtml(u)+'<div class="n">'+esc(u.nick)+' · '+esc(label)+'</div><div class="v">¡+'+clock(sec)+' bailando!</div>';
   el.hidden=false;el.style.animation="none";void el.offsetWidth;el.style.animation="";clearTimeout(bigH);bigH=setTimeout(function(){el.hidden=true},2800);
   burst(u,Math.min(120,40+n*3));sfxBig()}
 
@@ -437,11 +442,11 @@ $("gear").onclick=function(){openSheet(true);unlock()};
 $("close").onclick=function(){openSheet(false)};
 Array.prototype.forEach.call(document.querySelectorAll(".tab"),function(b){b.onclick=function(){
   Array.prototype.forEach.call(document.querySelectorAll(".tab"),function(x){x.setAttribute("aria-selected",x===b);$(x.dataset.p).hidden=x!==b})}});
-function fill(){$("oPer").value=cfg.per;$("oMaxG").value=cfg.maxGift;$("oGiant").checked=cfg.giant;$("oJoin").checked=cfg.join;$("oWords").value=cfg.words;
-  $("oEach").checked=cfg.each;$("oCd").value=String(cfg.cd);$("oLife").value=String(cfg.life);$("oMax").value=String(cfg.max);$("oBpm").value=String(cfg.bpm);$("oSafe").checked=cfg.safe;musicLabel()}
+function fill(){$("oPer").value=cfg.per;$("oMaxG").value=cfg.maxGift;$("oSec").value=cfg.secCoin;$("oJs").value=cfg.joinSec;$("oJoin").checked=cfg.join;$("oWords").value=cfg.words;
+  $("oEach").checked=cfg.each;$("oCd").value=String(cfg.cd);$("oMin").value=String(cfg.minLife);$("oMax").value=String(cfg.max);$("oBpm").value=String(cfg.bpm);$("oSafe").checked=cfg.safe;musicLabel()}
 function bind(id,key,num){var el=$(id);el.onchange=el.oninput=function(){cfg[key]=el.type==="checkbox"?el.checked:num?Math.max(num===2?0:1,+el.value||0):el.value;save();if(key==="safe")resize();ctaT=0}}
-bind("oPer","per",1);bind("oMaxG","maxGift",1);bind("oGiant","giant");bind("oJoin","join");bind("oWords","words");bind("oEach","each");bind("oCd","cd",2);
-bind("oLife","life",2);bind("oMax","max",1);bind("oBpm","bpm",1);bind("oSafe","safe");
+bind("oPer","per",1);bind("oMaxG","maxGift",1);bind("oSec","secCoin",1);bind("oJs","joinSec",1);bind("oJoin","join");bind("oWords","words");bind("oEach","each");bind("oCd","cd",2);
+bind("oMin","minLife",1);bind("oMax","max",1);bind("oBpm","bpm",1);bind("oSafe","safe");
 function musicLabel(){$("bMusic").textContent=cfg.music?"Música: sí":"Música: no"}
 $("bMusic").onclick=function(){cfg.music=!cfg.music;save();musicLabel();unlock();if(!cfg.music&&master){master.gain.setTargetAtTime(0,AC.currentTime,0.05)}else if(master){master.gain.setTargetAtTime(0.35,AC.currentTime,0.05)}};
 $("bDemo").onclick=function(){setDemo(!demo)};
