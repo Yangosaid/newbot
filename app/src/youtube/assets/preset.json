@@ -1,0 +1,14 @@
+{
+  "teams": [
+    {"name": "VOX", "c1": "#5bc236", "c2": "#ffffff", "logo": "logos/vox.png", "hero": "logos/vox-hero.png",
+     "keys": "vox, abascal, verde, 💚, 🟢"},
+    {"name": "PSOE", "c1": "#e30613", "c2": "#ffffff", "logo": "logos/psoe.png", "hero": "logos/psoe-hero.png",
+     "keys": "psoe, sanchez, socialista, rojo, 🌹, ❤️, 🔴"}
+  ],
+  "gifts": [],
+  "other": true,
+  "chat": true,
+  "chatEach": true,
+  "chatN": 1,
+  "chatCd": 3
+}

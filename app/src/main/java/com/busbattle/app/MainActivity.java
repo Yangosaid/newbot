@@ -34,7 +34,8 @@ public class MainActivity extends Activity {
 
     private WebView web;
     private SharedPreferences prefs;
-    private TikTokLive live;
+    private LiveSource live;
+    static final boolean YOUTUBE = "youtube".equals(BuildConfig.FLAVOR);
     private final Handler ui = new Handler(Looper.getMainLooper());
     private volatile boolean pageReady;
     private String lastStatus = "{\"type\":\"status\",\"ok\":false,\"text\":\"Escribe tu usuario de TikTok en Conexión\"}";
@@ -91,15 +92,21 @@ public class MainActivity extends Activity {
     private synchronized void startLive() {
         if (live != null) live.stop();
         String user = prefs.getString("user", ""), key = prefs.getString("key", "");
-        if (TikTokLive.normalize(user).isEmpty()) { live = null; return; }
-        log("Usuario @" + TikTokLive.normalize(user) + (key.isEmpty() ? ", sin clave Euler" : ", con clave Euler"));
-        live = new TikTokLive(user, key, new TikTokLive.Listener() {
+        if (user.trim().isEmpty()) { live = null; return; }
+        TikTokLive.Listener l = new TikTokLive.Listener() {
             @Override public void onEvent(String json) {
                 if (json.contains("\"type\":\"status\"")) lastStatus = json;
                 js("window.__bus&&window.__bus(" + safe(json) + ")");
             }
             @Override public void onLog(String line) { log(line); }
-        });
+        };
+        if (YOUTUBE) {
+            log("Directo de YouTube: " + user.trim());
+            live = new YouTubeChat(user, l);
+        } else {
+            log("Usuario @" + TikTokLive.normalize(user) + (key.isEmpty() ? ", sin clave Euler" : ", con clave Euler"));
+            live = new TikTokLive(user, key, l);
+        }
         live.start();
     }
 
@@ -124,8 +131,22 @@ public class MainActivity extends Activity {
         @JavascriptInterface public String getUser() { return prefs.getString("user", ""); }
         @JavascriptInterface public String getKey() { return prefs.getString("key", ""); }
 
+        /** "tiktok" or "youtube": the page adapts its labels and scoring. */
+        @JavascriptInterface public String getSource() { return YOUTUBE ? "youtube" : "tiktok"; }
+
+        /** Default teams and rules for this edition (assets/preset.json), or "". */
+        @JavascriptInterface public String getPreset() {
+            try (java.io.InputStream in = getAssets().open("preset.json")) {
+                java.io.ByteArrayOutputStream o = new java.io.ByteArrayOutputStream();
+                byte[] b = new byte[8192];
+                int n;
+                while ((n = in.read(b)) > 0) o.write(b, 0, n);
+                return o.toString("UTF-8");
+            } catch (Exception e) { return ""; }
+        }
+
         @JavascriptInterface public void connect(String user, String key) {
-            prefs.edit().putString("user", TikTokLive.normalize(user)).putString("key", key == null ? "" : key.trim()).apply();
+            prefs.edit().putString("user", YOUTUBE ? user.trim() : TikTokLive.normalize(user)).putString("key", key == null ? "" : key.trim()).apply();
             synchronized (logLines) { logLines.clear(); }
             startLive();
         }

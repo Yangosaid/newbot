@@ -36,7 +36,7 @@ import okio.ByteString;
  * It follows the protocol of the tiktok-live-connector library (v2.5): the room id comes from TikTok, the WebSocket
  * address is signed by Euler Stream, and the push frames are protobuf.
  */
-public final class TikTokLive {
+public final class TikTokLive implements LiveSource {
 
     public interface Listener {
         /** A JSON event for the game: {type:'status'|'gift'|'chat', ...}. Called on a background thread. */
@@ -86,7 +86,7 @@ public final class TikTokLive {
         return u.replace("/", "").trim();
     }
 
-    public synchronized void start() {
+    @Override public synchronized void start() {
         if (running) return;
         running = true;
         thread = new Thread(this::loop, "tiktok-live");
@@ -94,7 +94,7 @@ public final class TikTokLive {
         thread.start();
     }
 
-    public synchronized void stop() {
+    @Override public synchronized void stop() {
         running = false;
         WebSocket w = ws;
         if (w != null) w.cancel();

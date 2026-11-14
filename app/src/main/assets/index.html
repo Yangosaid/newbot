@@ -184,6 +184,9 @@ input[type=color]{width:40px;height:36px;border:0;background:none;padding:0}
       <div class="grp">
         <label class="row"><input type="checkbox" id="oOther"><span>Otros regalos: 1 bus por moneda para el equipo del espectador</span></label>
         <label class="row"><input type="checkbox" id="oChat"><span>Escribir el equipo en el chat une al espectador y suma 1 bus</span></label>
+        <label class="row"><input type="checkbox" id="oEach"><span>Cada comentario con el nombre del equipo suma buses (no solo el primero)</span></label>
+        <div class="row"><label for="oN">Buses por comentario</label><input type="number" id="oN" min="1" inputmode="numeric" style="width:70px">
+          <label for="oCd">Espera por espectador</label><select id="oCd"><option value="0">0 s</option><option value="1">1 s</option><option value="3">3 s</option><option value="5">5 s</option><option value="10">10 s</option></select></div>
       </div>
     </div>
     <div class="pane" id="pLink" hidden>
@@ -205,12 +208,14 @@ input[type=color]{width:40px;height:36px;border:0;background:none;padding:0}
 "use strict";
 var $=function(id){return document.getElementById(id)};
 var APP=!!window.BusApp;                                                      /* running inside the Android app */
+var SRC=APP&&BusApp.getSource?String(BusApp.getSource()):"tiktok",YT=SRC==="youtube";
 var LOCAL=APP||/^(localhost|127\.0\.0\.1)$/.test(location.hostname);
 var DEF={teams:[
     {name:"Barça",c1:"#1b4fa8",c2:"#a61b3f",logo:"",hero:"",keys:"barça, barca, barcelona, fcb, visca"},
     {name:"Madrid",c1:"#f4f4f6",c2:"#c9a227",logo:"",hero:"",keys:"madrid, real, rmcf, hala"}],
   gifts:[{name:"Rose",label:"Rosa",team:0,n:1},{name:"TikTok",label:"TikTok",team:1,n:1}],
-  other:true,chat:true,dur:300,safe:true,sound:true,url:""};
+  other:true,chat:true,chatEach:false,chatN:1,chatCd:3,dur:300,safe:true,sound:true,url:""};
+try{var PRE=APP&&BusApp.getPreset?String(BusApp.getPreset()):"";if(PRE){PRE=JSON.parse(PRE);for(var pk in PRE)DEF[pk]=PRE[pk]}}catch(e){}
 var cfg=JSON.parse(JSON.stringify(DEF));
 try{var sv=JSON.parse(localStorage.getItem("busCfg3")||"null");
   if(sv&&sv.teams&&sv.teams.length===2){for(var q=0;q<2;q++)sv.teams[q]=Object.assign({},DEF.teams[q],sv.teams[q]);cfg=Object.assign(cfg,sv)}
@@ -238,7 +243,7 @@ var GD={rose:["Rosa","🌹"],tiktok:["TikTok","🎵"],doughnut:["Donut","🍩"],
 function gInfo(g){var d=GD[norm(g.name)]||null;return {lb:String(g.label||(d&&d[0])||g.name||"").trim(),ic:d?d[1]:"🎁"}}
 
 /* ---------- state ---------- */
-var G={n:[0,0],pos:0,wins:[0,0],over:0,t:cfg.dur,run:false,don:[{},{}],mvp:[null,null],userTeam:{},joined:{},bank:{},pend:[],
+var G={n:[0,0],pos:0,wins:[0,0],over:0,t:cfg.dur,run:false,don:[{},{}],mvp:[null,null],userTeam:{},joined:{},lastChat:{},bank:{},pend:[],
   hype:[0,0],shake:0,flash:null,last:-1,streak:0,demo:!LOCAL};
 var imgs=[null,null],heros=[null,null],avs={};
 function loadImg(src,cb){if(!src){cb(null);return}var im=new Image();im.onload=function(){cb(im)};im.onerror=function(){cb(null)};im.src=src}
@@ -276,11 +281,11 @@ function urgent(){return cfg.dur>0&&G.run&&!G.over&&G.t<=30}
 /* rotating call to action, built from the real state of the match */
 var ctaI=-1,ctaT=0;
 function ctaList(){var A=esc(cfg.teams[0].name),B=esc(cfg.teams[1].name),L=[],d=G.n[0]-G.n[1];
-  if(!G.run)L.push("El primer regalo <b>arranca la ronda</b>");
-  if(cfg.chat)L.push("Escribe <b>"+A+"</b> o <b>"+B+"</b> en el chat y únete");
+  if(!G.run)L.push(YT?"El primer comentario <b>arranca la ronda</b>":"El primer regalo <b>arranca la ronda</b>");
+  if(cfg.chat)L.push(cfg.chatEach?"Comenta <b>"+A+"</b> o <b>"+B+"</b>: cada comentario <b>empuja "+fmt(Math.max(1,cfg.chatN|0))+" bus</b>":"Escribe <b>"+A+"</b> o <b>"+B+"</b> en el chat y únete");
   if(d!==0)L.push("<b>"+(d>0?B:A)+"</b> necesita <b>"+fmt(Math.abs(d)+1)+"</b> buses para remontar");
-  if(cfg.other)L.push("Cualquier regalo suma: <b>1 moneda = 1 bus</b>");
-  L.push("El que más regala <b>conduce el camión</b>");
+  if(cfg.other)L.push(YT?"Un <b>Super Chat</b> vale <b>10 buses por euro</b>":"Cualquier regalo suma: <b>1 moneda = 1 bus</b>");
+  L.push(YT?"El que más empuja <b>conduce el camión</b>":"El que más regala <b>conduce el camión</b>");
   if(G.streak>=2&&G.last>=0)L.push("<b>"+esc(cfg.teams[G.last].name)+"</b> lleva "+G.streak+" rondas seguidas");
   return L}
 function nextCta(){var L=ctaList(),el=$("cta");ctaI=(ctaI+1)%L.length;el.classList.remove("urgent");el.innerHTML=L[ctaI];el.classList.remove("sw");void el.offsetWidth;el.classList.add("sw")}
@@ -295,10 +300,10 @@ function toastEl(t,nick,av){var el=document.createElement("div"),col=t<0?"#ffc93
   var x=document.createElement("div");x.className="x";el.appendChild(x);
   var box=$("toasts");box.appendChild(el);while(box.children.length>(safe?2:3))box.removeChild(box.firstChild);return {el:el,sm:sm,x:x}}
 var tm={};
-function giftToast(uid,t,nick,av,label,gc,buses){var key=uid+"|"+label+"|"+t,m=tm[key],now=Date.now();
+function giftToast(uid,t,nick,av,label,gc,buses,raw){var key=uid+"|"+label+"|"+t,m=tm[key],now=Date.now();
   if(m&&m.o.el.parentNode&&now-m.t<6000){m.gc+=gc;m.b+=buses;m.t=now;clearTimeout(m.h)}
   else m=tm[key]={o:toastEl(t,nick,av),gc:gc,b:buses,t:now};
-  m.o.sm.textContent="envió "+label+(m.gc>1?" ×"+fmt(m.gc):"");m.o.x.textContent="+"+fmt(m.b);
+  m.o.sm.textContent=(raw?"":"envió ")+label+(m.gc>1?" ×"+fmt(m.gc):"");m.o.x.textContent="+"+fmt(m.b);
   m.h=setTimeout(function(){rm(m.o.el);if(tm[key]===m)delete tm[key]},4200)}
 function note(t,nick,av,sub,val){var o=toastEl(t,nick,av);o.sm.textContent=sub;o.x.textContent=val;setTimeout(function(){rm(o.el)},4200)}
 var bigH=0;
@@ -317,7 +322,9 @@ function setTeam(uid,t,nick,av){G.userTeam[uid]=t;var b=G.bank[uid];if(!b)return
   credit(t,b.n,uid,nick,av||b.av);note(t,nick,av||b.av,"libera su reserva para "+cfg.teams[t].name,"+"+fmt(b.n));if(b.n>=30)big(t,nick,"Reserva",b.n)}
 function keysOf(t){var T=cfg.teams[t],a=String(T.keys||"").split(",").map(function(k){return squeeze(norm(k).replace(/[^a-z0-9]+/g,""))}).filter(Boolean);
   var nm=squeeze(norm(T.name).replace(/[^a-z0-9]+/g,""));if(nm)a.push(nm);return a}
+function emojiKeys(t){return String(cfg.teams[t].keys||"").split(",").map(function(k){return k.trim()}).filter(function(k){return k&&!/[a-z0-9]/i.test(norm(k))})}
 function teamOf(text){var w=norm(text).split(/[^a-z0-9]+/).map(squeeze),hit=[false,false];
+  for(var et=0;et<2;et++)emojiKeys(et).forEach(function(k){if(String(text).indexOf(k)>=0)hit[et]=true});
   for(var t=0;t<2;t++){var ks=keysOf(t);for(var i=0;i<w.length&&!hit[t];i++){if(!w[i])continue;
     for(var k=0;k<ks.length;k++)if(w[i]===ks[k]||(ks[k].length>=5&&w[i].indexOf(ks[k])===0)){hit[t]=true;break}}}
   return hit[0]===hit[1]?-1:(hit[0]?0:1)}
@@ -326,6 +333,10 @@ function onEvent(e){if(!e||!e.type)return;
   if(e.type==="status"){setStatus(e.ok,e.text);return}
   var uid=String(e.user||e.nick||"?"),nick=String(e.nick||e.user||"Fan"),av=e.avatar||"";
   if(e.type==="chat"){if(!cfg.chat)return;var t=teamOf(e.text);if(t<0)return;var had=G.userTeam[uid];setTeam(uid,t,nick,av);
+    if(cfg.chatEach){var now=Date.now(),lc=G.lastChat[uid]||0;                       /* every comment naming a team pushes it */
+      if(now-lc>=Math.max(0,+cfg.chatCd||0)*1000){G.lastChat[uid]=now;G.joined[uid]=1;var cn=Math.max(1,cfg.chatN|0);
+        credit(t,cn,uid,nick,av);giftToast(uid,t,nick,av,had!==undefined&&had!==t?"se cambia a "+cfg.teams[t].name:"comenta "+cfg.teams[t].name,1,cn,true);snd.blip(t)}
+      return}
     if(!G.joined[uid]){G.joined[uid]=1;credit(t,1,uid,nick,av);note(t,nick,av,"se une a "+cfg.teams[t].name,"+1");snd.blip(t)}
     else if(had!==t)note(t,nick,av,"se cambia a "+cfg.teams[t].name,"");
     return}
@@ -333,7 +344,7 @@ function onEvent(e){if(!e||!e.type)return;
   if(e.type==="gift"){var cnt=Math.max(1,e.count|0),name=String(e.gift||"").trim(),k=norm(name),m=null;
     cfg.gifts.forEach(function(g){if(g.name&&norm(g.name)===k)m=g});
     if(m){var n=m.n*cnt,lb=gInfo(m).lb;setTeam(uid,m.team,nick,av);credit(m.team,n,uid,nick,av);giftToast(uid,m.team,nick,av,lb,cnt,n);fxGift(m.team,n,nick,lb)}
-    else if(cfg.other){var n2=Math.max(1,e.coins|0)*cnt,lb2=name||"Regalo";
+    else if(cfg.other){var n2=Math.max(1,e.coins|0)*cnt,lb2=String(e.label||name||"Regalo");
       if(uid in G.userTeam){var t2=G.userTeam[uid];credit(t2,n2,uid,nick,av);giftToast(uid,t2,nick,av,lb2,cnt,n2);fxGift(t2,n2,nick,lb2)}
       else{var b=G.bank[uid]||(G.bank[uid]={n:0,av:av});b.n+=n2;            /* no team yet: hold the buses until they pick one */
         note(-1,nick,av,"en reserva · escribe "+cfg.teams[0].name+" o "+cfg.teams[1].name,fmt(b.n));snd.blip(0)}}}}
@@ -572,10 +583,13 @@ function buildGifts(){var box=$("gRows");box.innerHTML="";cfg.gifts.forEach(func
   $("gt"+i).onchange=function(){g.team=+this.value;save();paintHud()};
   $("gc"+i).oninput=function(){g.n=Math.max(1,this.value|0);save();paintHud()};
   $("gd"+i).onclick=function(){cfg.gifts.splice(i,1);save();buildGifts();paintHud()}});
-  $("oOther").checked=cfg.other;$("oChat").checked=cfg.chat;buildSeen()}
+  $("oOther").checked=cfg.other;$("oChat").checked=cfg.chat;$("oEach").checked=!!cfg.chatEach;$("oN").value=Math.max(1,cfg.chatN|0);$("oCd").value=String(cfg.chatCd|0);buildSeen()}
 $("gAdd").onclick=function(){cfg.gifts.push({name:"",label:"",team:0,n:1});save();buildGifts()};
 $("oOther").onchange=function(){cfg.other=this.checked;save();ctaT=0};
 $("oChat").onchange=function(){cfg.chat=this.checked;save();paintHud();ctaT=0};
+$("oEach").onchange=function(){cfg.chatEach=this.checked;save();ctaT=0};
+$("oN").oninput=function(){cfg.chatN=Math.max(1,this.value|0);save();ctaT=0};
+$("oCd").onchange=function(){cfg.chatCd=+this.value;save()};
 $("oDur").onchange=function(){cfg.dur=+this.value;save();if(!G.run)G.t=cfg.dur;else if(cfg.dur>0)G.t=Math.min(G.t||cfg.dur,cfg.dur);paintLive()};
 $("oSafe").onchange=function(){cfg.safe=this.checked;save();resize()};
 
@@ -607,10 +621,16 @@ function connect(base){
     es.onopen=function(){setStatus(true,"Conectado al puente, esperando el directo");setDemo(false)};
     es.onmessage=function(m){try{onEvent(JSON.parse(m.data))}catch(e){}};
     es.onerror=function(){setStatus(false,"No se pudo conectar con el puente")}}catch(e){setStatus(false,"No se pudo conectar con el puente")}}
-$("lnNote").innerHTML=APP?"Escribe tu usuario de TikTok y pulsa «Guardar y conectar». La app se conecta sola en cuanto empiece tu directo y vuelve a intentarlo si se corta. La clave de Euler Stream (gratis en eulerstream.com) solo hace falta si el registro dice que se han limitado las conexiones."
+$("lnNote").innerHTML=YT?"Escribe tu canal de YouTube (@usuario) o pega el enlace de tu directo y pulsa «Guardar y conectar». La app encuentra el directo, lee el chat sin claves ni límites y vuelve a intentarlo si se corta.":APP?"Escribe tu usuario de TikTok y pulsa «Guardar y conectar». La app se conecta sola en cuanto empiece tu directo y vuelve a intentarlo si se corta. La clave de Euler Stream (gratis en eulerstream.com) solo hace falta si el registro dice que se han limitado las conexiones."
   :LOCAL?"Esta copia funciona desde el puente de tu móvil y recibe los regalos automáticamente cuando empieza el directo."
   :"Esta página es solo vista previa y control manual. Para recibir regalos reales, arranca el puente en Termux y abre <code>http://localhost:8080</code> en Chrome.";
 $("lnUrl").value=cfg.url||"";
+if(YT){$("apUser").previousElementSibling.textContent="Tu canal o directo de YouTube";$("apUser").placeholder="@tucanal o enlace del directo";
+  $("apKey").parentNode.hidden=true;$("apUser").setAttribute("inputmode","url");
+  document.querySelector('.tab[data-p="pGifts"]').textContent="Puntos";
+  $("pGifts").querySelector("p.note").textContent="Los comentarios que nombran a un equipo empujan sus buses. Los Super Chats valen 10 buses por euro y los nuevos miembros 50. También puedes añadir aquí reglas por nombre (Super Chat, Miembro).";
+  $("oOther").nextElementSibling.textContent="Super Chats y miembros: buses para el equipo del espectador";
+  $("oSafe").nextElementSibling.textContent="Dejar libre la zona que tapa el chat del directo"}
 if(APP){$("lnWeb").hidden=true;$("lnApp").hidden=false;
   try{$("apUser").value=BusApp.getUser();$("apKey").value=BusApp.getKey()}catch(e){}
   $("apGo").onclick=function(){var u=$("apUser").value.trim().replace(/^@/,"");$("apUser").value=u;$("apLog").textContent="";

@@ -39,7 +39,8 @@ jobs:
           BUS_KEYSTORE_PASS: bus-local-signing
       - name: Collect APKs
         run: |
-          cp app/build/outputs/apk/release/app-release.apk bus-battle.apk
+          cp app/build/outputs/apk/tiktok/release/app-tiktok-release.apk bus-battle.apk
+          cp app/build/outputs/apk/youtube/release/app-youtube-release.apk vox-vs-psoe.apk
           cp downloader/build/outputs/apk/release/downloader-arm64-v8a-release.apk vidsaver-arm64.apk
           cp downloader/build/outputs/apk/release/downloader-armeabi-v7a-release.apk vidsaver-armv7.apk
           ls -la *.apk
@@ -59,3 +60,7 @@ jobs:
           gh release create vidsaver vidsaver-arm64.apk vidsaver-armv7.apk --target "$GITHUB_SHA" --prerelease \
             --title "VidSaver APK (build ${GITHUB_RUN_NUMBER})" \
             --notes "TikTok / YouTube / Shorts downloader. Most phones: vidsaver-arm64.apk. Older 32-bit phones: vidsaver-armv7.apk."
+          gh release delete vox-psoe --yes --cleanup-tag || true
+          gh release create vox-psoe vox-vs-psoe.apk --target "$GITHUB_SHA" --prerelease \
+            --title "VOX vs PSOE - YouTube (build ${GITHUB_RUN_NUMBER})" \
+            --notes "Bus battle for YouTube live chat: every comment naming a team pushes its buses; Super Chats and members count extra."
