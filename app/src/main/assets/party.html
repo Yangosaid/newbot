@@ -37,6 +37,7 @@ body{background:var(--night);color:var(--ink);font-family:var(--body);overflow:h
 .ln{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:7px 0}
 .ln label{flex:1;min-width:150px;font-size:14px}
 .ln .grow{flex:1;min-width:0}
+label.ln{flex-wrap:nowrap}label.ln span{flex:1;min-width:0}label.ln input{flex:none}
 .note{font-size:13px;line-height:1.45;color:var(--ink-dim);margin:8px 0}
 .btn{background:var(--panel-2);color:var(--ink);border:1px solid var(--line);border-radius:10px;padding:10px 14px;font:700 15px/1 var(--display);letter-spacing:.04em;text-transform:uppercase;cursor:pointer}
 .btn.go{background:var(--hot);border-color:var(--hot);color:#fff}
@@ -45,6 +46,10 @@ input[type=checkbox]{width:20px;height:20px;accent-color:var(--hot)}
 #st.ok{color:var(--ok)}#st.bad{color:var(--bad)}
 #apLog{max-height:30vh;overflow:auto;white-space:pre-wrap;font:12px/1.35 monospace;color:var(--ink-dim);background:rgba(0,0,0,.35);border-radius:8px;padding:8px;margin:8px 0 0}
 #perf{font:12px monospace;color:var(--ink-dim)}
+.seg{display:flex;gap:0;border:1px solid var(--line);border-radius:12px;overflow:hidden;flex:1}
+.seg button{flex:1;background:var(--panel-2);color:var(--ink-dim);border:0;border-right:1px solid var(--line);padding:11px 6px;font:700 15px/1.1 var(--display);letter-spacing:.03em;text-transform:uppercase;cursor:pointer}
+.seg button:last-child{border-right:0}
+.seg button.on{background:var(--hot);color:#fff}
 #mon{background:rgba(0,0,0,.3);border-radius:10px;padding:8px 10px;margin:8px 0}
 #monC{display:flex;gap:14px;font:800 20px/1 var(--display);margin-bottom:6px}
 #monC span{display:flex;align-items:center;gap:5px}
@@ -129,6 +134,10 @@ input[type=checkbox]{width:20px;height:20px;accent-color:var(--hot)}
       <button id="close" aria-label="Cerrar">✕</button>
     </div>
     <div class="pane" id="pCtl">
+      <div class="grp" id="gTapQuick"><h3>👆 Toques en la pantalla</h3>
+        <div class="ln"><div class="seg" id="tapSeg"><button data-m="full">Completo</button><button data-m="energy">Solo energía ⚡</button><button data-m="off">Apagado</button></div></div>
+        <p class="note" id="tapNote"></p>
+      </div>
       <div class="ln"><button class="btn" id="bDemo"></button><button class="btn" id="bMusic"></button><button class="btn" id="bClear">Vaciar pista</button></div>
       <div class="ln"><button class="btn go" id="bBus">🚌 Ir a la batalla de buses</button></div>
       <div class="grp"><h3>Probar</h3>
@@ -150,7 +159,7 @@ input[type=checkbox]{width:20px;height:20px;accent-color:var(--hot)}
         <div class="ln"><label for="oFill">Bailarines de relleno (sin foto)</label><select id="oFill"><option value="0">Ninguno</option><option value="6">6</option><option value="10">10</option><option value="16">16</option></select></div>
       </div>
       <div class="grp" id="gLikes"><h3>Toques en la pantalla (me gusta)</h3>
-        <label class="ln"><input type="checkbox" id="oLike"><span>Los toques hacen aparecer el personaje de quien toca</span></label>
+        <p class="note">El modo (completo, solo energía o apagado) se elige arriba en Control.</p>
         <div class="ln"><label for="oLikeN">Toques necesarios</label><select id="oLikeN"><option value="5">5</option><option value="15">15</option><option value="30">30</option><option value="100">100</option></select></div>
         <div class="ln"><label for="oTapHold">Tras un regalo, los toques esperan para llevarse la cámara</label><select id="oTapHold"><option value="2">2 s</option><option value="4">4 s</option><option value="8">8 s</option><option value="15">15 s</option></select></div>
         <div class="ln"><label for="oLikeCam">La cámara visita a quien toca si no hay regalos durante</label><select id="oLikeCam"><option value="0">Nunca</option><option value="10">10 s</option><option value="20">20 s</option><option value="40">40 s</option></select></div>
@@ -196,7 +205,7 @@ var SRC=APP&&BusApp.getSource?String(BusApp.getSource()):"tiktok",YT=SRC==="yout
 try{localStorage.setItem("game","party")}catch(e){}
 
 /* ---------- settings ---------- */
-var DEF={per:2,max:24,fill:10,chat:YT,words:"",cd:YT?10:3,bpm:124,q:"ultra",auto:true,music:true,safe:true,hint:true,like:true,likeN:15,likeCam:20,tapHold:4,goal:2000,coinE:10,tapE:1,vipMin:100,vipLen:1};
+var DEF={per:2,max:24,fill:10,chat:YT,words:"",cd:YT?10:3,bpm:124,q:"ultra",auto:true,music:true,safe:true,hint:true,like:true,tapMode:"full",likeN:15,likeCam:20,tapHold:4,goal:2000,coinE:10,tapE:1,vipMin:100,vipLen:1};
 var cfg=Object.assign({},DEF);
 try{var sv=JSON.parse(localStorage.getItem("party3d3")||"null");if(sv)cfg=Object.assign(cfg,sv)}catch(e){}
 function save(){try{localStorage.setItem("party3d3",JSON.stringify(cfg))}catch(e){}}
@@ -446,7 +455,7 @@ setInterval(function(){if(YT||perf()<giftImgUntil)return;giftI=(giftI+1)%GIFTS.l
 function showGift(img){if(YT||!img)return;var el=$("hintIcon");el.innerHTML='<img alt="" referrerpolicy="no-referrer">';el.firstChild.src=img;giftImgUntil=perf()+4000;
   setTimeout(function(){if(perf()>=giftImgUntil){el.textContent=GIFTS[giftI]}},4100)}
 /* the two drawings take turns every few seconds (YouTube has no taps, so only the first one shows there) */
-setInterval(function(){if(YT||!cfg.like||perf()<hintHold)return;showSlide(hintSlide?0:1)},5000);
+setInterval(function(){if(YT||cfg.tapMode!=="full"){if(hintSlide)showSlide(0);return}if(perf()<hintHold)return;showSlide(hintSlide?0:1)},5000);
 
 /* ---------- live monitor (settings sheet only, never on camera): proof that gifts, taps and comments arrive ---------- */
 var mon={g:0,l:0,c:0},monLines=[];
@@ -465,7 +474,8 @@ function onEvent(e){if(!e||!e.type)return;monitor(e);
   if(e.type==="status"){setStatus(e.ok,e.text);return}
   if(e.type==="gift"){lastGiftAt=perf();if(e.img)setTimeout(function(){showGift(e.img)},0);var u=userOf(e),cnt=Math.max(1,e.count|0);
     support(u,{kind:"gift",coins:Math.max(1,e.coins|0)*cnt,count:cnt});return}
-  if(e.type==="like"&&cfg.like){var ul=userOf(e),c=Math.max(1,e.count|0);ul.likes=(ul.likes||0)+c;addEnergy(c*(+cfg.tapE||1));
+  if(e.type==="like"){if(cfg.tapMode==="off")return;var ul=userOf(e),c=Math.max(1,e.count|0);ul.likes=(ul.likes||0)+c;addEnergy(c*(+cfg.tapE||1));
+    if(cfg.tapMode==="energy")return;
     if(!ul.chars.length&&ul.likes<Math.max(1,cfg.likeN|0))return;
     support(ul,{kind:"tap",taps:c});return}
   if(e.type==="chat"&&cfg.chat){var t=norm(e.text||""),ok=!String(cfg.words||"").trim();
@@ -718,11 +728,16 @@ $("close").onclick=function(){openSheet(false)};
 Array.prototype.forEach.call(document.querySelectorAll(".tab"),function(b){b.onclick=function(){
   Array.prototype.forEach.call(document.querySelectorAll(".tab"),function(x){x.setAttribute("aria-selected",x===b);$(x.dataset.p).hidden=x!==b})}});
 function fill(){$("oPer").value=String(cfg.per);$("oMax").value=String(cfg.max);$("oFill").value=String(cfg.fill);$("oChat").checked=cfg.chat;$("oWords").value=cfg.words;
-  $("oCd").value=String(cfg.cd);$("oBpm").value=String(cfg.bpm);$("oQ").value=cfg.q;$("oAuto").checked=cfg.auto;$("oSafe").checked=cfg.safe;$("oHint").checked=cfg.hint;$("oLike").checked=cfg.like;$("oLikeN").value=String(cfg.likeN);$("oLikeCam").value=String(cfg.likeCam);$("oTapHold").value=String(cfg.tapHold);$("oGoal").value=String(cfg.goal);$("oVipMin").value=String(cfg.vipMin);$("oVipLen").value=String(cfg.vipLen);musicLabel()}
+  $("oCd").value=String(cfg.cd);$("oBpm").value=String(cfg.bpm);$("oQ").value=cfg.q;$("oAuto").checked=cfg.auto;$("oSafe").checked=cfg.safe;$("oHint").checked=cfg.hint;paintTapSeg();$("oLikeN").value=String(cfg.likeN);$("oLikeCam").value=String(cfg.likeCam);$("oTapHold").value=String(cfg.tapHold);$("oGoal").value=String(cfg.goal);$("oVipMin").value=String(cfg.vipMin);$("oVipLen").value=String(cfg.vipLen);musicLabel()}
 function bind(id,key,num){var el=$(id);el.onchange=el.oninput=function(){cfg[key]=el.type==="checkbox"?el.checked:num?Math.max(0,+el.value||0):el.value;save();
   if(key==="goal"){energy.target=cfg.goal;paintEnergy()}
   if(key==="q")applyQuality();if(key==="fill")layoutFillers();if(key==="hint"||key==="safe")paintHint()}}
-bind("oPer","per",1);bind("oMax","max",1);bind("oFill","fill",1);bind("oChat","chat");bind("oWords","words");bind("oCd","cd",1);bind("oBpm","bpm",1);bind("oQ","q");bind("oAuto","auto");bind("oSafe","safe");bind("oHint","hint");bind("oLike","like");bind("oLikeN","likeN",1);bind("oLikeCam","likeCam",1);bind("oTapHold","tapHold",1);bind("oGoal","goal",1);bind("oVipMin","vipMin",1);bind("oVipLen","vipLen",1);
+bind("oPer","per",1);bind("oMax","max",1);bind("oFill","fill",1);bind("oChat","chat");bind("oWords","words");bind("oCd","cd",1);bind("oBpm","bpm",1);bind("oQ","q");bind("oAuto","auto");bind("oSafe","safe");bind("oHint","hint");bind("oLikeN","likeN",1);bind("oLikeCam","likeCam",1);bind("oTapHold","tapHold",1);bind("oGoal","goal",1);bind("oVipMin","vipMin",1);bind("oVipLen","vipLen",1);
+var TAPNOTE={full:"Quien toca aparece con su personaje, se lleva la cámara un momento y llena la barra de energía.",
+  energy:"Los toques solo llenan la barra de energía ⚡ entre todos. Personajes y cámara quedan para quien envía regalos.",
+  off:"Los toques no hacen nada y el dibujo 👆 desaparece. Solo cuentan los regalos."};
+function paintTapSeg(){Array.prototype.forEach.call($("tapSeg").children,function(b){b.classList.toggle("on",b.dataset.m===cfg.tapMode)});$("tapNote").textContent=TAPNOTE[cfg.tapMode]||""}
+Array.prototype.forEach.call(document.querySelectorAll("#tapSeg button"),function(b){b.onclick=function(){cfg.tapMode=b.dataset.m;save();paintTapSeg();if(cfg.tapMode!=="full")showSlide(0)}});
 function musicLabel(){$("bMusic").textContent=cfg.music?"Música: sí":"Música: no"}
 $("bMusic").onclick=function(){cfg.music=!cfg.music;save();musicLabel();unlock();if(master)master.gain.setTargetAtTime(cfg.music?0.4:0,AC.currentTime,0.05)};
 $("bDemo").onclick=function(){setDemo(!demo)};
@@ -737,7 +752,7 @@ var tn=0;Array.prototype.forEach.call(document.querySelectorAll("[data-test]"),f
 function setStatus(ok,text){var el=$("st");el.className=ok?"ok":"bad";el.textContent=text||(ok?"Conectado":"Sin conexión");$("dot").className=ok?"ok":""}
 function appLog(l){var el=$("apLog");var at=el.scrollTop+el.clientHeight>=el.scrollHeight-4;el.textContent+=(el.textContent?"\n":"")+l;
   var x=el.textContent.split("\n");if(x.length>200)el.textContent=x.slice(-200).join("\n");if(at)el.scrollTop=el.scrollHeight}
-if(YT){$("gLikes").hidden=true;$("mLW").hidden=true;$("apUserL").textContent="Tu canal o directo de YouTube";$("apUser").placeholder="@tucanal o enlace del directo";$("apKeyRow").hidden=true}
+if(YT){$("gLikes").hidden=true;$("gTapQuick").hidden=true;$("mLW").hidden=true;$("apUserL").textContent="Tu canal o directo de YouTube";$("apUser").placeholder="@tucanal o enlace del directo";$("apKeyRow").hidden=true}
 $("lnNote").textContent=!APP?"Vista previa: abre esta página desde la app para recibir regalos reales.":YT?
   "Escribe tu canal de YouTube (@usuario) o pega el enlace del directo. La app lee el chat sola y vuelve a intentarlo si se corta.":
   "Escribe tu usuario de TikTok. La app se conecta sola cuando empieza tu directo.";
