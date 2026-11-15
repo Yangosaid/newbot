@@ -45,6 +45,13 @@ input[type=checkbox]{width:20px;height:20px;accent-color:var(--hot)}
 #st.ok{color:var(--ok)}#st.bad{color:var(--bad)}
 #apLog{max-height:30vh;overflow:auto;white-space:pre-wrap;font:12px/1.35 monospace;color:var(--ink-dim);background:rgba(0,0,0,.35);border-radius:8px;padding:8px;margin:8px 0 0}
 #perf{font:12px monospace;color:var(--ink-dim)}
+#mon{background:rgba(0,0,0,.3);border-radius:10px;padding:8px 10px;margin:8px 0}
+#monC{display:flex;gap:14px;font:800 20px/1 var(--display);margin-bottom:6px}
+#monC span{display:flex;align-items:center;gap:5px}
+#monL{font:13px/1.45 var(--body);color:var(--ink-dim);max-height:24vh;overflow:auto}
+#monL div{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#monL b{color:var(--ink)}
+#hint .g img{width:38px;height:38px;object-fit:contain;display:block}
 /* Language-free hint: 🌹 ➜ [camera frame with you inside]. Pictures only, so every viewer understands it. */
 #hint{position:absolute;left:50%;top:var(--hintTop,13.5%);transform:translateX(-50%);display:flex;align-items:center;gap:10px;padding:7px 14px 7px 12px;
   border-radius:999px;background:rgba(8,4,20,.55);border:1px solid rgba(255,255,255,.14);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);pointer-events:none;
@@ -146,6 +153,7 @@ input[type=checkbox]{width:20px;height:20px;accent-color:var(--hot)}
     <div class="pane" id="pLink" hidden>
       <div class="ln"><span>Estado:</span><span id="st" class="bad">Sin conexión</span></div>
       <p class="note" id="lnNote"></p>
+      <div id="mon"><div id="monC"><span>🎁 <i id="mG">0</i></span><span id="mLW">👆 <i id="mL">0</i></span><span>💬 <i id="mC">0</i></span></div><div id="monL"></div></div>
       <div class="ln"><label for="apUser" id="apUserL">Tu usuario de TikTok</label><input type="text" id="apUser" class="grow" placeholder="usuario (sin @)" autocapitalize="off" autocomplete="off" spellcheck="false"></div>
       <div class="ln" id="apKeyRow"><label for="apKey">Clave Euler Stream</label><input type="text" id="apKey" class="grow" placeholder="opcional" autocapitalize="off" autocomplete="off" spellcheck="false"></div>
       <div class="ln"><button class="btn go" id="apGo">Guardar y conectar</button></div>
@@ -404,17 +412,34 @@ function showSlide(i){hintSlide=i;$("slRose").classList.toggle("off",i!==0);$("s
 function snap(){var el=$("hint");el.classList.remove("snap");void el.offsetWidth;el.classList.add("snap")}
 /* u: a supporter who just sent a rose (shown in the camera frame); liker: someone whose taps just brought their dancer in */
 function paintHint(u,liker){var el=$("hint");el.hidden=!cfg.hint;$("stage").style.setProperty("--hintTop",cfg.safe?"13.5%":"3%");
-  $("hintIcon").textContent=YT?"💬":"🌹";
+  if(YT)$("hintIcon").textContent="💬";
   photoInto($("hintMe"),u,PERSON);photoInto($("hintTapMe"),liker,"<span>🕺</span>");
   if(u){showSlide(0);snap()}else if(liker){showSlide(1);snap()}
   if(u||liker){hintHold=perf()+4000;clearTimeout(hintT);hintT=setTimeout(function(){paintHint(null,null)},4000)}}
+/* any gift counts: the icon cycles through gifts; a real gift's picture shows for a moment when one arrives */
+var GIFTS=["🌹","🎁","🍩","🦁","💎","🌌","🧸","🎉"],giftI=0,giftImgUntil=0;
+setInterval(function(){if(YT||perf()<giftImgUntil)return;giftI=(giftI+1)%GIFTS.length;$("hintIcon").textContent=GIFTS[giftI]},1100);
+function showGift(img){if(YT||!img)return;var el=$("hintIcon");el.innerHTML='<img alt="" referrerpolicy="no-referrer">';el.firstChild.src=img;giftImgUntil=perf()+4000;
+  setTimeout(function(){if(perf()>=giftImgUntil){el.textContent=GIFTS[giftI]}},4100)}
 /* the two drawings take turns every few seconds (YouTube has no taps, so only the first one shows there) */
 setInterval(function(){if(YT||!cfg.like||perf()<hintHold)return;showSlide(hintSlide?0:1)},5000);
 
+/* ---------- live monitor (settings sheet only, never on camera): proof that gifts, taps and comments arrive ---------- */
+var mon={g:0,l:0,c:0},monLines=[];
+function esc(s){return String(s).replace(/[&<>"]/g,function(m){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[m]})}
+function monitor(e){var ic,txt;
+  if(e.type==="gift"){mon.g+=Math.max(1,e.count|0);ic="🎁";txt=(e.label||e.gift||"regalo")+(e.count>1?" ×"+e.count:"")+(e.coins?" · "+e.coins+"🪙":"")}
+  else if(e.type==="like"){mon.l+=Math.max(1,e.count|0);ic="👆";txt="×"+(e.count|0)}
+  else if(e.type==="chat"){mon.c++;ic="💬";txt=String(e.text||"").slice(0,60)}else return;
+  var t=new Date(),hh=("0"+t.getHours()).slice(-2)+":"+("0"+t.getMinutes()).slice(-2)+":"+("0"+t.getSeconds()).slice(-2);
+  monLines.unshift('<div>'+hh+' '+ic+' <b>'+esc(e.nick||e.user||"?")+'</b> '+esc(txt)+'</div>');if(monLines.length>40)monLines.length=40;
+  if(!$("sheet").hidden){$("mG").textContent=mon.g;$("mL").textContent=mon.l;$("mC").textContent=mon.c;$("monL").innerHTML=monLines.join("")}}
+function paintMon(){$("mG").textContent=mon.g;$("mL").textContent=mon.l;$("mC").textContent=mon.c;$("monL").innerHTML=monLines.join("")||'<div>—</div>'}
+
 /* ---------- events from the live ---------- */
-function onEvent(e){if(!e||!e.type)return;
+function onEvent(e){if(!e||!e.type)return;monitor(e);
   if(e.type==="status"){setStatus(e.ok,e.text);return}
-  if(e.type==="gift"){lastGiftAt=perf();var u=userOf(e),n=Math.max(1,e.count|0),added=null;for(var i=0;i<Math.min(n,cfg.per|0||1);i++)added=addChar(u);goTo(u,added);return}
+  if(e.type==="gift"){lastGiftAt=perf();if(e.img)setTimeout(function(){showGift(e.img)},0);var u=userOf(e),n=Math.max(1,e.count|0),added=null;for(var i=0;i<Math.min(n,cfg.per|0||1);i++)added=addChar(u);goTo(u,added);return}
   if(e.type==="like"&&cfg.like){var ul=userOf(e),c=Math.max(1,e.count|0);ul.likes=(ul.likes||0)+c;
     if(ul.chars.length){hearts(ul.chars[ul.chars.length-1],Math.min(6,c));return}
     if(ul.likes>=Math.max(1,cfg.likeN|0)){var nd=addChar(ul);hearts(nd,10);paintHint(null,ul);
@@ -559,7 +584,7 @@ function demoTick(dt){demoT-=dt;if(demoT>0)return;demoT=rnd(5,9);var i=(Math.ran
 function setDemo(v){demo=v;$("bDemo").textContent=v?"Parar demo":"Demo"}
 
 /* ---------- settings sheet ---------- */
-function openSheet(o){$("sheet").hidden=!o;$("gear").hidden=o;if(o)fill()}
+function openSheet(o){$("sheet").hidden=!o;$("gear").hidden=o;if(o){fill();paintMon()}}
 $("gear").onclick=function(){openSheet(true);unlock()};
 $("close").onclick=function(){openSheet(false)};
 Array.prototype.forEach.call(document.querySelectorAll(".tab"),function(b){b.onclick=function(){
@@ -582,7 +607,7 @@ var tn=0;Array.prototype.forEach.call(document.querySelectorAll("[data-test]"),f
 function setStatus(ok,text){var el=$("st");el.className=ok?"ok":"bad";el.textContent=text||(ok?"Conectado":"Sin conexión");$("dot").className=ok?"ok":""}
 function appLog(l){var el=$("apLog");var at=el.scrollTop+el.clientHeight>=el.scrollHeight-4;el.textContent+=(el.textContent?"\n":"")+l;
   var x=el.textContent.split("\n");if(x.length>200)el.textContent=x.slice(-200).join("\n");if(at)el.scrollTop=el.scrollHeight}
-if(YT){$("gLikes").hidden=true;$("apUserL").textContent="Tu canal o directo de YouTube";$("apUser").placeholder="@tucanal o enlace del directo";$("apKeyRow").hidden=true}
+if(YT){$("gLikes").hidden=true;$("mLW").hidden=true;$("apUserL").textContent="Tu canal o directo de YouTube";$("apUser").placeholder="@tucanal o enlace del directo";$("apKeyRow").hidden=true}
 $("lnNote").textContent=!APP?"Vista previa: abre esta página desde la app para recibir regalos reales.":YT?
   "Escribe tu canal de YouTube (@usuario) o pega el enlace del directo. La app lee el chat sola y vuelve a intentarlo si se corta.":
   "Escribe tu usuario de TikTok. La app se conecta sola cuando empieza tu directo.";
