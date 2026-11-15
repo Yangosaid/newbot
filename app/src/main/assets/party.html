@@ -57,6 +57,16 @@ input[type=checkbox]{width:20px;height:20px;accent-color:var(--hot)}
 #monL div{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 #monL b{color:var(--ink)}
 #hint .g img{width:38px;height:38px;object-fit:contain;display:block}
+/* camera-time table (left edge, numbers and symbols only): what each gift value buys */
+#legend{position:absolute;left:8px;top:31%;display:flex;flex-direction:column;gap:3px;padding:7px 8px;border-radius:16px;background:rgba(8,4,20,.5);
+  border:1px solid rgba(255,255,255,.12);pointer-events:none;font:800 15px/1 var(--display);color:#fff}
+#legend .h{display:flex;justify-content:space-between;gap:10px;font-size:15px;opacity:.85;padding:0 2px 3px;border-bottom:1px solid rgba(255,255,255,.15)}
+#legend .r{display:flex;align-items:center;gap:6px;padding:3px 4px;border-radius:9px;transition:background .3s}
+#legend .r .i{width:20px;text-align:center;font-size:16px}
+#legend .r .c{min-width:42px;color:#ffd76a}
+#legend .r .t{min-width:30px;text-align:right}
+#legend .r .x{font-size:12px;width:14px}
+#legend .r.on{background:rgba(255,201,60,.35);box-shadow:0 0 12px rgba(255,201,60,.6);animation:prioGlow .8s ease-in-out infinite}
 /* priority panel (right edge, no words): 🎁 ▲ first, the camera queue as photos, 👆 last */
 #prio{position:absolute;right:8px;top:31%;display:flex;flex-direction:column;align-items:center;gap:6px;padding:8px 6px;border-radius:22px;
   background:rgba(8,4,20,.5);border:1px solid rgba(255,255,255,.12);pointer-events:none;width:58px}
@@ -144,6 +154,7 @@ input[type=checkbox]{width:20px;height:20px;accent-color:var(--hot)}
       <div class="floor"><div class="me" id="hintTapMe"></div></div>
     </div>
   </div>
+  <div id="legend" aria-hidden="true"></div>
   <div id="prio" aria-hidden="true">
     <div class="tier tg" id="pTop">🎁<i>▲</i></div>
     <div id="qList"></div>
@@ -174,6 +185,7 @@ input[type=checkbox]{width:20px;height:20px;accent-color:var(--hot)}
         <div class="ln"><label for="oQ">Calidad</label><select id="oQ"><option value="ultra">Ultra (brillo, sombras, 120 Hz)</option><option value="alta">Alta</option><option value="media">Media</option><option value="ahorro">Ahorro de batería</option></select></div>
         <label class="ln"><input type="checkbox" id="oAuto"><span>Bajar la calidad sola si el teléfono va lento</span></label>
         <label class="ln"><input type="checkbox" id="oSafe"><span>Encuadrar por encima del chat del directo</span></label>
+        <label class="ln"><input type="checkbox" id="oLegend"><span>Tabla lateral: cuántos segundos de cámara da cada regalo (🌹 1🪙 = ⏱3s…)</span></label>
         <label class="ln"><input type="checkbox" id="oPrio"><span>Panel lateral: 🎁 primero, la cola de quien va a salir, 👆 al final</span></label>
         <label class="ln"><input type="checkbox" id="oFlag"><span>Bandera de Palestina 🇵🇸 en la pared de la sala</span></label>
         <label class="ln"><input type="checkbox" id="oHint"><span>Mostrar los dibujos 🌹 ➜ 📷 y 👆 ➜ 🕺 (sin palabras, los entiende todo el mundo)</span></label>
@@ -196,7 +208,7 @@ input[type=checkbox]{width:20px;height:20px;accent-color:var(--hot)}
       <div class="grp"><h3>Regalos grandes 👑</h3>
         <p class="note">Un regalo grande tiene su momento: la cámara gira alrededor del personaje, su foto llena la pantalla gigante, fuegos artificiales y todo el público le aplaude. Corto, para que nadie se aburra; un regalo igual o mayor lo interrumpe y los demás reciben la cámara justo después.</p>
         <div class="ln"><label for="oVipMin">Desde</label><select id="oVipMin"><option value="30">30 monedas</option><option value="100">100 monedas</option><option value="300">300 monedas</option><option value="1000">1.000 monedas</option></select></div>
-        <div class="ln"><label for="oVipLen">Duración</label><select id="oVipLen"><option value="0.6">Corta (2–5 s)</option><option value="1">Normal (4–8 s)</option><option value="1.4">Larga (6–11 s)</option></select></div>
+        <div class="ln"><label for="oVipLen">Duración</label><select id="oVipLen"><option value="0.6">Corta (3–6 s)</option><option value="1">Normal (5–10 s)</option><option value="1.4">Larga (7–14 s)</option></select></div>
       </div>
       <div class="grp"><h3>Energía del directo ⚡ ➜ 🎉</h3>
         <p class="note">Regalos y toques llenan la barra entre todos. Al llenarse: fiesta con láseres, confeti y baile sincronizado. Luego la meta sube.</p>
@@ -240,7 +252,7 @@ var SRC=APP&&BusApp.getSource?String(BusApp.getSource()):"tiktok",YT=SRC==="yout
 try{localStorage.setItem("game","party")}catch(e){}
 
 /* ---------- settings ---------- */
-var DEF={per:2,max:24,fill:10,chat:YT,words:"",cd:YT?10:3,bpm:124,q:"ultra",auto:true,music:true,safe:true,hint:true,flag:true,prio:true,sync:false,syncSrc:"output",like:true,tapMode:"full",likeN:15,likeCam:20,tapHold:4,goal:2000,coinE:10,tapE:1,vipMin:100,vipLen:1};
+var DEF={per:2,max:24,fill:10,chat:YT,words:"",cd:YT?10:3,bpm:124,q:"ultra",auto:true,music:true,safe:true,hint:true,flag:true,prio:true,legend:true,sync:false,syncSrc:"output",like:true,tapMode:"full",likeN:15,likeCam:20,tapHold:4,goal:2000,coinE:10,tapE:1,vipMin:100,vipLen:1};
 var cfg=Object.assign({},DEF);
 try{var sv=JSON.parse(localStorage.getItem("party3d3")||"null");if(sv)cfg=Object.assign(cfg,sv)}catch(e){}
 function save(){try{localStorage.setItem("party3d3",JSON.stringify(cfg))}catch(e){}}
@@ -554,6 +566,22 @@ function support(u,s){var now=perf(),gift=s.kind==="gift";
 
 /* ---------- the big-gift moment: a short 360° hero shot, photo on the LED wall, fireworks, the whole hall applauds ---------- */
 var vip=null,pending=null,camQ=[];
+/* ---------- the camera-time table ---------- */
+function legendRows(){var vm=Math.max(1,cfg.vipMin|0),r=[[1,"🌹",3000/1000],[10,"⭐",4]];
+  [vm,500,1000].forEach(function(c){if(c>=vm&&!r.some(function(x){return x[0]===c}))r.push([c,c>=1000?"💎":"👑",vipSecs(c)])});
+  return r.filter(function(x,i,a){return i===0||x[0]>a[i-1][0]})}
+function coinLabel(c){if(YT){var e=c/10;return "€"+(e<1?e.toFixed(1):Math.round(e))}return c+"🪙"}
+var legendOn=-1;
+function paintLegend(){var el=$("legend");el.hidden=!cfg.legend;if(!cfg.legend)return;
+  var rows=legendRows(),h='<div class="h"><span>'+(YT?"💸":"🎁")+'</span><span>⏱</span></div>';
+  if(YT)h+='<div class="r"><span class="i">💬</span><span class="c">·</span><span class="t">3s</span><span class="x"></span></div>';
+  rows.forEach(function(x,i){var sec=Math.round(x[2]*10)/10;h+='<div class="r" data-i="'+i+'"><span class="i">'+x[1]+'</span><span class="c">'+coinLabel(x[0])+'</span><span class="t">'+sec+'s</span><span class="x">'+(x[0]>=Math.max(1,cfg.vipMin|0)?"🎆":"")+'</span></div>'});
+  el.innerHTML=h;legendOn=-1;lightLegend()}
+/* the row matching whoever is on camera lights up */
+function lightLegend(){if(!cfg.legend)return;var c=vipOn()?vip.coins:focus&&focusByGift?(turn.coins||0):0,rows=legendRows(),idx=-1;
+  for(var i=0;i<rows.length;i++)if(c>=rows[i][0])idx=i;if(!c)idx=-1;
+  if(idx===legendOn)return;legendOn=idx;Array.prototype.forEach.call($("legend").querySelectorAll(".r[data-i]"),function(r){r.classList.toggle("on",+r.dataset.i===idx)})}
+
 /* ---------- the priority panel ---------- */
 var lastPrio="";
 function prioFace(u,cls,badge,lvl){var inner=u.av?'<img alt="" referrerpolicy="no-referrer" src="'+esc(u.av)+'">':'<span class="ph" style="background:hsl('+u.hue+',70%,45%)">'+esc(initial(u.nick))+'</span>';
@@ -575,9 +603,11 @@ function paintPrio(){var el=$("prio");el.hidden=!cfg.prio;if(!cfg.prio)return;
    Nobody is ever dropped: roses get shorter turns when the queue is long (3 s → 1.2 s), ⭐ at least 3.5 s,
    big gifts their full moment; a big moment cut short by a bigger gift comes back to finish its time. */
 function tierOf(c){return c>=1000?3:c>=Math.max(1,cfg.vipMin|0)?2:c>=10?1:0}
-function turnMs(){return Math.max(1200,3000-camQ.length*150)}
+/* camera time per gift value (seconds). Roses keep 3 s and only shorten in a real rush (more than 8 waiting). */
+function vipSecs(c){return (c>=1000?10:c>=500?7:5)*Math.max(0.4,+cfg.vipLen||1)}
+function turnMs(){return camQ.length>8?Math.max(1200,3000-(camQ.length-8)*200):3000}
 var turn={len:0};
-function turnLen(coins){return tierOf(coins)===1?Math.max(3500,turnMs()+1000):turnMs()}
+function turnLen(coins){return tierOf(coins)===1?4000:turnMs()}
 function enqueue(e,front){var old=null;camQ=camQ.filter(function(q){if(q.u===e.u){old=q;return false}return true});
   if(old){e.coins+=old.coins;e.at=old.at;if(old.remain&&!e.remain)e.remain=old.remain}
   /* strictly by value: the most valuable gift always goes first; equal values keep their arrival order */
@@ -602,8 +632,8 @@ function giftTurn(u,d,coins){var now=perf(),t=tierOf(coins);
     play(e);return}
   enqueue(e,false)}
 /* one place decides what happens when a turn or a moment ends (two paths used to race and skip a supporter) */
-function stepQueue(now){if(vip&&now>=vip.until){vip=null;focusAt=-1e9;turn.len=0}if(!camQ.length||playing(now))return;play(camQ.shift())}
-function startVip(u,d,coins,remainMs){var now=perf(),len=remainMs?remainMs/1000:(coins>=1000?8:coins>=500?6:4)*Math.max(0.4,+cfg.vipLen||1);
+function stepQueue(now){if(vip&&now>=vip.until){vip=null;focusAt=-1e9;turn.len=0;lightLegend()}if(!camQ.length||playing(now))return;play(camQ.shift())}
+function startVip(u,d,coins,remainMs){var now=perf(),len=remainMs?remainMs/1000:vipSecs(coins);
   camQ=camQ.filter(function(q){return q.u!==u});
   var id={};vip={id:id,u:u,d:d,coins:coins,start:now,until:now+len*1000,ang:camAng};pending=null;goTo(u,d,false);
   cheer(d,now,99);fireworks(d,coins);vipScreen(u);
@@ -659,7 +689,7 @@ function partyOn(){return perf()<energy.partyUntil}
 var camPos,camLook,camAng=0,tPos,tLook,focusAt=0;
 if(ok3d){camPos=new T.Vector3(0,4.6,13);camLook=new T.Vector3(0,1.9,-0.5);tPos=new T.Vector3();tLook=new T.Vector3()}
 var focusByGift=false;
-function goTo(u,d,byTaps){focus=u;focusAt=perf();focusByGift=!byTaps;setTimeout(paintPrio,0);focusD=d||(u.chars.length?u.chars[u.chars.length-1]:null);
+function goTo(u,d,byTaps){focus=u;focusAt=perf();focusByGift=!byTaps;setTimeout(function(){paintPrio();lightLegend()},0);focusD=d||(u.chars.length?u.chars[u.chars.length-1]:null);
   if(!byTaps)paintHint(u);else paintHint(null,u);
   camAng=(camAng>0?-1:1)*rnd(0.14,0.34)}
 var focusD=null;
@@ -863,14 +893,15 @@ $("close").onclick=function(){openSheet(false)};
 Array.prototype.forEach.call(document.querySelectorAll(".tab"),function(b){b.onclick=function(){
   Array.prototype.forEach.call(document.querySelectorAll(".tab"),function(x){x.setAttribute("aria-selected",x===b);$(x.dataset.p).hidden=x!==b})}});
 function fill(){$("oPer").value=String(cfg.per);$("oMax").value=String(cfg.max);$("oFill").value=String(cfg.fill);$("oChat").checked=cfg.chat;$("oWords").value=cfg.words;
-  $("oCd").value=String(cfg.cd);$("oBpm").value=String(cfg.bpm);$("oQ").value=cfg.q;$("oAuto").checked=cfg.auto;$("oSafe").checked=cfg.safe;$("oHint").checked=cfg.hint;$("oFlag").checked=cfg.flag;$("oPrio").checked=cfg.prio;$("oSync").checked=cfg.sync;$("oSyncSrc").value=cfg.syncSrc;paintTapSeg();$("oLikeN").value=String(cfg.likeN);$("oLikeCam").value=String(cfg.likeCam);$("oTapHold").value=String(cfg.tapHold);$("oGoal").value=String(cfg.goal);$("oVipMin").value=String(cfg.vipMin);$("oVipLen").value=String(cfg.vipLen);musicLabel()}
+  $("oCd").value=String(cfg.cd);$("oBpm").value=String(cfg.bpm);$("oQ").value=cfg.q;$("oAuto").checked=cfg.auto;$("oSafe").checked=cfg.safe;$("oHint").checked=cfg.hint;$("oFlag").checked=cfg.flag;$("oPrio").checked=cfg.prio;$("oLegend").checked=cfg.legend;$("oSync").checked=cfg.sync;$("oSyncSrc").value=cfg.syncSrc;paintTapSeg();$("oLikeN").value=String(cfg.likeN);$("oLikeCam").value=String(cfg.likeCam);$("oTapHold").value=String(cfg.tapHold);$("oGoal").value=String(cfg.goal);$("oVipMin").value=String(cfg.vipMin);$("oVipLen").value=String(cfg.vipLen);musicLabel()}
 function bind(id,key,num){var el=$(id);el.onchange=el.oninput=function(){cfg[key]=el.type==="checkbox"?el.checked:num?Math.max(0,+el.value||0):el.value;save();
   if(key==="flag"&&G.flag)G.flag.visible=cfg.flag;
   if(key==="prio"||key==="tapMode")paintPrio();
+  if(key==="legend"||key==="vipLen"||key==="vipMin")paintLegend();
   if(key==="sync"||key==="syncSrc")applySync();
   if(key==="goal"){energy.target=cfg.goal;paintEnergy()}
   if(key==="q")applyQuality();if(key==="fill")layoutFillers();if(key==="hint"||key==="safe")paintHint()}}
-bind("oPer","per",1);bind("oMax","max",1);bind("oFill","fill",1);bind("oChat","chat");bind("oWords","words");bind("oCd","cd",1);bind("oBpm","bpm",1);bind("oQ","q");bind("oAuto","auto");bind("oSafe","safe");bind("oHint","hint");bind("oFlag","flag");bind("oPrio","prio");bind("oSync","sync");bind("oSyncSrc","syncSrc");bind("oLikeN","likeN",1);bind("oLikeCam","likeCam",1);bind("oTapHold","tapHold",1);bind("oGoal","goal",1);bind("oVipMin","vipMin",1);bind("oVipLen","vipLen",1);
+bind("oPer","per",1);bind("oMax","max",1);bind("oFill","fill",1);bind("oChat","chat");bind("oWords","words");bind("oCd","cd",1);bind("oBpm","bpm",1);bind("oQ","q");bind("oAuto","auto");bind("oSafe","safe");bind("oHint","hint");bind("oFlag","flag");bind("oPrio","prio");bind("oLegend","legend");bind("oSync","sync");bind("oSyncSrc","syncSrc");bind("oLikeN","likeN",1);bind("oLikeCam","likeCam",1);bind("oTapHold","tapHold",1);bind("oGoal","goal",1);bind("oVipMin","vipMin",1);bind("oVipLen","vipLen",1);
 var TAPNOTE={full:"Quien toca aparece con su personaje, se lleva la cámara un momento y llena la barra de energía.",
   energy:"Los toques solo llenan la barra de energía ⚡ entre todos. Personajes y cámara quedan para quien envía regalos.",
   off:"Los toques no hacen nada y el dibujo 👆 desaparece. Solo cuentan los regalos."};
@@ -914,7 +945,7 @@ function resize(){W=innerWidth;H=innerHeight;if(!ok3d)return;var pr=Math.min(win
   cam.aspect=W/H;cam.fov=W/H<0.75?60:48;cam.updateProjectionMatrix()}
 function wake(){try{navigator.wakeLock&&navigator.wakeLock.request("screen").catch(function(){})}catch(e){}}
 window.addEventListener("resize",resize);
-fill();applyQuality();buildLasers();buildFlag();paintPrio();if(cfg.sync)applySync();paintEnergy();layoutFillers();paintHint(null);setDemo(!APP);wake();
+fill();applyQuality();buildLasers();buildFlag();paintPrio();paintLegend();if(cfg.sync)applySync();paintEnergy();layoutFillers();paintHint(null);setDemo(!APP);wake();
 if(document.fonts&&document.fonts.ready)document.fonts.ready.then(function(){for(var k in users){var u=users[k];if(u.label){u.label.dispose();u.label=null;relabel(u)}}});
 if(APP&&!$("apUser").value){openSheet(true);document.querySelector('.tab[data-p="pLink"]').click()}
 requestAnimationFrame(frame);
