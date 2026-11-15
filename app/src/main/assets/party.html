@@ -571,7 +571,7 @@ function paintPrio(){var el=$("prio");el.hidden=!cfg.prio;if(!cfg.prio)return;
 
 /* gift turns: whoever is on camera keeps it at least 3 s (2 s when the queue is long); the same supporter is never queued twice */
 /* ---------- camera turns for gifts ----------
-   Levels: 💎 1000+, 👑 big (vipMin+), ⭐ 10+, 🌹 the rest. Higher levels go first, same level in arrival order.
+   Order: strictly by gift value, highest first (equal values in arrival order). Levels 💎 1000+, 👑 big, ⭐ 10+, 🌹 set the turn length.
    Nobody is ever dropped: roses get shorter turns when the queue is long (3 s → 1.2 s), ⭐ at least 3.5 s,
    big gifts their full moment; a big moment cut short by a bigger gift comes back to finish its time. */
 function tierOf(c){return c>=1000?3:c>=Math.max(1,cfg.vipMin|0)?2:c>=10?1:0}
@@ -580,15 +580,14 @@ var turn={len:0};
 function turnLen(coins){return tierOf(coins)===1?Math.max(3500,turnMs()+1000):turnMs()}
 function enqueue(e,front){var old=null;camQ=camQ.filter(function(q){if(q.u===e.u){old=q;return false}return true});
   if(old){e.coins+=old.coins;e.at=old.at;if(old.remain&&!e.remain)e.remain=old.remain}
-  var t=tierOf(e.coins),i=0;
-  if(front){while(i<camQ.length&&tierOf(camQ[i].coins)>t)i++}                 /* first of its level */
-  else{while(i<camQ.length&&tierOf(camQ[i].coins)>=t)i++}                     /* last of its level */
+  /* strictly by value: the most valuable gift always goes first; equal values keep their arrival order */
+  var i=0;while(i<camQ.length&&(camQ[i].coins>e.coins||camQ[i].coins===e.coins&&camQ[i].at<=e.at))i++;
   camQ.splice(i,0,e);paintPrio()}
 function playing(now){return vipOn()||(focus&&focusByGift&&now-focusAt<turn.len)}
 function play(e){var d=e.u.chars.indexOf(e.d)>=0?e.d:e.u.chars[e.u.chars.length-1];if(!d)d=addChar(e.u);   /* pushed off a full floor? back for their turn */
   if(!d)return;
   if(tierOf(e.coins)>=2)startVip(e.u,d,e.coins,e.remain);
-  else{turn.len=turnLen(e.coins);turn.coins=e.coins;goTo(e.u,d,false);burst(d)}
+  else{turn.len=turnLen(e.coins);turn.coins=e.coins;turn.at=e.at;goTo(e.u,d,false);burst(d)}
   paintPrio()}
 function giftTurn(u,d,coins){var now=perf(),t=tierOf(coins);
   /* the same supporter gifts again while on camera: restart their turn, and upgrade it if it became big */
@@ -599,7 +598,7 @@ function giftTurn(u,d,coins){var now=perf(),t=tierOf(coins);
   /* a big gift interrupts a smaller moment or a normal turn; whoever was interrupted goes back first in line */
   if(t>=2&&(!vipOn()||coins>vip.coins)){
     if(vipOn()){var left=vip.until-now;if(left>1500)enqueue({u:vip.u,d:vip.d,coins:vip.coins,at:vip.start,remain:left},true);vip=null}
-    else if(focus&&focusByGift&&now-focusAt<2000)enqueue({u:focus,d:focusChar(),coins:turn.coins||1,at:now},true);
+    else if(focus&&focusByGift&&now-focusAt<2000)enqueue({u:focus,d:focusChar(),coins:turn.coins||1,at:turn.at||now},true);
     play(e);return}
   enqueue(e,false)}
 /* one place decides what happens when a turn or a moment ends (two paths used to race and skip a supporter) */
