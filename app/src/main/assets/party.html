@@ -71,6 +71,8 @@ input[type=checkbox]{width:20px;height:20px;accent-color:var(--hot)}
 #prio .q b{position:absolute;bottom:-4px;right:-5px;min-width:17px;height:17px;border-radius:9px;background:#ffc93c;color:#1a1200;font:800 12px/17px var(--display);text-align:center;padding:0 3px}
 #prio .q.now img,#prio .q.now .ph{border-color:#ffc93c;box-shadow:0 0 12px #ffc93c}
 #prio .q.now b{background:#ff2d55;color:#fff}
+#prio .q s{position:absolute;top:-7px;left:-7px;text-decoration:none;font-size:15px;filter:drop-shadow(0 1px 2px rgba(0,0,0,.6))}
+#prio .q.vip img,#prio .q.vip .ph{border-color:#ffc93c;box-shadow:0 0 10px rgba(255,201,60,.7)}
 #prio .q.in{animation:qIn .45s cubic-bezier(.2,.9,.3,1.4)}
 #prio .slot{width:38px;height:38px;border-radius:50%;border:2px dashed rgba(255,255,255,.55);display:grid;place-items:center;color:#fff;font:700 22px/1 var(--display);opacity:.75;animation:prioGlow 1.6s ease-in-out infinite}
 #prio .more{font:800 13px/1 var(--display);color:#ffc93c}
@@ -544,8 +546,7 @@ function support(u,s){var now=perf(),gift=s.kind==="gift";
   /* camera: gifts always bring it back (with a new angle); taps take it after a short protection */
   var big=gift&&s.coins>=Math.max(1,cfg.vipMin|0),inVip=vip&&now<vip.until;
   if(gift){
-    if(big&&(!inVip||s.coins>=vip.coins))startVip(u,d,s.coins);              /* a big gift gets its moment (an equal or bigger one interrupts) */
-    else queueCam(u,d)}                                                      /* everyone else gets a fair turn, in order */
+    giftTurn(u,d,s.coins)}                                                   /* every gift gets the camera; bigger gifts go first and stay longer */
   else if(!inVip&&!camQ.length&&focus!==u&&now-lastGiftAt>Math.max(5,+cfg.likeCam||20)*1000&&now-focusAt>Math.max(1,+cfg.tapHold||4)*1000&&now-(u.tapCamAt||-1e9)>8000){u.tapCamAt=now;goTo(u,d,true)}
   /* celebrate */
   if(gift){burst(d);d.party=now;cheer(d,now)}else hearts(d,Math.min(8,(s.taps|0)+2));
@@ -555,30 +556,59 @@ function support(u,s){var now=perf(),gift=s.kind==="gift";
 var vip=null,pending=null,camQ=[];
 /* ---------- the priority panel ---------- */
 var lastPrio="";
-function prioFace(u,cls,badge){var inner=u.av?'<img alt="" referrerpolicy="no-referrer" src="'+esc(u.av)+'">':'<span class="ph" style="background:hsl('+u.hue+',70%,45%)">'+esc(initial(u.nick))+'</span>';
-  return '<div class="q '+cls+'" data-u="'+esc(u.uid)+'">'+inner+'<b>'+badge+'</b></div>'}
+function prioFace(u,cls,badge,lvl){var inner=u.av?'<img alt="" referrerpolicy="no-referrer" src="'+esc(u.av)+'">':'<span class="ph" style="background:hsl('+u.hue+',70%,45%)">'+esc(initial(u.nick))+'</span>';
+  var L=lvl===3?"💎":lvl===2?"👑":lvl===1?"⭐":"";
+  return '<div class="q '+cls+(lvl>=2?" vip":"")+'" data-u="'+esc(u.uid)+'">'+inner+(L?'<s>'+L+'</s>':'')+'<b>'+badge+'</b></div>'}
 function paintPrio(){var el=$("prio");el.hidden=!cfg.prio;if(!cfg.prio)return;
   $("pTop").firstChild.nodeValue=YT?"💸":"🎁";$("pLow").textContent=YT?"💬":"👆";
   el.querySelector(".ar").hidden=$("pLow").hidden=!YT&&cfg.tapMode==="off";
-  var h="";if(focus&&focusByGift&&focus.chars.length)h+=prioFace(focus,"now","🎥");
-  camQ.slice(0,4).forEach(function(q,i){h+=prioFace(q.u,"",i+1)});
+  var h="";if(focus&&focusByGift&&focus.chars.length)h+=prioFace(focus,"now","🎥",vipOn()?tierOf(vip.coins):tierOf(turn.coins||0));
+  camQ.slice(0,4).forEach(function(q,i){h+=prioFace(q.u,"",i+1,tierOf(q.coins))});
   if(camQ.length>4)h+='<div class="more">+'+(camQ.length-4)+'</div>';
   if(!camQ.length)h+='<div class="slot">+</div>';                 /* an open spot: send a gift and it's yours */
   if(h===lastPrio)return;var old={};Array.prototype.forEach.call($("qList").children,function(c){if(c.dataset.u)old[c.dataset.u]=1});
   $("qList").innerHTML=h;lastPrio=h;Array.prototype.forEach.call($("qList").children,function(c){if(c.dataset.u&&!old[c.dataset.u])c.classList.add("in")})}
 
 /* gift turns: whoever is on camera keeps it at least 3 s (2 s when the queue is long); the same supporter is never queued twice */
+/* ---------- camera turns for gifts ----------
+   Levels: 💎 1000+, 👑 big (vipMin+), ⭐ 10+, 🌹 the rest. Higher levels go first, same level in arrival order.
+   Nobody is ever dropped: roses get shorter turns when the queue is long (3 s → 1.2 s), ⭐ at least 3.5 s,
+   big gifts their full moment; a big moment cut short by a bigger gift comes back to finish its time. */
+function tierOf(c){return c>=1000?3:c>=Math.max(1,cfg.vipMin|0)?2:c>=10?1:0}
 function turnMs(){return Math.max(1200,3000-camQ.length*150)}
-function queueCam(u,d){var now=perf();camQ=camQ.filter(function(q){return q.u!==u});
-  if(vipOn()||(focus&&focus!==u&&focusByGift&&now-focusAt<turnMs())){camQ.push({u:u,d:d});paintPrio();return}
-  goTo(u,d,false)}
-function stepQueue(now){if(!camQ.length||vipOn())return;if(focusByGift&&now-focusAt<turnMs())return;var q=camQ.shift();
-  var d=q.u.chars.indexOf(q.d)>=0?q.d:q.u.chars[q.u.chars.length-1];if(!d)d=addChar(q.u);   /* pushed off a full floor? back for their turn */
-  if(d){goTo(q.u,d,false);burst(d)}paintPrio()}
-function startVip(u,d,coins){var now=perf(),len=(coins>=1000?8:coins>=500?6:4)*Math.max(0.4,+cfg.vipLen||1);
-  vip={u:u,d:d,coins:coins,start:now,until:now+len*1000,ang:camAng};pending=null;goTo(u,d,false);
+var turn={len:0};
+function turnLen(coins){return tierOf(coins)===1?Math.max(3500,turnMs()+1000):turnMs()}
+function enqueue(e,front){var old=null;camQ=camQ.filter(function(q){if(q.u===e.u){old=q;return false}return true});
+  if(old){e.coins+=old.coins;e.at=old.at;if(old.remain&&!e.remain)e.remain=old.remain}
+  var t=tierOf(e.coins),i=0;
+  if(front){while(i<camQ.length&&tierOf(camQ[i].coins)>t)i++}                 /* first of its level */
+  else{while(i<camQ.length&&tierOf(camQ[i].coins)>=t)i++}                     /* last of its level */
+  camQ.splice(i,0,e);paintPrio()}
+function playing(now){return vipOn()||(focus&&focusByGift&&now-focusAt<turn.len)}
+function play(e){var d=e.u.chars.indexOf(e.d)>=0?e.d:e.u.chars[e.u.chars.length-1];if(!d)d=addChar(e.u);   /* pushed off a full floor? back for their turn */
+  if(!d)return;
+  if(tierOf(e.coins)>=2)startVip(e.u,d,e.coins,e.remain);
+  else{turn.len=turnLen(e.coins);turn.coins=e.coins;goTo(e.u,d,false);burst(d)}
+  paintPrio()}
+function giftTurn(u,d,coins){var now=perf(),t=tierOf(coins);
+  /* the same supporter gifts again while on camera: restart their turn, and upgrade it if it became big */
+  if(focus===u&&playing(now)){if(vipOn()){if(coins>vip.coins)vip.coins=coins;burst(d);return}
+    var tot=(turn.coins||0)+coins;if(tierOf(tot)>=2)startVip(u,d,tot);else{turn.len=turnLen(tot);turn.coins=tot;goTo(u,d,false)}return}
+  var e={u:u,d:d,coins:coins,at:now};
+  if(!playing(now)&&!camQ.length){play(e);return}
+  /* a big gift interrupts a smaller moment or a normal turn; whoever was interrupted goes back first in line */
+  if(t>=2&&(!vipOn()||coins>vip.coins)){
+    if(vipOn()){var left=vip.until-now;if(left>1500)enqueue({u:vip.u,d:vip.d,coins:vip.coins,at:vip.start,remain:left},true);vip=null}
+    else if(focus&&focusByGift&&now-focusAt<2000)enqueue({u:focus,d:focusChar(),coins:turn.coins||1,at:now},true);
+    play(e);return}
+  enqueue(e,false)}
+/* one place decides what happens when a turn or a moment ends (two paths used to race and skip a supporter) */
+function stepQueue(now){if(vip&&now>=vip.until){vip=null;focusAt=-1e9;turn.len=0}if(!camQ.length||playing(now))return;play(camQ.shift())}
+function startVip(u,d,coins,remainMs){var now=perf(),len=remainMs?remainMs/1000:(coins>=1000?8:coins>=500?6:4)*Math.max(0.4,+cfg.vipLen||1);
+  camQ=camQ.filter(function(q){return q.u!==u});
+  var id={};vip={id:id,u:u,d:d,coins:coins,start:now,until:now+len*1000,ang:camAng};pending=null;goTo(u,d,false);
   cheer(d,now,99);fireworks(d,coins);vipScreen(u);
-  setTimeout(function(){if(vip&&perf()>=vip.until){vip=null;focusAt=-1e9;stepQueue(perf())}},len*1000+30)}
+  setTimeout(function(){stepQueue(perf())},len*1000+30)}
 function vipOn(){return vip&&perf()<vip.until}
 var fwT=[];function fireworks(d,coins){var n=coins>=1000?6:coins>=500?4:2;fwT.forEach(clearTimeout);fwT=[];
   for(var i=0;i<n;i++)fwT.push(setTimeout(function(){if(d.root.parent){burst(d);burst(d)}},i*650))}
@@ -643,6 +673,8 @@ function stepCamera(now,dt){var t=now/1000,portrait=W/H<0.75,d=focusChar();
     tLook.set(d.x,cfg.safe?1.0:1.3,d.z);tPos.set(d.x+Math.sin(a)*dist,2.6+swoop*1.2+Math.sin(t*0.3)*0.06,d.z+Math.cos(a)*dist);clearView(d)}
   else{tLook.set(0,1.8,-0.5);tPos.set(Math.sin(t*0.12)*2.6,4.4+Math.sin(t*0.2)*0.35,portrait?13.5:11)}
   var k=vipOn()&&now-vip.start>700?1:1-Math.exp(-dt*(vipOn()?4:d?2.2:1.0));camPos.lerp(tPos,k);camLook.lerp(tLook,k);cam.position.copy(camPos);cam.lookAt(camLook);
+  /* nobody stands in the lens: characters right next to the camera are hidden for that moment */
+  for(var ci=0,all=chars.concat(fillers);ci<all.length;ci++){var o=all[ci];o.root.visible=o===d||Math.hypot(o.x-camPos.x,o.z-camPos.z)>1.4}
   /* the follow spot */
   var on=d?1:0;follow.intensity=damp(follow.intensity,on*16,3,dt);followCone.material.opacity=damp(followCone.material.opacity,on*0.03,3,dt);G.close=damp(G.close||0,on,2,dt);
   if(d){follow.target.position.set(d.x,0,d.z);follow.position.set(d.x*0.4,10,d.z+1.5);
