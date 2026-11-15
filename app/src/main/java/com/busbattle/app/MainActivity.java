@@ -44,6 +44,7 @@ public class MainActivity extends Activity {
     /* Messages to the page are batched: one evaluateJavascript every 60 ms instead of one per gift / tap / log line. */
     private final java.util.concurrent.ConcurrentLinkedQueue<String> outQ = new java.util.concurrent.ConcurrentLinkedQueue<>();
     private volatile String audioMsg;
+    private final java.util.concurrent.atomic.AtomicInteger queued = new java.util.concurrent.atomic.AtomicInteger();
     private final Runnable flusher = new Runnable() {
         @Override public void run() { flush(); ui.postDelayed(this, 60); }
     };
@@ -113,6 +114,8 @@ public class MainActivity extends Activity {
         TikTokLive.Listener l = new TikTokLive.Listener() {
             @Override public void onEvent(String json) {
                 if (json.contains("\"type\":\"status\"")) lastStatus = json;
+                // a flood of taps must never delay gifts: drop taps when the page is behind
+                if (queued.get() > 600 && json.contains("\"type\":\"like\"")) return;
                 js("window.__bus&&window.__bus(" + safe(json) + ")");
             }
             @Override public void onLog(String line) { log(line); }
@@ -142,14 +145,15 @@ public class MainActivity extends Activity {
     private void js(final String code) {
         if (!pageReady) return;
         outQ.add(code);
+        queued.incrementAndGet();
     }
 
     private void flush() {
-        if (!pageReady || web == null) { outQ.clear(); return; }
+        if (!pageReady || web == null) { outQ.clear(); queued.set(0); return; }
         StringBuilder b = new StringBuilder();
         String c;
         int n = 0;
-        while (n < 400 && (c = outQ.poll()) != null) { b.append(c).append(';'); n++; }
+        while (n < 400 && (c = outQ.poll()) != null) { b.append(c).append(';'); n++; queued.decrementAndGet(); }
         String a = audioMsg;
         audioMsg = null;
         if (a != null) b.append(a);
