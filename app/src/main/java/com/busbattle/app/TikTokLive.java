@@ -367,7 +367,6 @@ public final class TikTokLive implements LiveSource {
                 if (end) streaks.remove(k); else streaks.put(k, new long[]{count, now});
             }
         }
-        log("Regalo " + who.nick + ": " + name + " x" + count + (end ? " fin" : "") + " → +" + delta);
         if (delta <= 0) return;
         try {
             JSONObject o = who.json().put("type", "gift").put("gift", name).put("count", delta).put("coins", coins)

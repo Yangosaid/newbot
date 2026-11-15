@@ -41,6 +41,15 @@ public class MainActivity extends Activity {
     private String lastStatus = "{\"type\":\"status\",\"ok\":false,\"text\":\"Escribe tu usuario de TikTok en Conexión\"}";
     private final ArrayDeque<String> logLines = new ArrayDeque<>();
     private ValueCallback<Uri[]> fileCallback;
+    /* Messages to the page are batched: one evaluateJavascript every 60 ms instead of one per gift / tap / log line. */
+    private final java.util.concurrent.ConcurrentLinkedQueue<String> outQ = new java.util.concurrent.ConcurrentLinkedQueue<>();
+    private volatile String audioMsg;
+    private final Runnable flusher = new Runnable() {
+        @Override public void run() { flush(); ui.postDelayed(this, 60); }
+    };
+    private MusicSync music;
+    private String musicSource = "output";
+    private static final int REQ_AUDIO = 11;
 
     @SuppressLint({"SetJavaScriptEnabled", "AddJavascriptInterface"})
     @Override
@@ -92,6 +101,7 @@ public class MainActivity extends Activity {
         web.loadUrl("file:///android_asset/index.html");
 
         if (!prefs.getString("user", "").isEmpty()) startLive();
+        ui.postDelayed(flusher, 60);
     }
 
     // ------------------------------------------------------------ TikTok connection
@@ -131,12 +141,57 @@ public class MainActivity extends Activity {
 
     private void js(final String code) {
         if (!pageReady) return;
-        ui.post(() -> { if (web != null) web.evaluateJavascript(code, null); });
+        outQ.add(code);
+    }
+
+    private void flush() {
+        if (!pageReady || web == null) { outQ.clear(); return; }
+        StringBuilder b = new StringBuilder();
+        String c;
+        int n = 0;
+        while (n < 400 && (c = outQ.poll()) != null) { b.append(c).append(';'); n++; }
+        String a = audioMsg;
+        audioMsg = null;
+        if (a != null) b.append(a);
+        if (b.length() > 0) web.evaluateJavascript(b.toString(), null);
+    }
+
+    // ------------------------------------------------------------ music the user plays (Spotify…) → lights
+
+    private void startMusic(String source) {
+        musicSource = source;
+        if (Build.VERSION.SDK_INT >= 23 && checkSelfPermission(android.Manifest.permission.RECORD_AUDIO) != android.content.pm.PackageManager.PERMISSION_GRANTED) {
+            requestPermissions(new String[]{android.Manifest.permission.RECORD_AUDIO}, REQ_AUDIO);
+            return;
+        }
+        if (music == null) music = new MusicSync(new MusicSync.Out() {
+            @Override public void level(float b, float m, float h, boolean beat) {
+                audioMsg = "window.__busAudio&&window.__busAudio(" + fmt(b) + "," + fmt(m) + "," + fmt(h) + "," + (beat ? 1 : 0) + ")";
+                if (beat) js("window.__busBeat&&window.__busBeat()");
+            }
+            @Override public void state(String st) { js("window.__busAudioState&&window.__busAudioState(" + JSONObject.quote(st) + ")"); }
+        });
+        music.start(source);
+    }
+
+    private static String fmt(float v) { return String.valueOf(Math.round(v * 1000) / 1000f); }
+
+    @Override
+    public void onRequestPermissionsResult(int req, String[] perms, int[] res) {
+        super.onRequestPermissionsResult(req, perms, res);
+        if (req != REQ_AUDIO) return;
+        if (res.length > 0 && res[0] == android.content.pm.PackageManager.PERMISSION_GRANTED) startMusic(musicSource);
+        else js("window.__busAudioState&&window.__busAudioState(\"denied\")");
     }
 
     final class Bridge {
         @JavascriptInterface public String getUser() { return prefs.getString("user", ""); }
         @JavascriptInterface public String getKey() { return prefs.getString("key", ""); }
+
+        /** Lights follow the music the phone plays: source "output" (any app) or "mic"; on=false stops listening. */
+        @JavascriptInterface public void musicSync(final boolean on, final String source) {
+            ui.post(() -> { if (on) startMusic(source == null ? "output" : source); else if (music != null) music.stop(); });
+        }
 
         /** "tiktok" or "youtube": the page adapts its labels and scoring. */
         @JavascriptInterface public String getSource() { return YOUTUBE ? "youtube" : "tiktok"; }
@@ -249,6 +304,8 @@ public class MainActivity extends Activity {
 
     @Override
     protected void onDestroy() {
+        ui.removeCallbacks(flusher);
+        if (music != null) music.stop();
         if (live != null) live.stop();
         live = null;
         pageReady = false;
