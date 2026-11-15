@@ -302,6 +302,7 @@ public final class TikTokLive implements LiveSource {
             try {
                 if ("WebcastGiftMessage".equals(method)) onGift(body);
                 else if ("WebcastChatMessage".equals(method)) onChat(body);
+                else if ("WebcastLikeMessage".equals(method)) onLike(body);
                 else if ("WebcastControlMessage".equals(method)) {
                     Proto.Reader c = new Proto.Reader(body);
                     long action = 0;
@@ -373,6 +374,21 @@ public final class TikTokLive implements LiveSource {
                     .put("giftId", String.valueOf(giftId)).put("img", img.startsWith("https://") ? img : "");
             out.onEvent(o.toString());
         } catch (Exception ignored) {}
+    }
+
+    /** Taps on the screen ("likes"): count is how many taps in this batch, total the room's running total. */
+    void onLike(byte[] body) {
+        Who who = null;
+        long count = 0, total = 0;
+        Proto.Reader r = new Proto.Reader(body);
+        while (r.next()) {
+            if (r.field == 2 && r.wire == 0) count = r.varint();
+            else if (r.field == 3 && r.wire == 0) total = r.varint();
+            else if (r.field == 5 && r.wire == 2) who = Who.parse(r.bytes());
+            else r.skip();
+        }
+        if (who == null || count <= 0) return;
+        try { out.onEvent(who.json().put("type", "like").put("count", count).put("total", total).toString()); } catch (Exception ignored) {}
     }
 
     void onChat(byte[] body) {
