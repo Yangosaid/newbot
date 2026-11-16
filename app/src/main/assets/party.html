@@ -204,7 +204,7 @@ input[type=checkbox]{width:20px;height:20px;accent-color:var(--hot)}
         <p class="note" id="tapNote"></p>
       </div>
       <div class="grp"><h3>👩 👨 Cuerpos</h3>
-        <p class="note">Cada espectador recibe un cuerpo de chica o de chico según su nombre (Fatima, María, Mohamed, Carlos…), o uno neutro si no se sabe. Si escribe solo 👩 o 👨 (o «chica», «chico», «بنت», «ولد») en el chat, su personaje cambia al momento y se recuerda para los próximos directos. Hay cuerpos graciosos: musculoso con piernas de pollo, barrigón, fideo larguísimo, cabezón, mini, modelo, curvy y diva.</p>
+        <p class="note">Cada espectador recibe un cuerpo de chica o de chico según su nombre (Fatima, María, Mohamed, Carlos…), o uno neutro si no se sabe. Si escribe solo 👩 o 👨 (o «chica», «chico», «بنت», «ولد») en el chat, su personaje cambia al momento y se recuerda para los próximos directos. Cuerpos elegantes: chicas con vestido, tacones y peinados (melena, coleta, moño); chicos atléticos con sudadera, gorra o cascos.</p>
       </div>
       <div class="grp"><h3>🏛️ Salas</h3>
         <p class="note">La sala cambia sola para que el directo no canse (con un fundido corto). El cambio espera a que termine el momento de un regalo grande o la fiesta.</p>
@@ -674,18 +674,16 @@ function changeG(u,g){if(u.g===g)return;u.g=g;u.gSel=g;setLook(u);rememberFan(u,
 /* body builds: tw/th torso width/height, hs head size, kL/lw leg length/width, kA/aw arm length/width, belly, hip, hand */
 var B0={id:"normal",tw:1,th:1,hs:1.3,kL:1,lw:1,kA:1,aw:1,belly:0,hip:1,hand:1};
 function bd(o){return Object.assign({},B0,o)}
-var BUILD_M=[bd({}),bd({id:"muscle",tw:1.55,th:1.05,hs:1.12,kL:0.78,lw:0.62,aw:1.95,hand:1.5,tank:1}),bd({id:"belly",tw:1.2,th:0.92,hs:1.35,kL:0.72,lw:1.2,kA:0.9,belly:1.5}),
-  bd({id:"noodle",tw:0.78,th:1.25,hs:1.18,kL:1.45,lw:0.68,kA:1.35,aw:0.68}),bd({id:"bobble",tw:0.9,hs:2.05,kL:0.85}),bd({id:"mini",tw:0.92,th:0.78,hs:1.75,kL:0.58,kA:0.72,hand:1.2})];
-var BUILD_F=[bd({}),bd({id:"curvy",hip:1.42,tw:1.02,kL:0.95,lw:1.12}),bd({id:"model",tw:0.84,th:1.1,hs:1.15,kL:1.42,lw:0.78,kA:1.2,aw:0.8}),
-  bd({id:"bobble",tw:0.9,hs:2.05,kL:0.85}),bd({id:"mini",tw:0.92,th:0.78,hs:1.75,kL:0.58,kA:0.72,hand:1.2}),bd({id:"diva",hs:1.4,hip:1.15,kL:1.05,diva:1})];
-var BUILD_N=[bd({}),bd({id:"bobble",tw:0.9,hs:2.05,kL:0.85}),bd({id:"mini",tw:0.92,th:0.78,hs:1.75,kL:0.58,kA:0.72,hand:1.2}),bd({id:"noodle",tw:0.78,th:1.25,hs:1.18,kL:1.45,lw:0.68,kA:1.35,aw:0.68})];
-var HAIR_M=["short","cap","mohawk","afro","bald","horns","phones"],HAIR_F=["long","pony","pigtails","bun","puffs","afro","long"],HAIR_N=["short","cap","phones","short"];
+var BUILD_M=[bd({}),bd({id:"athletic",tw:1.18,th:1.04,aw:1.15,kL:1.06,lw:1.05,hand:1.05}),bd({id:"tall",tw:1.05,th:1.06,kL:1.12,kA:1.06})];
+var BUILD_F=[bd({id:"elegant",tw:0.92,kL:1.1,lw:0.88,kA:1.04,aw:0.88,hip:1.08}),bd({id:"tall",tw:0.9,th:1.04,kL:1.16,lw:0.86,kA:1.06,aw:0.86,hip:1.06})];
+var BUILD_N=[bd({}),bd({id:"tall",tw:1.02,th:1.04,kL:1.08,kA:1.04})];
+var HAIR_M=["short","cap","phones","short","cap"],HAIR_F=["long","pony","bun","long","pony","long"],HAIR_N=["short","cap","phones","short"];
 var TOP_F=[0xff4fa3,0xff7ad9,0xa855f7,0xfb7185,0xfacc15,0x22d3ee,0xf97316,0xffffff,0x10b981,0xe11d48],SKIRT=[0x111827,0x7c3aed,0xdb2777,0x0ea5e9,0xfbbf24,0xf5f5f4,0x16a34a];
 
 function femaleGeos(g){if(g.torsoF)return;
   var pts=[[0,0],[0.17,0],[0.155,0.1],[0.135,0.22],[0.168,0.35],[0.178,0.43],[0.14,0.51],[0.07,0.55],[0,0.555]].map(function(p){return new T.Vector2(p[0],p[1])});
   g.torsoF=new T.LatheGeometry(pts,28);g.torsoF.scale(1,1,0.72);
-  g.skirt=new T.CylinderGeometry(0.175,0.33,0.34,24,1,true);g.skirt.scale(1,1,0.85);
+  g.skirt=new T.CylinderGeometry(0.17,0.29,0.46,28,1,true);g.skirt.scale(1,1,0.85);
   g.longHair=new T.CapsuleGeometry(0.17,0.34,6,14);g.longHair.scale(1.12,1,0.55);
   g.tail=new T.CapsuleGeometry(0.06,0.3,6,10);g.tie=new T.SphereGeometry(0.07,12,8);
   g.bun=new T.SphereGeometry(0.11,16,12);g.puff=new T.SphereGeometry(0.14,16,12);g.afro=new T.SphereGeometry(0.3,24,18);
@@ -702,7 +700,7 @@ function makeChar(u,i,pos){var g=geos();femaleGeos(g);
   var hy0=0.92*kL+(heels?0.05:0);
   var root=new T.Group(),hips=new T.Group();root.add(hips);hips.position.y=hy0;
   var pelvis=mesh(g.pelvis,pantM,true);pelvis.position.y=0.02;pelvis.scale.set(hip*(lw>1?lw:1),1,hip);hips.add(pelvis);
-  if(skirt){var sk=new T.Mesh(g.skirt,new T.MeshStandardMaterial({color:pants,roughness:0.75,side:T.DoubleSide,envMapIntensity:0.4}));sk.castShadow=true;sk.position.y=-0.1;sk.scale.set(hip,1,hip);hips.add(sk)}
+  if(skirt){var sk=new T.Mesh(g.skirt,new T.MeshStandardMaterial({color:pants,roughness:0.75,side:T.DoubleSide,envMapIntensity:0.4}));sk.castShadow=true;sk.position.y=-0.16;sk.scale.set(hip,1,hip);hips.add(sk)}
   var spine=new T.Group();spine.position.y=0.05;hips.add(spine);
   var torso=mesh(fem?g.torsoF:g.torso,cloth,true);torso.scale.set(tw,th,tw);spine.add(torso);
   if(!fem&&!B.tank){var pocket=mesh(g.pocket,clothD);pocket.position.set(0,0.12*th,0.135*tw);pocket.scale.x=tw;spine.add(pocket);
