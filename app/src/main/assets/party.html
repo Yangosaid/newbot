@@ -194,7 +194,7 @@ input[type=checkbox]{width:20px;height:20px;accent-color:var(--hot)}
     <div class="pane" id="pCtl">
       <div class="grp"><h3>🛡️ Modo seguro TikTok</h3>
         <label class="ln"><input type="checkbox" id="oSafeLive"><span>Activado (recomendado)</span></label>
-        <p class="note">Quita de la pantalla todo lo que pide regalos (🌹 ➜ 📷, el panel 🎁 de la cola, las monedas del top 3 y la hora feliz ×2), y cualquier comentario mete al espectador en la sala con su foto. Así el directo es interactivo y TikTok no lo ve como «solicitud de regalos automática». Lo más importante sigue siendo hablar y salir con tu cámara o tu voz.</p>
+        <p class="note">Quita de la pantalla todo lo que pide regalos (🌹 ➜ 📷, el panel 🎁 de la cola, el símbolo 🪙 del top 3 y la hora feliz ×2). Solo queda el dibujo 👆 ➜ 🕺 con la foto de quien toca la pantalla, y los números del top 3 sin símbolo. Lo más importante sigue siendo hablar y salir con tu cámara o tu voz.</p>
       </div>
       <div class="grp" id="gTapQuick"><h3>👆 Toques en la pantalla</h3>
         <div class="ln"><div class="seg" id="tapSeg"><button data-m="full">Completo</button><button data-m="energy">Solo energía ⚡</button><button data-m="off">Apagado</button></div></div>
@@ -549,9 +549,11 @@ function photoInto(el,u,empty){if(u&&u.av){el.innerHTML='<img alt="" referrerpol
 function showSlide(i){hintSlide=i;$("slRose").classList.toggle("off",i!==0);$("slTap").classList.toggle("off",i!==1)}
 function snap(){var el=$("hint");el.classList.remove("snap");void el.offsetWidth;el.classList.add("snap")}
 /* u: a supporter who just sent a rose (shown in the camera frame); liker: someone whose taps just brought their dancer in */
-function paintHint(u,liker){var el=$("hint");el.hidden=!cfg.hint||safeLive();$("stage").style.setProperty("--hintTop",cfg.safe?"13.5%":"3%");
+function tapOnly(){return safeLive()&&!YT}
+function paintHint(u,liker){var el=$("hint");el.hidden=!cfg.hint||(tapOnly()&&cfg.tapMode!=="full")||(safeLive()&&YT);$("stage").style.setProperty("--hintTop",cfg.safe?"13.5%":"3%");
   if(YT)$("hintIcon").textContent="💬";
-  photoInto($("hintMe"),u,PERSON);photoInto($("hintTapMe"),liker,"<span>🕺</span>");
+  photoInto($("hintMe"),u,PERSON);if(liker||!tapOnly()||perf()>=hintHold)photoInto($("hintTapMe"),liker,"<span>🕺</span>");
+  if(tapOnly()){u=null;showSlide(1)}
   if(u){showSlide(0);snap()}else if(liker){showSlide(1);snap()}
   if(u||liker){hintHold=perf()+4000;clearTimeout(hintT);hintT=setTimeout(function(){paintHint(null,null)},4000)}}
 /* any gift counts: the icon cycles through gifts; a real gift's picture shows for a moment when one arrives */
@@ -560,7 +562,7 @@ setInterval(function(){if(YT||perf()<giftImgUntil)return;giftI=(giftI+1)%GIFTS.l
 function showGift(img){if(YT||!img)return;var el=$("hintIcon");el.innerHTML='<img alt="" referrerpolicy="no-referrer">';el.firstChild.src=img;giftImgUntil=perf()+4000;
   setTimeout(function(){if(perf()>=giftImgUntil){el.textContent=GIFTS[giftI]}},4100)}
 /* the two drawings take turns every few seconds (YouTube has no taps, so only the first one shows there) */
-setInterval(function(){if(YT||cfg.tapMode!=="full"){if(hintSlide)showSlide(0);return}if(perf()<hintHold)return;showSlide(hintSlide?0:1)},5000);
+setInterval(function(){if(tapOnly()){if(!hintSlide)showSlide(1);return}if(YT||cfg.tapMode!=="full"){if(hintSlide)showSlide(0);return}if(perf()<hintHold)return;showSlide(hintSlide?0:1)},5000);
 
 /* ---------- live monitor (settings sheet only, never on camera): proof that gifts, taps and comments arrive ---------- */
 var mon={g:0,l:0,c:0},monLines=[];
@@ -579,15 +581,16 @@ function onEvent(e){if(!e||!e.type)return;monitor(e);
   if(e.type==="status"){setStatus(e.ok,e.text);return}
   if(e.type==="gift"){lastGiftAt=perf();if(e.img)setTimeout(function(){showGift(e.img)},0);var u=userOf(e),cnt=Math.max(1,e.count|0);
     support(u,{kind:"gift",coins:Math.max(1,e.coins|0)*cnt,count:cnt,name:String(e.gift||e.label||""),img:e.img||""});return}
-  if(e.type==="like"){if(cfg.tapMode==="off")return;var ul=userOf(e),c=Math.max(1,e.count|0);ul.likes=(ul.likes||0)+c;addEnergy(c*(+cfg.tapE||1));
+  if(e.type==="like"){if(cfg.tapMode==="off")return;var ul=userOf(e),c=Math.max(1,e.count|0);
+    if(tapOnly()&&cfg.tapMode==="full"&&ul.av&&perf()-(G.tapPic||0)>1500){G.tapPic=perf();paintHint(null,ul)}ul.likes=(ul.likes||0)+c;addEnergy(c*(+cfg.tapE||1));
     if(cfg.tapMode==="energy")return;
     if(!ul.chars.length&&ul.likes<Math.max(1,cfg.likeN|0))return;
     if(!ul.chars.length){var nw=perf();if(nw-(G.tapSpawn||0)<900)return;G.tapSpawn=nw}
     support(ul,{kind:"tap",taps:c});return}
-  if(e.type==="chat"&&(cfg.chat||safeLive())){var t=norm(e.text||""),ok=!String(cfg.words||"").trim()||(safeLive()&&!YT);
+  if(e.type==="chat"&&cfg.chat){var t=norm(e.text||""),ok=!String(cfg.words||"").trim();
     if(!ok)ok=String(cfg.words).split(",").some(function(w){w=norm(w);return w&&(/[a-z0-9]/.test(w)?(" "+t.replace(/[^a-z0-9]+/g," ")+" ").indexOf(" "+w+" ")>=0:t.indexOf(w)>=0)});
-    if(!ok)return;var u2=userOf(e),now=perf();if(now-u2.lastChat<Math.max(safeLive()&&!YT?8:0,+cfg.cd||0)*1000)return;u2.lastChat=now;
-    addEnergy(5);var dc=u2.chars.length?u2.chars[u2.chars.length-1]:addChar(u2);if(dc){if(YT||!safeLive()||(!camQ.length&&!playing(now)&&now-focusAt>3000))goTo(u2,dc,!YT&&safeLive());burst(dc);dc.party=now;cheer(dc,now)}}}
+    if(!ok)return;var u2=userOf(e),now=perf();if(now-u2.lastChat<Math.max(0,+cfg.cd||0)*1000)return;u2.lastChat=now;
+    addEnergy(5);var dc=u2.chars.length?u2.chars[u2.chars.length-1]:addChar(u2);if(dc){goTo(u2,dc,false);burst(dc);dc.party=now;cheer(dc,now)}}}
 
 /* ---------- every support goes through here: character, status, combo, camera, crowd ---------- */
 var LEVELS=[1,30,100,500,1000];
@@ -698,7 +701,7 @@ function paintTop3(){var el=$("top3");el.hidden=!cfg.top3||!top3.length;if(el.hi
   top3.forEach(function(u,i){var img=u.av?'<img alt="" referrerpolicy="no-referrer" src="'+esc(u.av)+'">':'<span class="ph" style="background:hsl('+u.hue+',70%,45%)">'+esc(initial(u.nick))+'</span>';
     var nm=u.nick.length>11?u.nick.slice(0,10)+"…":u.nick;
     h+='<div class="tp r'+(i+1)+'" data-u="'+esc(u.uid)+'"><span class="md">'+M[i]+'</span><span class="pf">'+img+(i===0?'<i class="cr">👑</i>':'')+(u.first?'<i class="fl">🔥</i>':'')+'</span>'+
-      '<span class="tx"><span class="nm">'+esc(nm)+'</span><span class="cn">'+(safeLive()?"":fmtN(u.sCoins)+(YT?" pts":" 🪙"))+'</span></span></div>'});
+      '<span class="tx"><span class="nm">'+esc(nm)+'</span><span class="cn">'+fmtN(u.sCoins)+(safeLive()?"":YT?" pts":" 🪙")+'</span></span></div>'});
   if(h===lastTop3)return;
   /* FLIP: rows slide to their new place when the order changes */
   var before={};Array.prototype.forEach.call(el.children,function(c){before[c.dataset.u]=c.getBoundingClientRect().top});
