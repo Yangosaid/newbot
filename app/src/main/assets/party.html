@@ -22,7 +22,6 @@ body{background:var(--night);color:var(--ink);font-family:var(--body);overflow:h
 #stage{position:relative;height:100%;overflow:hidden;touch-action:manipulation;user-select:none;-webkit-user-select:none}
 #gl{position:absolute;inset:0;width:100%;height:100%;display:block}
 #fade{position:absolute;inset:0;background:#000;opacity:0;pointer-events:none;transition:opacity .7s ease}#fade.on{opacity:1}
-#hint.pic{padding:6px}#hint.pic .tap,#hint.pic .ar{display:none}
 #hallBtns{flex-wrap:wrap}
 #nogl{position:absolute;inset:0;display:grid;place-items:center;text-align:center;padding:24px;font:700 20px/1.3 var(--display)}
 #gear{position:absolute;right:10px;bottom:10px;width:40px;height:40px;border-radius:50%;border:1px solid rgba(255,255,255,.12);background:rgba(10,6,24,.45);
@@ -198,7 +197,7 @@ input[type=checkbox]{width:20px;height:20px;accent-color:var(--hot)}
     <div class="pane" id="pCtl">
       <div class="grp"><h3>🛡️ Modo seguro TikTok</h3>
         <label class="ln"><input type="checkbox" id="oSafeLive"><span>Activado (recomendado)</span></label>
-        <p class="note">Pantalla limpia: sin dibujos que pidan regalos o toques (solo queda el círculo pequeño con la foto del último que toca), sin top 3, sin barra de energía, sin cola 🎁, sin ×2, sin medallas. Solo la sala, los personajes con su nombre, y en la pantalla gigante la foto del último que apoya (regalo o toques). Lo más importante sigue siendo hablar y salir con tu cámara o tu voz.</p>
+        <p class="note">Pantalla limpia: sin dibujos que pidan regalos (solo queda 👆 ➜ con la foto del último que toca), sin top 3, sin barra de energía, sin cola 🎁, sin ×2, sin medallas. Solo la sala, los personajes con su nombre, y en la pantalla gigante la foto del último que envía un regalo. Lo más importante sigue siendo hablar y salir con tu cámara o tu voz.</p>
       </div>
       <div class="grp" id="gTapQuick"><h3>👆 Toques en la pantalla</h3>
         <div class="ln"><div class="seg" id="tapSeg"><button data-m="full">Completo</button><button data-m="energy">Solo energía ⚡</button><button data-m="off">Apagado</button></div></div>
@@ -732,7 +731,7 @@ function showSlide(i){hintSlide=i;$("slRose").classList.toggle("off",i!==0);$("s
 function snap(){var el=$("hint");el.classList.remove("snap");void el.offsetWidth;el.classList.add("snap")}
 /* u: a supporter who just sent a rose (shown in the camera frame); liker: someone whose taps just brought their dancer in */
 function tapOnly(){return safeLive()&&!YT}
-function paintHint(u,liker){var el=$("hint");var pic=tapOnly()&&cfg.tapMode==="full";el.classList.toggle("pic",pic);el.hidden=!cfg.hint||(safeLive()&&!pic);$("stage").style.setProperty("--hintTop",cfg.safe?"13.5%":"3%");
+function paintHint(u,liker){var el=$("hint");var pic=tapOnly()&&cfg.tapMode==="full";el.hidden=!cfg.hint||(safeLive()&&!pic);$("stage").style.setProperty("--hintTop",cfg.safe?"13.5%":"3%");
   if(YT)$("hintIcon").textContent="💬";
   photoInto($("hintMe"),u,PERSON);if(liker||!tapOnly()||perf()>=hintHold)photoInto($("hintTapMe"),liker,"<span>🕺</span>");
   if(tapOnly()){u=null;showSlide(1)}
@@ -779,7 +778,7 @@ function onEvent(e){if(!e||!e.type)return;monitor(e);
 var LEVELS=[1,30,100,500,1000];
 function levelOf(c){var l=0;for(var i=0;i<LEVELS.length;i++)if(c>=LEVELS[i])l=i+1;return l}
 var lastSup=null;
-function support(u,s){var now=perf(),gift=s.kind==="gift";lastSup=u;ensurePhoto(u);
+function support(u,s){var now=perf(),gift=s.kind==="gift";if(gift){lastSup=u;ensurePhoto(u)}
   /* a returning supporter keeps their character; a new one (or one with room for more) gets a new dancer */
   var d=u.chars.length?u.chars[u.chars.length-1]:null,isNew=false;
   if(gift){var add=Math.min(s.count||1,Math.max(1,cfg.per|0)-u.chars.length);for(var i=0;i<add;i++){d=addChar(u);isNew=true}}
