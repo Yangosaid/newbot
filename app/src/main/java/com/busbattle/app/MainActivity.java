@@ -115,6 +115,7 @@ public class MainActivity extends Activity {
             @Override public void onEvent(String json) {
                 if (json.contains("\"type\":\"status\"")) lastStatus = json;
                 // a flood of taps must never delay gifts: drop taps when the page is behind
+                if (queued.get() > 300 && json.contains("\"type\":\"join\"")) return;
                 if (queued.get() > 600 && json.contains("\"type\":\"like\"")) return;
                 js("window.__bus&&window.__bus(" + safe(json) + ")");
             }
