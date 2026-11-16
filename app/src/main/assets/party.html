@@ -58,7 +58,7 @@ input[type=checkbox]{width:20px;height:20px;accent-color:var(--hot)}
 #monL b{color:var(--ink)}
 #hint .g img{width:38px;height:38px;object-fit:contain;display:block}
 /* the three top supporters of this live (top-left), with photo, name and support */
-#top3{position:absolute;left:8px;top:31%;display:flex;flex-direction:column;gap:5px;pointer-events:none;max-width:46%}
+#top3{position:absolute;left:8px;top:47%;display:flex;flex-direction:column;gap:5px;pointer-events:none;max-width:46%}
 #top3 .tp{display:flex;align-items:center;gap:6px;padding:4px 10px 4px 4px;border-radius:999px;background:rgba(8,4,20,.55);border:1px solid rgba(255,255,255,.12)}
 #top3 .tp.r1{background:linear-gradient(90deg,rgba(255,201,60,.38),rgba(8,4,20,.55));border-color:rgba(255,201,60,.7);box-shadow:0 0 14px rgba(255,201,60,.4)}
 #top3 .md{font-size:18px;width:20px;text-align:center}
@@ -76,7 +76,7 @@ input[type=checkbox]{width:20px;height:20px;accent-color:var(--hot)}
 #top3 .tp.up{animation:tUp .7s ease}
 @keyframes tUp{40%{box-shadow:0 0 22px rgba(255,201,60,.9)}}
 /* overtake: [new #1] ⬆️ [old #1] */
-#overtake{position:absolute;left:50%;top:52%;transform:translateX(-50%);display:flex;align-items:center;gap:12px;padding:8px 16px;border-radius:999px;
+#overtake{position:absolute;left:50%;top:calc(var(--hintTop,13.5%) + 124px);transform:translateX(-50%);display:flex;align-items:center;gap:12px;padding:8px 16px;border-radius:999px;
   background:linear-gradient(90deg,rgba(255,201,60,.92),rgba(255,61,139,.92));box-shadow:0 8px 28px rgba(0,0,0,.4);pointer-events:none}
 #overtake img,#overtake .ph{width:56px;height:56px;border-radius:50%;object-fit:cover;border:3px solid #fff;display:grid;place-items:center;font:800 22px/1 var(--display);color:#fff}
 #overtake .l img,#overtake .l .ph{width:42px;height:42px;opacity:.75;filter:grayscale(.5)}
@@ -87,15 +87,15 @@ input[type=checkbox]{width:20px;height:20px;accent-color:var(--hot)}
 /* happy hour badge next to the gift icon */
 #hx2{font:italic 800 22px/1 var(--display);color:#1a1200;background:#ffc93c;border-radius:10px;padding:3px 7px;box-shadow:0 0 14px #ffc93c;animation:prioGlow 1s ease-in-out infinite}
 /* priority panel (right edge, no words): 🎁 ▲ first, the camera queue as photos, 👆 last */
-#prio{position:absolute;right:8px;top:31%;display:flex;flex-direction:column;align-items:center;gap:6px;padding:8px 6px;border-radius:22px;
+#prio{position:absolute;right:8px;top:45%;display:flex;flex-direction:column;align-items:center;gap:6px;padding:8px 6px;border-radius:22px;
   background:rgba(8,4,20,.5);border:1px solid rgba(255,255,255,.12);pointer-events:none;width:58px}
 #prio .tier{position:relative;display:grid;place-items:center;border-radius:50%}
-#prio .tg{width:50px;height:50px;font-size:30px;background:radial-gradient(circle,rgba(255,201,60,.45),rgba(255,201,60,.08) 70%);box-shadow:0 0 18px rgba(255,201,60,.55);animation:prioGlow 1.6s ease-in-out infinite}
+#prio .tg{width:42px;height:42px;font-size:25px;background:radial-gradient(circle,rgba(255,201,60,.45),rgba(255,201,60,.08) 70%);box-shadow:0 0 18px rgba(255,201,60,.55);animation:prioGlow 1.6s ease-in-out infinite}
 #prio .tg i{position:absolute;top:-8px;right:-6px;font-style:normal;font-size:16px;color:#ffc93c;text-shadow:0 0 6px #ffc93c}
-#prio .tt{width:34px;height:34px;font-size:20px;opacity:.5;filter:grayscale(.4)}
+#prio .tt{width:28px;height:28px;font-size:17px;opacity:.5;filter:grayscale(.4)}
 #prio .ar{font-size:12px;color:#ffc93c;opacity:.9;line-height:1}
-#prio .q{position:relative;width:40px;height:40px;border-radius:50%;overflow:visible}
-#prio .q img,#prio .q .ph{width:40px;height:40px;border-radius:50%;object-fit:cover;border:2px solid rgba(255,255,255,.85);box-sizing:border-box;display:grid;place-items:center;
+#prio .q{position:relative;width:36px;height:36px;border-radius:50%;overflow:visible}
+#prio .q img,#prio .q .ph{width:36px;height:36px;border-radius:50%;object-fit:cover;border:2px solid rgba(255,255,255,.85);box-sizing:border-box;display:grid;place-items:center;
   font:800 18px/1 var(--display);color:#fff;background:#5b21b6}
 #prio .q b{position:absolute;bottom:-4px;right:-5px;min-width:17px;height:17px;border-radius:9px;background:#ffc93c;color:#1a1200;font:800 12px/17px var(--display);text-align:center;padding:0 3px}
 #prio .q.now img,#prio .q.now .ph{border-color:#ffc93c;box-shadow:0 0 12px #ffc93c}
@@ -103,7 +103,7 @@ input[type=checkbox]{width:20px;height:20px;accent-color:var(--hot)}
 #prio .q s{position:absolute;top:-7px;left:-7px;text-decoration:none;font-size:15px;filter:drop-shadow(0 1px 2px rgba(0,0,0,.6))}
 #prio .q.vip img,#prio .q.vip .ph{border-color:#ffc93c;box-shadow:0 0 10px rgba(255,201,60,.7)}
 #prio .q.in{animation:qIn .45s cubic-bezier(.2,.9,.3,1.4)}
-#prio .slot{width:38px;height:38px;border-radius:50%;border:2px dashed rgba(255,255,255,.55);display:grid;place-items:center;color:#fff;font:700 22px/1 var(--display);opacity:.75;animation:prioGlow 1.6s ease-in-out infinite}
+#prio .slot{width:34px;height:34px;border-radius:50%;border:2px dashed rgba(255,255,255,.55);display:grid;place-items:center;color:#fff;font:700 22px/1 var(--display);opacity:.75;animation:prioGlow 1.6s ease-in-out infinite}
 #prio .more{font:800 13px/1 var(--display);color:#ffc93c}
 @keyframes prioGlow{50%{transform:scale(1.07)}}
 @keyframes qIn{from{transform:scale(.3);opacity:0}to{transform:none;opacity:1}}
@@ -619,8 +619,8 @@ function paintPrio(){var el=$("prio");el.hidden=!cfg.prio;if(!cfg.prio)return;
   $("pTop").firstChild.nodeValue=YT?"💸":"🎁";$("pLow").textContent=YT?"💬":"👆";
   el.querySelector(".ar").hidden=$("pLow").hidden=!YT&&cfg.tapMode==="off";
   var h="";if(focus&&focusByGift&&focus.chars.length)h+=prioFace(focus,"now","🎥",vipOn()?tierOf(vip.coins):tierOf(turn.coins||0));
-  camQ.slice(0,4).forEach(function(q,i){h+=prioFace(q.u,"",i+1,tierOf(q.coins))});
-  if(camQ.length>4)h+='<div class="more">+'+(camQ.length-4)+'</div>';
+  camQ.slice(0,3).forEach(function(q,i){h+=prioFace(q.u,"",i+1,tierOf(q.coins))});
+  if(camQ.length>3)h+='<div class="more">+'+(camQ.length-3)+'</div>';
   if(!camQ.length)h+='<div class="slot">+</div>';                 /* an open spot: send a gift and it's yours */
   if(h===lastPrio)return;var old={};Array.prototype.forEach.call($("qList").children,function(c){if(c.dataset.u)old[c.dataset.u]=1});
   $("qList").innerHTML=h;lastPrio=h;Array.prototype.forEach.call($("qList").children,function(c){if(c.dataset.u&&!old[c.dataset.u])c.classList.add("in")})}
