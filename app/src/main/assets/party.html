@@ -205,7 +205,7 @@ input[type=checkbox]{width:20px;height:20px;accent-color:var(--hot)}
       </div>
       <div class="grp"><h3>👋 Los que entran</h3>
         <label class="ln"><input type="checkbox" id="oJoin"><span>Cada espectador que entra al directo aparece bailando con su foto y su nombre</span></label>
-        <p class="note">Ideal al empezar el directo para animar a la gente. Sin cámara: la cámara sigue siendo para los regalos y los toques. Quítalo cuando la sala esté llena.</p>
+        <p class="note">Ideal al empezar el directo para animar a la gente. La cámara los visita como a los que tocan (1,5 s cada uno, siempre después de los regalos). Quítalo cuando el directo se llene.</p>
       </div>
       <div class="grp"><h3>👩 👨 Cuerpos</h3>
         <p class="note">Cada espectador recibe un cuerpo de chica o de chico según su nombre (Fatima, María, Mohamed, Carlos…), o uno neutro si no se sabe. Si escribe solo 👩 o 👨 (o «chica», «chico», «بنت», «ولد») en el chat, su personaje cambia al momento y se recuerda para los próximos directos. Cuerpos elegantes: chicas con vestido, tacones y peinados (melena, coleta, moño); chicos atléticos con sudadera, gorra o cascos.</p>
@@ -860,7 +860,10 @@ function onEvent(e){if(!e||!e.type)return;monitor(e);
     if(!ok)return;var u2=userOf(e),now=perf();if(now-u2.lastChat<Math.max(0,+cfg.cd||0)*1000)return;u2.lastChat=now;
     addEnergy(5);var dc=u2.chars.length?u2.chars[u2.chars.length-1]:addChar(u2);if(dc){goTo(u2,dc,false);burst(dc);dc.party=now;cheer(dc,now)}}}
 
-var joinQ=[];setInterval(function(){if(!joinQ.length)return;var u=joinQ.shift();if(!cfg.joinChar||u.chars.length)return;var d=addChar(u);if(d){burst(d);d.party=perf()}},500);
+/* taps and visitors entering: the camera goes to the latest one, 1.5 s each, once the gift turns are over */
+function tapCam(u,d,now){u.lastTap=now;var inVip=vip&&now<vip.until;
+  if(+cfg.likeCam2>0&&!inVip&&!camQ.length&&!playing(now)&&now-lastGiftAt>(+cfg.likeCam2)*1000&&now-focusAt>Math.max(0.5,+cfg.tapHold2||1.5)*1000&&focus!==u)goTo(u,d,true)}
+var joinQ=[];setInterval(function(){if(!joinQ.length)return;var u=joinQ.shift();if(!cfg.joinChar||u.chars.length)return;var d=addChar(u);if(d){burst(d);d.party=perf();tapCam(u,d,perf())}},500);
 /* ---------- every support goes through here: character, status, combo, camera, crowd ---------- */
 var LEVELS=[1,30,100,500,1000];
 function levelOf(c){var l=0;for(var i=0;i<LEVELS.length;i++)if(c>=LEVELS[i])l=i+1;return l}
@@ -882,10 +885,7 @@ function support(u,s){var now=perf(),gift=s.kind==="gift";if(gift){lastSup=u;ens
   var big=gift&&s.coins>=Math.max(1,cfg.vipMin|0),inVip=vip&&now<vip.until;
   if(gift){
     giftTurn(u,d,s.coins)}                                                   /* every gift gets the camera; bigger gifts go first and stay longer */
-  else{u.lastTap=now;
-    if(+cfg.likeCam2>0&&!inVip&&!camQ.length&&!playing(now)&&now-lastGiftAt>(+cfg.likeCam2)*1000&&now-focusAt>Math.max(0.5,+cfg.tapHold2||1.5)*1000){
-      /* the camera always goes to whoever tapped last (this person, unless they are already on camera) */
-      if(focus!==u)goTo(u,d,true)}}
+  else tapCam(u,d,now);
   /* celebrate */
   if(gift){burst(d);d.party=now;cheer(d,now);giftFX(d,s.name,s.coins);giftIcon(d,s.img)}else hearts(d,Math.min(8,(s.taps|0)+2));
   if(!gift&&isNew)paintHint(null,u)}
