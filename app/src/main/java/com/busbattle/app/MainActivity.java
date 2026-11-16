@@ -197,6 +197,35 @@ public class MainActivity extends Activity {
             ui.post(() -> { if (on) startMusic(source == null ? "output" : source); else if (music != null) music.stop(); });
         }
 
+        /** Saves the thank-you poster (data:image/png) to Pictures/BusBattle and optionally opens the share sheet. */
+        @JavascriptInterface public void savePoster(final String dataUrl, final boolean share) {
+            new Thread(() -> {
+                try {
+                    String b64 = dataUrl.substring(dataUrl.indexOf(',') + 1);
+                    byte[] png = android.util.Base64.decode(b64, android.util.Base64.DEFAULT);
+                    String name = "top10_" + new SimpleDateFormat("yyyyMMdd_HHmm", Locale.US).format(new Date()) + ".png";
+                    // MediaStore on every version: a content:// link that other apps can read (file:// shares crash on Android 7+)
+                    android.content.ContentValues v = new android.content.ContentValues();
+                    v.put(android.provider.MediaStore.MediaColumns.DISPLAY_NAME, name);
+                    v.put(android.provider.MediaStore.MediaColumns.MIME_TYPE, "image/png");
+                    if (Build.VERSION.SDK_INT >= 29) v.put(android.provider.MediaStore.MediaColumns.RELATIVE_PATH, android.os.Environment.DIRECTORY_PICTURES + "/BusBattle");
+                    Uri uri = getContentResolver().insert(android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI, v);
+                    if (uri == null) throw new IllegalStateException("no uri");
+                    try (java.io.OutputStream o = getContentResolver().openOutputStream(uri)) { if (o == null) throw new IllegalStateException("no stream"); o.write(png); }
+                    final Uri u = uri;
+                    ui.post(() -> {
+                        android.widget.Toast.makeText(MainActivity.this, "Guardado en Fotos › BusBattle", android.widget.Toast.LENGTH_SHORT).show();
+                        if (share && u != null) {
+                            Intent i = new Intent(Intent.ACTION_SEND).setType("image/png").putExtra(Intent.EXTRA_STREAM, u).addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+                            try { startActivity(Intent.createChooser(i, "Compartir")); } catch (Exception ignored) {}
+                        }
+                    });
+                } catch (Exception e) {
+                    ui.post(() -> android.widget.Toast.makeText(MainActivity.this, "No se pudo guardar: " + e.getMessage(), android.widget.Toast.LENGTH_LONG).show());
+                }
+            }, "poster").start();
+        }
+
         /** "tiktok" or "youtube": the page adapts its labels and scoring. */
         @JavascriptInterface public String getSource() { return YOUTUBE ? "youtube" : "tiktok"; }
 
