@@ -138,6 +138,7 @@ public class MainActivity extends Activity {
                 if (queued.get() > 300 && json.contains("\"type\":\"join\"")) return;
                 if (queued.get() > 600 && json.contains("\"type\":\"like\"")) return;
                 js("window.__bus&&window.__bus(" + safe(json) + ")");
+                if (!json.contains("\"type\":\"status\"")) FloatOverlay.get(MainActivity.this).event(safe(json));
             }
             @Override public void onLog(String line) { log(line); }
         };
@@ -260,6 +261,25 @@ public class MainActivity extends Activity {
         }
 
         /** "tiktok" or "youtube": the page adapts its labels and scoring. */
+        /** Floating stars over any app: on=true shows them (asks Android for the "display over other apps" permission the first time). */
+        @JavascriptInterface public String floatShow(final boolean on, final String opts) {
+            if (on && !FloatOverlay.allowed(MainActivity.this)) {
+                prefs.edit().putString("float_opts", opts == null ? "{}" : opts).putBoolean("float_want", true).apply();
+                ui.post(() -> {
+                    try { startActivity(new Intent(android.provider.Settings.ACTION_MANAGE_OVERLAY_PERMISSION, Uri.parse("package:" + getPackageName()))); }
+                    catch (Exception e) { try { startActivity(new Intent(android.provider.Settings.ACTION_MANAGE_OVERLAY_PERMISSION)); } catch (Exception ignored) {} }
+                });
+                return "noperm";
+            }
+            prefs.edit().putString("float_opts", opts == null ? "{}" : opts).putBoolean("float_want", on).apply();
+            ui.post(() -> { if (on) FloatOverlay.get(MainActivity.this).show(opts); else FloatOverlay.get(MainActivity.this).hide(); });
+            return on ? "on" : "off";
+        }
+        @JavascriptInterface public String floatState() {
+            if (FloatOverlay.get(MainActivity.this).isShown()) return "on";
+            return FloatOverlay.allowed(MainActivity.this) ? "off" : "noperm";
+        }
+
         @JavascriptInterface public String getSource() { return YOUTUBE ? "youtube" : "tiktok"; }
 
         /** Default teams and rules for this edition (assets/preset.json), or "". */
@@ -368,9 +388,18 @@ public class MainActivity extends Activity {
                 v -> { if (!"1".equals(v)) MainActivity.super.onBackPressed(); });
     }
 
+    /* back from Android's "display over other apps" screen (or a new start): bring the floating stars back if they were on */
+    @Override
+    protected void onResume() {
+        super.onResume();
+        if (prefs.getBoolean("float_want", false) && FloatOverlay.allowed(this) && !FloatOverlay.get(this).isShown())
+            FloatOverlay.get(this).show(prefs.getString("float_opts", "{}"));
+    }
+
     @Override
     protected void onDestroy() {
         ui.removeCallbacks(flusher);
+        FloatOverlay.get(this).hide();
         if (music != null) music.stop();
         if (live != null) live.stop();
         live = null;

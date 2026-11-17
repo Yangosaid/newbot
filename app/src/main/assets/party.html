@@ -220,6 +220,15 @@ input[type=checkbox]{width:20px;height:20px;accent-color:var(--hot)}
         <div class="ln"><div class="seg" id="tapSeg"><button data-m="full">Completo</button><button data-m="energy">Solo energía ⚡</button><button data-m="off">Apagado</button></div></div>
         <p class="note" id="tapNote"></p>
       </div>
+      <div class="grp"><h3>🫧 Estrellas flotantes (encima de cualquier juego)</h3>
+        <p class="note">Sale encima de cualquier app que abras durante el directo (otro juego, YouTube…): los que tocan suben como burbujas con su foto y su nombre, y cada regalo entra como una tarjeta con la foto, el nombre y el regalo (el de más valor primero). No bloquea el juego de debajo. Muévela arrastrando el pequeño ✥; doble toque en ✥ la esconde un momento. La primera vez Android pide permiso para «mostrar sobre otras apps».</p>
+        <div class="ln"><button class="btn go" id="bFloat">Activar</button><span class="note" id="floatSt"></span></div>
+        <label class="ln"><input type="checkbox" id="oFlTaps"><span>👆 Burbujas de los que tocan</span></label>
+        <label class="ln"><input type="checkbox" id="oFlGifts"><span>🎁 Tarjetas de los regalos</span></label>
+        <label class="ln"><input type="checkbox" id="oFlWall"><span>⭐ Fila con los 5 últimos que apoyan</span></label>
+        <label class="ln"><input type="checkbox" id="oFlJoin"><span>👋 Los que entran al directo</span></label>
+        <div class="ln"><label for="oFlSize">Tamaño</label><select id="oFlSize"><option value="0.8">Pequeño</option><option value="1">Normal</option><option value="1.25">Grande</option></select></div>
+      </div>
       <div class="grp"><h3>🎥 Mi cámara</h3>
         <label class="ln"><input type="checkbox" id="oHost"><span>Salir yo con la cámara delantera en una burbuja pequeña</span></label>
         <p class="note">Arrástrala con el dedo a un borde donde no tape a nadie (se queda ahí). Siempre empieza con tu vídeo (o tu foto), nunca con la cámara: la cámara solo se enciende cuando tú pulsas 🎥 o das doble toque en la burbuja; otro doble toque y vuelve el vídeo. Cuando llega un regalo grande, la burbuja se hace pequeña para dejar el protagonismo a quien apoya.</p>
@@ -335,7 +344,7 @@ var SRC=APP&&BusApp.getSource?String(BusApp.getSource()):"tiktok",YT=SRC==="yout
 try{localStorage.setItem("game","party")}catch(e){}
 
 /* ---------- settings ---------- */
-var DEF={per:2,max:24,fill:10,chat:YT,words:"",cd:YT?10:3,bpm:124,q:"ultra",auto:true,music:true,safe:true,hint:true,flag:true,prio:true,top3:true,kingScreen:true,memory:true,safeLive:true,joinChar:true,host:false,hostSize:"m",hostShape2:"card",hostVx:50,hostVy:50,hostVz:1,hostVol:0,hostMirror:true,hostSup:true,hostX:null,hostY:null,hostIcon:"☕",hallMin:15,hall:"club",sync:false,syncSrc:"output",like:true,tapMode:"full",likeN:15,likeCam2:5,tapHold2:1.5,goal:2000,coinE:10,tapE:1,vipMin:100,vipLen:1};
+var DEF={per:2,max:24,fill:10,chat:YT,words:"",cd:YT?10:3,bpm:124,q:"ultra",auto:true,music:true,safe:true,hint:true,flag:true,prio:true,top3:true,kingScreen:true,memory:true,safeLive:true,flTaps:true,flGifts:true,flWall:true,flJoin:false,flSize:1,joinChar:true,host:false,hostSize:"m",hostShape2:"card",hostVx:50,hostVy:50,hostVz:1,hostVol:0,hostMirror:true,hostSup:true,hostX:null,hostY:null,hostIcon:"☕",hallMin:15,hall:"club",sync:false,syncSrc:"output",like:true,tapMode:"full",likeN:15,likeCam2:5,tapHold2:1.5,goal:2000,coinE:10,tapE:1,vipMin:100,vipLen:1};
 var cfg=Object.assign({},DEF);
 /* TikTok-safe mode (on by default): no gift requests on screen, comments put viewers in the hall too */
 function safeLive(){return !!cfg.safeLive}
@@ -968,6 +977,19 @@ $("hvV").oninput=function(){cfg.hostVol=+this.value;save();paintVidCtl();var hv=
   pv.addEventListener("pointerdown",function(e){on=true;sx=e.clientX;sy=e.clientY;ox=+cfg.hostVx;oy=+cfg.hostVy;try{pv.setPointerCapture(e.pointerId)}catch(x){}e.preventDefault()});
   pv.addEventListener("pointermove",function(e){if(!on)return;var k=100/(pv.offsetWidth*Math.max(1,+cfg.hostVz));cfg.hostVx=clamp(ox-(e.clientX-sx)*k,0,100);cfg.hostVy=clamp(oy-(e.clientY-sy)*k*pv.offsetWidth/pv.offsetHeight,0,100);paintVidCtl();vidFrame()});
   pv.addEventListener("pointerup",function(){on=false});pv.addEventListener("pointercancel",function(){on=false})})();
+
+/* ---------- floating stars over any app (native window, see FloatOverlay.java) ---------- */
+function flOpts(){return JSON.stringify({taps:cfg.flTaps,gifts:cfg.flGifts,wall:cfg.flWall,join:cfg.flJoin,size:+cfg.flSize||1})}
+function flState(){try{return APP&&BusApp.floatState?String(BusApp.floatState()):"none"}catch(e){return "none"}}
+function paintFloat(){var s=flState();$("bFloat").textContent=s==="on"?"Desactivar":"Activar";$("bFloat").classList.toggle("go",s!=="on");
+  $("floatSt").textContent=s==="on"?"✅":s==="noperm"?"Falta el permiso":s==="none"?"Solo en la app":""}
+$("bFloat").onclick=function(){if(!APP||!BusApp.floatShow)return;var on=flState()!=="on";try{BusApp.floatShow(on,flOpts())}catch(e){}setTimeout(paintFloat,400)};
+[["oFlTaps","flTaps"],["oFlGifts","flGifts"],["oFlWall","flWall"],["oFlJoin","flJoin"],["oFlSize","flSize"]].forEach(function(p){var el=$(p[0]);
+  el.checked=!!cfg[p[1]];if(el.tagName==="SELECT")el.value=String(cfg[p[1]]);
+  el.onchange=function(){cfg[p[1]]=el.tagName==="SELECT"?+el.value:el.checked;save();
+    if(flState()==="on"){try{if(p[1]==="flSize")BusApp.floatShow(false,flOpts());BusApp.floatShow(true,flOpts())}catch(e){}}}});
+document.addEventListener("visibilitychange",function(){if(!document.hidden)paintFloat()});
+paintFloat();
 var joinQ=[];setInterval(function(){if(!joinQ.length)return;var u=joinQ.shift();if(!cfg.joinChar||u.chars.length)return;var d=addChar(u);if(d){burst(d);d.party=perf();tapCam(u,d,perf())}},500);
 /* ---------- every support goes through here: character, status, combo, camera, crowd ---------- */
 var LEVELS=[1,30,100,500,1000];

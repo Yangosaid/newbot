@@ -128,6 +128,15 @@ input[type=checkbox]{width:20px;height:20px;accent-color:var(--hot)}
         <div class="ln"><button class="btn go" id="bStart">▶ Salir ya</button><button class="btn" id="bEnd">⏹ Terminar carrera</button></div>
         <p class="note">Cada espectador conduce un coche con su foto y su nombre. Toques = acelera, comentario = empujón, regalo = nitro 🔥 (más valor, más segundos). Los de atrás reciben un poco de rebufo, así cualquiera puede ganar. Entre carrera y carrera hay unos segundos para apuntarse.</p>
       </div>
+      <div class="grp"><h3>🫧 Estrellas flotantes (encima de cualquier juego)</h3>
+        <p class="note">Sale encima de cualquier app que abras durante el directo (otro juego, YouTube…): los que tocan suben como burbujas con su foto y su nombre, y cada regalo entra como una tarjeta con la foto, el nombre y el regalo (el de más valor primero). No bloquea el juego de debajo. Muévela arrastrando el pequeño ✥; doble toque en ✥ la esconde un momento. La primera vez Android pide permiso para «mostrar sobre otras apps».</p>
+        <div class="ln"><button class="btn go" id="bFloat">Activar</button><span class="note" id="floatSt"></span></div>
+        <label class="ln"><input type="checkbox" id="oFlTaps"><span>👆 Burbujas de los que tocan</span></label>
+        <label class="ln"><input type="checkbox" id="oFlGifts"><span>🎁 Tarjetas de los regalos</span></label>
+        <label class="ln"><input type="checkbox" id="oFlWall"><span>⭐ Fila con los 5 últimos que apoyan</span></label>
+        <label class="ln"><input type="checkbox" id="oFlJoin"><span>👋 Los que entran al directo</span></label>
+        <div class="ln"><label for="oFlSize">Tamaño</label><select id="oFlSize"><option value="0.8">Pequeño</option><option value="1">Normal</option><option value="1.25">Grande</option></select></div>
+      </div>
       <div class="grp"><h3>🎮 Juegos</h3>
         <div class="ln"><button class="btn" id="bParty">🕺 Ir a la sala</button><button class="btn" id="bBus">🚌 Batalla de buses</button></div>
       </div>
@@ -177,7 +186,7 @@ var APP=!!window.BusApp;
 var SRC=APP&&BusApp.getSource?String(BusApp.getSource()):"tiktok",YT=SRC==="youtube";
 try{localStorage.setItem("game","race")}catch(e){}
 
-var DEF={len:750,lobby:15,max:12,bots:5,tapsJoin:1,camTaps:true,join:true,hint:true,pos:true,q:"ultra",auto:true};
+var DEF={flTaps:true,flGifts:true,flWall:true,flJoin:false,flSize:1,len:750,lobby:15,max:12,bots:5,tapsJoin:1,camTaps:true,join:true,hint:true,pos:true,q:"ultra",auto:true};
 var cfg=Object.assign({},DEF);
 try{var sv=JSON.parse(localStorage.getItem("race1")||"null");if(sv)cfg=Object.assign(cfg,sv)}catch(e){}
 function save(){try{localStorage.setItem("race1",JSON.stringify(cfg))}catch(e){}}
@@ -518,6 +527,19 @@ setInterval(function(){var now=perf();for(var k in users){var u=users[k];if(now-
 function wake(){try{navigator.wakeLock&&navigator.wakeLock.request("screen").catch(function(){})}catch(e){}}
 document.addEventListener("visibilitychange",function(){if(!document.hidden)wake()});
 
+
+/* ---------- floating stars over any app (native window, see FloatOverlay.java) ---------- */
+function flOpts(){return JSON.stringify({taps:cfg.flTaps,gifts:cfg.flGifts,wall:cfg.flWall,join:cfg.flJoin,size:+cfg.flSize||1})}
+function flState(){try{return APP&&BusApp.floatState?String(BusApp.floatState()):"none"}catch(e){return "none"}}
+function paintFloat(){var s=flState();$("bFloat").textContent=s==="on"?"Desactivar":"Activar";$("bFloat").classList.toggle("go",s!=="on");
+  $("floatSt").textContent=s==="on"?"✅":s==="noperm"?"Falta el permiso":s==="none"?"Solo en la app":""}
+$("bFloat").onclick=function(){if(!APP||!BusApp.floatShow)return;var on=flState()!=="on";try{BusApp.floatShow(on,flOpts())}catch(e){}setTimeout(paintFloat,400)};
+[["oFlTaps","flTaps"],["oFlGifts","flGifts"],["oFlWall","flWall"],["oFlJoin","flJoin"],["oFlSize","flSize"]].forEach(function(p){var el=$(p[0]);
+  el.checked=!!cfg[p[1]];if(el.tagName==="SELECT")el.value=String(cfg[p[1]]);
+  el.onchange=function(){cfg[p[1]]=el.tagName==="SELECT"?+el.value:el.checked;save();
+    if(flState()==="on"){try{if(p[1]==="flSize")BusApp.floatShow(false,flOpts());BusApp.floatShow(true,flOpts())}catch(e){}}}});
+document.addEventListener("visibilitychange",function(){if(!document.hidden)paintFloat()});
+paintFloat();
 window.__race=function(){return {phase:phase,racers:racers.map(function(r){return r.u.nick+":"+Math.round(-r.z)+(r.fin?"✓":"")}),cam:camFocus&&camFocus.u.nick,order:finishOrder.map(function(r){return r.u.nick})}};
 window.__raceSkip=function(){phaseAt-=1e6};window.__raceWarp=function(f){racers.forEach(function(r){r.z=Math.min(r.z,-L*f+Math.random()*12)})};
 
