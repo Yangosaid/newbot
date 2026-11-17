@@ -22,7 +22,19 @@ body{background:var(--night);color:var(--ink);font-family:var(--body);overflow:h
 #stage{position:relative;height:100%;overflow:hidden;touch-action:manipulation;user-select:none;-webkit-user-select:none}
 #gl{position:absolute;inset:0;width:100%;height:100%;display:block}
 #fade{position:absolute;inset:0;background:#000;opacity:0;pointer-events:none;transition:opacity .7s ease}#fade.on{opacity:1}
-#hallBtns{flex-wrap:wrap}
+#hallBtns,#busyBtns{flex-wrap:wrap}
+#host{position:absolute;z-index:6;border-radius:50%;overflow:hidden;background:#111;touch-action:none;box-shadow:0 0 0 3px #fff,0 0 18px 4px rgba(255,45,122,.55);transition:transform .5s ease,opacity .5s ease;animation:hostGlow 2.4s ease-in-out infinite}
+#host.card{border-radius:20px}#host.dim{transform:scale(.78);opacity:.82}
+#host.drag{transition:none;animation:none;box-shadow:0 0 0 3px #ffc93c,0 0 26px 6px rgba(255,201,60,.75)}
+#host.away{box-shadow:0 0 0 3px #ffc93c,0 0 18px 4px rgba(255,201,60,.5)}
+@keyframes hostGlow{0%,100%{box-shadow:0 0 0 3px #fff,0 0 14px 3px rgba(255,45,122,.5)}50%{box-shadow:0 0 0 3px #fff,0 0 22px 6px rgba(24,214,255,.55)}}
+#hostCam{width:100%;height:100%;object-fit:cover;display:block;pointer-events:none}#hostCam.mir{transform:scaleX(-1)}#hostCam.blur{filter:blur(14px)}
+#hostMsg{position:absolute;inset:0;display:grid;place-items:center;font-size:.26em;background:#111;pointer-events:none}
+#hostBusy{position:absolute;inset:0;pointer-events:none}
+#hbBg{position:absolute;inset:0;background:#2a1240 center/cover no-repeat;filter:brightness(.7) saturate(.9)}#hbBg.sup{filter:none}
+#hbIcon{position:absolute;left:50%;top:42%;transform:translate(-50%,-50%);font-size:.36em;line-height:1;animation:bob 1.6s ease-in-out infinite;filter:drop-shadow(0 2px 6px rgba(0,0,0,.6))}
+#hbTime{position:absolute;left:0;right:0;bottom:9%;text-align:center;font:800 .14em/1 var(--display);color:#fff;text-shadow:0 1px 4px #000}
+#hbHeart{position:absolute;right:12%;top:9%;font-size:.17em;animation:bob 1s ease-in-out infinite}
 #nogl{position:absolute;inset:0;display:grid;place-items:center;text-align:center;padding:24px;font:700 20px/1.3 var(--display)}
 #gear{position:absolute;right:10px;bottom:10px;width:40px;height:40px;border-radius:50%;border:1px solid rgba(255,255,255,.12);background:rgba(10,6,24,.45);
   color:var(--ink);font-size:19px;line-height:1;cursor:pointer;opacity:.3}
@@ -185,6 +197,8 @@ input[type=checkbox]{width:20px;height:20px;accent-color:var(--hot)}
     <div class="tier tt" id="pLow">👆</div>
   </div>
   <div id="energy" aria-hidden="true"><span>⚡</span><div class="bar"><div class="fill" id="eFill"></div><div class="gl"></div></div><span class="boom">🎉</span></div>
+  <div id="host" aria-hidden="true" hidden><video id="hostCam" autoplay playsinline muted></video><div id="hostMsg" hidden></div>
+    <div id="hostBusy" hidden><div id="hbBg"></div><span id="hbIcon">☕</span><span id="hbHeart">❤️</span><span id="hbTime">0:00</span></div></div>
   <button id="gear" aria-label="Ajustes">⚙<i id="dot"></i></button>
 
   <div id="sheet" hidden>
@@ -202,6 +216,15 @@ input[type=checkbox]{width:20px;height:20px;accent-color:var(--hot)}
       <div class="grp" id="gTapQuick"><h3>👆 Toques en la pantalla</h3>
         <div class="ln"><div class="seg" id="tapSeg"><button data-m="full">Completo</button><button data-m="energy">Solo energía ⚡</button><button data-m="off">Apagado</button></div></div>
         <p class="note" id="tapNote"></p>
+      </div>
+      <div class="grp"><h3>🎥 Mi cámara</h3>
+        <label class="ln"><input type="checkbox" id="oHost"><span>Salir yo con la cámara delantera en una burbuja pequeña</span></label>
+        <p class="note">Arrástrala con el dedo a un borde donde no tape a nadie (se queda ahí). Doble toque en la burbuja = ocupado: la cámara se apaga y sale tu foto con el tiempo que llevas fuera; otro doble toque y vuelves. Cuando llega un regalo grande, la burbuja se hace pequeña para dejar el protagonismo a quien apoya.</p>
+        <div class="ln"><label for="oHostSize">Tamaño</label><select id="oHostSize"><option value="s">Pequeña</option><option value="m">Mediana</option><option value="l">Grande</option></select><select id="oHostShape"><option value="circle">⚪ Círculo</option><option value="card">▯ Tarjeta</option></select></div>
+        <label class="ln"><input type="checkbox" id="oHostMirror"><span>Modo espejo</span></label>
+        <div class="ln"><button class="btn" id="bBlur">🌫️ Difuminar</button><button class="btn" id="bHostPic">🖼️ Mi foto para «ocupado»</button><input type="file" id="hostFile" accept="image/*" hidden></div>
+        <div class="ln" id="busyBtns"><button class="btn" data-b="">🎥</button><button class="btn" data-b="☕">☕</button><button class="btn" data-b="🍽️">🍽️</button><button class="btn" data-b="📞">📞</button><button class="btn" data-b="🎮">🎮</button><button class="btn" data-b="🚗">🚗</button><button class="btn" data-b="💤">💤</button></div>
+        <label class="ln"><input type="checkbox" id="oHostSup"><span>Mientras estoy ocupado, mi burbuja enseña la foto del último que envía un regalo ❤️</span></label>
       </div>
       <div class="grp"><h3>👋 Los que entran</h3>
         <label class="ln"><input type="checkbox" id="oJoin"><span>Cada espectador que entra al directo aparece bailando con su foto y su nombre</span></label>
@@ -302,7 +325,7 @@ var SRC=APP&&BusApp.getSource?String(BusApp.getSource()):"tiktok",YT=SRC==="yout
 try{localStorage.setItem("game","party")}catch(e){}
 
 /* ---------- settings ---------- */
-var DEF={per:2,max:24,fill:10,chat:YT,words:"",cd:YT?10:3,bpm:124,q:"ultra",auto:true,music:true,safe:true,hint:true,flag:true,prio:true,top3:true,kingScreen:true,memory:true,safeLive:true,joinChar:true,hallMin:15,hall:"club",sync:false,syncSrc:"output",like:true,tapMode:"full",likeN:15,likeCam2:5,tapHold2:1.5,goal:2000,coinE:10,tapE:1,vipMin:100,vipLen:1};
+var DEF={per:2,max:24,fill:10,chat:YT,words:"",cd:YT?10:3,bpm:124,q:"ultra",auto:true,music:true,safe:true,hint:true,flag:true,prio:true,top3:true,kingScreen:true,memory:true,safeLive:true,joinChar:true,host:false,hostSize:"m",hostShape:"circle",hostMirror:true,hostSup:true,hostX:null,hostY:null,hostIcon:"☕",hallMin:15,hall:"club",sync:false,syncSrc:"output",like:true,tapMode:"full",likeN:15,likeCam2:5,tapHold2:1.5,goal:2000,coinE:10,tapE:1,vipMin:100,vipLen:1};
 var cfg=Object.assign({},DEF);
 /* TikTok-safe mode (on by default): no gift requests on screen, comments put viewers in the hall too */
 function safeLive(){return !!cfg.safeLive}
@@ -863,6 +886,54 @@ function onEvent(e){if(!e||!e.type)return;monitor(e);
 /* taps and visitors entering: the camera goes to the latest one, 1.5 s each, once the gift turns are over */
 function tapCam(u,d,now){u.lastTap=now;var inVip=vip&&now<vip.until;
   if(+cfg.likeCam2>0&&!inVip&&!camQ.length&&!playing(now)&&now-lastGiftAt>(+cfg.likeCam2)*1000&&now-focusAt>Math.max(0.5,+cfg.tapHold2||1.5)*1000&&focus!==u)goTo(u,d,true)}
+/* ---------- the host's own camera bubble: small, at the edge, draggable; a "busy" card when the host steps away ---------- */
+var HOST={stream:null,busy:"",busyAt:0,starting:false,frame:null};
+var HOSTSIZE={s:96,m:128,l:168};
+function hostEl(){return $("host")}
+function hostLayout(){var el=hostEl(),sz=HOSTSIZE[cfg.hostSize]||128;el.hidden=!cfg.host;if(!cfg.host){hostStop();return}
+  el.style.fontSize=sz+"px";el.style.width=sz+"px";el.style.height=Math.round(sz*(cfg.hostShape==="card"?1.3:1))+"px";el.classList.toggle("card",cfg.hostShape==="card");
+  var st=$("stage").getBoundingClientRect(),w=el.offsetWidth,h=el.offsetHeight;
+  var x=clamp((cfg.hostX==null?1:cfg.hostX)*(st.width-w-16)+8,8,Math.max(8,st.width-w-8)),y=clamp((cfg.hostY==null?0.25:cfg.hostY)*st.height,8,Math.max(8,st.height-h-8));
+  el.style.left=x+"px";el.style.top=y+"px";$("hostCam").classList.toggle("mir",cfg.hostMirror);$("hostCam").classList.toggle("blur",!!HOST.blur);
+  paintBusy();if(!HOST.busy)hostStart()}
+function hostStart(){if(HOST.stream||HOST.starting||!cfg.host||HOST.busy||document.hidden)return;
+  if(!navigator.mediaDevices||!navigator.mediaDevices.getUserMedia){hostMsg("📷✖");return}
+  HOST.starting=true;navigator.mediaDevices.getUserMedia({video:{facingMode:"user",width:{ideal:640},height:{ideal:640},frameRate:{ideal:30,max:30}},audio:false}).then(function(st){HOST.starting=false;
+    if(!cfg.host||HOST.busy||document.hidden){st.getTracks().forEach(function(t){t.stop()});return}
+    HOST.stream=st;var v=$("hostCam");v.srcObject=st;v.play().catch(function(){});hostMsg("");
+    st.getVideoTracks().forEach(function(t){t.onended=function(){HOST.stream=null;setTimeout(hostStart,800)}})}).catch(function(){HOST.starting=false;hostMsg("📷✖")})}
+function hostStop(){if(HOST.stream){HOST.stream.getTracks().forEach(function(t){t.onended=null;t.stop()});HOST.stream=null}var v=$("hostCam");if(v)v.srcObject=null}
+function hostMsg(t){$("hostMsg").textContent=t;$("hostMsg").hidden=!t}
+/* busy: the camera turns off (privacy and battery) and a card shows my photo or a soft still of my last frame, an icon and how long I've been away */
+function setBusy(ic){if(ic&&!HOST.busy){var v=$("hostCam");try{if(v.videoWidth){var c=document.createElement("canvas");c.width=160;c.height=160;var x=c.getContext("2d"),s=Math.min(v.videoWidth,v.videoHeight);
+      x.filter="blur(6px)";x.drawImage(v,(v.videoWidth-s)/2,(v.videoHeight-s)/2,s,s,0,0,160,160);HOST.frame=c.toDataURL("image/jpeg",0.7)}}catch(e){}}
+  HOST.busy=ic||"";HOST.busyAt=perf();if(HOST.busy)hostStop();hostLayout();paintHostBtns()}
+function hostPic(){try{return localStorage.getItem("party_hostpic")||""}catch(e){return ""}}
+function paintBusy(){var b=$("hostBusy");b.hidden=!HOST.busy;$("host").classList.toggle("away",!!HOST.busy);if(!HOST.busy)return;
+  var sup=cfg.hostSup&&lastSup&&lastSup.av,bg=sup?lastSup.av:hostPic()||HOST.frame||"";
+  $("hbBg").style.backgroundImage=bg?'url("'+bg.replace(/"/g,"%22")+'")':"none";$("hbBg").classList.toggle("sup",!!sup);
+  $("hbIcon").textContent=HOST.busy;$("hbHeart").hidden=!sup}
+setInterval(function(){if(!cfg.host)return;var el=hostEl();
+  if(HOST.busy){var s=Math.floor((perf()-HOST.busyAt)/1000);$("hbTime").textContent=Math.floor(s/60)+":"+("0"+s%60).slice(-2);paintBusy()}
+  /* a big gift's moment belongs to the supporter: the bubble steps back a little */
+  el.classList.toggle("dim",!!vipOn())},1000);
+document.addEventListener("visibilitychange",function(){if(document.hidden)hostStop();else if(cfg.host&&!HOST.busy)hostStart()});
+window.addEventListener("resize",function(){if(cfg.host)hostLayout()});
+/* drag with one finger to move; double tap = busy ☕ on/off */
+(function(){var el=null,sx=0,sy=0,ox=0,oy=0,moved=false,lastTap=0;
+  document.addEventListener("pointerdown",function(e){var h=hostEl();if(!h||h.hidden||!h.contains(e.target))return;el=h;moved=false;sx=e.clientX;sy=e.clientY;ox=h.offsetLeft;oy=h.offsetTop;try{h.setPointerCapture(e.pointerId)}catch(x){}e.preventDefault()});
+  document.addEventListener("pointermove",function(e){if(!el)return;var dx=e.clientX-sx,dy=e.clientY-sy;if(!moved&&Math.hypot(dx,dy)<8)return;moved=true;el.classList.add("drag");
+    var st=$("stage").getBoundingClientRect();el.style.left=clamp(ox+dx,8,st.width-el.offsetWidth-8)+"px";el.style.top=clamp(oy+dy,8,st.height-el.offsetHeight-8)+"px"});
+  document.addEventListener("pointerup",function(e){if(!el)return;var h=el;el=null;h.classList.remove("drag");var st=$("stage").getBoundingClientRect();
+    if(moved){cfg.hostX=clamp((h.offsetLeft-8)/Math.max(1,st.width-h.offsetWidth-16),0,1);cfg.hostY=clamp(h.offsetTop/st.height,0,1);save();return}
+    var now=perf();if(now-lastTap<350){lastTap=0;setBusy(HOST.busy?"":(cfg.hostIcon||"☕"))}else lastTap=now})})();
+function paintHostBtns(){var el=$("busyBtns");if(!el)return;Array.prototype.forEach.call(el.children,function(b){b.classList.toggle("go",b.dataset.b===HOST.busy||(!HOST.busy&&b.dataset.b===""))})}
+
+Array.prototype.forEach.call(document.querySelectorAll("#busyBtns button"),function(b){b.onclick=function(){if(b.dataset.b)cfg.hostIcon=b.dataset.b,save();setBusy(b.dataset.b)}});
+$("bBlur").onclick=function(){HOST.blur=!HOST.blur;$("bBlur").classList.toggle("go",HOST.blur);hostLayout()};
+$("bHostPic").onclick=function(){$("hostFile").click()};
+$("hostFile").onchange=function(){var f=this.files&&this.files[0];if(!f)return;var rd=new FileReader();rd.onload=function(){var im=new Image();im.onload=function(){var c=document.createElement("canvas");c.width=c.height=256;var x=c.getContext("2d"),s=Math.min(im.width,im.height);
+    x.drawImage(im,(im.width-s)/2,(im.height-s)/2,s,s,0,0,256,256);try{localStorage.setItem("party_hostpic",c.toDataURL("image/jpeg",0.85))}catch(e){}paintBusy()};im.src=rd.result};rd.readAsDataURL(f)};
 var joinQ=[];setInterval(function(){if(!joinQ.length)return;var u=joinQ.shift();if(!cfg.joinChar||u.chars.length)return;var d=addChar(u);if(d){burst(d);d.party=perf();tapCam(u,d,perf())}},500);
 /* ---------- every support goes through here: character, status, combo, camera, crowd ---------- */
 var LEVELS=[1,30,100,500,1000];
@@ -1318,16 +1389,17 @@ $("close").onclick=function(){openSheet(false)};
 Array.prototype.forEach.call(document.querySelectorAll(".tab"),function(b){b.onclick=function(){
   Array.prototype.forEach.call(document.querySelectorAll(".tab"),function(x){x.setAttribute("aria-selected",x===b);$(x.dataset.p).hidden=x!==b})}});
 function fill(){$("oPer").value=String(cfg.per);$("oMax").value=String(cfg.max);$("oFill").value=String(cfg.fill);$("oChat").checked=cfg.chat;$("oWords").value=cfg.words;
-  $("oCd").value=String(cfg.cd);$("oBpm").value=String(cfg.bpm);$("oQ").value=cfg.q;$("oAuto").checked=cfg.auto;$("oSafe").checked=cfg.safe;$("oHint").checked=cfg.hint;$("oFlag").checked=cfg.flag;$("oPrio").checked=cfg.prio;$("oTop3").checked=cfg.top3;$("oKing").checked=cfg.kingScreen;$("oMemory").checked=cfg.memory;$("oSafeLive").checked=cfg.safeLive;$("oJoin").checked=cfg.joinChar;$("oHallMin").value=String(cfg.hallMin);$("oSync").checked=cfg.sync;$("oSyncSrc").value=cfg.syncSrc;paintTapSeg();$("oLikeN").value=String(cfg.likeN);$("oLikeCam").value=String(cfg.likeCam2);$("oTapHold").value=String(cfg.tapHold2);$("oGoal").value=String(cfg.goal);$("oVipMin").value=String(cfg.vipMin);$("oVipLen").value=String(cfg.vipLen);musicLabel()}
+  $("oCd").value=String(cfg.cd);$("oBpm").value=String(cfg.bpm);$("oQ").value=cfg.q;$("oAuto").checked=cfg.auto;$("oSafe").checked=cfg.safe;$("oHint").checked=cfg.hint;$("oFlag").checked=cfg.flag;$("oPrio").checked=cfg.prio;$("oTop3").checked=cfg.top3;$("oKing").checked=cfg.kingScreen;$("oMemory").checked=cfg.memory;$("oSafeLive").checked=cfg.safeLive;$("oHost").checked=cfg.host;$("oHostSize").value=cfg.hostSize;$("oHostShape").value=cfg.hostShape;$("oHostMirror").checked=cfg.hostMirror;$("oHostSup").checked=cfg.hostSup;$("oJoin").checked=cfg.joinChar;$("oHallMin").value=String(cfg.hallMin);$("oSync").checked=cfg.sync;$("oSyncSrc").value=cfg.syncSrc;paintTapSeg();$("oLikeN").value=String(cfg.likeN);$("oLikeCam").value=String(cfg.likeCam2);$("oTapHold").value=String(cfg.tapHold2);$("oGoal").value=String(cfg.goal);$("oVipMin").value=String(cfg.vipMin);$("oVipLen").value=String(cfg.vipLen);musicLabel()}
 function bind(id,key,num){var el=$(id);el.onchange=el.oninput=function(){cfg[key]=el.type==="checkbox"?el.checked:num?Math.max(0,+el.value||0):el.value;save();
   if(key==="flag"&&G.flag)G.flag.visible=cfg.flag;
   if(key==="prio"||key==="tapMode")paintPrio();
   if(key==="top3"){lastTop3="";paintTop3()}
   if(key==="sync"||key==="syncSrc")applySync();
   if(key==="goal"){energy.target=cfg.goal;paintEnergy()}
+  if(key.indexOf("host")===0)hostLayout();
   if(key==="safeLive"){paintPrio();paintHint();lastTop3="";paintTop3();paintHappy();paintEnergy();for(var uk in users){var uu=users[uk];if(uu.label){uu.label.dispose();uu.label=null;relabel(uu)}}}
   if(key==="q")applyQuality();if(key==="fill")layoutFillers();if(key==="hint"||key==="safe")paintHint()}}
-bind("oPer","per",1);bind("oMax","max",1);bind("oFill","fill",1);bind("oChat","chat");bind("oWords","words");bind("oCd","cd",1);bind("oBpm","bpm",1);bind("oQ","q");bind("oAuto","auto");bind("oSafe","safe");bind("oHint","hint");bind("oFlag","flag");bind("oPrio","prio");bind("oTop3","top3");bind("oKing","kingScreen");bind("oMemory","memory");bind("oSafeLive","safeLive");bind("oJoin","joinChar");bind("oHallMin","hallMin",1);bind("oSync","sync");bind("oSyncSrc","syncSrc");bind("oLikeN","likeN",1);bind("oLikeCam","likeCam2",1);bind("oTapHold","tapHold2",1);bind("oGoal","goal",1);bind("oVipMin","vipMin",1);bind("oVipLen","vipLen",1);
+bind("oPer","per",1);bind("oMax","max",1);bind("oFill","fill",1);bind("oChat","chat");bind("oWords","words");bind("oCd","cd",1);bind("oBpm","bpm",1);bind("oQ","q");bind("oAuto","auto");bind("oSafe","safe");bind("oHint","hint");bind("oFlag","flag");bind("oPrio","prio");bind("oTop3","top3");bind("oKing","kingScreen");bind("oMemory","memory");bind("oSafeLive","safeLive");bind("oHost","host");bind("oHostSize","hostSize");bind("oHostShape","hostShape");bind("oHostMirror","hostMirror");bind("oHostSup","hostSup");bind("oJoin","joinChar");bind("oHallMin","hallMin",1);bind("oSync","sync");bind("oSyncSrc","syncSrc");bind("oLikeN","likeN",1);bind("oLikeCam","likeCam2",1);bind("oTapHold","tapHold2",1);bind("oGoal","goal",1);bind("oVipMin","vipMin",1);bind("oVipLen","vipLen",1);
 var TAPNOTE={full:"Quien toca aparece con su personaje, se lleva la cámara un momento y llena la barra de energía.",
   energy:"Los toques solo llenan la barra de energía ⚡ entre todos. Personajes y cámara quedan para quien envía regalos.",
   off:"Los toques no hacen nada y el dibujo 👆 desaparece. Solo cuentan los regalos."};
@@ -1408,7 +1480,7 @@ function resize(){W=innerWidth;H=innerHeight;if(!ok3d)return;var pr=Math.min(win
   cam.aspect=W/H;cam.fov=W/H<0.75?60:48;cam.updateProjectionMatrix()}
 function wake(){try{navigator.wakeLock&&navigator.wakeLock.request("screen").catch(function(){})}catch(e){}}
 window.addEventListener("resize",resize);
-if(ok3d)initHalls();applyHall(HALLS[cfg.hall]?cfg.hall:"club");fill();applyQuality();buildLasers();buildFlag();paintPrio();if(cfg.sync)applySync();paintEnergy();layoutFillers();paintHint(null);paintHappy();setDemo(!APP);wake();
+if(ok3d)initHalls();applyHall(HALLS[cfg.hall]?cfg.hall:"club");fill();applyQuality();buildLasers();buildFlag();paintPrio();if(cfg.sync)applySync();paintEnergy();layoutFillers();paintHint(null);paintHappy();hostLayout();setDemo(!APP);wake();
 if(document.fonts&&document.fonts.ready)document.fonts.ready.then(function(){for(var k in users){var u=users[k];if(u.label){u.label.dispose();u.label=null;relabel(u)}}});
 if(APP&&!$("apUser").value){openSheet(true);document.querySelector('.tab[data-p="pLink"]').click()}
 requestAnimationFrame(frame);

@@ -51,6 +51,8 @@ public class MainActivity extends Activity {
     private MusicSync music;
     private String musicSource = "output";
     private static final int REQ_AUDIO = 11;
+    private static final int REQ_CAM = 12;
+    private android.webkit.PermissionRequest camRequest;
 
     @SuppressLint({"SetJavaScriptEnabled", "AddJavascriptInterface"})
     @Override
@@ -89,6 +91,22 @@ public class MainActivity extends Activity {
             }
         });
         web.setWebChromeClient(new WebChromeClient() {
+            /* the host's own camera bubble in the hall: the page asks for the front camera (video only) */
+            @Override
+            public void onPermissionRequest(final android.webkit.PermissionRequest req) {
+                ui.post(() -> {
+                    boolean video = false;
+                    for (String r : req.getResources()) if (android.webkit.PermissionRequest.RESOURCE_VIDEO_CAPTURE.equals(r)) video = true;
+                    if (!video) { req.deny(); return; }
+                    if (Build.VERSION.SDK_INT >= 23 && checkSelfPermission(android.Manifest.permission.CAMERA) != android.content.pm.PackageManager.PERMISSION_GRANTED) {
+                        if (camRequest != null) camRequest.deny();
+                        camRequest = req;
+                        requestPermissions(new String[]{android.Manifest.permission.CAMERA}, REQ_CAM);
+                        return;
+                    }
+                    req.grant(new String[]{android.webkit.PermissionRequest.RESOURCE_VIDEO_CAPTURE});
+                });
+            }
             @Override
             public boolean onShowFileChooser(WebView v, ValueCallback<Uri[]> cb, FileChooserParams p) {
                 if (fileCallback != null) fileCallback.onReceiveValue(null);
@@ -184,6 +202,14 @@ public class MainActivity extends Activity {
     @Override
     public void onRequestPermissionsResult(int req, String[] perms, int[] res) {
         super.onRequestPermissionsResult(req, perms, res);
+        if (req == REQ_CAM) {
+            if (camRequest != null) {
+                if (res.length > 0 && res[0] == android.content.pm.PackageManager.PERMISSION_GRANTED) camRequest.grant(new String[]{android.webkit.PermissionRequest.RESOURCE_VIDEO_CAPTURE});
+                else camRequest.deny();
+                camRequest = null;
+            }
+            return;
+        }
         if (req != REQ_AUDIO) return;
         if (res.length > 0 && res[0] == android.content.pm.PackageManager.PERMISSION_GRANTED) startMusic(musicSource);
         else js("window.__busAudioState&&window.__busAudioState(\"denied\")");
