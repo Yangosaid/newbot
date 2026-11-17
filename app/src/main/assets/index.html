@@ -210,7 +210,7 @@ input[type=color]{width:40px;height:36px;border:0;background:none;padding:0}
 "use strict";
 var $=function(id){return document.getElementById(id)};
 var APP=!!window.BusApp;                                                      /* running inside the Android app */
-try{if(APP&&localStorage.getItem("game")!=="bus"){location.replace("party.html");return}}catch(e){}   /* the 3D hall is the default */
+try{var gm=localStorage.getItem("game");if(APP&&gm!=="bus"){location.replace(gm==="race"?"race.html":"party.html");return}}catch(e){}   /* the 3D hall is the default */
 var SRC=APP&&BusApp.getSource?String(BusApp.getSource()):"tiktok",YT=SRC==="youtube";
 var LOCAL=APP||/^(localhost|127\.0\.0\.1)$/.test(location.hostname);
 var DEF={teams:[
