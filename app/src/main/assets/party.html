@@ -201,7 +201,7 @@ input[type=checkbox]{width:20px;height:20px;accent-color:var(--hot)}
   </div>
   <div id="energy" aria-hidden="true"><span>⚡</span><div class="bar"><div class="fill" id="eFill"></div><div class="gl"></div></div><span class="boom">🎉</span></div>
   <div id="host" aria-hidden="true" hidden><video id="hostCam" autoplay playsinline muted></video><div id="hostMsg" hidden></div>
-    <div id="hostBusy" hidden><div id="hbBg"></div><video id="hbVid" loop muted playsinline hidden></video><span id="hbIcon">☕</span><span id="hbHeart">❤️</span><span id="hbTime">0:00</span></div></div>
+    <div id="hostBusy" hidden><div id="hbBg"></div><video id="hbVid" loop muted playsinline hidden></video><span id="hbIcon">☕</span><span id="hbHeart">❤️</span></div></div>
   <button id="gear" aria-label="Ajustes">⚙<i id="dot"></i></button>
 
   <div id="sheet" hidden>
@@ -222,7 +222,7 @@ input[type=checkbox]{width:20px;height:20px;accent-color:var(--hot)}
       </div>
       <div class="grp"><h3>🎥 Mi cámara</h3>
         <label class="ln"><input type="checkbox" id="oHost"><span>Salir yo con la cámara delantera en una burbuja pequeña</span></label>
-        <p class="note">Arrástrala con el dedo a un borde donde no tape a nadie (se queda ahí). Doble toque en la burbuja = ocupado: la cámara se apaga y sale tu foto con el tiempo que llevas fuera; otro doble toque y vuelves. Cuando llega un regalo grande, la burbuja se hace pequeña para dejar el protagonismo a quien apoya.</p>
+        <p class="note">Arrástrala con el dedo a un borde donde no tape a nadie (se queda ahí). Siempre empieza con tu vídeo (o tu foto), nunca con la cámara: la cámara solo se enciende cuando tú pulsas 🎥 o das doble toque en la burbuja; otro doble toque y vuelve el vídeo. Cuando llega un regalo grande, la burbuja se hace pequeña para dejar el protagonismo a quien apoya.</p>
         <div class="ln"><label for="oHostSize">Tamaño</label><select id="oHostSize"><option value="s">Pequeña</option><option value="m">Mediana</option><option value="l">Grande</option></select><select id="oHostShape"><option value="card">▯ Vertical</option><option value="circle">⚪ Círculo</option></select></div>
         <label class="ln"><input type="checkbox" id="oHostMirror"><span>Modo espejo</span></label>
         <div class="ln"><button class="btn" id="bBlur">🌫️ Difuminar</button><button class="btn" id="bHostPic">🖼️ Mi foto para «ocupado»</button><input type="file" id="hostFile" accept="image/*" hidden></div>
@@ -897,7 +897,7 @@ function onEvent(e){if(!e||!e.type)return;monitor(e);
 function tapCam(u,d,now){u.lastTap=now;var inVip=vip&&now<vip.until;
   if(+cfg.likeCam2>0&&!inVip&&!camQ.length&&!playing(now)&&now-lastGiftAt>(+cfg.likeCam2)*1000&&now-focusAt>Math.max(0.5,+cfg.tapHold2||1.5)*1000&&focus!==u)goTo(u,d,true)}
 /* ---------- the host's own camera bubble: small, at the edge, draggable; a "busy" card when the host steps away ---------- */
-var HOST={stream:null,busy:"",busyAt:0,starting:false,frame:null};
+var HOST={stream:null,busy:cfg.hostIcon||"☕",busyAt:0,starting:false,frame:null};
 var HOSTSIZE={s:90,m:118,l:156};
 function hostEl(){return $("host")}
 function hostLayout(){var el=hostEl(),sz=HOSTSIZE[cfg.hostSize]||128;el.hidden=!cfg.host;if(!cfg.host){hostStop();return}
@@ -928,7 +928,7 @@ function paintBusy(){var b=$("hostBusy"),hv=$("hbVid");b.hidden=!HOST.busy;$("ho
   $("hbBg").style.backgroundImage=bg?'url("'+bg.replace(/"/g,"%22")+'")':"none";$("hbBg").classList.toggle("sup",!!sup);
   $("hbIcon").textContent=HOST.busy;$("hbHeart").hidden=!sup}
 setInterval(function(){if(!cfg.host)return;var el=hostEl();
-  if(HOST.busy){var s=Math.floor((perf()-HOST.busyAt)/1000);$("hbTime").textContent=Math.floor(s/60)+":"+("0"+s%60).slice(-2);paintBusy()}
+  if(HOST.busy){paintBusy()}
   /* a big gift's moment belongs to the supporter: the bubble steps back a little */
   el.classList.toggle("dim",!!vipOn())},1000);
 document.addEventListener("visibilitychange",function(){if(document.hidden)hostStop();else if(cfg.host&&!HOST.busy)hostStart()});
@@ -1430,6 +1430,7 @@ function bind(id,key,num){var el=$(id);el.onchange=el.oninput=function(){cfg[key
   if(key==="top3"){lastTop3="";paintTop3()}
   if(key==="sync"||key==="syncSrc")applySync();
   if(key==="goal"){energy.target=cfg.goal;paintEnergy()}
+  if(key==="host"&&cfg.host)HOST.busy=HOST.busy||cfg.hostIcon||"☕";
   if(key.indexOf("host")===0)hostLayout();
   if(key==="safeLive"){paintPrio();paintHint();lastTop3="";paintTop3();paintHappy();paintEnergy();for(var uk in users){var uu=users[uk];if(uu.label){uu.label.dispose();uu.label=null;relabel(uu)}}}
   if(key==="q")applyQuality();if(key==="fill")layoutFillers();if(key==="hint"||key==="safe")paintHint()}}
