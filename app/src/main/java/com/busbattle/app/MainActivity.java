@@ -111,8 +111,10 @@ public class MainActivity extends Activity {
             public boolean onShowFileChooser(WebView v, ValueCallback<Uri[]> cb, FileChooserParams p) {
                 if (fileCallback != null) fileCallback.onReceiveValue(null);
                 fileCallback = cb;
-                Intent i = new Intent(Intent.ACTION_GET_CONTENT).addCategory(Intent.CATEGORY_OPENABLE).setType("image/*");
-                try { startActivityForResult(Intent.createChooser(i, "Imagen"), PICK_FILE); }
+                String type = "image/*";
+                for (String t : p.getAcceptTypes()) if (t != null && t.startsWith("video")) type = "video/*";
+                Intent i = new Intent(Intent.ACTION_GET_CONTENT).addCategory(Intent.CATEGORY_OPENABLE).setType(type);
+                try { startActivityForResult(Intent.createChooser(i, type.startsWith("video") ? "Vídeo" : "Imagen"), PICK_FILE); }
                 catch (ActivityNotFoundException e) { fileCallback = null; return false; }
                 return true;
             }
