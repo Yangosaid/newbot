@@ -219,6 +219,10 @@ public class MainActivity extends Activity {
 
     final class Bridge {
         @JavascriptInterface public String getUser() { return prefs.getString("user", ""); }
+        /** True while another app (Spotify, YouTube Music…) is playing music, so the hall never starts sounds that would pause it. */
+        @JavascriptInterface public boolean otherMusic() {
+            try { android.media.AudioManager am = (android.media.AudioManager) getSystemService(AUDIO_SERVICE); return am != null && am.isMusicActive(); } catch (Exception e) { return false; }
+        }
         @JavascriptInterface public String getKey() { return prefs.getString("key", ""); }
 
         /** Lights follow the music the phone plays: source "output" (any app) or "mic"; on=false stops listening. */

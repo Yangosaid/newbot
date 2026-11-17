@@ -228,7 +228,7 @@ input[type=checkbox]{width:20px;height:20px;accent-color:var(--hot)}
         <div class="ln"><button class="btn" id="bBlur">🌫️ Difuminar</button><button class="btn" id="bHostPic">🖼️ Mi foto para «ocupado»</button><input type="file" id="hostFile" accept="image/*" hidden></div>
         <div class="ln"><button class="btn" id="bHostVid">🎬 Mi vídeo para «ocupado»</button><button class="btn" id="bHostVidDel" hidden>✖</button><input type="file" id="hostVidFile" accept="video/*" hidden></div>
         <div id="hvBox" hidden>
-          <p class="note">El vídeo se repite solo. Mueve el dedo sobre la vista previa para elegir la parte que se ve, acerca con 🔍 y elige el volumen con 🔊 (a la izquierda del todo = sin sonido).</p>
+          <p class="note">El vídeo se repite solo. Mueve el dedo sobre la vista previa para elegir la parte que se ve, acerca con 🔍 y elige el volumen con 🔊 (a la izquierda del todo = sin sonido). Si pones música en Spotify, deja el vídeo sin sonido: un vídeo con sonido para Spotify.</p>
           <div id="hvEdit"><div id="hvPrev"><video id="hvPrevVid" loop muted playsinline></video></div>
             <div class="sl"><label>🔍<input type="range" id="hvZ" min="1" max="3" step="0.05"></label><label>↔<input type="range" id="hvX" min="0" max="100" step="1"></label><label>↕<input type="range" id="hvY" min="0" max="100" step="1"></label>
               <label>🔊<input type="range" id="hvV" min="0" max="100" step="1"></label><span class="note" id="hvVn"></span></div></div>
@@ -1297,7 +1297,7 @@ window.__busAudioState=function(st){A.state=st;
   $("syncSt").textContent=st==="output"?"🎧 Escuchando el sonido del teléfono":st==="mic"?"🎙️ Escuchando con el micrófono":st==="denied"?"Sin permiso de micrófono: actívalo en los ajustes de Android":st==="fail"?"Este teléfono no deja escuchar el sonido; prueba con el micrófono":"";
   if(st==="denied"||st==="fail"){cfg.sync=false;save();$("oSync").checked=false}}
 function audioLive(){return cfg.sync&&perf()-A.last<1500}
-function applySync(){if(APP&&BusApp.musicSync)try{BusApp.musicSync(!!cfg.sync,cfg.syncSrc)}catch(e){}
+function applySync(){if(cfg.sync)quiet();else unlock();if(APP&&BusApp.musicSync)try{BusApp.musicSync(!!cfg.sync,cfg.syncSrc)}catch(e){}
   if(cfg.sync&&master)master.gain.setTargetAtTime(0,AC.currentTime,0.1);else if(!cfg.sync&&master&&cfg.music)master.gain.setTargetAtTime(0.4,AC.currentTime,0.1);
   if(!cfg.sync)$("syncSt").textContent=""}
 /* beat clock: the song's own beats when listening, otherwise the app's tempo */
@@ -1388,9 +1388,16 @@ function applyQuality(){if(!ok3d)return;Q=QUALITY[cfg.q]||QUALITY.ultra;
 
 /* ---------- music: a synthesized club loop, in time with the dancers ---------- */
 var AC=null,master=null,nextBeat=0,beatN=0,comp=null;
-function audio(){if(AC)return AC;try{AC=new (window.AudioContext||window.webkitAudioContext)();comp=AC.createDynamicsCompressor();comp.threshold.value=-14;comp.ratio.value=4;
+function audio(){if(AC)return AC;if(!wantSound()||G.other)return null;try{AC=new (window.AudioContext||window.webkitAudioContext)();comp=AC.createDynamicsCompressor();comp.threshold.value=-14;comp.ratio.value=4;
   master=AC.createGain();master.gain.value=cfg.music?0.4:0;master.connect(comp);comp.connect(AC.destination)}catch(e){AC=null}return AC}
-function unlock(){var a=audio();if(a&&a.state==="suspended")a.resume()}
+/* our own beat and sound effects only run when the host is NOT playing their music: an active sound engine can take
+   Android's audio focus and pause Spotify. When the lights follow the host's music, or another app is playing, it stays asleep. */
+function otherMusic(){try{return APP&&BusApp.otherMusic&&BusApp.otherMusic()}catch(e){return false}}
+function wantSound(){return cfg.music&&!cfg.sync}
+function unlock(){if(!wantSound())return;if((G.other=otherMusic())){quiet(true);return}var a=audio();if(a&&a.state==="suspended")a.resume()}
+function quiet(save_){if(AC&&AC.state==="running")AC.suspend();if(save_&&cfg.music){cfg.music=false;save();musicLabel()}}
+G.other=otherMusic();if(G.other&&cfg.music){cfg.music=false;save()}
+setInterval(function(){G.other=otherMusic();if(G.other&&cfg.music)quiet(true);else if(AC&&AC.state==="running"&&!wantSound())quiet()},2000);
 document.addEventListener("pointerdown",unlock,{passive:true});
 function music(now){if(!cfg.music||cfg.sync||!audio()||AC.state!=="running")return;var spb=60/cfg.bpm;
   if(nextBeat<AC.currentTime-0.2){var b=beat(now);beatN=Math.ceil(b);nextBeat=AC.currentTime+(beatN-b)*spb}
@@ -1441,7 +1448,7 @@ var TAPNOTE={full:"Quien toca aparece con su personaje, se lleva la cámara un m
 function paintTapSeg(){Array.prototype.forEach.call($("tapSeg").children,function(b){b.classList.toggle("on",b.dataset.m===cfg.tapMode)});$("tapNote").textContent=TAPNOTE[cfg.tapMode]||""}
 Array.prototype.forEach.call(document.querySelectorAll("#tapSeg button"),function(b){b.onclick=function(){cfg.tapMode=b.dataset.m;save();paintTapSeg();paintPrio();if(cfg.tapMode!=="full")showSlide(0)}});
 function musicLabel(){$("bMusic").textContent=cfg.music?"Música: sí":"Música: no"}
-$("bMusic").onclick=function(){cfg.music=!cfg.music;save();musicLabel();unlock();if(master)master.gain.setTargetAtTime(cfg.music?0.4:0,AC.currentTime,0.05)};
+$("bMusic").onclick=function(){cfg.music=!cfg.music;save();musicLabel();if(!cfg.music)quiet();unlock();if(master)master.gain.setTargetAtTime(cfg.music?0.4:0,AC.currentTime,0.05)};
 $("bDemo").onclick=function(){setDemo(!demo)};
 $("bHappy").onclick=function(){if(safeLive())return;if(happyOn()){happyUntil=0}else{happyUntil=perf()+5*60000;sfxLevel()}paintHappy()};
 function paintHappy(){var on=happyOn();$("hx2").hidden=!on;$("bHappy").disabled=safeLive();$("bHappy").textContent=on?"⏹ Parar la hora feliz":"⚡ ×2 durante 5 min";
