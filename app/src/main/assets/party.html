@@ -251,7 +251,7 @@ input[type=checkbox]{width:20px;height:20px;accent-color:var(--hot)}
         <p class="note">Ideal al empezar el directo para animar a la gente. La cámara los visita como a los que tocan (1,5 s cada uno, siempre después de los regalos). Quítalo cuando el directo se llene.</p>
       </div>
       <div class="grp"><h3>👩 👨 Cuerpos</h3>
-        <p class="note">Cada espectador recibe un cuerpo de chica o de chico según su nombre (Fatima, María, Mohamed, Carlos…), o uno neutro si no se sabe. Si escribe solo 👩 o 👨 (o «chica», «chico», «بنت», «ولد») en el chat, su personaje cambia al momento y se recuerda para los próximos directos. Cuerpos elegantes: chicas con vestido, tacones y peinados (melena, coleta, moño); chicos atléticos con sudadera, gorra o cascos.</p>
+        <p class="note">Cada espectador aparece al momento con un cuerpo neutro. Si escribe solo 👩 o 👨 (o «chica», «chico», «بنت», «ولد») en el chat, su personaje cambia al momento y se recuerda para los próximos directos. Cuerpos elegantes: chicas con vestido, tacones y peinados (melena, coleta, moño); chicos atléticos con sudadera, gorra o cascos.</p>
       </div>
       <div class="grp"><h3>🏛️ Salas</h3>
         <p class="note">La sala cambia sola para que el directo no canse (con un fundido corto). El cambio espera a que termine el momento de un regalo grande o la fiesta.</p>
@@ -612,7 +612,7 @@ var users={},focus=null,lastGiftAt=-1e9,firstGiftDone=false;
 function userOf(e){var uid=String(e.user||e.nick||"?"),u=users[uid];
   if(!u){u=users[uid]={uid:uid,nick:String(e.nick||e.user||"Fan"),av:"",img:null,face:null,label:null,hue:hashHue(uid),lastChat:-1e9,chars:[],coins:0,sCoins:0,likes:0,level:0,combo:0};
     var f=cfg.memory&&fans[uid];if(f){u.coins=f.c;u.level=levelOf(u.coins);u.returning=f.c>0;if(f.g){u.g=u.gSel=f.g}}
-    if(!u.g)u.g=guessG(u.nick)}
+    if(!u.g)u.g="n"}   /* no guessing from the name: everyone appears at once with a neutral body; 👩 / 👨 in a comment changes it */
   u.lastSeen=perf();
   /* a supporter from an earlier live walks back in with their level and outfits (no camera: that stays for gifts) */
   if(u.returning&&!u.welcomed&&!u.chars.length&&u.coins>=5&&e.type!=="gift"){u.welcomed=true;setTimeout(function(){if(!u.chars.length){var dw=addChar(u);if(dw){burst(dw);dw.party=perf()}}},0)}
