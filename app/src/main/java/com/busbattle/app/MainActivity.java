@@ -275,6 +275,7 @@ public class MainActivity extends Activity {
             ui.post(() -> { if (on) FloatOverlay.get(MainActivity.this).show(opts); else FloatOverlay.get(MainActivity.this).hide(); });
             return on ? "on" : "off";
         }
+        @JavascriptInterface public void floatTest() { ui.post(() -> FloatOverlay.get(MainActivity.this).test()); }
         @JavascriptInterface public String floatState() {
             if (FloatOverlay.get(MainActivity.this).isShown()) return "on";
             return FloatOverlay.allowed(MainActivity.this) ? "off" : "noperm";

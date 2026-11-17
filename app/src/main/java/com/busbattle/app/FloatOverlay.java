@@ -150,6 +150,23 @@ final class FloatOverlay {
         web = null; handle = null;
     }
 
+    /** About 20 s of made-up taps and gifts, so the host can check the stars over another app without a live. */
+    void test() {
+        final String[] names = {"Fatima", "Carlos", "Sara", "Youssef", "Lucia", "Omar", "Maria", "Hamza"};
+        final int[] coins = {1, 1, 5, 30, 1, 99, 1, 500};
+        for (int i = 0; i < 60; i++) {
+            final int k = i;
+            ui.postDelayed(() -> {
+                try {
+                    org.json.JSONObject e = new org.json.JSONObject().put("user", "test" + (k % 8)).put("nick", names[k % 8]);
+                    if (k % 6 == 5) e.put("type", "gift").put("gift", "Regalo").put("coins", coins[(k / 6) % 8]).put("count", 1);
+                    else e.put("type", "like").put("count", 1 + (k * 7) % 15);
+                    event(e.toString());
+                } catch (Exception ignored) {}
+            }, 600L + i * 330L);
+        }
+    }
+
     /** A live event (same JSON as the games get). Taps are dropped first if the page falls behind. */
     void event(String json) {
         if (!shown) return;
