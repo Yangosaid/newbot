@@ -407,6 +407,7 @@ public class MainActivity extends Activity {
         }, "copy-video").start();
     }
     private void stopBusyAudio() {
+        js("window.__busySndOff&&window.__busySndOff()");
         if (busyPlayer != null) { try { busyPlayer.stop(); } catch (Exception ignored) {} busyPlayer.release(); busyPlayer = null; }
     }
     /** Volume 0..1; 0 or off stops it. Started at the page's position so it matches the picture. No audio focus request on purpose. */
@@ -423,7 +424,7 @@ public class MainActivity extends Activity {
                 busyPlayer.prepare();
                 busyPlayer.seekTo(Math.max(0, (int) (atSec * 1000)));
                 busyPlayer.start();
-            } else if (atSec >= 0 && Math.abs(busyPlayer.getCurrentPosition() - atSec * 1000) > 400) busyPlayer.seekTo((int) (atSec * 1000));
+            }
             busyPlayer.setVolume(vol, vol);
         } catch (Exception e) { log("Sonido del vídeo: " + e); stopBusyAudio(); }
     }

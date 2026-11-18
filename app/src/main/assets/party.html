@@ -961,9 +961,11 @@ $("hostFile").onchange=function(){var f=this.files&&this.files[0];if(!f)return;v
 /* my looping video for "busy": kept in the phone's storage (IndexedDB), framed with pan and zoom */
 /* the video's sound: inside the app it is played by Android itself without taking the audio focus, so Spotify keeps playing
    (the picture in the bubble stays muted); in a browser preview the video element plays it */
+window.__busySndOff=function(){HOST.snd=false};   /* Android stopped the sound (app left the screen): start it fresh next time */
 function nativeSound(){return APP&&!!BusApp.busyAudio}
 function busySound(hv){var vol=clamp((+cfg.hostVol||0)/100,0,1);
-  if(nativeSound()){if(hv)hv.muted=true;try{BusApp.busyAudio(!!hv&&vol>0&&!document.hidden,vol,hv?hv.currentTime:0)}catch(e){}return}
+  /* the position is sent only when the sound starts; after that Android loops it on its own (re-syncing made it stutter) */
+  if(nativeSound()){if(hv)hv.muted=true;var on=!!hv&&vol>0&&!document.hidden;try{BusApp.busyAudio(on,vol,on&&!HOST.snd?hv.currentTime:-1)}catch(e){}HOST.snd=on;return}
   if(hv){hv.volume=vol;hv.muted=vol<=0}}
 function frameMedia(el){var x=+cfg.hostVx,y=+cfg.hostVy,z=Math.max(1,+cfg.hostVz||1);el.style.objectPosition=x+"% "+y+"%";el.style.backgroundPosition=x+"% "+y+"%";el.style.transformOrigin=x+"% "+y+"%";el.style.transform="scale("+z+")"}
 function mediaDB(cb){try{var rq=indexedDB.open("party_media",1);rq.onupgradeneeded=function(){rq.result.createObjectStore("m")};rq.onsuccess=function(){cb(rq.result)};rq.onerror=function(){cb(null)}}catch(e){cb(null)}}
@@ -978,8 +980,6 @@ $("hostVidFile").onchange=function(){var f=this.files&&this.files[0];if(!f)retur
 $("bHostVidDel").onclick=function(){if(APP&&BusApp.busyDelete)try{BusApp.busyDelete()}catch(e){}setVid(null);mediaDB(function(db){if(!db)return;try{db.transaction("m","readwrite").objectStore("m").delete("busyVid")}catch(e){}})};
 function vidFrame(){save();frameMedia($("hvPrevVid"));frameMedia($("hbVid"));frameMedia($("hbBg"))}
 $("hvV").oninput=function(){cfg.hostVol=+this.value;save();paintVidCtl();var hv=$("hbVid");busySound(hv.hidden||hv.paused?null:hv)};
-/* when the video starts over, the sound starts over with it */
-(function(){var lt=0;$("hbVid").addEventListener("timeupdate",function(){var hv=this;if(hv.currentTime+0.5<lt)busySound(hv);lt=hv.currentTime})})();
 document.addEventListener("visibilitychange",function(){var hv=$("hbVid");busySound(!document.hidden&&!hv.hidden&&!hv.paused?hv:null)});
 [["hvZ","hostVz"],["hvX","hostVx"],["hvY","hostVy"]].forEach(function(p){$(p[0]).oninput=function(){cfg[p[1]]=+this.value;vidFrame()}});
 /* drag on the preview to choose the part of the video that shows */
