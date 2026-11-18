@@ -53,6 +53,9 @@ public class MainActivity extends Activity {
     private static final int REQ_AUDIO = 11;
     private static final int REQ_CAM = 12;
     private android.webkit.PermissionRequest camRequest;
+    private boolean pickingVideo;
+    /* the sound of the host's "busy" video, played natively WITHOUT asking for audio focus, so Spotify keeps playing alongside */
+    private android.media.MediaPlayer busyPlayer;
 
     @SuppressLint({"SetJavaScriptEnabled", "AddJavascriptInterface"})
     @Override
@@ -113,6 +116,7 @@ public class MainActivity extends Activity {
                 fileCallback = cb;
                 String type = "image/*";
                 for (String t : p.getAcceptTypes()) if (t != null && t.startsWith("video")) type = "video/*";
+                pickingVideo = type.startsWith("video");
                 Intent i = new Intent(Intent.ACTION_GET_CONTENT).addCategory(Intent.CATEGORY_OPENABLE).setType(type);
                 try { startActivityForResult(Intent.createChooser(i, type.startsWith("video") ? "Vídeo" : "Imagen"), PICK_FILE); }
                 catch (ActivityNotFoundException e) { fileCallback = null; return false; }
@@ -275,6 +279,10 @@ public class MainActivity extends Activity {
             ui.post(() -> { if (on) FloatOverlay.get(MainActivity.this).show(opts); else FloatOverlay.get(MainActivity.this).hide(); });
             return on ? "on" : "off";
         }
+        @JavascriptInterface public boolean hasBusyAudio() { return busyFile().exists(); }
+        @JavascriptInterface public void busyAudio(final boolean on, final double vol, final double atSec) { ui.post(() -> busyAudio(on, (float) vol, (float) atSec)); }
+        @JavascriptInterface public void busyDelete() { ui.post(() -> { stopBusyAudio(); //noinspection ResultOfMethodCallIgnored
+            busyFile().delete(); }); }
         @JavascriptInterface public void floatTest() { ui.post(() -> FloatOverlay.get(MainActivity.this).test()); }
         @JavascriptInterface public String floatState() {
             if (FloatOverlay.get(MainActivity.this).isShown()) return "on";
@@ -378,8 +386,49 @@ public class MainActivity extends Activity {
         super.onActivityResult(req, res, data);
         if (req != PICK_FILE || fileCallback == null) return;
         Uri u = res == RESULT_OK && data != null ? data.getData() : null;
+        if (u != null && pickingVideo) copyBusyVideo(u);
         fileCallback.onReceiveValue(u == null ? null : new Uri[]{u});
         fileCallback = null;
+    }
+
+    private java.io.File busyFile() { return new java.io.File(getFilesDir(), "busy_video"); }
+    private void copyBusyVideo(final Uri u) {
+        stopBusyAudio();
+        new Thread(() -> {
+            java.io.File tmp = new java.io.File(getFilesDir(), "busy_video.part");
+            try (java.io.InputStream in = getContentResolver().openInputStream(u); java.io.OutputStream out = new java.io.FileOutputStream(tmp)) {
+                byte[] buf = new byte[65536]; int n;
+                while (in != null && (n = in.read(buf)) > 0) out.write(buf, 0, n);
+            } catch (Exception e) { tmp.delete(); return; }
+            //noinspection ResultOfMethodCallIgnored
+            tmp.renameTo(busyFile());
+        }, "copy-video").start();
+    }
+    private void stopBusyAudio() {
+        if (busyPlayer != null) { try { busyPlayer.stop(); } catch (Exception ignored) {} busyPlayer.release(); busyPlayer = null; }
+    }
+    /** Volume 0..1; 0 or off stops it. Started at the page's position so it matches the picture. No audio focus request on purpose. */
+    private void busyAudio(boolean on, float vol, float atSec) {
+        if (!on || vol <= 0 || !busyFile().exists()) { stopBusyAudio(); return; }
+        try {
+            if (busyPlayer == null) {
+                busyPlayer = new android.media.MediaPlayer();
+                busyPlayer.setAudioAttributes(new android.media.AudioAttributes.Builder()
+                        .setUsage(android.media.AudioAttributes.USAGE_MEDIA).setContentType(android.media.AudioAttributes.CONTENT_TYPE_MOVIE).build());
+                busyPlayer.setDataSource(busyFile().getAbsolutePath());
+                busyPlayer.setLooping(true);
+                busyPlayer.prepare();
+                busyPlayer.seekTo(Math.max(0, (int) (atSec * 1000)));
+                busyPlayer.start();
+            } else if (atSec >= 0 && Math.abs(busyPlayer.getCurrentPosition() - atSec * 1000) > 400) busyPlayer.seekTo((int) (atSec * 1000));
+            busyPlayer.setVolume(vol, vol);
+        } catch (Exception e) { stopBusyAudio(); }
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        stopBusyAudio();   // the bubble is only seen while the app is on screen
     }
 
     @Override
@@ -401,6 +450,7 @@ public class MainActivity extends Activity {
     protected void onDestroy() {
         ui.removeCallbacks(flusher);
         FloatOverlay.get(this).hide();
+        stopBusyAudio();
         if (music != null) music.stop();
         if (live != null) live.stop();
         live = null;

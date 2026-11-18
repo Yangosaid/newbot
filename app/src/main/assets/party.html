@@ -238,10 +238,10 @@ input[type=checkbox]{width:20px;height:20px;accent-color:var(--hot)}
         <div class="ln"><button class="btn" id="bBlur">🌫️ Difuminar</button><button class="btn" id="bHostPic">🖼️ Mi foto para «ocupado»</button><input type="file" id="hostFile" accept="image/*" hidden></div>
         <div class="ln"><button class="btn" id="bHostVid">🎬 Mi vídeo para «ocupado»</button><button class="btn" id="bHostVidDel" hidden>✖</button><input type="file" id="hostVidFile" accept="video/*" hidden></div>
         <div id="hvBox" hidden>
-          <p class="note">El vídeo se repite solo. Mueve el dedo sobre la vista previa para elegir la parte que se ve, acerca con 🔍 y elige el volumen con 🔊 (a la izquierda del todo = sin sonido). Si pones música en Spotify, deja el vídeo sin sonido: un vídeo con sonido para Spotify.</p>
+          <p class="note">El vídeo se repite solo. Mueve el dedo sobre la vista previa para elegir la parte que se ve, acerca con 🔍 y elige el volumen con 🔊 (a la izquierda del todo = sin sonido). El sonido del vídeo se mezcla con Spotify: los dos suenan a la vez.</p>
           <div id="hvEdit"><div id="hvPrev"><video id="hvPrevVid" loop muted playsinline></video></div>
             <div class="sl"><label>🔍<input type="range" id="hvZ" min="1" max="3" step="0.05"></label><label>↔<input type="range" id="hvX" min="0" max="100" step="1"></label><label>↕<input type="range" id="hvY" min="0" max="100" step="1"></label>
-              <label>🔊<input type="range" id="hvV" min="0" max="100" step="1"></label><span class="note" id="hvVn"></span></div></div>
+              <label>🔊<input type="range" id="hvV" min="0" max="100" step="1"></label><span class="note" id="hvVn"></span><span class="note" id="hvOld" hidden>🔊 Vuelve a elegir el vídeo una vez para que suene junto a Spotify.</span></div></div>
         </div>
         <div class="ln" id="busyBtns"><button class="btn" data-b="">🎥</button><button class="btn" data-b="☕">☕</button><button class="btn" data-b="🍽️">🍽️</button><button class="btn" data-b="📞">📞</button><button class="btn" data-b="🎮">🎮</button><button class="btn" data-b="🚗">🚗</button><button class="btn" data-b="💤">💤</button></div>
         <label class="ln"><input type="checkbox" id="oHostSup"><span>Mientras estoy ocupado, mi burbuja enseña la foto del último que envía un regalo ❤️</span></label>
@@ -931,8 +931,8 @@ function setBusy(ic){if(ic&&!HOST.busy){var v=$("hostCam");try{if(v.videoWidth){
 function hostPic(){try{return localStorage.getItem("party_hostpic")||""}catch(e){return ""}}
 function paintBusy(){var b=$("hostBusy"),hv=$("hbVid");b.hidden=!HOST.busy;$("host").classList.toggle("away",!!HOST.busy);
   var useVid=!!(HOST.busy&&HOST.vidURL);$("host").classList.toggle("vid",useVid);hv.hidden=!useVid;
-  if(useVid){if(hv.dataset.src!==HOST.vidURL){hv.dataset.src=HOST.vidURL;hv.src=HOST.vidURL}var vol=clamp((+cfg.hostVol||0)/100,0,1);hv.volume=vol;hv.muted=vol<=0;frameMedia(hv);if(hv.paused)hv.play().catch(function(){hv.muted=true;hv.play().catch(function(){})})}
-  else if(!hv.paused)hv.pause();
+  if(useVid){if(hv.dataset.src!==HOST.vidURL){hv.dataset.src=HOST.vidURL;hv.src=HOST.vidURL}frameMedia(hv);busySound(hv);if(hv.paused)hv.play().catch(function(){hv.muted=true;hv.play().catch(function(){})})}
+  else{if(!hv.paused)hv.pause();busySound(null)}
   if(!HOST.busy)return;
   var sup=!useVid&&cfg.hostSup&&lastSup&&lastSup.av,bg=useVid?"":sup?lastSup.av:hostPic()||HOST.frame||"";frameMedia($("hbBg"));
   $("hbBg").style.backgroundImage=bg?'url("'+bg.replace(/"/g,"%22")+'")':"none";$("hbBg").classList.toggle("sup",!!sup);
@@ -959,19 +959,28 @@ $("bHostPic").onclick=function(){$("hostFile").click()};
 $("hostFile").onchange=function(){var f=this.files&&this.files[0];if(!f)return;var rd=new FileReader();rd.onload=function(){var im=new Image();im.onload=function(){var c=document.createElement("canvas");c.width=c.height=256;var x=c.getContext("2d"),s=Math.min(im.width,im.height);
     x.drawImage(im,(im.width-s)/2,(im.height-s)/2,s,s,0,0,256,256);try{localStorage.setItem("party_hostpic",c.toDataURL("image/jpeg",0.85))}catch(e){}paintBusy()};im.src=rd.result};rd.readAsDataURL(f)};
 /* my looping video for "busy": kept in the phone's storage (IndexedDB), framed with pan and zoom */
+/* the video's sound: inside the app it is played by Android itself without taking the audio focus, so Spotify keeps playing
+   (the picture in the bubble stays muted); in a browser preview the video element plays it */
+function nativeSound(){return APP&&!!BusApp.busyAudio}
+function busySound(hv){var vol=clamp((+cfg.hostVol||0)/100,0,1);
+  if(nativeSound()){if(hv)hv.muted=true;try{BusApp.busyAudio(!!hv&&vol>0&&!document.hidden,vol,hv?hv.currentTime:0)}catch(e){}return}
+  if(hv){hv.volume=vol;hv.muted=vol<=0}}
 function frameMedia(el){var x=+cfg.hostVx,y=+cfg.hostVy,z=Math.max(1,+cfg.hostVz||1);el.style.objectPosition=x+"% "+y+"%";el.style.backgroundPosition=x+"% "+y+"%";el.style.transformOrigin=x+"% "+y+"%";el.style.transform="scale("+z+")"}
 function mediaDB(cb){try{var rq=indexedDB.open("party_media",1);rq.onupgradeneeded=function(){rq.result.createObjectStore("m")};rq.onsuccess=function(){cb(rq.result)};rq.onerror=function(){cb(null)}}catch(e){cb(null)}}
 function setVid(blob){if(HOST.vidURL){URL.revokeObjectURL(HOST.vidURL);HOST.vidURL=""}if(blob)HOST.vidURL=URL.createObjectURL(blob);
   $("hvBox").hidden=$("bHostVidDel").hidden=!HOST.vidURL;var pv=$("hvPrevVid");if(HOST.vidURL){pv.src=HOST.vidURL;frameMedia(pv);pv.play().catch(function(){})}else{pv.removeAttribute("src");pv.load()}
   $("hbVid").dataset.src="";paintBusy();paintVidCtl()}
-function paintVidCtl(){$("hvV").value=String(cfg.hostVol||0);$("hvVn").textContent=(+cfg.hostVol>0?cfg.hostVol+"%":"🔇");$("hvZ").value=String(cfg.hostVz);$("hvX").value=String(cfg.hostVx);$("hvY").value=String(cfg.hostVy)}
+function paintVidCtl(){var old=HOST.vidURL&&APP&&BusApp.hasBusyAudio&&!BusApp.hasBusyAudio();$("hvOld").hidden=!old;$("hvV").value=String(cfg.hostVol||0);$("hvVn").textContent=(+cfg.hostVol>0?cfg.hostVol+"%":"🔇");$("hvZ").value=String(cfg.hostVz);$("hvX").value=String(cfg.hostVx);$("hvY").value=String(cfg.hostVy)}
 mediaDB(function(db){if(!db)return;try{var g=db.transaction("m").objectStore("m").get("busyVid");g.onsuccess=function(){if(g.result)setVid(g.result)}}catch(e){}});
 $("bHostVid").onclick=function(){$("hostVidFile").click()};
 $("hostVidFile").onchange=function(){var f=this.files&&this.files[0];if(!f)return;cfg.hostVx=50;cfg.hostVy=50;cfg.hostVz=1;save();setVid(f);
   mediaDB(function(db){if(!db)return;try{db.transaction("m","readwrite").objectStore("m").put(f,"busyVid")}catch(e){}})};
-$("bHostVidDel").onclick=function(){setVid(null);mediaDB(function(db){if(!db)return;try{db.transaction("m","readwrite").objectStore("m").delete("busyVid")}catch(e){}})};
+$("bHostVidDel").onclick=function(){if(APP&&BusApp.busyDelete)try{BusApp.busyDelete()}catch(e){}setVid(null);mediaDB(function(db){if(!db)return;try{db.transaction("m","readwrite").objectStore("m").delete("busyVid")}catch(e){}})};
 function vidFrame(){save();frameMedia($("hvPrevVid"));frameMedia($("hbVid"));frameMedia($("hbBg"))}
-$("hvV").oninput=function(){cfg.hostVol=+this.value;save();paintVidCtl();var hv=$("hbVid"),vol=cfg.hostVol/100;hv.volume=vol;hv.muted=vol<=0;if(!hv.paused&&vol>0)hv.play().catch(function(){})};
+$("hvV").oninput=function(){cfg.hostVol=+this.value;save();paintVidCtl();var hv=$("hbVid");busySound(hv.hidden||hv.paused?null:hv)};
+/* when the video starts over, the sound starts over with it */
+(function(){var lt=0;$("hbVid").addEventListener("timeupdate",function(){var hv=this;if(hv.currentTime+0.5<lt)busySound(hv);lt=hv.currentTime})})();
+document.addEventListener("visibilitychange",function(){var hv=$("hbVid");busySound(!document.hidden&&!hv.hidden&&!hv.paused?hv:null)});
 [["hvZ","hostVz"],["hvX","hostVx"],["hvY","hostVy"]].forEach(function(p){$(p[0]).oninput=function(){cfg[p[1]]=+this.value;vidFrame()}});
 /* drag on the preview to choose the part of the video that shows */
 (function(){var on=false,sx=0,sy=0,ox=0,oy=0,pv=$("hvPrev");
