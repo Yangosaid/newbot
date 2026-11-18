@@ -52,15 +52,26 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          gh release delete apk --yes --cleanup-tag || true
-          gh release create apk bus-battle.apk --target "$GITHUB_SHA" --prerelease \
-            --title "Bus Battle APK (build ${GITHUB_RUN_NUMBER})" \
-            --notes "Built from ${GITHUB_REF_NAME} @ ${GITHUB_SHA::7}. Download bus-battle.apk on the phone and install it."
-          gh release delete vidsaver --yes --cleanup-tag || true
-          gh release create vidsaver vidsaver-arm64.apk vidsaver-armv7.apk --target "$GITHUB_SHA" --prerelease \
-            --title "VidSaver APK (build ${GITHUB_RUN_NUMBER})" \
-            --notes "TikTok / YouTube / Shorts downloader. Most phones: vidsaver-arm64.apk. Older 32-bit phones: vidsaver-armv7.apk."
-          gh release delete vox-psoe --yes --cleanup-tag || true
-          gh release create vox-psoe vox-vs-psoe.apk --target "$GITHUB_SHA" --prerelease \
-            --title "VOX vs PSOE - YouTube (build ${GITHUB_RUN_NUMBER})" \
-            --notes "Bus battle for YouTube live chat: every comment naming a team pushes its buses; Super Chats and members count extra."
+          # Replace each file without taking the download link down: upload the new file under a temporary name, then
+          # delete the old one and rename the new one (a gap of milliseconds instead of the whole upload).
+          publish() {
+            tag="$1"; title="$2"; notes="$3"; shift 3
+            if ! gh release view "$tag" >/dev/null 2>&1; then
+              gh release create "$tag" "$@" --target "$GITHUB_SHA" --prerelease --title "$title" --notes "$notes"; return
+            fi
+            for f in "$@"; do
+              cp "$f" "new-$f"
+              gh release upload "$tag" "new-$f" --clobber
+              old=$(gh api "repos/$GITHUB_REPOSITORY/releases/tags/$tag" --jq ".assets[]|select(.name==\"$f\")|.id")
+              new=$(gh api "repos/$GITHUB_REPOSITORY/releases/tags/$tag" --jq ".assets[]|select(.name==\"new-$f\")|.id")
+              if [ -n "$old" ]; then gh api -X DELETE "repos/$GITHUB_REPOSITORY/releases/assets/$old"; fi
+              gh api -X PATCH "repos/$GITHUB_REPOSITORY/releases/assets/$new" -f name="$f" >/dev/null
+            done
+            gh release edit "$tag" --title "$title" --notes "$notes"
+          }
+          publish apk "Bus Battle APK (build ${GITHUB_RUN_NUMBER})" \
+            "Built from ${GITHUB_REF_NAME} @ ${GITHUB_SHA::7}. Download bus-battle.apk on the phone and install it." bus-battle.apk
+          publish vidsaver "VidSaver APK (build ${GITHUB_RUN_NUMBER})" \
+            "TikTok / YouTube / Shorts downloader. Most phones: vidsaver-arm64.apk. Older 32-bit phones: vidsaver-armv7.apk." vidsaver-arm64.apk vidsaver-armv7.apk
+          publish vox-psoe "VOX vs PSOE - YouTube (build ${GITHUB_RUN_NUMBER})" \
+            "Bus battle for YouTube live chat: every comment naming a team pushes its buses; Super Chats and members count extra." vox-vs-psoe.apk
