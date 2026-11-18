@@ -51,7 +51,11 @@ body{background:var(--night);color:var(--ink);font-family:var(--body);overflow:h
 #lobby .clk b{position:absolute;inset:0;display:grid;place-items:center;font:800 22px/1 var(--display)}
 #lobby .flag{font-size:30px}
 #lobby .hint{display:flex;align-items:center;gap:8px;font-size:30px}
-#lobby .hint .tap{animation:tap .8s ease-in-out infinite}
+#lobby .hint .tap{position:relative;display:inline-block;width:36px;text-align:center;animation:tap .8s ease-in-out infinite}
+#lobby .hint .tap i{position:absolute;font-style:normal;font-size:14px;left:22px;top:-6px;animation:heart 1.6s ease-out infinite}
+#lobby .hint .tap i+i{left:0;top:-2px;animation-delay:.8s}
+@keyframes heart{0%{opacity:0;transform:translateY(6px) scale(.6)}25%{opacity:1}100%{opacity:0;transform:translateY(-18px) scale(1.1)}}
+
 #lobby .hint svg{width:30px;height:20px}
 #lobby .cnt{font:800 20px/1 var(--display);color:var(--ink-dim)}
 @keyframes tap{0%,100%{transform:translateY(0)}50%{transform:translateY(5px) scale(.92)}}
@@ -110,7 +114,7 @@ input[type=checkbox]{width:20px;height:20px;accent-color:var(--hot)}
   <div id="lobby" aria-hidden="true" hidden>
     <div class="clk"><svg viewBox="0 0 54 54"><circle cx="27" cy="27" r="23" fill="none" stroke="rgba(255,255,255,.18)" stroke-width="5"/><circle id="clkArc" cx="27" cy="27" r="23" fill="none" stroke="#ff3d8b" stroke-width="5" stroke-linecap="round" stroke-dasharray="144.5" stroke-dashoffset="0"/></svg><b id="clkN">15</b></div>
     <span class="flag">🏎️</span><span class="cnt" id="lobN"></span>
-    <span class="hint" id="lobHint"><span class="tap" id="hintIc">👆</span><svg viewBox="0 0 34 22"><path d="M2 11h24M18 3l9 8-9 8" fill="none" stroke="#fff" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"/></svg><span>🏁</span></span>
+    <span class="hint" id="lobHint"><span class="tap"><span id="hintIc">👆</span><i>❤️</i><i>❤️</i></span><svg viewBox="0 0 34 22"><path d="M2 11h24M18 3l9 8-9 8" fill="none" stroke="#fff" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"/></svg><span>🏁</span></span>
   </div>
   <div id="big" aria-hidden="true" hidden></div>
   <div id="win" aria-hidden="true" hidden><span class="cup">🏆</span><div class="ph" id="winPh"></div><div class="nm" id="winNm"></div><div class="w" id="winW"></div></div>

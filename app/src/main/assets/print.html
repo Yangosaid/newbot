@@ -25,7 +25,11 @@ body{background:var(--night);color:var(--ink);font-family:var(--body);overflow:h
 /* language-free hint: 👆 ➜ 🖨️ with the photo of the card being printed */
 #hint{position:absolute;left:50%;top:calc(env(safe-area-inset-top,0px) + 12%);transform:translateX(-50%);display:flex;align-items:center;gap:10px;padding:7px 14px 7px 12px;
   border-radius:999px;background:rgba(20,12,6,.6);border:1px solid rgba(255,255,255,.16);pointer-events:none;box-shadow:0 8px 30px rgba(0,0,0,.35)}
-#hint .tap{font-size:32px;line-height:1;animation:tap .8s ease-in-out infinite}
+#hint .tap{position:relative;font-size:32px;line-height:1;width:40px;text-align:center;animation:tap .8s ease-in-out infinite}
+#hint .tap i{position:absolute;font-style:normal;font-size:15px;left:24px;top:-6px;animation:heart 1.6s ease-out infinite}
+#hint .tap i+i{left:2px;top:-2px;animation-delay:.8s}
+@keyframes heart{0%{opacity:0;transform:translateY(6px) scale(.6)}25%{opacity:1}100%{opacity:0;transform:translateY(-18px) scale(1.1)}}
+
 #hint svg{width:30px;height:20px}
 #hint .pr{font-size:32px;line-height:1}
 #hint .me{width:46px;height:46px;border-radius:50%;overflow:hidden;border:2px solid #fff;display:grid;place-items:center;font:800 18px/1 var(--display);background:rgba(255,255,255,.12)}
@@ -63,7 +67,7 @@ input[type=checkbox]{width:20px;height:20px;accent-color:var(--hot)}
 <div id="stage">
   <canvas id="gl"></canvas>
   <div id="nogl" hidden>Este teléfono no puede mostrar gráficos 3D.</div>
-  <div id="hint" aria-hidden="true"><span class="tap">👆</span><svg viewBox="0 0 34 22"><path d="M2 11h24M18 3l9 8-9 8" fill="none" stroke="#fff" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"/></svg><span class="pr">🖨️</span><div class="me" id="hintMe">📷</div></div>
+  <div id="hint" aria-hidden="true"><span class="tap">👆<i>❤️</i><i>❤️</i></span><svg viewBox="0 0 34 22"><path d="M2 11h24M18 3l9 8-9 8" fill="none" stroke="#fff" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"/></svg><span class="pr">🖨️</span><div class="me" id="hintMe">📷</div></div>
   <button id="gear" aria-label="Ajustes">⚙<i id="dot"></i></button>
 
   <div id="sheet" hidden>
