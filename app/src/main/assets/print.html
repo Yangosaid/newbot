@@ -94,7 +94,7 @@ input[type=checkbox]{width:20px;height:20px;accent-color:var(--hot)}
         <div class="ln"><label for="oFlSize">Tamaño</label><select id="oFlSize"><option value="0.8">Pequeño</option><option value="1">Normal</option><option value="1.25">Grande</option></select></div>
       </div>
       <div class="grp"><h3>🎁 Placa de regalos</h3>
-        <p class="note">Una placa de cristal oscuro con marco dorado montada en la máquina, siempre a la vista: 🌹 ➜ tarjeta · 🪙10 ➜ tarjeta dorada · 🪙100 ➜ póster · 🪙1000 ➜ página entera. Solo dibujos y números. Recuerda que TikTok castiga pedir regalos de forma automática: explícalo también tú con tu voz y quítala si vuelve a haber una restricción.</p>
+        <p class="note">Una placa de cristal oscuro con marco dorado montada en la máquina, siempre a la vista: 👆 ➜ tarjeta · 🌹 ➜ tarjeta roja · 🪙10 ➜ tarjeta dorada · 🪙100 ➜ póster · 🪙1000 ➜ página entera. Solo dibujos y números. Recuerda que TikTok castiga pedir regalos de forma automática: explícalo también tú con tu voz y quítala si vuelve a haber una restricción.</p>
         <label class="ln"><input type="checkbox" id="oPlaque"><span>Mostrar la placa</span></label>
       </div>
       <div class="grp"><h3>🎨 Aspecto</h3>
@@ -462,7 +462,7 @@ function onEvent(e){if(!e||!e.type)return;
     paintHint();paintMon()}}
 
 /* ---------- hint ---------- */
-function paintHint(){var el=$("hint");el.hidden=!cfg.hint;var u=job?job.items[0].u:latest();
+function paintHint(){var el=$("hint");el.hidden=!cfg.hint||!!cfg.plaque;var u=job?job.items[0].u:latest();
   $("hintMe").innerHTML=u&&u.src?'<img alt="" referrerpolicy="no-referrer" src="'+esc(u.src)+'">':u?'<span style="display:grid;place-items:center;width:100%;height:100%;background:hsl('+u.hue+',70%,45%)">'+esc(initial(u.nick))+'</span>':"📷";
 }
 
@@ -506,28 +506,30 @@ function plaqueCanvas(){var W2=1600,H2=230,c=document.createElement("canvas");c.
   var bg=x.createLinearGradient(0,0,0,H2);bg.addColorStop(0,"#1d1830");bg.addColorStop(0.5,"#0f0c1c");bg.addColorStop(1,"#191428");x.fillStyle=bg;x.fillRect(0,0,W2,H2);
   var gl=x.createLinearGradient(0,0,0,H2*0.5);gl.addColorStop(0,"rgba(255,255,255,.16)");gl.addColorStop(1,"rgba(255,255,255,0)");x.fillStyle=gl;x.fillRect(0,0,W2,H2*0.5);   /* glass shine */
   x.lineWidth=8;x.strokeStyle=goldGrad(x,0,0,W2,H2);x.strokeRect(6,6,W2-12,H2-12);x.lineWidth=2;x.strokeRect(20,20,W2-40,H2-40);
-  var cw=(W2-40)/4;
+  var cw=(W2-40)/5;
   function coin(cx,cy,n){x.save();var g=x.createRadialGradient(cx-8,cy-8,4,cx,cy,30);g.addColorStop(0,"#fff3b0");g.addColorStop(1,"#d39b12");x.fillStyle=g;x.beginPath();x.arc(cx,cy-20,27,0,7);x.fill();
     x.lineWidth=3;x.strokeStyle="#8a5d00";x.stroke();x.restore();x.font="800 44px 'Barlow Condensed',Arial";x.fillStyle="#ffd76a";x.textAlign="center";x.textBaseline="middle";x.fillText(n,cx,cy+40)}
   function arrow(cx,cy){x.save();x.strokeStyle="rgba(255,255,255,.75)";x.lineWidth=7;x.lineCap="round";x.beginPath();x.moveTo(cx-22,cy);x.lineTo(cx+18,cy);x.moveTo(cx+4,cy-14);x.lineTo(cx+20,cy);x.lineTo(cx+4,cy+14);x.stroke();x.restore()}
-  function miniCard(cx,cy,w,h,gold,rainbow){x.save();x.fillStyle=gold?"#fff4d0":"#fffdf8";x.fillRect(cx-w/2,cy-h/2,w,h);
-    x.lineWidth=gold||rainbow?7:5;if(rainbow){var rb=x.createLinearGradient(cx-w/2,0,cx+w/2,0);for(var k=0;k<=6;k++)rb.addColorStop(k/6,"hsl("+k*60+",90%,60%)");x.strokeStyle=rb}else x.strokeStyle=gold?goldGrad(x,cx-w/2,cy-h/2,cx+w/2,cy+h/2):"#e0284f";
+  function miniCard(cx,cy,w,h,gold,rainbow,plain){x.save();x.fillStyle=gold?"#fff4d0":"#fffdf8";x.fillRect(cx-w/2,cy-h/2,w,h);
+    x.lineWidth=gold||rainbow?7:5;if(rainbow){var rb=x.createLinearGradient(cx-w/2,0,cx+w/2,0);for(var k=0;k<=6;k++)rb.addColorStop(k/6,"hsl("+k*60+",90%,60%)");x.strokeStyle=rb}else x.strokeStyle=gold?goldGrad(x,cx-w/2,cy-h/2,cx+w/2,cy+h/2):plain?"#2a2a33":"#e0284f";
     x.strokeRect(cx-w/2+3,cy-h/2+3,w-6,h-6);var wide=w>h,r=Math.min(w,h)*0.26,px=wide?cx-w*0.22:cx,py=wide?cy:cy-h*0.12;
     x.fillStyle="#9aa6b8";x.beginPath();x.arc(px,py,r,0,7);x.fill();x.fillStyle="#dfe4ec";x.beginPath();x.arc(px,py-r*0.25,r*0.38,0,7);x.fill();
     x.fillStyle="#3a3a44";if(wide)x.fillRect(cx+w*0.04,cy-4,w*0.34,8);else x.fillRect(cx-w*0.3,cy+h*0.28,w*0.6,7);
     if(gold||rainbow){x.font=Math.round(Math.min(w,h)*0.26)+"px serif";x.textAlign="center";x.textBaseline="middle";x.fillText(rainbow?"👑":"✨",px,cy-h/2+Math.min(w,h)*0.12)}x.restore()}
   var cy=H2/2+2,L=function(i){return 20+cw*i};
-  /* each cell: the gift on the left, the arrow in the middle, what it prints on the right */
-  x.font="80px serif";x.textAlign="center";x.textBaseline="middle";x.fillText("🌹",L(0)+80,cy);arrow(L(0)+175,cy);miniCard(L(0)+285,cy,96,124,false,false);
-  coin(L(1)+80,cy,"10");arrow(L(1)+175,cy);miniCard(L(1)+285,cy,96,124,true,false);
-  coin(L(2)+80,cy,"100");arrow(L(2)+175,cy);miniCard(L(2)+290,cy,160,104,true,false);
-  coin(L(3)+80,cy,"1000");arrow(L(3)+175,cy);miniCard(L(3)+285,cy,116,150,false,true);
-  x.strokeStyle="rgba(255,201,60,.45)";x.lineWidth=2;for(var i=1;i<4;i++){x.beginPath();x.moveTo(20+cw*i,40);x.lineTo(20+cw*i,H2-40);x.stroke()}
+  /* each cell: the tap or gift on the left, the arrow in the middle, what it prints on the right */
+  x.textAlign="center";x.textBaseline="middle";x.font="76px serif";x.fillText("👆",L(0)+66,cy+8);x.font="34px serif";x.fillText("❤️",L(0)+100,cy-40);x.fillText("❤️",L(0)+40,cy-52);
+  arrow(L(0)+148,cy);miniCard(L(0)+235,cy,92,118,false,false,true);
+  x.font="76px serif";x.fillText("🌹",L(1)+66,cy);arrow(L(1)+148,cy);miniCard(L(1)+235,cy,92,118,false,false);
+  coin(L(2)+66,cy,"10");arrow(L(2)+148,cy);miniCard(L(2)+235,cy,92,118,true,false);
+  coin(L(3)+66,cy,"100");arrow(L(3)+148,cy);miniCard(L(3)+232,cy,140,92,true,false);
+  coin(L(4)+66,cy,"1000");arrow(L(4)+148,cy);miniCard(L(4)+235,cy,104,136,false,true);
+  x.strokeStyle="rgba(255,201,60,.45)";x.lineWidth=2;for(var i=1;i<5;i++){x.beginPath();x.moveTo(20+cw*i,40);x.lineTo(20+cw*i,H2-40);x.stroke()}
   return c}
 function buildPlaque(){var pg=new T.Group();G.bridge.add(pg);G.plaque=pg;
-  var bez=new T.Mesh(new T.BoxGeometry(6.6,0.98,0.08),new T.MeshStandardMaterial({color:0x0c0a14,roughness:0.3,metalness:0.8}));pg.add(bez);
-  var face=new T.Mesh(new T.PlaneGeometry(6.48,0.93),new T.MeshBasicMaterial({map:tex(plaqueCanvas()),toneMapped:false}));face.position.z=0.045;pg.add(face);
-  [-1,1].forEach(function(sd){var post=new T.Mesh(new T.CylinderGeometry(0.04,0.04,0.7,10),G.mMetal);post.position.set(sd*2.9,-0.55,-0.06);pg.add(post)});
+  var bez=new T.Mesh(new T.BoxGeometry(7.2,1.08,0.08),new T.MeshStandardMaterial({color:0x0c0a14,roughness:0.3,metalness:0.8}));pg.add(bez);
+  var face=new T.Mesh(new T.PlaneGeometry(7.06,1.02),new T.MeshBasicMaterial({map:tex(plaqueCanvas()),toneMapped:false}));face.position.z=0.045;pg.add(face);
+  [-1,1].forEach(function(sd){var post=new T.Mesh(new T.CylinderGeometry(0.04,0.04,0.7,10),G.mMetal);post.position.set(sd*3.2,-0.6,-0.06);pg.add(post)});
   /* tilted toward the camera so it reads straight on */
   pg.position.set(0,1.75,-0.25);pg.rotation.x=-0.78;pg.visible=!!cfg.plaque}
 /* ---------- camera ---------- */
@@ -553,7 +555,7 @@ window.addEventListener("resize",resize);
 
 /* ---------- settings ---------- */
 function fill(){$("oPlaque").checked=cfg.plaque;$("oLookMin").value=String(cfg.lookMin);$("oQ").value=cfg.q;$("oAuto").checked=cfg.auto;$("oNeed").value=String(cfg.need);$("oAgain").value=String(cfg.again2);$("oSpeed").value=String(cfg.speed);$("oHint").checked=cfg.hint;$("oRepeat").checked=cfg.repeat}
-function bind(id,key,num){var el=$(id);el.onchange=function(){cfg[key]=el.type==="checkbox"?el.checked:num?+el.value:el.value;save();if(key==="plaque"&&G.plaque)G.plaque.visible=cfg.plaque;if(key==="q")applyQuality();paintHint()}}
+function bind(id,key,num){var el=$(id);el.onchange=function(){cfg[key]=el.type==="checkbox"?el.checked:num?+el.value:el.value;save();if(key==="plaque"&&G.plaque){G.plaque.visible=cfg.plaque;paintHint()}if(key==="q")applyQuality();paintHint()}}
 bind("oQ","q");bind("oPlaque","plaque");bind("oLookMin","lookMin",1);bind("oAuto","auto");bind("oNeed","need",1);bind("oAgain","again2",1);bind("oSpeed","speed",1);bind("oHint","hint");bind("oRepeat","repeat");
 function openSheet(o){$("sheet").hidden=!o;$("gear").hidden=o;if(o){fill();paintMon()}}
 $("gear").onclick=function(){openSheet(true)};$("close").onclick=function(){openSheet(false)};
