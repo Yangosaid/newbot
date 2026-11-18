@@ -79,7 +79,7 @@ input[type=checkbox]{width:20px;height:20px;accent-color:var(--hot)}
     </div>
     <div class="pane" id="pCtl">
       <div class="grp"><h3>🖨️ Imprenta</h3>
-        <p class="note">Cada espectador que toca la pantalla sale impreso en una tarjeta con su foto y su nombre. La máquina imprime línea a línea, el papel avanza y las tarjetas caen por el borde. Cuatro tarjetas por página, dos por fila; el papel avanza tirado por los rodillos mientras el cabezal imprime. Sin lista de espera: imprime a los últimos que han tocado. Quien ya está en la página no se vuelve a imprimir aunque toque; cuando la página se llena, se queda un momento y avanza.</p>
+        <p class="note">Cada espectador que toca la pantalla sale impreso en una tarjeta con su foto y su nombre. La máquina imprime línea a línea, el papel avanza y las tarjetas caen por el borde. Cuatro tarjetas por página, dos por fila; el papel avanza tirado por los rodillos mientras el cabezal imprime. Sin lista de espera: imprime a los últimos que han tocado. Si quitas «varias veces en la misma página» (Reglas), quien ya está en la página no se vuelve a imprimir aunque toque; cuando la página se llena, se queda un momento y avanza.</p>
               </div>
       <div class="grp"><h3>🫧 Estrellas flotantes (encima de cualquier juego)</h3>
         <p class="note">Sale encima de cualquier app que abras durante el directo (otro juego, YouTube…): los que tocan suben como burbujas con su foto y su nombre, y cada regalo entra como una tarjeta con la foto, el nombre y el regalo (el de más valor primero). No bloquea el juego de debajo. Muévela arrastrando el pequeño ✥; doble toque en ✥ la esconde un momento. La primera vez Android pide permiso para «mostrar sobre otras apps».</p>
@@ -108,6 +108,7 @@ input[type=checkbox]{width:20px;height:20px;accent-color:var(--hot)}
         <div class="ln"><label for="oNeed">Toques para salir impreso</label><select id="oNeed"><option value="1">1</option><option value="5">5</option><option value="15">15</option><option value="30">30</option></select></div>
         <div class="ln"><label for="oAgain">La misma persona puede volver a salir tras</label><select id="oAgain"><option value="-1">En la página siguiente</option><option value="60">1 min</option><option value="180">3 min</option><option value="600">10 min</option><option value="0">Solo una vez por directo</option></select></div>
         <div class="ln"><label for="oSpeed">Velocidad de la máquina</label><select id="oSpeed"><option value="0.7">Lenta</option><option value="1">Normal</option><option value="1.5">Rápida</option></select></div>
+        <label class="ln"><input type="checkbox" id="oRepeat"><span>La misma persona puede salir varias veces en la misma página (si toca otra vez)</span></label>
         <label class="ln"><input type="checkbox" id="oHint"><span>Mostrar el dibujo 👆 ➜ 🖨️ arriba</span></label>
       </div>
     </div>
@@ -132,7 +133,7 @@ var APP=!!window.BusApp;
 var SRC=APP&&BusApp.getSource?String(BusApp.getSource()):"tiktok",YT=SRC==="youtube";
 try{localStorage.setItem("game","print")}catch(e){}
 
-var DEF={need:1,again2:-1,speed:1,hint:true,q:"ultra",auto:true,flTaps:true,flGifts:true,flWall:true,flJoin:false,flSize:1};
+var DEF={need:1,again2:-1,repeat:true,speed:1,hint:true,q:"ultra",auto:true,flTaps:true,flGifts:true,flWall:true,flJoin:false,flSize:1};
 var cfg=Object.assign({},DEF);
 try{var sv=JSON.parse(localStorage.getItem("print1")||"null");if(sv)cfg=Object.assign(cfg,sv)}catch(e){}
 function save(){try{localStorage.setItem("print1",JSON.stringify(cfg))}catch(e){}}
@@ -274,7 +275,7 @@ function perforation(u){onTape(u,0.05,function(y){tapeX.fillStyle="rgba(80,60,40
    No waiting list: when the machine is free it prints whoever tapped LAST (among those who tapped in the last 15 s), and the one
    before them for the second card of the row. Nobody already on the current page is printed again, however much they tap. */
 var job=null,page={users:[],rows:0},pendSince=0,gapLeft=0;
-function eligible(u,now){if(page.users.indexOf(u)>=0||u.taps<Math.max(1,cfg.need|0))return false;var again=+cfg.again2;
+function eligible(u,now){if((!cfg.repeat&&page.users.indexOf(u)>=0)||u.taps<Math.max(1,cfg.need|0))return false;var again=+cfg.again2;
   if(!u.lastPrint||again<0)return true;return again>0&&now-u.lastPrint>again*1000}
 function candidates(){var now=perf(),a=[];for(var k in users){var u=users[k];if(now-u.lastTap<=15000&&eligible(u,now))a.push(u)}return a.sort(function(x,y){return y.lastTap-x.lastTap})}
 function latest(){return candidates()[0]||null}
@@ -342,9 +343,9 @@ function resize(){W=innerWidth;H=innerHeight;if(!ok3d)return;var pr=Math.min(win
 window.addEventListener("resize",resize);
 
 /* ---------- settings ---------- */
-function fill(){$("oQ").value=cfg.q;$("oAuto").checked=cfg.auto;$("oNeed").value=String(cfg.need);$("oAgain").value=String(cfg.again2);$("oSpeed").value=String(cfg.speed);$("oHint").checked=cfg.hint}
+function fill(){$("oQ").value=cfg.q;$("oAuto").checked=cfg.auto;$("oNeed").value=String(cfg.need);$("oAgain").value=String(cfg.again2);$("oSpeed").value=String(cfg.speed);$("oHint").checked=cfg.hint;$("oRepeat").checked=cfg.repeat}
 function bind(id,key,num){var el=$(id);el.onchange=function(){cfg[key]=el.type==="checkbox"?el.checked:num?+el.value:el.value;save();if(key==="q")applyQuality();paintHint()}}
-bind("oQ","q");bind("oAuto","auto");bind("oNeed","need",1);bind("oAgain","again2",1);bind("oSpeed","speed",1);bind("oHint","hint");
+bind("oQ","q");bind("oAuto","auto");bind("oNeed","need",1);bind("oAgain","again2",1);bind("oSpeed","speed",1);bind("oHint","hint");bind("oRepeat","repeat");
 function openSheet(o){$("sheet").hidden=!o;$("gear").hidden=o;if(o){fill();paintMon()}}
 $("gear").onclick=function(){openSheet(true)};$("close").onclick=function(){openSheet(false)};
 Array.prototype.forEach.call(document.querySelectorAll(".tab"),function(b){b.onclick=function(){
