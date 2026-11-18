@@ -63,7 +63,7 @@ input[type=checkbox]{width:20px;height:20px;accent-color:var(--hot)}
 <div id="stage">
   <canvas id="gl"></canvas>
   <div id="nogl" hidden>Este teléfono no puede mostrar gráficos 3D.</div>
-  <div id="hint" aria-hidden="true"><span class="tap">👆</span><svg viewBox="0 0 34 22"><path d="M2 11h24M18 3l9 8-9 8" fill="none" stroke="#fff" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"/></svg><span class="pr">🖨️</span><div class="me" id="hintMe">📷</div><span class="q" id="hintQ"></span></div>
+  <div id="hint" aria-hidden="true"><span class="tap">👆</span><svg viewBox="0 0 34 22"><path d="M2 11h24M18 3l9 8-9 8" fill="none" stroke="#fff" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"/></svg><span class="pr">🖨️</span><div class="me" id="hintMe">📷</div></div>
   <button id="gear" aria-label="Ajustes">⚙<i id="dot"></i></button>
 
   <div id="sheet" hidden>
@@ -75,9 +75,8 @@ input[type=checkbox]{width:20px;height:20px;accent-color:var(--hot)}
     </div>
     <div class="pane" id="pCtl">
       <div class="grp"><h3>🖨️ Imprenta</h3>
-        <p class="note">Cada espectador que toca la pantalla sale impreso en una tarjeta con su foto y su nombre. La máquina imprime línea a línea, el papel avanza y las tarjetas caen por el borde. Si tocan muchos a la vez, se imprime primero a los últimos que han tocado.</p>
-        <div class="ln"><button class="btn" id="bClear">Vaciar la cola</button></div>
-      </div>
+        <p class="note">Cada espectador que toca la pantalla sale impreso en una tarjeta con su foto y su nombre. La máquina imprime línea a línea, el papel avanza y las tarjetas caen por el borde. Sin lista de espera: cuando la máquina termina una tarjeta, imprime al último que ha tocado.</p>
+              </div>
       <div class="grp"><h3>🫧 Estrellas flotantes (encima de cualquier juego)</h3>
         <p class="note">Sale encima de cualquier app que abras durante el directo (otro juego, YouTube…): los que tocan suben como burbujas con su foto y su nombre, y cada regalo entra como una tarjeta con la foto, el nombre y el regalo (el de más valor primero). No bloquea el juego de debajo. Muévela arrastrando el pequeño ✥; doble toque en ✥ la esconde un momento. La primera vez Android pide permiso para «mostrar sobre otras apps».</p>
         <div class="ln"><button class="btn go" id="bFloat">Activar</button><button class="btn" id="bFloatTest">🧪 Probar 20 s</button><span class="note" id="floatSt"></span></div>
@@ -239,20 +238,20 @@ function drawCard(u,style){var c=document.createElement("canvas");c.width=512;c.
   return c}
 
 /* cards on the paper: each one is printed line by line (its visible canvas grows from the far edge), then the paper carries it forward */
-var cards=[],queue=[],job=null,advance=0,paperShift=0;
+var cards=[],job=null,advance=0,paperShift=0;
 function makeCardMesh(full){var vis=document.createElement("canvas");vis.width=full.width;vis.height=full.height;var t=tex(vis);
   var m=new T.Mesh(new T.PlaneGeometry(CW,CH),new T.MeshStandardMaterial({map:t,transparent:true,roughness:0.75}));m.rotation.x=-Math.PI/2;m.position.set(0,0.02,PZ0+CH/2);m.receiveShadow=true;
   scene.add(m);return {mesh:m,full:full,vis:vis,t:t,z:PZ0+CH/2,fall:0}}
 function revealTo(c,f){var x=c.vis.getContext("2d"),h=Math.round(c.full.height*f);x.clearRect(0,0,c.vis.width,c.vis.height);if(h>0)x.drawImage(c.full,0,0,c.full.width,h,0,0,c.full.width,h);c.t.needsUpdate=true}
 function freeCard(c){scene.remove(c.mesh);c.mesh.geometry.dispose();c.mesh.material.dispose();c.t.dispose()}
 
-function enqueue(u){if(u.queued)return;u.queued=true;queue.push(u);
-  /* many at once: the latest tappers first, and never more than 25 waiting */
-  if(queue.length>25){var drop=queue.shift();drop.queued=false}paintHint()}
-function startJob(){if(!queue.length||!ok3d)return;var u=queue.pop();u.queued=false;ensurePhoto(u);
+/* no waiting list: when the machine is free it prints whoever tapped LAST (among those who tapped in the last 15 s) */
+function eligible(u,now){var again=+cfg.again;return u.taps>=Math.max(1,cfg.need|0)&&(!u.lastPrint||(again>0&&now-u.lastPrint>again*1000))}
+function latest(){var now=perf(),b=null;for(var k in users){var u=users[k];if(now-u.lastTap>15000||!eligible(u,now))continue;if(!b||u.lastTap>b.lastTap)b=u}return b}
+function startJob(){if(!ok3d)return;var u=latest();if(!u)return;ensurePhoto(u);
   job={u:u,t0:perf(),wait:u.img||!u.av?0:1400,card:null,style:pick(STYLES)};paintHint()}
 
-function stepPrinter(now,dt){var sp=+cfg.speed||1,busy=queue.length>4?1.6:1;
+function stepPrinter(now,dt){var sp=+cfg.speed||1,busy=1;
   if(advance>0){var d=Math.min(advance,dt*(3.2*sp*busy));advance-=d;cards.forEach(function(c){c.z+=d});paperShift+=d}
   else if(!job)startJob();
   if(job&&advance<=0){
@@ -276,14 +275,13 @@ function onEvent(e){if(!e||!e.type)return;
   if(e.type==="status"){setStatus(e.ok,e.text);return}
   if(YT&&e.type==="chat")e={type:"like",user:e.user,nick:e.nick,avatar:e.avatar,count:1};   /* YouTube has no taps: a comment prints */
   if(e.type==="like"){var c=Math.max(1,e.count|0);mon.l+=c;var u=userOf(e),now=perf();u.taps+=c;u.lastTap=now;
-    var again=+cfg.again,can=!u.lastPrint||(again>0&&now-u.lastPrint>again*1000);
-    if(can&&!u.queued&&(job?job.u!==u:true)&&u.taps>=Math.max(1,cfg.need|0)){ensurePhoto(u);enqueue(u)}
-    paintMon()}}
+    if(eligible(u,now))ensurePhoto(u);
+    paintHint();paintMon()}}
 
 /* ---------- hint ---------- */
-function paintHint(){var el=$("hint");el.hidden=!cfg.hint;var u=job?job.u:queue[queue.length-1];
+function paintHint(){var el=$("hint");el.hidden=!cfg.hint;var u=job?job.u:latest();
   $("hintMe").innerHTML=u&&u.src?'<img alt="" referrerpolicy="no-referrer" src="'+esc(u.src)+'">':u?'<span style="display:grid;place-items:center;width:100%;height:100%;background:hsl('+u.hue+',70%,45%)">'+esc(initial(u.nick))+'</span>':"📷";
-  $("hintQ").textContent=queue.length?"+"+queue.length:"";$("hintMe").firstChild&&0}
+}
 
 /* ---------- camera ---------- */
 function stepCamera(now){var t=now/1000,portrait=W/H<0.75,z=job?G.bridge.position.z:-1;
@@ -294,7 +292,7 @@ var last=perf(),fpsAcc=0,fpsN=0,fpsT=perf(),slow=0;
 function frame(){var now=perf(),dt=Math.min(0.05,(now-last)/1000);last=now;
   if(ok3d){stepPrinter(now,dt);stepInk(dt);stepCamera(now);
     if(composer)composer.render(dt);else R.render(scene,cam);
-    fpsAcc+=dt;fpsN++;if(now-fpsT>2000){var fps=fpsN/fpsAcc;fpsT=now;fpsAcc=0;fpsN=0;$("perf").textContent=Math.round(fps)+" fps · "+cfg.q+" · "+queue.length+" en cola";
+    fpsAcc+=dt;fpsN++;if(now-fpsT>2000){var fps=fpsN/fpsAcc;fpsT=now;fpsAcc=0;fpsN=0;$("perf").textContent=Math.round(fps)+" fps · "+cfg.q;
       if(cfg.auto&&fps<40){if(++slow>=3){slow=0;var qi=QORDER.indexOf(cfg.q);if(qi<QORDER.length-1){cfg.q=QORDER[qi+1];save();applyQuality();fill()}}}else slow=0}}
   requestAnimationFrame(frame)}
 function applyQuality(){if(!ok3d)return;Q=QUALITY[cfg.q]||QUALITY.ultra;R.shadowMap.enabled=cfg.q!=="ahorro";
@@ -314,7 +312,6 @@ function openSheet(o){$("sheet").hidden=!o;$("gear").hidden=o;if(o){fill();paint
 $("gear").onclick=function(){openSheet(true)};$("close").onclick=function(){openSheet(false)};
 Array.prototype.forEach.call(document.querySelectorAll(".tab"),function(b){b.onclick=function(){
   Array.prototype.forEach.call(document.querySelectorAll(".tab"),function(x){x.setAttribute("aria-selected",x===b);$(x.dataset.p).hidden=x!==b})}});
-$("bClear").onclick=function(){queue.forEach(function(u){u.queued=false});queue=[];paintHint()};
 function go(g,page){try{localStorage.setItem("game",g)}catch(e){}location.href=page}
 $("bParty").onclick=function(){go("party","party.html")};$("bRace").onclick=function(){go("race","race.html")};$("bBus").onclick=function(){go("bus","index.html")};
 var tn=0,TN=["Fatima","Carlos","Sara","Youssef","Lucia","Omar","Maria","Hamza"];
@@ -345,10 +342,10 @@ $("bFloat").onclick=function(){if(!APP||!BusApp.floatShow)return;var on=flState(
 document.addEventListener("visibilitychange",function(){if(!document.hidden)paintFloat()});
 paintFloat();
 
-setInterval(function(){var now=perf();for(var k in users){var u=users[k];if(now-u.lastTap>1800000&&!u.queued)delete users[k]}},60000);
+setInterval(function(){var now=perf();for(var k in users){var u=users[k];if(now-u.lastTap>1800000)delete users[k]}},60000);
 function wake(){try{navigator.wakeLock&&navigator.wakeLock.request("screen").catch(function(){})}catch(e){}}
 document.addEventListener("visibilitychange",function(){if(!document.hidden)wake()});
-window.__print=function(){return {queue:queue.map(function(u){return u.nick}),job:job&&job.u.nick,cards:cards.length,printed:mon.p}};
+window.__print=function(){return {next:(latest()||{}).nick,job:job&&job.u.nick,cards:cards.length,printed:mon.p}};
 fill();applyQuality();paintHint();wake();if(ok3d)requestAnimationFrame(frame);
 })();
 </script>
