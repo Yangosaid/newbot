@@ -274,7 +274,13 @@ function eligible(u,now){if(page.users.indexOf(u)>=0||u.taps<Math.max(1,cfg.need
   if(!u.lastPrint||again<0)return true;return again>0&&now-u.lastPrint>again*1000}
 function candidates(){var now=perf(),a=[];for(var k in users){var u=users[k];if(now-u.lastTap<=15000&&eligible(u,now))a.push(u)}return a.sort(function(x,y){return y.lastTap-x.lastTap})}
 function latest(){return candidates()[0]||null}
-function tryStart(now){var c=candidates();if(!c.length){pendSince=0;return}
+function tryStart(now){var c=candidates();
+  if(!c.length){pendSince=0;
+    /* only people who are already on this page keep tapping (e.g. a single tapper): after a few seconds the page is closed,
+       so they can be printed again on the next one instead of the machine waiting forever */
+    if(page.users.length&&now-(G.rowEnd||0)>6000){var blocked=page.users.some(function(u){return now-u.lastTap<6000&&u.taps>=Math.max(1,cfg.need|0)});
+      if(blocked){gapLeft=PGAP;perforation(feedS+PGAP/2);page={users:[],rows:0}}}
+    return}
   /* one person waiting: give a second one a moment to tap, so the row is full */
   if(c.length<2){if(!pendSince)pendSince=now;if(now-pendSince<2500)return}
   var us=c.slice(0,2);us.forEach(function(u){ensurePhoto(u);page.users.push(u)});pendSince=0;
@@ -288,7 +294,7 @@ function stepPrinter(now,dt){var sp=+cfg.speed||1;
     /* line feed: the motor pulls the paper in small steps while the head runs across */
     var dur=2.6/sp,step=0.07;if(now-job.last>step/(CH/dur)*1000){job.last=now;feedTo=Math.min(job.u0+CH,feedTo+step)}
     G.head.position.x=Math.sin(now/110)*(PW/2-0.6);G.led.color.setHex(Math.sin(now/80)>0?0x33ff88:0x0b3a1f);if(Math.random()<0.8)ink(G.head.position.x,PL+0.05);
-    if(feedS>=job.u0+CH-0.005){job.users.forEach(function(u){u.lastPrint=now;mon.p++});paintMon();page.rows++;job=null;G.led.color.setHex(0x33ff88);
+    if(feedS>=job.u0+CH-0.005){job.users.forEach(function(u){u.lastPrint=now;mon.p++});paintMon();page.rows++;G.rowEnd=now;job=null;G.led.color.setHex(0x33ff88);
       if(page.rows>=2){gapLeft=PGAP;perforation(feedS+PGAP/2);page={users:[],rows:0}}else gapLeft=ROWGAP;paintHint()}}
   else G.head.position.x=damp(G.head.position.x,0,3,dt);
   var prev=feedS;feedS=damp(feedS,feedTo,22,dt);var v=(feedS-prev)/Math.max(dt,1e-3);clearTo(feedS+2);
