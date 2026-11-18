@@ -75,7 +75,7 @@ input[type=checkbox]{width:20px;height:20px;accent-color:var(--hot)}
     </div>
     <div class="pane" id="pCtl">
       <div class="grp"><h3>🖨️ Imprenta</h3>
-        <p class="note">Cada espectador que toca la pantalla sale impreso en una tarjeta con su foto y su nombre. La máquina imprime línea a línea, el papel avanza y las tarjetas caen por el borde. Sin lista de espera: cuando la máquina termina una tarjeta, imprime al último que ha tocado.</p>
+        <p class="note">Cada espectador que toca la pantalla sale impreso en una tarjeta con su foto y su nombre. La máquina imprime línea a línea, el papel avanza y las tarjetas caen por el borde. Cuatro tarjetas por página. Sin lista de espera: cuando la máquina termina una tarjeta, imprime al último que ha tocado. Quien ya está en la página no se vuelve a imprimir aunque toque; cuando la página se llena, se queda un momento y avanza.</p>
               </div>
       <div class="grp"><h3>🫧 Estrellas flotantes (encima de cualquier juego)</h3>
         <p class="note">Sale encima de cualquier app que abras durante el directo (otro juego, YouTube…): los que tocan suben como burbujas con su foto y su nombre, y cada regalo entra como una tarjeta con la foto, el nombre y el regalo (el de más valor primero). No bloquea el juego de debajo. Muévela arrastrando el pequeño ✥; doble toque en ✥ la esconde un momento. La primera vez Android pide permiso para «mostrar sobre otras apps».</p>
@@ -102,7 +102,7 @@ input[type=checkbox]{width:20px;height:20px;accent-color:var(--hot)}
     <div class="pane" id="pRules" hidden>
       <div class="grp"><h3>Impresión</h3>
         <div class="ln"><label for="oNeed">Toques para salir impreso</label><select id="oNeed"><option value="1">1</option><option value="5">5</option><option value="15">15</option><option value="30">30</option></select></div>
-        <div class="ln"><label for="oAgain">La misma persona puede volver a salir tras</label><select id="oAgain"><option value="60">1 min</option><option value="180">3 min</option><option value="600">10 min</option><option value="0">Solo una vez por directo</option></select></div>
+        <div class="ln"><label for="oAgain">La misma persona puede volver a salir tras</label><select id="oAgain"><option value="-1">En la página siguiente</option><option value="60">1 min</option><option value="180">3 min</option><option value="600">10 min</option><option value="0">Solo una vez por directo</option></select></div>
         <div class="ln"><label for="oSpeed">Velocidad de la máquina</label><select id="oSpeed"><option value="0.7">Lenta</option><option value="1">Normal</option><option value="1.5">Rápida</option></select></div>
         <label class="ln"><input type="checkbox" id="oHint"><span>Mostrar el dibujo 👆 ➜ 🖨️ arriba</span></label>
       </div>
@@ -128,7 +128,7 @@ var APP=!!window.BusApp;
 var SRC=APP&&BusApp.getSource?String(BusApp.getSource()):"tiktok",YT=SRC==="youtube";
 try{localStorage.setItem("game","print")}catch(e){}
 
-var DEF={need:1,again:180,speed:1,hint:true,q:"ultra",auto:true,flTaps:true,flGifts:true,flWall:true,flJoin:false,flSize:1};
+var DEF={need:1,again2:-1,speed:1,hint:true,q:"ultra",auto:true,flTaps:true,flGifts:true,flWall:true,flJoin:false,flSize:1};
 var cfg=Object.assign({},DEF);
 try{var sv=JSON.parse(localStorage.getItem("print1")||"null");if(sv)cfg=Object.assign(cfg,sv)}catch(e){}
 function save(){try{localStorage.setItem("print1",JSON.stringify(cfg))}catch(e){}}
@@ -150,7 +150,8 @@ var scene,cam,G={};
 function tex(c){var t=new T.CanvasTexture(c);t.colorSpace=T.SRGBColorSpace;t.anisotropy=R?Math.min(8,R.capabilities.getMaxAnisotropy()):1;return t}
 function std(c,r,m){return new T.MeshStandardMaterial({color:c,roughness:r,metalness:m||0})}
 /* layout (metres): paper 6 wide running from the roll (z=-6.4) to the front edge of the desk (z=4.6); cards 3.4 × 4.2 */
-var PW=6,CW=3.4,CH=4.2,GAP=0.7,PZ0=-5.3,EDGE=4.6;   /* a card prints between z=PZ0 and PZ0+CH */
+var PW=6,CW=2.7,CH=3.33,ROWGAP=0.35,PGAP=0.8,PZ0=-6.1,EDGE=4.6;   /* a page = 4 cards (2 × 2) printed between z=PZ0 and PZ0+2·CH+ROWGAP */
+var SLOTS=[[-1.5,0],[1.5,0],[-1.5,1],[1.5,1]];function slotZ(row){return PZ0+CH/2+row*(CH+ROWGAP)}
 
 if(ok3d){
   R.outputColorSpace=T.SRGBColorSpace;R.toneMapping=T.ACESFilmicToneMapping;R.toneMappingExposure=1.05;R.shadowMap.enabled=true;R.shadowMap.type=T.PCFSoftShadowMap;
@@ -192,8 +193,8 @@ function buildDesk(){
 
 function buildPrinter(){var met=std(0xbfc5cf,0.25,0.95),dark=std(0x26272d,0.35,0.7);
   /* two side rails along the paper, a bridge that slides along them, and the head that runs across the bridge */
-  [-1,1].forEach(function(sd){var rail=new T.Mesh(new T.CylinderGeometry(0.09,0.09,7.6,16),met);rail.rotation.x=Math.PI/2;rail.position.set(sd*(PW/2+0.55),0.9,-3.1);rail.castShadow=true;scene.add(rail);
-    [-6.7,0.5].forEach(function(z){var ft=new T.Mesh(new T.BoxGeometry(0.5,1.0,0.5),dark);ft.position.set(sd*(PW/2+0.55),0.5,z);ft.castShadow=true;scene.add(ft)})});
+  [-1,1].forEach(function(sd){var rail=new T.Mesh(new T.CylinderGeometry(0.09,0.09,8.6,16),met);rail.rotation.x=Math.PI/2;rail.position.set(sd*(PW/2+0.55),0.9,-2.6);rail.castShadow=true;scene.add(rail);
+    [-6.85,1.6].forEach(function(z){var ft=new T.Mesh(new T.BoxGeometry(0.5,1.0,0.5),dark);ft.position.set(sd*(PW/2+0.55),0.5,z);ft.castShadow=true;scene.add(ft)})});
   var bridge=new T.Group();scene.add(bridge);G.bridge=bridge;
   var bar=new T.Mesh(new T.CylinderGeometry(0.1,0.1,PW+1.3,16),met);bar.rotation.z=Math.PI/2;bar.position.y=0.9;bar.castShadow=true;bridge.add(bar);
   [-1,1].forEach(function(sd){var sl=new T.Mesh(new T.BoxGeometry(0.45,0.45,0.6),dark);sl.position.set(sd*(PW/2+0.55),0.9,0);sl.castShadow=true;bridge.add(sl)});
@@ -237,36 +238,39 @@ function drawCard(u,style){var c=document.createElement("canvas");c.width=512;c.
   x.font="34px serif";x.fillText("❤",cx-tw/2-30,ty+2);x.fillText("❤",cx+tw/2+30,ty+2);
   return c}
 
-/* cards on the paper: each one is printed line by line (its visible canvas grows from the far edge), then the paper carries it forward */
-var cards=[],job=null,advance=0,paperShift=0;
-function makeCardMesh(full){var vis=document.createElement("canvas");vis.width=full.width;vis.height=full.height;var t=tex(vis);
-  var m=new T.Mesh(new T.PlaneGeometry(CW,CH),new T.MeshStandardMaterial({map:t,transparent:true,roughness:0.75}));m.rotation.x=-Math.PI/2;m.position.set(0,0.02,PZ0+CH/2);m.receiveShadow=true;
-  scene.add(m);return {mesh:m,full:full,vis:vis,t:t,z:PZ0+CH/2,fall:0}}
+/* cards on the paper: four per page; each one is printed line by line (its visible canvas grows from the far edge).
+   When the page is full it stays a moment, then the paper carries it forward and the cards drop over the edge. */
+var cards=[],job=null,advance=0,paperShift=0,page={users:[],n:0,fullAt:0};
+function makeCardMesh(full,x,z){var vis=document.createElement("canvas");vis.width=full.width;vis.height=full.height;var t=tex(vis);
+  var m=new T.Mesh(new T.PlaneGeometry(CW,CH),new T.MeshStandardMaterial({map:t,transparent:true,roughness:0.75}));m.rotation.x=-Math.PI/2;m.position.set(x,0.02,z);m.receiveShadow=true;
+  scene.add(m);return {mesh:m,full:full,vis:vis,t:t,x:x,z:z,fall:0}}
 function revealTo(c,f){var x=c.vis.getContext("2d"),h=Math.round(c.full.height*f);x.clearRect(0,0,c.vis.width,c.vis.height);if(h>0)x.drawImage(c.full,0,0,c.full.width,h,0,0,c.full.width,h);c.t.needsUpdate=true}
 function freeCard(c){scene.remove(c.mesh);c.mesh.geometry.dispose();c.mesh.material.dispose();c.t.dispose()}
 
-/* no waiting list: when the machine is free it prints whoever tapped LAST (among those who tapped in the last 15 s) */
-function eligible(u,now){var again=+cfg.again;return u.taps>=Math.max(1,cfg.need|0)&&(!u.lastPrint||(again>0&&now-u.lastPrint>again*1000))}
+/* no waiting list: when the machine is free it prints whoever tapped LAST (among those who tapped in the last 15 s);
+   nobody already on the current page is printed again, however much they tap */
+function eligible(u,now){if(page.users.indexOf(u)>=0||u.taps<Math.max(1,cfg.need|0))return false;var again=+cfg.again2;
+  if(!u.lastPrint||again<0)return true;return again>0&&now-u.lastPrint>again*1000}
 function latest(){var now=perf(),b=null;for(var k in users){var u=users[k];if(now-u.lastTap>15000||!eligible(u,now))continue;if(!b||u.lastTap>b.lastTap)b=u}return b}
-function startJob(){if(!ok3d)return;var u=latest();if(!u)return;ensurePhoto(u);
-  job={u:u,t0:perf(),wait:u.img||!u.av?0:1400,card:null,style:pick(STYLES)};paintHint()}
+function startJob(){if(!ok3d||page.n>=4)return;var u=latest();if(!u)return;ensurePhoto(u);page.users.push(u);
+  var sl=SLOTS[page.n];job={u:u,t0:perf(),wait:u.img||!u.av?0:1400,card:null,style:pick(STYLES),x:sl[0],z:slotZ(sl[1]),slot:page.n};page.n++;paintHint()}
 
-function stepPrinter(now,dt){var sp=+cfg.speed||1,busy=1;
-  if(advance>0){var d=Math.min(advance,dt*(3.2*sp*busy));advance-=d;cards.forEach(function(c){c.z+=d});paperShift+=d}
-  else if(!job)startJob();
+function stepPrinter(now,dt){var sp=+cfg.speed||1;
+  if(advance>0){var d=Math.min(advance,dt*3.4*sp);advance-=d;cards.forEach(function(c){c.z+=d});paperShift+=d}
+  else if(!job){if(page.n>=4){if(!page.fullAt)page.fullAt=now;else if(now-page.fullAt>1800/sp){advance=2*CH+ROWGAP+PGAP;page={users:[],n:0,fullAt:0}}}else startJob()}
   if(job&&advance<=0){
-    if(!job.card){if(now-job.t0<job.wait&&!job.u.img)return;job.card=makeCardMesh(drawCard(job.u,job.style));cards.push(job.card);job.p=0}
-    var dur=2.6/(sp*busy);job.p=Math.min(1,job.p+dt/dur);revealTo(job.card,job.p);
-    /* bridge follows the printed line; the head runs side to side */
-    G.bridge.position.z=PZ0+job.p*CH;G.head.position.x=Math.sin(now/90)*CW*0.45;G.led.color.setHex(Math.sin(now/80)>0?0x33ff88:0x0b3a1f);
+    if(!job.card){if(now-job.t0<job.wait&&!job.u.img)return;job.card=makeCardMesh(drawCard(job.u,job.style),job.x,job.z);cards.push(job.card);job.p=0}
+    var dur=2.4/sp;job.p=Math.min(1,job.p+dt/dur);revealTo(job.card,job.p);
+    /* bridge follows the printed line; the head runs side to side over this card */
+    G.bridge.position.z=job.z-CH/2+job.p*CH;G.head.position.x=job.x+Math.sin(now/90)*CW*0.42;G.led.color.setHex(Math.sin(now/80)>0?0x33ff88:0x0b3a1f);
     if(Math.random()<0.8)ink(G.head.position.x,G.bridge.position.z);
-    if(job.p>=1){job.u.lastPrint=now;mon.p++;paintMon();job=null;advance=CH+GAP;G.led.color.setHex(0x33ff88)}}
+    if(job.p>=1){job.u.lastPrint=now;mon.p++;paintMon();job=null;G.led.color.setHex(0x33ff88);paintHint()}}
   else{G.bridge.position.z=damp(G.bridge.position.z,PZ0,4,dt);G.head.position.x=damp(G.head.position.x,0,4,dt)}
   /* the roll turns while the paper moves; cards past the edge tip over and drop */
   G.roll.rotation.x=-paperShift/0.62;G.paperT.offset.y=paperShift/((EDGE+6.4)/4);
   for(var i=cards.length-1;i>=0;i--){var c=cards[i],m=c.mesh;
-    if(c.z-CH/2>EDGE-0.2){c.fall+=dt;m.rotation.x=-Math.PI/2+Math.min(Math.PI/2,c.fall*2.6);m.position.set(0,0.02-c.fall*c.fall*6,c.z+c.fall*0.6);if(c.fall>1.6){freeCard(c);cards.splice(i,1)}}
-    else m.position.set(0,0.02,c.z)}}
+    if(c.z-CH/2>EDGE-0.2){c.fall+=dt;m.rotation.x=-Math.PI/2+Math.min(Math.PI/2,c.fall*2.6);m.position.set(c.x,0.02-c.fall*c.fall*6,c.z+c.fall*0.6);if(c.fall>1.6){freeCard(c);cards.splice(i,1)}}
+    else m.position.set(c.x,0.02,c.z)}}
 function ink(x,z){var p=G.inkP[G.inkI];G.inkI=(G.inkI+1)%G.inkP.length;p.x=x+rnd(-0.05,0.05);p.y=0.15;p.z=z+rnd(-0.05,0.05);p.v=0}
 function stepInk(dt){var a=G.ink.geometry.attributes.position.array;G.inkP.forEach(function(p,i){if(p.y>0.03){p.v+=9*dt;p.y-=p.v*dt}else p.y=-9;a[i*3]=p.x;a[i*3+1]=p.y;a[i*3+2]=p.z});G.ink.geometry.attributes.position.needsUpdate=true}
 
@@ -285,7 +289,7 @@ function paintHint(){var el=$("hint");el.hidden=!cfg.hint;var u=job?job.u:latest
 
 /* ---------- camera ---------- */
 function stepCamera(now){var t=now/1000,portrait=W/H<0.75,z=job?G.bridge.position.z:-1;
-  cam.position.set(Math.sin(t*0.15)*0.6,portrait?13.5:10,portrait?6.8:6.5);cam.lookAt(0,0,portrait?-0.6+(z+1)*0.12:-0.8)}
+  cam.position.set(Math.sin(t*0.15)*0.6,portrait?15.5:11,portrait?7.4:6.8);cam.lookAt(0,0,portrait?-1.4+(z+2.6)*0.08:-1.6)}
 
 /* ---------- loop ---------- */
 var last=perf(),fpsAcc=0,fpsN=0,fpsT=perf(),slow=0;
@@ -305,9 +309,9 @@ function resize(){W=innerWidth;H=innerHeight;if(!ok3d)return;var pr=Math.min(win
 window.addEventListener("resize",resize);
 
 /* ---------- settings ---------- */
-function fill(){$("oQ").value=cfg.q;$("oAuto").checked=cfg.auto;$("oNeed").value=String(cfg.need);$("oAgain").value=String(cfg.again);$("oSpeed").value=String(cfg.speed);$("oHint").checked=cfg.hint}
+function fill(){$("oQ").value=cfg.q;$("oAuto").checked=cfg.auto;$("oNeed").value=String(cfg.need);$("oAgain").value=String(cfg.again2);$("oSpeed").value=String(cfg.speed);$("oHint").checked=cfg.hint}
 function bind(id,key,num){var el=$(id);el.onchange=function(){cfg[key]=el.type==="checkbox"?el.checked:num?+el.value:el.value;save();if(key==="q")applyQuality();paintHint()}}
-bind("oQ","q");bind("oAuto","auto");bind("oNeed","need",1);bind("oAgain","again",1);bind("oSpeed","speed",1);bind("oHint","hint");
+bind("oQ","q");bind("oAuto","auto");bind("oNeed","need",1);bind("oAgain","again2",1);bind("oSpeed","speed",1);bind("oHint","hint");
 function openSheet(o){$("sheet").hidden=!o;$("gear").hidden=o;if(o){fill();paintMon()}}
 $("gear").onclick=function(){openSheet(true)};$("close").onclick=function(){openSheet(false)};
 Array.prototype.forEach.call(document.querySelectorAll(".tab"),function(b){b.onclick=function(){
