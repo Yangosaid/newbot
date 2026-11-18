@@ -81,7 +81,7 @@ input[type=checkbox]{width:20px;height:20px;accent-color:var(--hot)}
     </div>
     <div class="pane" id="pCtl">
       <div class="grp"><h3>🖨️ Imprenta</h3>
-        <p class="note">Cada espectador que toca la pantalla sale impreso en una tarjeta con su foto y su nombre. Los regalos van siempre primero, del de más valor al de menos, y ninguno se queda sin imprimir: 🌹 menos de 10 monedas = tarjeta con marco rojo y el regalo pegado; ⭐ 10–99 = tarjeta dorada con brillos; 👑 100–999 = póster ancho de toda la fila con confeti; 💎 1000+ = página entera para esa persona. La máquina imprime línea a línea, el papel avanza y las tarjetas caen por el borde. Cuatro tarjetas por página, dos por fila. Reparto justo, sin lista de espera: entra quien ha tocado en los últimos 20 s; primero los que todavía no han salido, luego los que más tiempo llevan esperando; quien acaba de salir descansa más páginas cuanta más gente toca (1–2 personas: vuelve enseguida · 3–4: en la página siguiente · 5–10: salta una página · 11+: salta dos). Junto al cabezal se ven los dos siguientes 👀.</p>
+        <p class="note">Cada espectador que toca la pantalla sale impreso en una tarjeta con su foto y su nombre. Los regalos van siempre primero, del de más valor al de menos, y ninguno se queda sin imprimir: 🌹 menos de 10 monedas = tarjeta con marco rojo y el regalo pegado; ⭐ 10–99 = tarjeta dorada con brillos; 👑 100–999 = póster ancho de toda la fila con confeti; 💎 1000+ = página entera para esa persona. La máquina imprime línea a línea, el papel avanza y las tarjetas caen por el borde. Cuatro tarjetas por página, dos por fila. Reparto justo, sin lista de espera: entra quien ha tocado en los últimos 12 s (si tocó hace mucho, quizá ya se fue); primero los que todavía no han salido, luego los que más tiempo llevan esperando; quien acaba de salir descansa más páginas cuanta más gente toca (1–2 personas: vuelve enseguida · 3–4: en la página siguiente · 5–10: salta una página · 11+: salta dos). Junto al cabezal se ven los dos siguientes 👀.</p>
               </div>
       <div class="grp"><h3>🫧 Estrellas flotantes (encima de cualquier juego)</h3>
         <p class="note">Sale encima de cualquier app que abras durante el directo (otro juego, YouTube…): los que tocan suben como burbujas con su foto y su nombre, y cada regalo entra como una tarjeta con la foto, el nombre y el regalo (el de más valor primero). No bloquea el juego de debajo. Muévela arrastrando el pequeño ✥; doble toque en ✥ la esconde un momento. La primera vez Android pide permiso para «mostrar sobre otras apps».</p>
@@ -335,7 +335,7 @@ function perforation(u){onTape(u,0.05,function(y){tapeX.fillStyle="rgba(80,60,40
      💎 1000 +           → a full-page poster (holographic frame, crown), the page is closed first so it has it all to itself
    A small gift shares its row with the next small gift, or with the latest tapper, so nothing waits for nothing.
    Taps — "who deserves it most", no waiting list:
-     • only people who tapped in the last 20 s compete (whoever stops tapping simply drops out, nothing piles up);
+     • only people who tapped in the last 12 s compete (whoever stops tapping simply drops out, nothing piles up);
      • someone never printed in this live goes first; then whoever has waited longest since their last print;
        a small bonus for having tapped in the last 3 s keeps the "I tap, something happens" feeling;
      • whoever was just printed rests for a number of pages that grows with the crowd:
@@ -350,7 +350,8 @@ var ACT=[],ACTI={},BK=[];
 function actAdd(u,now){if(ACTI[u.uid]===undefined){ACTI[u.uid]=ACT.length;ACT.push(u)}var sec=Math.floor(now/1000),b=BK[BK.length-1];
   if(!b||b.s!==sec){b={s:sec,u:[],seen:{}};BK.push(b)}if(!b.seen[u.uid]){b.seen[u.uid]=1;b.u.push(u)}}
 function actDel(u){var i=ACTI[u.uid];if(i===undefined)return;var last=ACT.pop();if(last!==u){ACT[i]=last;ACTI[last.uid]=i}delete ACTI[u.uid]}
-function actPrune(now){var lim=Math.floor((now-20000)/1000);while(BK.length&&BK[0].s<lim){var b=BK.shift();for(var i=0;i<b.u.length;i++)if(now-b.u[i].lastTap>20000)actDel(b.u[i])}}
+var LIVEMS=12000;   /* only people who tapped in the last 12 s compete: someone who tapped long ago may have left */
+function actPrune(now){var lim=Math.floor((now-LIVEMS)/1000);while(BK.length&&BK[0].s<lim){var b=BK.shift();for(var i=0;i<b.u.length;i++)if(now-b.u[i].lastTap>LIVEMS)actDel(b.u[i])}}
 setInterval(function(){actPrune(perf())},1000);
 function active(){return ACT}
 function restPages(n){return n<=2?-1:n<=4?0:n<=10?1:2}

@@ -294,7 +294,7 @@ input[type=checkbox]{width:20px;height:20px;accent-color:var(--hot)}
       </div>
       <div class="grp" id="gLikes"><h3>Toques en la pantalla (me gusta)</h3>
         <p class="note">El modo (completo, solo energía o apagado) se elige arriba en Control.</p>
-        <div class="ln"><label for="oLikeN">Toques necesarios</label><select id="oLikeN"><option value="5">5</option><option value="15">15</option><option value="30">30</option><option value="100">100</option></select></div>
+        <div class="ln"><label for="oLikeN">Toques necesarios</label><select id="oLikeN"><option value="1">1</option><option value="3">3</option><option value="5">5</option><option value="15">15</option><option value="30">30</option><option value="100">100</option></select></div>
         <div class="ln"><label for="oTapHold">Cada persona se queda en cámara al menos</label><select id="oTapHold"><option value="1">1 s</option><option value="1.5">1,5 s</option><option value="2">2 s</option><option value="4">4 s</option><option value="8">8 s</option></select></div>
         <div class="ln"><label for="oLikeCam">Cuando termina el turno de los regalos, la cámara pasa a quien toca tras</label><select id="oLikeCam"><option value="0">Nunca</option><option value="3">3 s</option><option value="5">5 s</option><option value="10">10 s</option><option value="20">20 s</option></select></div>
       </div>
@@ -345,11 +345,11 @@ var SRC=APP&&BusApp.getSource?String(BusApp.getSource()):"tiktok",YT=SRC==="yout
 try{localStorage.setItem("game","party")}catch(e){}
 
 /* ---------- settings ---------- */
-var DEF={per:2,max:24,fill:10,chat:YT,words:"",cd:YT?10:3,bpm:124,q:"ultra",auto:true,music:true,safe:true,hint:true,flag:true,prio:true,top3:true,kingScreen:true,memory:true,safeLive:true,flTaps:true,flGifts:true,flWall:true,flJoin:false,flSize:1,joinChar:true,host:false,hostSize:"m",hostShape2:"card",hostVx:50,hostVy:50,hostVz:1,hostVol:0,hostMirror:true,hostSup:true,hostX:null,hostY:null,hostIcon:"☕",hallMin:15,hall:"club",sync:false,syncSrc:"output",like:true,tapMode:"full",likeN:15,likeCam2:5,tapHold2:1.5,goal:2000,coinE:10,tapE:1,vipMin:100,vipLen:1};
+var DEF={per:2,max:24,fill:10,chat:YT,words:"",cd:YT?10:3,bpm:124,q:"ultra",auto:true,music:true,safe:true,hint:true,flag:true,prio:true,top3:true,kingScreen:true,memory:true,safeLive:true,flTaps:true,flGifts:true,flWall:true,flJoin:false,flSize:1,joinChar:true,host:false,hostSize:"m",hostShape2:"card",hostVx:50,hostVy:50,hostVz:1,hostVol:0,hostMirror:true,hostSup:true,hostX:null,hostY:null,hostIcon:"☕",hallMin:15,hall:"club",sync:false,syncSrc:"output",like:true,tapMode:"full",likeN:3,likeCam2:5,tapHold2:1.5,goal:2000,coinE:10,tapE:1,vipMin:100,vipLen:1};
 var cfg=Object.assign({},DEF);
 /* TikTok-safe mode (on by default): no gift requests on screen, comments put viewers in the hall too */
 function safeLive(){return !!cfg.safeLive}
-try{var sv=JSON.parse(localStorage.getItem("party3d3")||"null");if(sv)cfg=Object.assign(cfg,sv)}catch(e){}
+try{var sv=JSON.parse(localStorage.getItem("party3d3")||"null");if(sv)cfg=Object.assign(cfg,sv);if(sv&&sv.likeN===15)cfg.likeN=3}catch(e){}
 function save(){try{localStorage.setItem("party3d3",JSON.stringify(cfg))}catch(e){}}
 var QUALITY={ultra:{pr:2.5,samples:4,shadow:2048,bloom:true,shadows:true},alta:{pr:1.75,samples:4,shadow:1024,bloom:true,shadows:true},
   media:{pr:1.25,samples:0,shadow:1024,bloom:false,shadows:true},ahorro:{pr:1,samples:0,shadow:512,bloom:false,shadows:false}};
@@ -609,8 +609,12 @@ function paintHallBtns(){var el=$("hallBtns");if(!el)return;if(!el.children.leng
 
 /* ---------- supporters ---------- */
 var users={},focus=null,lastGiftAt=-1e9,firstGiftDone=false;
+/* at most 60 000 viewers remembered: over that, the ones idle longest are forgotten (never someone tapping now, on the floor,
+   in the camera queue or who sent a gift) */
+var userN=0;function trimUsers(){var keep={};camQ.forEach(function(q){keep[q.u.uid]=1});var a=[];for(var k in users){var x=users[k];if(ACTI[k]===undefined&&!keep[k]&&!x.chars.length&&!(x.coins>0)&&x!==focus)a.push(x)}
+  a.sort(function(p,q){return (p.lastSeen||0)-(q.lastSeen||0)});var drop=Math.max(0,userN-45000);for(var i=0;i<drop&&i<a.length;i++){delete users[a[i].uid];userN--}}
 function userOf(e){var uid=String(e.user||e.nick||"?"),u=users[uid];
-  if(!u){u=users[uid]={uid:uid,nick:String(e.nick||e.user||"Fan"),av:"",img:null,face:null,label:null,hue:hashHue(uid),lastChat:-1e9,chars:[],coins:0,sCoins:0,likes:0,level:0,combo:0};
+  if(!u){if(++userN>60000)trimUsers();u=users[uid]={uid:uid,nick:String(e.nick||e.user||"Fan"),av:"",img:null,face:null,label:null,hue:hashHue(uid),lastChat:-1e9,chars:[],coins:0,sCoins:0,likes:0,level:0,combo:0};
     var f=cfg.memory&&fans[uid];if(f){u.coins=f.c;u.level=levelOf(u.coins);u.returning=f.c>0;if(f.g){u.g=u.gSel=f.g}}
     if(!u.g)u.g="n"}   /* no guessing from the name: everyone appears at once with a neutral body; 👩 / 👨 in a comment changes it */
   u.lastSeen=perf();
@@ -807,12 +811,13 @@ function spot(front){var best=null,bd=-1;for(var t=0;t<30;t++){var p={x:rnd(-5.2
 function addChar(u){if(!ok3d)return null;
   if(u.chars.length>=Math.max(1,cfg.per|0)){var old=u.chars[0];chars.splice(chars.indexOf(old),1);u.chars.shift();dispose(old)}
   /* tappers may fill at most half the floor: a new tapper replaces the oldest tapper, never a gift sender */
-  if(!u.coins){var taps=chars.filter(function(c){return !c.u.coins&&c.u!==focus});if(taps.length>=Math.max(1,(cfg.max|0)>>1))removeChar(taps[0])}
+  if(!u.coins&&chars.length>=Math.max(1,cfg.max|0)){var now0=perf(),out=null,os=-1;chars.forEach(function(c){var cu=c.u;if(cu.coins||cu===focus||cu===u||now0-(cu.floorAt||0)<8000)return;
+      var idle=now0-(cu.lastTap||0),sc=idle>20000?1e9+idle:now0-(cu.floorAt||0);if(sc>os){os=sc;out=c}});if(out)removeChar(out)}
   while(chars.length>=Math.max(1,cfg.max|0)){var idx=-1,lo=Infinity;for(var i=0;i<chars.length;i++){var cu=chars[i].u;if(cu===focus||cu===u)continue;
       var sc=cu.coins>0?1e9+cu.coins*1000+i:(cu.likes||0)+i*0.001;if(sc<lo){lo=sc;idx=i}}if(idx<0)idx=0;
     removeChar(chars[idx])}
-  ensurePhoto(u);var d=makeChar(u,chars.length,spot(true));d.drop=perf();chars.push(d);u.chars.push(d);dress(d);return d}
-function removeChar(o){var i=chars.indexOf(o);if(i<0)return;chars.splice(i,1);o.u.chars.splice(o.u.chars.indexOf(o),1);dispose(o);if(!o.u.chars.length)releaseUser(o.u)}
+  ensurePhoto(u);var d=makeChar(u,chars.length,spot(true));d.drop=perf();chars.push(d);u.chars.push(d);dress(d);u.floorAt=perf();return d}
+function removeChar(o){var i=chars.indexOf(o);if(i<0)return;chars.splice(i,1);o.u.chars.splice(o.u.chars.indexOf(o),1);dispose(o);if(!o.u.chars.length){o.u.offAt=perf();releaseUser(o.u)}}
 /* a supporter with no character left gives back their textures and photo (the big long-live memory leak) */
 function releaseUser(u){if(u===focus||vip&&vip.u===u||top3.indexOf(u)>=0)return;if(u.face){u.face.dispose();u.face=null}if(u.label){u.label.dispose();u.label=null}u.img=null;u.photoAsked=false}
 function layoutFillers(){if(!ok3d)return;while(fillers.length>(cfg.fill|0))dispose(fillers.pop());
@@ -896,8 +901,9 @@ function onEvent(e){if(!e||!e.type)return;monitor(e);
     if(tapOnly()&&cfg.tapMode==="full"&&ul.av&&perf()-(G.tapPic||0)>1500){G.tapPic=perf();paintHint(null,ul)}
     ul.likes=(ul.likes||0)+c;addEnergy(c*(+cfg.tapE||1));
     if(cfg.tapMode==="energy")return;
-    if(!ul.chars.length&&ul.likes<Math.max(1,cfg.likeN|0))return;
-    if(!ul.chars.length){var nw=perf();if(nw-(G.tapSpawn||0)<900)return;G.tapSpawn=nw}
+    var nw=perf();ul.lastTap=nw;if(!ul.firstTap)ul.firstTap=nw;
+    if(ul.likes>=Math.max(1,cfg.likeN|0))actAdd(ul,nw);
+    if(!ul.chars.length)return;                       /* their dancer comes through the fair scheduler */
     support(ul,{kind:"tap",taps:c});return}
   if(e.type==="chat"){var sg=saidG(e.text);if(sg){var ug=userOf(e);changeG(ug,sg);return}}
   if(e.type==="chat"&&cfg.chat){var t=norm(e.text||""),ok=!String(cfg.words||"").trim();
@@ -906,8 +912,38 @@ function onEvent(e){if(!e||!e.type)return;monitor(e);
     addEnergy(5);var dc=u2.chars.length?u2.chars[u2.chars.length-1]:addChar(u2);if(dc){goTo(u2,dc,false);burst(dc);dc.party=now;cheer(dc,now)}}}
 
 /* taps and visitors entering: the camera goes to the latest one, 1.5 s each, once the gift turns are over */
-function tapCam(u,d,now){u.lastTap=now;var inVip=vip&&now<vip.until;
-  if(+cfg.likeCam2>0&&!inVip&&!camQ.length&&!playing(now)&&now-lastGiftAt>(+cfg.likeCam2)*1000&&now-focusAt>Math.max(0.5,+cfg.tapHold2||1.5)*1000&&focus!==u)goTo(u,d,true)}
+/* ---------- fair share for tappers (and visitors): who gets a dancer, and who gets the camera ----------
+   Gifts keep their priority untouched. Among people who tapped in the last 12 s (an old tap may mean they left):
+     • a dancer: whoever never had one goes first (earliest tapper first), then whoever left the floor longest ago; new dancers are let in
+       2 to 6 a second depending on how many are waiting (a crowd never waits behind a 1-a-second door);
+     • the floor: tappers may use every spot gift senders don't; when it is full, the tapper who stopped tapping longest
+       ago leaves, or, if all are tapping, the one on the floor longest (so the floor rotates and everyone gets a turn);
+     • the camera (when no gift is playing): someone never on camera goes first, then whoever waited longest since their
+       last turn, with a small bonus for a tap in the last 3 s; 1.5 s each.
+   Every tap costs the same whether 1 or 1 000 000 people tap: an array + index pruned by one-second buckets, and a random
+   sample of 96 when more than 300 are tapping (everyone still tapping keeps the same chance). */
+var ACT=[],ACTI={},BK=[];
+function actAdd(u,now){if(ACTI[u.uid]===undefined){ACTI[u.uid]=ACT.length;ACT.push(u)}var sec=Math.floor(now/1000),b=BK[BK.length-1];
+  if(!b||b.s!==sec){b={s:sec,u:[],seen:{}};BK.push(b)}if(!b.seen[u.uid]){b.seen[u.uid]=1;b.u.push(u)}}
+function actDel(u){var i=ACTI[u.uid];if(i===undefined)return;var last=ACT.pop();if(last!==u){ACT[i]=last;ACTI[last.uid]=i}delete ACTI[u.uid]}
+var LIVEMS=12000;   /* only people who tapped in the last 12 s count: someone who tapped long ago may have left */
+setInterval(function(){var now=perf(),lim=Math.floor((now-LIVEMS)/1000);while(BK.length&&BK[0].s<lim){var b=BK.shift();for(var i=0;i<b.u.length;i++)if(now-(b.u[i].lastTap||0)>LIVEMS)actDel(b.u[i])}
+  /* a tapper's dancer leaves the floor after 2 minutes without any sign of them (gift senders stay) */
+  if((G.leaveTick=(G.leaveTick||0)+1)%10===0)chars.slice().forEach(function(c){var cu=c.u;if(cu.coins||cu===focus||vip&&vip.u===cu)return;if(now-Math.max(cu.lastTap||0,cu.lastSeen||0,cu.floorAt||0)>120000)removeChar(c)})},1000);
+function pool(){var n=ACT.length;if(n<=300)return ACT.slice();var a=[],seen={};for(var i=0;i<96;i++){var u=ACT[(Math.random()*n)|0];if(!seen[u.uid]){seen[u.uid]=1;a.push(u)}}return a}
+function tapCam(u,d,now){u.lastTap=now;actAdd(u,now)}
+/* new dancers for tappers who have none */
+setInterval(function(){if(!ok3d||cfg.tapMode!=="full")return;var now=perf(),wait=pool().filter(function(u){return !u.chars.length&&(u.likes||0)>=Math.max(1,cfg.likeN|0)});if(!wait.length)return;
+  /* never on the floor first (earliest tapper first), then whoever left the floor longest ago */
+  var key=function(u){return u.floorAt?(u.offAt||0):-1e12+(u.firstTap||0)};wait.sort(function(a,b){return key(a)-key(b)});var n=wait.length>=12?2:wait.length>=4?1:1,step=wait.length>=12?0:wait.length>=4?1:2;
+  if((G.spawnTick=(G.spawnTick||0)+1)%(step+1))return;   /* 250 ms ticks: 2 per tick in a crowd (~8/s), else every 2nd or 3rd tick */
+  for(var i=0;i<n&&i<wait.length;i++){var u=wait[i],d=addChar(u);if(d){u.floorAt=now;burst(d);hearts(d,4)}}},250);
+/* the camera for tappers */
+setInterval(function(){if(!ok3d||cfg.tapMode!=="full")return;var now=perf(),inVip=vip&&now<vip.until;
+  if(!(+cfg.likeCam2>0)||inVip||camQ.length||playing(now)||now-lastGiftAt<=(+cfg.likeCam2)*1000||now-focusAt<=Math.max(0.5,+cfg.tapHold2||1.5)*1000)return;
+  var best=null,bs=-1e18;pool().forEach(function(u){if(u===focus||!u.chars.length||now-(u.lastTap||0)>LIVEMS)return;
+    var sc=(u.camAt?(now-u.camAt)/1000*10:1e6-(u.firstTap||now)/1000)+(now-(u.lastTap||0)<3000?15:0);if(sc>bs){bs=sc;best=u}});
+  if(best){best.camAt=now;goTo(best,best.chars[best.chars.length-1],true)}},200);
 /* ---------- the host's own camera bubble: small, at the edge, draggable; a "busy" card when the host steps away ---------- */
 var HOST={stream:null,busy:cfg.hostIcon||"☕",busyAt:0,starting:false,frame:null};
 var HOSTSIZE={s:90,m:118,l:156};
@@ -1517,7 +1553,7 @@ if(APP){try{$("apUser").value=BusApp.getUser();$("apKey").value=BusApp.getKey()}
 /* housekeeping: forget viewers who left without supporting, free whatever nobody shows */
 setInterval(function(){var now=perf(),n=0;for(var k in users){var u=users[k];if(u.chars.length||u===focus)continue;
     var idle=now-Math.max(u.lastSeen||0,u.lastGift||0,u.lastChat>0?u.lastChat:0);
-    if(!u.coins&&idle>5*60000){delete users[k];n++;continue}
+    if(!u.coins&&idle>5*60000&&ACTI[k]===undefined){delete users[k];n++;userN--;continue}
     if(u.face||u.label||u.img)releaseUser(u)}},60000);
 
 /* ---------- thank-you poster: top 10 of this live, ready for a story (1080×1920) ---------- */
@@ -1550,7 +1586,7 @@ function fmtN(n){return Math.floor(n||0).toLocaleString()}
 
 /* read-only state for automated checks */
 window.__camFree=function(){camQ=[];vip=null;focus=null;focusD=null};
-window.__party=function(){return {hall:hallName,wall:lastSup&&lastSup.nick,top3:top3.map(function(u){return u.nick+":"+u.sCoins+(u.first?"🔥":"")}),happy:happyOn(),beatPeriodMs:Math.round(A.period),listening:audioLive(),vip:vipOn()?vip.u.nick:null,queue:camQ.map(function(q){return q.u.nick}),focus:focus&&focus.nick,chars:chars.length,energy:Math.round(energy.v)+"/"+energy.target,party:partyOn(),
+window.__party=function(){return {act:ACT.length,known:userN,onFloor:chars.map(function(c){return c.u.uid}),hall:hallName,wall:lastSup&&lastSup.nick,top3:top3.map(function(u){return u.nick+":"+u.sCoins+(u.first?"🔥":"")}),happy:happyOn(),beatPeriodMs:Math.round(A.period),listening:audioLive(),vip:vipOn()?vip.u.nick:null,queue:camQ.map(function(q){return q.u.nick}),focus:focus&&focus.nick,chars:chars.length,energy:Math.round(energy.v)+"/"+energy.target,party:partyOn(),
   users:Object.keys(users).map(function(k){var u=users[k];return u.nick+":"+u.coins+"c/L"+(u.level||0)+(u.medal||"")+"/x"+(u.combo||0)+"/"+u.chars.length+"ch"})}};
 
 /* ---------- boot ---------- */
