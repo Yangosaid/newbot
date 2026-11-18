@@ -295,7 +295,7 @@ input[type=checkbox]{width:20px;height:20px;accent-color:var(--hot)}
       <div class="grp" id="gLikes"><h3>Toques en la pantalla (me gusta)</h3>
         <p class="note">El modo (completo, solo energía o apagado) se elige arriba en Control.</p>
         <div class="ln"><label for="oLikeN">Toques necesarios</label><select id="oLikeN"><option value="1">1</option><option value="3">3</option><option value="5">5</option><option value="15">15</option><option value="30">30</option><option value="100">100</option></select></div>
-        <div class="ln"><label for="oTapHold">Cada persona se queda en cámara al menos</label><select id="oTapHold"><option value="1">1 s</option><option value="1.5">1,5 s</option><option value="2">2 s</option><option value="4">4 s</option><option value="8">8 s</option></select></div>
+        <div class="ln"><label for="oTapHold">Cada persona se queda en cámara al menos</label><select id="oTapHold"><option value="1">1 s</option><option value="1.5">1,5 s</option><option value="2.2">2,2 s</option><option value="2">2 s</option><option value="4">4 s</option><option value="8">8 s</option></select></div>
         <div class="ln"><label for="oLikeCam">Cuando termina el turno de los regalos, la cámara pasa a quien toca tras</label><select id="oLikeCam"><option value="0">Nunca</option><option value="3">3 s</option><option value="5">5 s</option><option value="10">10 s</option><option value="20">20 s</option></select></div>
       </div>
       <div class="grp"><h3>Regalos grandes 👑</h3>
@@ -345,11 +345,11 @@ var SRC=APP&&BusApp.getSource?String(BusApp.getSource()):"tiktok",YT=SRC==="yout
 try{localStorage.setItem("game","party")}catch(e){}
 
 /* ---------- settings ---------- */
-var DEF={per:2,max:24,fill:10,chat:YT,words:"",cd:YT?10:3,bpm:124,q:"ultra",auto:true,music:true,safe:true,hint:true,flag:true,prio:true,top3:true,kingScreen:true,memory:true,safeLive:true,flTaps:true,flGifts:true,flWall:true,flJoin:false,flSize:1,joinChar:true,host:false,hostSize:"m",hostShape2:"card",hostVx:50,hostVy:50,hostVz:1,hostVol:0,hostMirror:true,hostSup:true,hostX:null,hostY:null,hostIcon:"☕",hallMin:15,hall:"club",sync:false,syncSrc:"output",like:true,tapMode:"full",likeN:3,likeCam2:5,tapHold2:1.5,goal:2000,coinE:10,tapE:1,vipMin:100,vipLen:1};
+var DEF={per:2,max:24,fill:10,chat:YT,words:"",cd:YT?10:3,bpm:124,q:"ultra",auto:true,music:true,safe:true,hint:true,flag:true,prio:true,top3:true,kingScreen:true,memory:true,safeLive:true,flTaps:true,flGifts:true,flWall:true,flJoin:false,flSize:1,joinChar:true,host:false,hostSize:"m",hostShape2:"card",hostVx:50,hostVy:50,hostVz:1,hostVol:0,hostMirror:true,hostSup:true,hostX:null,hostY:null,hostIcon:"☕",hallMin:15,hall:"club",sync:false,syncSrc:"output",like:true,tapMode:"full",likeN:3,likeCam2:5,tapHold2:2.2,goal:2000,coinE:10,tapE:1,vipMin:100,vipLen:1};
 var cfg=Object.assign({},DEF);
 /* TikTok-safe mode (on by default): no gift requests on screen, comments put viewers in the hall too */
 function safeLive(){return !!cfg.safeLive}
-try{var sv=JSON.parse(localStorage.getItem("party3d3")||"null");if(sv)cfg=Object.assign(cfg,sv);if(sv&&sv.likeN===15)cfg.likeN=3}catch(e){}
+try{var sv=JSON.parse(localStorage.getItem("party3d3")||"null");if(sv)cfg=Object.assign(cfg,sv);if(sv&&sv.likeN===15)cfg.likeN=3;if(sv&&+sv.tapHold2===1.5)cfg.tapHold2=2.2}catch(e){}
 function save(){try{localStorage.setItem("party3d3",JSON.stringify(cfg))}catch(e){}}
 var QUALITY={ultra:{pr:2.5,samples:4,shadow:2048,bloom:true,shadows:true},alta:{pr:1.75,samples:4,shadow:1024,bloom:true,shadows:true},
   media:{pr:1.25,samples:0,shadow:1024,bloom:false,shadows:true},ahorro:{pr:1,samples:0,shadow:512,bloom:false,shadows:false}};
@@ -919,7 +919,7 @@ function onEvent(e){if(!e||!e.type)return;monitor(e);
      • the floor: tappers may use every spot gift senders don't; when it is full, the tapper who stopped tapping longest
        ago leaves, or, if all are tapping, the one on the floor longest (so the floor rotates and everyone gets a turn);
      • the camera (when no gift is playing): someone never on camera goes first, then whoever waited longest since their
-       last turn, with a small bonus for a tap in the last 3 s; 1.5 s each.
+       last turn, with a small bonus for a tap in the last 3 s; 2.2 s each so they can dance.
    Every tap costs the same whether 1 or 1 000 000 people tap: an array + index pruned by one-second buckets, and a random
    sample of 96 when more than 300 are tapping (everyone still tapping keeps the same chance). */
 var ACT=[],ACTI={},BK=[];
@@ -940,7 +940,7 @@ setInterval(function(){if(!ok3d||cfg.tapMode!=="full")return;var now=perf(),wait
   for(var i=0;i<n&&i<wait.length;i++){var u=wait[i],d=addChar(u);if(d){u.floorAt=now;burst(d);hearts(d,4)}}},250);
 /* the camera for tappers */
 setInterval(function(){if(!ok3d||cfg.tapMode!=="full")return;var now=perf(),inVip=vip&&now<vip.until;
-  if(!(+cfg.likeCam2>0)||inVip||camQ.length||playing(now)||now-lastGiftAt<=(+cfg.likeCam2)*1000||now-focusAt<=Math.max(0.5,+cfg.tapHold2||1.5)*1000)return;
+  if(!(+cfg.likeCam2>0)||inVip||camQ.length||playing(now)||now-lastGiftAt<=(+cfg.likeCam2)*1000||now-focusAt<=Math.max(0.5,+cfg.tapHold2||2.2)*1000)return;
   var best=null,bs=-1e18;pool().forEach(function(u){if(u===focus||!u.chars.length||now-(u.lastTap||0)>LIVEMS)return;
     var sc=(u.camAt?(now-u.camAt)/1000*10:1e6-(u.firstTap||now)/1000)+(now-(u.lastTap||0)<3000?15:0);if(sc>bs){bs=sc;best=u}});
   if(best){best.camAt=now;goTo(best,best.chars[best.chars.length-1],true)}},200);
