@@ -1,0 +1,356 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Imprenta de Fans</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800&family=Barlow:wght@400;500;600&display=swap">
+<style>
+/* Fan printer: every viewer who taps the screen is printed on a card with their photo and name, line by line;
+   the paper moves forward and the cards drop over the edge of the desk. No sounds, so the host's music keeps playing. */
+:root{
+  color-scheme:dark;
+  --night:#05020c; --panel:#140d2a; --panel-2:#1f1640; --line:#3b2d6b;
+  --ink:#f7f4ff; --ink-dim:#b4a9d6; --ok:#4ade80; --bad:#ff6b5e; --hot:#ff3d8b; --gold:#ffc93c;
+  --display:"Barlow Condensed","Arial Narrow","Roboto Condensed",system-ui,sans-serif;
+  --body:"Barlow","Segoe UI",Roboto,system-ui,sans-serif;
+}
+html,body{height:100%;margin:0}
+[hidden]{display:none!important}
+body{background:var(--night);color:var(--ink);font-family:var(--body);overflow:hidden}
+#stage{position:relative;height:100%;overflow:hidden;touch-action:manipulation;user-select:none;-webkit-user-select:none}
+#gl{position:absolute;inset:0;width:100%;height:100%;display:block}
+#nogl{position:absolute;inset:0;display:grid;place-items:center;text-align:center;padding:24px;font:700 20px/1.3 var(--display)}
+
+/* language-free hint: 👆 ➜ 🖨️ with the photo of the card being printed */
+#hint{position:absolute;left:50%;top:calc(env(safe-area-inset-top,0px) + 12%);transform:translateX(-50%);display:flex;align-items:center;gap:10px;padding:7px 14px 7px 12px;
+  border-radius:999px;background:rgba(20,12,6,.6);border:1px solid rgba(255,255,255,.16);pointer-events:none;box-shadow:0 8px 30px rgba(0,0,0,.35)}
+#hint .tap{font-size:32px;line-height:1;animation:tap .8s ease-in-out infinite}
+#hint svg{width:30px;height:20px}
+#hint .pr{font-size:32px;line-height:1}
+#hint .me{width:46px;height:46px;border-radius:50%;overflow:hidden;border:2px solid #fff;display:grid;place-items:center;font:800 18px/1 var(--display);background:rgba(255,255,255,.12)}
+#hint .me img{width:100%;height:100%;object-fit:cover}
+#hint .q{font:800 18px/1 var(--display);color:var(--ink-dim);min-width:18px}
+@keyframes tap{0%,100%{transform:translateY(0)}50%{transform:translateY(5px) scale(.92)}}
+#gear{position:absolute;right:10px;bottom:10px;width:40px;height:40px;border-radius:50%;border:1px solid rgba(255,255,255,.12);background:rgba(10,6,24,.45);
+  color:var(--ink);font-size:19px;line-height:1;cursor:pointer;opacity:.3}
+#gear i{position:absolute;top:3px;right:3px;width:8px;height:8px;border-radius:50%;background:var(--bad)}
+#gear i.ok{background:var(--ok)}
+#sheet{position:absolute;left:0;right:0;bottom:0;max-height:78%;overflow:auto;background:var(--panel);border-top:1px solid var(--line);
+  border-radius:18px 18px 0 0;padding:0 16px 22px;box-shadow:0 -12px 40px rgba(0,0,0,.5);z-index:20}
+#tabs{position:sticky;top:0;display:flex;gap:4px;align-items:center;background:var(--panel);padding:12px 0 8px;z-index:1}
+.tab{flex:1;background:none;border:0;border-bottom:3px solid transparent;color:var(--ink-dim);font:800 16px/1 var(--display);letter-spacing:.06em;text-transform:uppercase;padding:8px 2px;cursor:pointer}
+.tab[aria-selected="true"]{color:var(--ink);border-bottom-color:var(--hot)}
+#close{background:var(--panel-2);border:0;color:var(--ink);width:36px;height:36px;border-radius:50%;font-size:16px;cursor:pointer;flex:none}
+.grp{background:var(--panel-2);border-radius:12px;padding:10px 12px;margin:10px 0}
+.grp h3{margin:0 0 6px;font:800 15px/1.2 var(--display);letter-spacing:.06em;text-transform:uppercase;color:var(--ink-dim)}
+.ln{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:7px 0}
+.ln label{flex:1;min-width:150px;font-size:14px}
+.ln .grow{flex:1;min-width:0}
+label.ln{flex-wrap:nowrap}label.ln span{flex:1;min-width:0}label.ln input{flex:none}
+.note{font-size:13px;line-height:1.45;color:var(--ink-dim);margin:8px 0}
+.btn{background:var(--panel-2);color:var(--ink);border:1px solid var(--line);border-radius:10px;padding:10px 14px;font:700 15px/1 var(--display);letter-spacing:.04em;text-transform:uppercase;cursor:pointer}
+.btn.go{background:var(--hot);border-color:var(--hot);color:#fff}
+input[type=text],select{background:#0c0820;color:var(--ink);border:1px solid var(--line);border-radius:8px;padding:9px 10px;font:500 15px var(--body)}
+input[type=checkbox]{width:20px;height:20px;accent-color:var(--hot)}
+#st.ok{color:var(--ok)}#st.bad{color:var(--bad)}
+#apLog{max-height:30vh;overflow:auto;white-space:pre-wrap;font:12px/1.35 monospace;color:var(--ink-dim);background:rgba(0,0,0,.35);border-radius:8px;padding:8px;margin:8px 0 0}
+#perf{font:12px monospace;color:var(--ink-dim)}
+#monC{display:flex;gap:14px;font:800 20px/1 var(--display);margin:6px 0}
+</style>
+</head>
+<body>
+<div id="stage">
+  <canvas id="gl"></canvas>
+  <div id="nogl" hidden>Este teléfono no puede mostrar gráficos 3D.</div>
+  <div id="hint" aria-hidden="true"><span class="tap">👆</span><svg viewBox="0 0 34 22"><path d="M2 11h24M18 3l9 8-9 8" fill="none" stroke="#fff" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"/></svg><span class="pr">🖨️</span><div class="me" id="hintMe">📷</div><span class="q" id="hintQ"></span></div>
+  <button id="gear" aria-label="Ajustes">⚙<i id="dot"></i></button>
+
+  <div id="sheet" hidden>
+    <div id="tabs" role="tablist">
+      <button class="tab" role="tab" data-p="pCtl" aria-selected="true">Control</button>
+      <button class="tab" role="tab" data-p="pRules" aria-selected="false">Reglas</button>
+      <button class="tab" role="tab" data-p="pLink" aria-selected="false">Conexión</button>
+      <button id="close" aria-label="Cerrar">✕</button>
+    </div>
+    <div class="pane" id="pCtl">
+      <div class="grp"><h3>🖨️ Imprenta</h3>
+        <p class="note">Cada espectador que toca la pantalla sale impreso en una tarjeta con su foto y su nombre. La máquina imprime línea a línea, el papel avanza y las tarjetas caen por el borde. Si tocan muchos a la vez, se imprime primero a los últimos que han tocado.</p>
+        <div class="ln"><button class="btn" id="bClear">Vaciar la cola</button></div>
+      </div>
+      <div class="grp"><h3>🫧 Estrellas flotantes (encima de cualquier juego)</h3>
+        <p class="note">Sale encima de cualquier app que abras durante el directo (otro juego, YouTube…): los que tocan suben como burbujas con su foto y su nombre, y cada regalo entra como una tarjeta con la foto, el nombre y el regalo (el de más valor primero). No bloquea el juego de debajo. Muévela arrastrando el pequeño ✥; doble toque en ✥ la esconde un momento. La primera vez Android pide permiso para «mostrar sobre otras apps».</p>
+        <div class="ln"><button class="btn go" id="bFloat">Activar</button><button class="btn" id="bFloatTest">🧪 Probar 20 s</button><span class="note" id="floatSt"></span></div>
+        <p class="note">Para probar sin directo: activa, pulsa 🧪 y abre enseguida tu juego. Durante 20 segundos llegan toques y regalos de prueba.</p>
+        <label class="ln"><input type="checkbox" id="oFlTaps"><span>👆 Burbujas de los que tocan</span></label>
+        <label class="ln"><input type="checkbox" id="oFlGifts"><span>🎁 Tarjetas de los regalos</span></label>
+        <label class="ln"><input type="checkbox" id="oFlWall"><span>⭐ Fila con los 5 últimos que apoyan</span></label>
+        <label class="ln"><input type="checkbox" id="oFlJoin"><span>👋 Los que entran al directo</span></label>
+        <div class="ln"><label for="oFlSize">Tamaño</label><select id="oFlSize"><option value="0.8">Pequeño</option><option value="1">Normal</option><option value="1.25">Grande</option></select></div>
+      </div>
+      <div class="grp"><h3>🎮 Juegos</h3>
+        <div class="ln"><button class="btn" id="bParty">🕺 Sala</button><button class="btn" id="bRace">🏁 Carrera</button><button class="btn" id="bBus">🚌 Buses</button></div>
+      </div>
+      <div class="grp"><h3>Probar</h3>
+        <div class="ln"><button class="btn" data-test="1">Toques</button><button class="btn" data-test="6">6 personas tocando</button></div>
+      </div>
+      <div class="grp"><h3>Imagen</h3>
+        <div class="ln"><label for="oQ">Calidad</label><select id="oQ"><option value="ultra">Ultra (brillo, 120 Hz)</option><option value="alta">Alta</option><option value="media">Media</option><option value="ahorro">Ahorro de batería</option></select></div>
+        <label class="ln"><input type="checkbox" id="oAuto"><span>Bajar la calidad sola si el teléfono va lento</span></label>
+        <div id="perf"></div>
+      </div>
+    </div>
+    <div class="pane" id="pRules" hidden>
+      <div class="grp"><h3>Impresión</h3>
+        <div class="ln"><label for="oNeed">Toques para salir impreso</label><select id="oNeed"><option value="1">1</option><option value="5">5</option><option value="15">15</option><option value="30">30</option></select></div>
+        <div class="ln"><label for="oAgain">La misma persona puede volver a salir tras</label><select id="oAgain"><option value="60">1 min</option><option value="180">3 min</option><option value="600">10 min</option><option value="0">Solo una vez por directo</option></select></div>
+        <div class="ln"><label for="oSpeed">Velocidad de la máquina</label><select id="oSpeed"><option value="0.7">Lenta</option><option value="1">Normal</option><option value="1.5">Rápida</option></select></div>
+        <label class="ln"><input type="checkbox" id="oHint"><span>Mostrar el dibujo 👆 ➜ 🖨️ arriba</span></label>
+      </div>
+    </div>
+    <div class="pane" id="pLink" hidden>
+      <div class="ln"><span>Estado:</span><span id="st" class="bad">Sin conexión</span></div>
+      <p class="note" id="lnNote"></p>
+      <div id="monC"><span id="mLW">👆 <i id="mL">0</i></span><span>🖨️ <i id="mP">0</i></span></div>
+      <div class="ln"><label for="apUser" id="apUserL">Tu usuario de TikTok</label><input type="text" id="apUser" class="grow" placeholder="usuario (sin @)" autocapitalize="off" autocomplete="off" spellcheck="false"></div>
+      <div class="ln" id="apKeyRow"><label for="apKey">Clave Euler Stream</label><input type="text" id="apKey" class="grow" placeholder="opcional" autocapitalize="off" autocomplete="off" spellcheck="false"></div>
+      <div class="ln"><button class="btn go" id="apGo">Guardar y conectar</button></div>
+      <pre id="apLog"></pre>
+    </div>
+  </div>
+</div>
+
+<script src="lib/three-bundle.js"></script>
+<script>
+(function(){
+"use strict";
+var $=function(id){return document.getElementById(id)};
+var APP=!!window.BusApp;
+var SRC=APP&&BusApp.getSource?String(BusApp.getSource()):"tiktok",YT=SRC==="youtube";
+try{localStorage.setItem("game","print")}catch(e){}
+
+var DEF={need:1,again:180,speed:1,hint:true,q:"ultra",auto:true,flTaps:true,flGifts:true,flWall:true,flJoin:false,flSize:1};
+var cfg=Object.assign({},DEF);
+try{var sv=JSON.parse(localStorage.getItem("print1")||"null");if(sv)cfg=Object.assign(cfg,sv)}catch(e){}
+function save(){try{localStorage.setItem("print1",JSON.stringify(cfg))}catch(e){}}
+var QUALITY={ultra:{pr:2.5,samples:4,bloom:true},alta:{pr:1.75,samples:4,bloom:true},media:{pr:1.25,samples:0,bloom:false},ahorro:{pr:1,samples:0,bloom:false}};
+var QORDER=["ultra","alta","media","ahorro"];
+function clamp(v,a,b){return v<a?a:v>b?b:v}
+function rnd(a,b){return a+Math.random()*(b-a)}
+function pick(a){return a[(Math.random()*a.length)|0]}
+function perf(){return performance.now()}
+function damp(c,t,k,dt){return c+(t-c)*(1-Math.exp(-k*dt))}
+function hashHue(s){var h=2166136261;s=String(s);for(var i=0;i<s.length;i++){h^=s.charCodeAt(i);h=Math.imul(h,16777619)}return (h>>>0)%360}
+function initial(s){var c=String(s).replace(/[^A-Za-z0-9À-ÿ؀-ۿ]/g,"").charAt(0);return (c||String(s).charAt(0)||"?").toUpperCase()}
+function esc(s){return String(s).replace(/[&<>"]/g,function(m){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[m]})}
+
+/* ---------- 3D ---------- */
+var T=window.THREE,R=null,ok3d=true,Q=QUALITY[cfg.q]||QUALITY.ultra,composer=null,W=0,H=0;
+try{if(!T||!T.WebGLRenderer)throw 0;R=new T.WebGLRenderer({canvas:$("gl"),antialias:false,powerPreference:"high-performance",stencil:false})}catch(e){ok3d=false;$("nogl").hidden=false}
+var scene,cam,G={};
+function tex(c){var t=new T.CanvasTexture(c);t.colorSpace=T.SRGBColorSpace;t.anisotropy=R?Math.min(8,R.capabilities.getMaxAnisotropy()):1;return t}
+function std(c,r,m){return new T.MeshStandardMaterial({color:c,roughness:r,metalness:m||0})}
+/* layout (metres): paper 6 wide running from the roll (z=-6.4) to the front edge of the desk (z=4.6); cards 3.4 × 4.2 */
+var PW=6,CW=3.4,CH=4.2,GAP=0.7,PZ0=-5.3,EDGE=4.6;   /* a card prints between z=PZ0 and PZ0+CH */
+
+if(ok3d){
+  R.outputColorSpace=T.SRGBColorSpace;R.toneMapping=T.ACESFilmicToneMapping;R.toneMappingExposure=1.05;R.shadowMap.enabled=true;R.shadowMap.type=T.PCFSoftShadowMap;
+  scene=new T.Scene();scene.background=new T.Color(0x1a120c);
+  var pm=new T.PMREMGenerator(R);scene.environment=pm.fromScene(new T.RoomEnvironment(),0.04).texture;pm.dispose();
+  cam=new T.PerspectiveCamera(50,1,0.1,100);
+  scene.add(new T.HemisphereLight(0xfff1dc,0x3a2414,0.75));
+  var key=new T.SpotLight(0xfff0dd,140,40,0.7,0.5,1.4);key.position.set(-3,12,4);key.target.position.set(0,0,-1);key.castShadow=true;key.shadow.mapSize.set(1024,1024);key.shadow.bias=-0.0005;scene.add(key);scene.add(key.target);
+  var warm=new T.PointLight(0xffb070,20,20,1.6);warm.position.set(5,4,3);scene.add(warm);
+  buildDesk();buildPrinter();
+}
+
+function woodTex(){var c=document.createElement("canvas");c.width=1024;c.height=1024;var x=c.getContext("2d");
+  for(var i=0;i<16;i++){var y=i*64,g=x.createLinearGradient(0,y,0,y+64);var b=pick([[122,74,40],[134,82,45],[112,66,35],[140,90,52]]);
+    g.addColorStop(0,"rgb("+b+")");g.addColorStop(1,"rgb("+b.map(function(v){return v-14})+")");x.fillStyle=g;x.fillRect(0,y,1024,64);x.fillStyle="rgba(40,22,10,.6)";x.fillRect(0,y+62,1024,2)}
+  for(var k=0;k<900;k++){x.strokeStyle="rgba(50,28,12,"+rnd(0.05,0.18).toFixed(2)+")";x.lineWidth=rnd(0.5,1.6);var yy=Math.random()*1024;x.beginPath();x.moveTo(0,yy);
+    for(var px=0;px<=1024;px+=64)x.lineTo(px,yy+Math.sin(px*0.01+k)*rnd(1,4));x.stroke()}
+  var t=tex(c);t.wrapS=t.wrapT=T.RepeatWrapping;t.repeat.set(2,2);return t}
+function paperTex(){var c=document.createElement("canvas");c.width=256;c.height=256;var x=c.getContext("2d");x.fillStyle="#f3ead8";x.fillRect(0,0,256,256);
+  for(var i=0;i<1400;i++){x.fillStyle="rgba(120,100,70,"+rnd(0.02,0.07).toFixed(3)+")";x.fillRect(Math.random()*256,Math.random()*256,rnd(1,3),1)}
+  var t=tex(c);t.wrapS=t.wrapT=T.RepeatWrapping;t.repeat.set(2,4);return t}
+
+function buildDesk(){
+  var desk=new T.Mesh(new T.BoxGeometry(16,0.6,14),new T.MeshStandardMaterial({map:woodTex(),roughness:0.6,metalness:0.05}));desk.position.set(0,-0.3,-1.5);desk.receiveShadow=true;scene.add(desk);
+  var floor=new T.Mesh(new T.PlaneGeometry(80,80),std(0x120c08,0.9));floor.rotation.x=-Math.PI/2;floor.position.y=-6;scene.add(floor);
+  /* the paper: a long sheet from the roll to the edge, then it hangs down over the edge */
+  G.paperT=paperTex();var pmM=new T.MeshStandardMaterial({map:G.paperT,roughness:0.85});
+  var sheet=new T.Mesh(new T.PlaneGeometry(PW,EDGE+6.4),pmM);sheet.rotation.x=-Math.PI/2;sheet.position.set(0,0.012,(EDGE-6.4)/2);sheet.receiveShadow=true;scene.add(sheet);
+  var hang=new T.Mesh(new T.PlaneGeometry(PW,3),pmM);hang.position.set(0,-1.5,EDGE+0.02);scene.add(hang);
+  var curl=new T.Mesh(new T.CylinderGeometry(0.12,0.12,PW,24,1,true,0,Math.PI/2),pmM);curl.rotation.z=Math.PI/2;curl.position.set(0,-0.11,EDGE-0.11);scene.add(curl);
+  /* the roll at the back */
+  var roll=new T.Mesh(new T.CylinderGeometry(0.62,0.62,PW+0.1,40),new T.MeshStandardMaterial({map:G.paperT,roughness:0.8}));roll.rotation.z=Math.PI/2;roll.position.set(0,0.62,-6.6);roll.castShadow=true;scene.add(roll);G.roll=roll;
+  [-1,1].forEach(function(sd){var cap=new T.Mesh(new T.CylinderGeometry(0.3,0.3,0.12,24),std(0x2a2a30,0.3,0.8));cap.rotation.z=Math.PI/2;cap.position.set(sd*(PW/2+0.1),0.62,-6.6);scene.add(cap);
+    var st=new T.Mesh(new T.BoxGeometry(0.25,1.2,0.5),std(0x2a2a30,0.35,0.8));st.position.set(sd*(PW/2+0.3),0.6,-6.6);st.castShadow=true;scene.add(st)});
+  /* a mug and a pencil for scale and warmth */
+  var mug=new T.Mesh(new T.CylinderGeometry(0.55,0.5,1.2,32),std(0xc8462e,0.35,0.05));mug.position.set(5.3,0.6,1.8);mug.castShadow=true;scene.add(mug);
+  var cof=new T.Mesh(new T.CircleGeometry(0.5,32),std(0x3a1d0c,0.2));cof.rotation.x=-Math.PI/2;cof.position.set(5.3,1.12,1.8);scene.add(cof);
+  var pen=new T.Mesh(new T.CylinderGeometry(0.06,0.06,2.6,8),std(0xf2c230,0.5));pen.rotation.set(Math.PI/2,0,0.6);pen.position.set(-5.2,0.07,2.4);pen.castShadow=true;scene.add(pen)}
+
+function buildPrinter(){var met=std(0xbfc5cf,0.25,0.95),dark=std(0x26272d,0.35,0.7);
+  /* two side rails along the paper, a bridge that slides along them, and the head that runs across the bridge */
+  [-1,1].forEach(function(sd){var rail=new T.Mesh(new T.CylinderGeometry(0.09,0.09,7.6,16),met);rail.rotation.x=Math.PI/2;rail.position.set(sd*(PW/2+0.55),0.9,-3.1);rail.castShadow=true;scene.add(rail);
+    [-6.7,0.5].forEach(function(z){var ft=new T.Mesh(new T.BoxGeometry(0.5,1.0,0.5),dark);ft.position.set(sd*(PW/2+0.55),0.5,z);ft.castShadow=true;scene.add(ft)})});
+  var bridge=new T.Group();scene.add(bridge);G.bridge=bridge;
+  var bar=new T.Mesh(new T.CylinderGeometry(0.1,0.1,PW+1.3,16),met);bar.rotation.z=Math.PI/2;bar.position.y=0.9;bar.castShadow=true;bridge.add(bar);
+  [-1,1].forEach(function(sd){var sl=new T.Mesh(new T.BoxGeometry(0.45,0.45,0.6),dark);sl.position.set(sd*(PW/2+0.55),0.9,0);sl.castShadow=true;bridge.add(sl)});
+  var head=new T.Group();head.position.y=0.62;bridge.add(head);G.head=head;
+  var hb=new T.Mesh(new T.BoxGeometry(0.8,0.6,0.7),std(0x34363d,0.3,0.6));hb.castShadow=true;head.add(hb);
+  var hf=new T.Mesh(new T.BoxGeometry(0.82,0.12,0.72),std(0xe8e8ee,0.2,0.9));hf.position.y=0.33;head.add(hf);
+  var noz=new T.Mesh(new T.ConeGeometry(0.1,0.25,12),dark);noz.rotation.x=Math.PI;noz.position.y=-0.42;head.add(noz);
+  G.led=new T.MeshBasicMaterial({color:0x33ff88});var led=new T.Mesh(new T.SphereGeometry(0.05,10,8),G.led);led.position.set(0.25,0.15,0.36);head.add(led);
+  /* ink dots falling from the nozzle */
+  var N=120,g=new T.BufferGeometry();g.setAttribute("position",new T.Float32BufferAttribute(new Float32Array(N*3),3));
+  G.ink=new T.Points(g,new T.PointsMaterial({color:0x222222,size:0.05,transparent:true,opacity:0.8,depthWrite:false}));G.ink.frustumCulled=false;scene.add(G.ink);G.inkP=[];for(var i=0;i<N;i++)G.inkP.push({x:0,y:-9,z:0,v:0});G.inkI=0;
+  bridge.position.z=PZ0}
+
+/* ---------- viewers ---------- */
+var users={},mon={l:0,p:0};
+function userOf(e){var uid=String(e.user||e.nick||"?"),u=users[uid];
+  if(!u)u=users[uid]={uid:uid,nick:String(e.nick||e.user||"Fan"),av:"",img:null,hue:hashHue(uid),taps:0,lastPrint:0,lastTap:0,queued:false};
+  if(e.nick)u.nick=String(e.nick);if(e.avatar&&e.avatar!==u.av){u.av=String(e.avatar);u.photoAsked=false}return u}
+var imgWait={},imgN=0;
+window.__busImg=function(id,data){var cb=imgWait[id];delete imgWait[id];if(cb)cb(data)};
+function ensurePhoto(u){if(!u.av||u.photoAsked)return;u.photoAsked=true;var url=u.av;
+  var done=function(src){if(!src||u.av!==url)return;u.src=src;var im=new Image();im.onload=function(){if(u.av===url)u.img=im};im.src=src};
+  if(APP&&BusApp.image){var id="i"+(++imgN);imgWait[id]=done;try{BusApp.image(url,id)}catch(e){}}else done(url)}
+
+/* ---------- the card ---------- */
+var STYLES=["classic","polaroid","stamp","film"];
+function drawCard(u,style){var c=document.createElement("canvas");c.width=512;c.height=632;var x=c.getContext("2d"),W2=512,H2=632;
+  x.fillStyle="#fffdf8";x.fillRect(0,0,W2,H2);
+  if(style==="stamp"){x.fillStyle="#f3ead8";for(var i=0;i<=W2;i+=32){x.beginPath();x.arc(i,0,11,0,7);x.fill();x.beginPath();x.arc(i,H2,11,0,7);x.fill()}for(var j=0;j<=H2;j+=32){x.beginPath();x.arc(0,j,11,0,7);x.fill();x.beginPath();x.arc(W2,j,11,0,7);x.fill()}}
+  if(style==="film"){x.fillStyle="#1b1b1f";x.fillRect(0,0,W2,H2);x.fillStyle="#fffdf8";for(var f=12;f<H2;f+=40){x.fillRect(12,f,22,22);x.fillRect(W2-34,f,22,22)}x.fillStyle="#2a2a30";x.fillRect(48,30,W2-96,H2-60)}
+  else{x.lineWidth=5;x.strokeStyle="#1b1b1f";x.strokeRect(26,26,W2-52,H2-52)}
+  var cx=256,cy=style==="polaroid"?236:250,r=style==="polaroid"?190:170;
+  x.save();if(style==="polaroid"){x.beginPath();x.rect(cx-r,cy-r,2*r,2*r)}else{x.beginPath();x.arc(cx,cy,r,0,7)}x.clip();
+  if(u.img){var im=u.img,k=Math.max(2*r/im.width,2*r/im.height);try{x.drawImage(im,cx-im.width*k/2,cy-im.height*k/2,im.width*k,im.height*k)}catch(e){}}
+  else{var gg=x.createLinearGradient(0,cy-r,0,cy+r);gg.addColorStop(0,"hsl("+u.hue+",70%,58%)");gg.addColorStop(1,"hsl("+((u.hue+40)%360)+",70%,36%)");x.fillStyle=gg;x.fillRect(cx-r,cy-r,2*r,2*r);
+    x.fillStyle="#fff";x.textAlign="center";x.textBaseline="middle";x.font="800 170px 'Barlow Condensed',Arial";x.fillText(initial(u.nick),cx,cy+10)}
+  x.restore();
+  if(style!=="polaroid"){x.lineWidth=6;x.strokeStyle=style==="film"?"#fffdf8":"#1b1b1f";x.beginPath();x.arc(cx,cy,r,0,7);x.stroke()}
+  var nm=u.nick.length>16?u.nick.slice(0,15)+"…":u.nick;x.textAlign="center";x.textBaseline="middle";x.font="italic 700 50px 'Barlow Condensed',Georgia,serif";
+  x.fillStyle=style==="film"?"#fffdf8":"#1b1b1f";var ty=style==="polaroid"?520:510;x.fillText(nm,cx,ty);var tw=x.measureText(nm).width;
+  x.font="34px serif";x.fillText("❤",cx-tw/2-30,ty+2);x.fillText("❤",cx+tw/2+30,ty+2);
+  return c}
+
+/* cards on the paper: each one is printed line by line (its visible canvas grows from the far edge), then the paper carries it forward */
+var cards=[],queue=[],job=null,advance=0,paperShift=0;
+function makeCardMesh(full){var vis=document.createElement("canvas");vis.width=full.width;vis.height=full.height;var t=tex(vis);
+  var m=new T.Mesh(new T.PlaneGeometry(CW,CH),new T.MeshStandardMaterial({map:t,transparent:true,roughness:0.75}));m.rotation.x=-Math.PI/2;m.position.set(0,0.02,PZ0+CH/2);m.receiveShadow=true;
+  scene.add(m);return {mesh:m,full:full,vis:vis,t:t,z:PZ0+CH/2,fall:0}}
+function revealTo(c,f){var x=c.vis.getContext("2d"),h=Math.round(c.full.height*f);x.clearRect(0,0,c.vis.width,c.vis.height);if(h>0)x.drawImage(c.full,0,0,c.full.width,h,0,0,c.full.width,h);c.t.needsUpdate=true}
+function freeCard(c){scene.remove(c.mesh);c.mesh.geometry.dispose();c.mesh.material.dispose();c.t.dispose()}
+
+function enqueue(u){if(u.queued)return;u.queued=true;queue.push(u);
+  /* many at once: the latest tappers first, and never more than 25 waiting */
+  if(queue.length>25){var drop=queue.shift();drop.queued=false}paintHint()}
+function startJob(){if(!queue.length||!ok3d)return;var u=queue.pop();u.queued=false;ensurePhoto(u);
+  job={u:u,t0:perf(),wait:u.img||!u.av?0:1400,card:null,style:pick(STYLES)};paintHint()}
+
+function stepPrinter(now,dt){var sp=+cfg.speed||1,busy=queue.length>4?1.6:1;
+  if(advance>0){var d=Math.min(advance,dt*(3.2*sp*busy));advance-=d;cards.forEach(function(c){c.z+=d});paperShift+=d}
+  else if(!job)startJob();
+  if(job&&advance<=0){
+    if(!job.card){if(now-job.t0<job.wait&&!job.u.img)return;job.card=makeCardMesh(drawCard(job.u,job.style));cards.push(job.card);job.p=0}
+    var dur=2.6/(sp*busy);job.p=Math.min(1,job.p+dt/dur);revealTo(job.card,job.p);
+    /* bridge follows the printed line; the head runs side to side */
+    G.bridge.position.z=PZ0+job.p*CH;G.head.position.x=Math.sin(now/90)*CW*0.45;G.led.color.setHex(Math.sin(now/80)>0?0x33ff88:0x0b3a1f);
+    if(Math.random()<0.8)ink(G.head.position.x,G.bridge.position.z);
+    if(job.p>=1){job.u.lastPrint=now;mon.p++;paintMon();job=null;advance=CH+GAP;G.led.color.setHex(0x33ff88)}}
+  else{G.bridge.position.z=damp(G.bridge.position.z,PZ0,4,dt);G.head.position.x=damp(G.head.position.x,0,4,dt)}
+  /* the roll turns while the paper moves; cards past the edge tip over and drop */
+  G.roll.rotation.x=-paperShift/0.62;G.paperT.offset.y=paperShift/((EDGE+6.4)/4);
+  for(var i=cards.length-1;i>=0;i--){var c=cards[i],m=c.mesh;
+    if(c.z-CH/2>EDGE-0.2){c.fall+=dt;m.rotation.x=-Math.PI/2+Math.min(Math.PI/2,c.fall*2.6);m.position.set(0,0.02-c.fall*c.fall*6,c.z+c.fall*0.6);if(c.fall>1.6){freeCard(c);cards.splice(i,1)}}
+    else m.position.set(0,0.02,c.z)}}
+function ink(x,z){var p=G.inkP[G.inkI];G.inkI=(G.inkI+1)%G.inkP.length;p.x=x+rnd(-0.05,0.05);p.y=0.15;p.z=z+rnd(-0.05,0.05);p.v=0}
+function stepInk(dt){var a=G.ink.geometry.attributes.position.array;G.inkP.forEach(function(p,i){if(p.y>0.03){p.v+=9*dt;p.y-=p.v*dt}else p.y=-9;a[i*3]=p.x;a[i*3+1]=p.y;a[i*3+2]=p.z});G.ink.geometry.attributes.position.needsUpdate=true}
+
+/* ---------- events: only taps print ---------- */
+function onEvent(e){if(!e||!e.type)return;
+  if(e.type==="status"){setStatus(e.ok,e.text);return}
+  if(YT&&e.type==="chat")e={type:"like",user:e.user,nick:e.nick,avatar:e.avatar,count:1};   /* YouTube has no taps: a comment prints */
+  if(e.type==="like"){var c=Math.max(1,e.count|0);mon.l+=c;var u=userOf(e),now=perf();u.taps+=c;u.lastTap=now;
+    var again=+cfg.again,can=!u.lastPrint||(again>0&&now-u.lastPrint>again*1000);
+    if(can&&!u.queued&&(job?job.u!==u:true)&&u.taps>=Math.max(1,cfg.need|0)){ensurePhoto(u);enqueue(u)}
+    paintMon()}}
+
+/* ---------- hint ---------- */
+function paintHint(){var el=$("hint");el.hidden=!cfg.hint;var u=job?job.u:queue[queue.length-1];
+  $("hintMe").innerHTML=u&&u.src?'<img alt="" referrerpolicy="no-referrer" src="'+esc(u.src)+'">':u?'<span style="display:grid;place-items:center;width:100%;height:100%;background:hsl('+u.hue+',70%,45%)">'+esc(initial(u.nick))+'</span>':"📷";
+  $("hintQ").textContent=queue.length?"+"+queue.length:"";$("hintMe").firstChild&&0}
+
+/* ---------- camera ---------- */
+function stepCamera(now){var t=now/1000,portrait=W/H<0.75,z=job?G.bridge.position.z:-1;
+  cam.position.set(Math.sin(t*0.15)*0.6,portrait?13.5:10,portrait?6.8:6.5);cam.lookAt(0,0,portrait?-0.6+(z+1)*0.12:-0.8)}
+
+/* ---------- loop ---------- */
+var last=perf(),fpsAcc=0,fpsN=0,fpsT=perf(),slow=0;
+function frame(){var now=perf(),dt=Math.min(0.05,(now-last)/1000);last=now;
+  if(ok3d){stepPrinter(now,dt);stepInk(dt);stepCamera(now);
+    if(composer)composer.render(dt);else R.render(scene,cam);
+    fpsAcc+=dt;fpsN++;if(now-fpsT>2000){var fps=fpsN/fpsAcc;fpsT=now;fpsAcc=0;fpsN=0;$("perf").textContent=Math.round(fps)+" fps · "+cfg.q+" · "+queue.length+" en cola";
+      if(cfg.auto&&fps<40){if(++slow>=3){slow=0;var qi=QORDER.indexOf(cfg.q);if(qi<QORDER.length-1){cfg.q=QORDER[qi+1];save();applyQuality();fill()}}}else slow=0}}
+  requestAnimationFrame(frame)}
+function applyQuality(){if(!ok3d)return;Q=QUALITY[cfg.q]||QUALITY.ultra;R.shadowMap.enabled=cfg.q!=="ahorro";
+  if(composer){composer.dispose&&composer.dispose();composer=null}
+  if(Q.bloom||Q.samples){var rt=new T.WebGLRenderTarget(2,2,{type:T.HalfFloatType,samples:Q.samples});composer=new T.EffectComposer(R,rt);composer.addPass(new T.RenderPass(scene,cam));
+    if(Q.bloom)composer.addPass(new T.UnrealBloomPass(new T.Vector2(256,256),0.25,0.4,0.92));composer.addPass(new T.OutputPass())}
+  resize()}
+function resize(){W=innerWidth;H=innerHeight;if(!ok3d)return;var pr=Math.min(window.devicePixelRatio||1,Q.pr);R.setPixelRatio(pr);R.setSize(W,H,false);
+  cam.aspect=W/H;cam.fov=W/H<0.75?52:44;cam.updateProjectionMatrix();if(composer){composer.setPixelRatio(pr);composer.setSize(W,H)}}
+window.addEventListener("resize",resize);
+
+/* ---------- settings ---------- */
+function fill(){$("oQ").value=cfg.q;$("oAuto").checked=cfg.auto;$("oNeed").value=String(cfg.need);$("oAgain").value=String(cfg.again);$("oSpeed").value=String(cfg.speed);$("oHint").checked=cfg.hint}
+function bind(id,key,num){var el=$(id);el.onchange=function(){cfg[key]=el.type==="checkbox"?el.checked:num?+el.value:el.value;save();if(key==="q")applyQuality();paintHint()}}
+bind("oQ","q");bind("oAuto","auto");bind("oNeed","need",1);bind("oAgain","again",1);bind("oSpeed","speed",1);bind("oHint","hint");
+function openSheet(o){$("sheet").hidden=!o;$("gear").hidden=o;if(o){fill();paintMon()}}
+$("gear").onclick=function(){openSheet(true)};$("close").onclick=function(){openSheet(false)};
+Array.prototype.forEach.call(document.querySelectorAll(".tab"),function(b){b.onclick=function(){
+  Array.prototype.forEach.call(document.querySelectorAll(".tab"),function(x){x.setAttribute("aria-selected",x===b);$(x.dataset.p).hidden=x!==b})}});
+$("bClear").onclick=function(){queue.forEach(function(u){u.queued=false});queue=[];paintHint()};
+function go(g,page){try{localStorage.setItem("game",g)}catch(e){}location.href=page}
+$("bParty").onclick=function(){go("party","party.html")};$("bRace").onclick=function(){go("race","race.html")};$("bBus").onclick=function(){go("bus","index.html")};
+var tn=0,TN=["Fatima","Carlos","Sara","Youssef","Lucia","Omar","Maria","Hamza"];
+Array.prototype.forEach.call(document.querySelectorAll("[data-test]"),function(b){b.onclick=function(){var n=+b.dataset.test;for(var i=0;i<n;i++){tn++;onEvent({type:"like",user:"t"+tn,nick:TN[tn%TN.length],count:5})}}});
+function paintMon(){if($("sheet").hidden)return;$("mL").textContent=mon.l;$("mP").textContent=mon.p}
+/* ---------- connection (same bridge as the other games) ---------- */
+function setStatus(ok,text){var el=$("st");el.className=ok?"ok":"bad";el.textContent=text||(ok?"Conectado":"Sin conexión");$("dot").className=ok?"ok":""}
+function appLog(l){var el=$("apLog");el.textContent+=(el.textContent?"\n":"")+l;var x=el.textContent.split("\n");if(x.length>200)el.textContent=x.slice(-200).join("\n");el.scrollTop=el.scrollHeight}
+if(YT){$("apUserL").textContent="Tu canal o directo de YouTube";$("apUser").placeholder="@tucanal o enlace del directo";$("apKeyRow").hidden=true;$("mLW").firstChild.nodeValue="💬 "}
+$("lnNote").textContent=!APP?"Vista previa: abre esta página desde la app para recibir regalos reales.":YT?"Escribe tu canal de YouTube (@usuario) o pega el enlace del directo.":"Escribe tu usuario de TikTok. La app se conecta sola cuando empieza tu directo.";
+if(APP){try{$("apUser").value=BusApp.getUser();$("apKey").value=BusApp.getKey()}catch(e){}
+  $("apGo").onclick=function(){var u=$("apUser").value.trim();if(!YT)u=u.replace(/^@/,"");$("apUser").value=u;$("apLog").textContent="";try{BusApp.connect(u,$("apKey").value.trim())}catch(e){}};
+  window.__bus=function(e){try{onEvent(e)}catch(x){}};window.__busLog=appLog;try{BusApp.ready()}catch(e){}}
+else window.__bus=function(e){try{onEvent(e)}catch(x){}};
+
+
+/* ---------- floating stars over any app (native window, see FloatOverlay.java) ---------- */
+function flOpts(){return JSON.stringify({taps:cfg.flTaps,gifts:cfg.flGifts,wall:cfg.flWall,join:cfg.flJoin,size:+cfg.flSize||1})}
+function flState(){try{return APP&&BusApp.floatState?String(BusApp.floatState()):"none"}catch(e){return "none"}}
+function paintFloat(){var s=flState();$("bFloat").textContent=s==="on"?"Desactivar":"Activar";$("bFloat").classList.toggle("go",s!=="on");
+  $("floatSt").textContent=s==="on"?"✅":s==="noperm"?"Falta el permiso":s==="none"?"Solo en la app":""}
+$("bFloatTest").onclick=function(){if(!APP||!BusApp.floatTest)return;if(flState()!=="on"){try{BusApp.floatShow(true,flOpts())}catch(e){}}setTimeout(function(){try{BusApp.floatTest()}catch(e){}},500);setTimeout(paintFloat,400)};
+$("bFloat").onclick=function(){if(!APP||!BusApp.floatShow)return;var on=flState()!=="on";try{BusApp.floatShow(on,flOpts())}catch(e){}setTimeout(paintFloat,400)};
+[["oFlTaps","flTaps"],["oFlGifts","flGifts"],["oFlWall","flWall"],["oFlJoin","flJoin"],["oFlSize","flSize"]].forEach(function(p){var el=$(p[0]);
+  el.checked=!!cfg[p[1]];if(el.tagName==="SELECT")el.value=String(cfg[p[1]]);
+  el.onchange=function(){cfg[p[1]]=el.tagName==="SELECT"?+el.value:el.checked;save();
+    if(flState()==="on"){try{if(p[1]==="flSize")BusApp.floatShow(false,flOpts());BusApp.floatShow(true,flOpts())}catch(e){}}}});
+document.addEventListener("visibilitychange",function(){if(!document.hidden)paintFloat()});
+paintFloat();
+
+setInterval(function(){var now=perf();for(var k in users){var u=users[k];if(now-u.lastTap>1800000&&!u.queued)delete users[k]}},60000);
+function wake(){try{navigator.wakeLock&&navigator.wakeLock.request("screen").catch(function(){})}catch(e){}}
+document.addEventListener("visibilitychange",function(){if(!document.hidden)wake()});
+window.__print=function(){return {queue:queue.map(function(u){return u.nick}),job:job&&job.u.nick,cards:cards.length,printed:mon.p}};
+fill();applyQuality();paintHint();wake();if(ok3d)requestAnimationFrame(frame);
+})();
+</script>
+</body>
+</html>
