@@ -154,12 +154,12 @@ var PW=6,CW=2.7,CH=3.33,ROWGAP=0.35,PGAP=0.8,PZ0=-6.1,EDGE=4.6;   /* a page = 4 
 var SLOTS=[[-1.5,0],[1.5,0],[-1.5,1],[1.5,1]];function slotZ(row){return PZ0+CH/2+row*(CH+ROWGAP)}
 
 if(ok3d){
-  R.outputColorSpace=T.SRGBColorSpace;R.toneMapping=T.ACESFilmicToneMapping;R.toneMappingExposure=1.05;R.shadowMap.enabled=true;R.shadowMap.type=T.PCFSoftShadowMap;
+  R.outputColorSpace=T.SRGBColorSpace;R.toneMapping=T.ACESFilmicToneMapping;R.toneMappingExposure=0.9;R.shadowMap.enabled=true;R.shadowMap.type=T.PCFSoftShadowMap;
   scene=new T.Scene();scene.background=new T.Color(0x1a120c);
   var pm=new T.PMREMGenerator(R);scene.environment=pm.fromScene(new T.RoomEnvironment(),0.04).texture;pm.dispose();
   cam=new T.PerspectiveCamera(50,1,0.1,100);
-  scene.add(new T.HemisphereLight(0xfff1dc,0x3a2414,0.75));
-  var key=new T.SpotLight(0xfff0dd,140,40,0.7,0.5,1.4);key.position.set(-3,12,4);key.target.position.set(0,0,-1);key.castShadow=true;key.shadow.mapSize.set(1024,1024);key.shadow.bias=-0.0005;scene.add(key);scene.add(key.target);
+  scene.add(new T.HemisphereLight(0xfff1dc,0x3a2414,0.5));
+  var key=new T.SpotLight(0xfff0dd,70,40,0.7,0.5,1.4);key.position.set(-3,12,4);key.target.position.set(0,0,-1);key.castShadow=true;key.shadow.mapSize.set(1024,1024);key.shadow.bias=-0.0005;scene.add(key);scene.add(key.target);
   var warm=new T.PointLight(0xffb070,20,20,1.6);warm.position.set(5,4,3);scene.add(warm);
   buildDesk();buildPrinter();
 }
@@ -170,7 +170,7 @@ function woodTex(){var c=document.createElement("canvas");c.width=1024;c.height=
   for(var k=0;k<900;k++){x.strokeStyle="rgba(50,28,12,"+rnd(0.05,0.18).toFixed(2)+")";x.lineWidth=rnd(0.5,1.6);var yy=Math.random()*1024;x.beginPath();x.moveTo(0,yy);
     for(var px=0;px<=1024;px+=64)x.lineTo(px,yy+Math.sin(px*0.01+k)*rnd(1,4));x.stroke()}
   var t=tex(c);t.wrapS=t.wrapT=T.RepeatWrapping;t.repeat.set(2,2);return t}
-function paperTex(){var c=document.createElement("canvas");c.width=256;c.height=256;var x=c.getContext("2d");x.fillStyle="#f3ead8";x.fillRect(0,0,256,256);
+function paperTex(){var c=document.createElement("canvas");c.width=256;c.height=256;var x=c.getContext("2d");x.fillStyle="#e2d6bf";x.fillRect(0,0,256,256);
   for(var i=0;i<1400;i++){x.fillStyle="rgba(120,100,70,"+rnd(0.02,0.07).toFixed(3)+")";x.fillRect(Math.random()*256,Math.random()*256,rnd(1,3),1)}
   var t=tex(c);t.wrapS=t.wrapT=T.RepeatWrapping;t.repeat.set(2,4);return t}
 
@@ -242,7 +242,7 @@ function drawCard(u,style){var c=document.createElement("canvas");c.width=512;c.
    When the page is full it stays a moment, then the paper carries it forward and the cards drop over the edge. */
 var cards=[],job=null,advance=0,paperShift=0,page={users:[],n:0,fullAt:0};
 function makeCardMesh(full,x,z){var vis=document.createElement("canvas");vis.width=full.width;vis.height=full.height;var t=tex(vis);
-  var m=new T.Mesh(new T.PlaneGeometry(CW,CH),new T.MeshStandardMaterial({map:t,transparent:true,roughness:0.75}));m.rotation.x=-Math.PI/2;m.position.set(x,0.02,z);m.receiveShadow=true;
+  var m=new T.Mesh(new T.PlaneGeometry(CW,CH),new T.MeshBasicMaterial({map:t,transparent:true,toneMapped:false}));m.rotation.x=-Math.PI/2;m.position.set(x,0.02,z);m.receiveShadow=true;
   scene.add(m);return {mesh:m,full:full,vis:vis,t:t,x:x,z:z,fall:0}}
 function revealTo(c,f){var x=c.vis.getContext("2d"),h=Math.round(c.full.height*f);x.clearRect(0,0,c.vis.width,c.vis.height);if(h>0)x.drawImage(c.full,0,0,c.full.width,h,0,0,c.full.width,h);c.t.needsUpdate=true}
 function freeCard(c){scene.remove(c.mesh);c.mesh.geometry.dispose();c.mesh.material.dispose();c.t.dispose()}
@@ -302,7 +302,7 @@ function frame(){var now=perf(),dt=Math.min(0.05,(now-last)/1000);last=now;
 function applyQuality(){if(!ok3d)return;Q=QUALITY[cfg.q]||QUALITY.ultra;R.shadowMap.enabled=cfg.q!=="ahorro";
   if(composer){composer.dispose&&composer.dispose();composer=null}
   if(Q.bloom||Q.samples){var rt=new T.WebGLRenderTarget(2,2,{type:T.HalfFloatType,samples:Q.samples});composer=new T.EffectComposer(R,rt);composer.addPass(new T.RenderPass(scene,cam));
-    if(Q.bloom)composer.addPass(new T.UnrealBloomPass(new T.Vector2(256,256),0.25,0.4,0.92));composer.addPass(new T.OutputPass())}
+    composer.addPass(new T.OutputPass())}   /* no bloom here: white paper would glow and wash the photos out */
   resize()}
 function resize(){W=innerWidth;H=innerHeight;if(!ok3d)return;var pr=Math.min(window.devicePixelRatio||1,Q.pr);R.setPixelRatio(pr);R.setSize(W,H,false);
   cam.aspect=W/H;cam.fov=W/H<0.75?52:44;cam.updateProjectionMatrix();if(composer){composer.setPixelRatio(pr);composer.setSize(W,H)}}
