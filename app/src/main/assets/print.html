@@ -81,7 +81,7 @@ input[type=checkbox]{width:20px;height:20px;accent-color:var(--hot)}
     </div>
     <div class="pane" id="pCtl">
       <div class="grp"><h3>🖨️ Imprenta</h3>
-        <p class="note">Cada espectador que toca la pantalla sale impreso en una tarjeta con su foto y su nombre. Los regalos van siempre primero, del de más valor al de menos, y ninguno se queda sin imprimir: 🌹 menos de 10 monedas = tarjeta con marco rojo y el regalo pegado; ⭐ 10–99 = tarjeta dorada con brillos; 👑 100–999 = póster ancho de toda la fila con confeti; 💎 1000+ = página entera para esa persona. La máquina imprime línea a línea, el papel avanza y las tarjetas caen por el borde. Cuatro tarjetas por página, dos por fila; el papel avanza tirado por los rodillos mientras el cabezal imprime. Sin lista de espera: imprime a los últimos que han tocado. Si quitas «varias veces en la misma página» (Reglas), quien ya está en la página no se vuelve a imprimir aunque toque; cuando la página se llena, se queda un momento y avanza.</p>
+        <p class="note">Cada espectador que toca la pantalla sale impreso en una tarjeta con su foto y su nombre. Los regalos van siempre primero, del de más valor al de menos, y ninguno se queda sin imprimir: 🌹 menos de 10 monedas = tarjeta con marco rojo y el regalo pegado; ⭐ 10–99 = tarjeta dorada con brillos; 👑 100–999 = póster ancho de toda la fila con confeti; 💎 1000+ = página entera para esa persona. La máquina imprime línea a línea, el papel avanza y las tarjetas caen por el borde. Cuatro tarjetas por página, dos por fila. Reparto justo, sin lista de espera: entra quien ha tocado en los últimos 20 s; primero los que todavía no han salido, luego los que más tiempo llevan esperando; quien acaba de salir descansa más páginas cuanta más gente toca (1–2 personas: vuelve enseguida · 3–4: en la página siguiente · 5–10: salta una página · 11+: salta dos). Junto al cabezal se ven los dos siguientes 👀.</p>
               </div>
       <div class="grp"><h3>🫧 Estrellas flotantes (encima de cualquier juego)</h3>
         <p class="note">Sale encima de cualquier app que abras durante el directo (otro juego, YouTube…): los que tocan suben como burbujas con su foto y su nombre, y cada regalo entra como una tarjeta con la foto, el nombre y el regalo (el de más valor primero). No bloquea el juego de debajo. Muévela arrastrando el pequeño ✥; doble toque en ✥ la esconde un momento. La primera vez Android pide permiso para «mostrar sobre otras apps».</p>
@@ -117,9 +117,7 @@ input[type=checkbox]{width:20px;height:20px;accent-color:var(--hot)}
     <div class="pane" id="pRules" hidden>
       <div class="grp"><h3>Impresión</h3>
         <div class="ln"><label for="oNeed">Toques para salir impreso</label><select id="oNeed"><option value="1">1</option><option value="5">5</option><option value="15">15</option><option value="30">30</option></select></div>
-        <div class="ln"><label for="oAgain">La misma persona puede volver a salir tras</label><select id="oAgain"><option value="-1">En la página siguiente</option><option value="60">1 min</option><option value="180">3 min</option><option value="600">10 min</option><option value="0">Solo una vez por directo</option></select></div>
         <div class="ln"><label for="oSpeed">Velocidad de la máquina</label><select id="oSpeed"><option value="0.7">Lenta</option><option value="1">Normal</option><option value="1.5">Rápida</option></select></div>
-        <label class="ln"><input type="checkbox" id="oRepeat"><span>La misma persona puede salir varias veces en la misma página (si toca otra vez)</span></label>
         <label class="ln"><input type="checkbox" id="oHint"><span>Mostrar el dibujo 👆 ➜ 🖨️ arriba</span></label>
       </div>
     </div>
@@ -330,13 +328,26 @@ function perforation(u){onTape(u,0.05,function(y){tapeX.fillStyle="rgba(80,60,40
      👑 100 – 999        → a wide poster across the whole row, golden rays, confetti when it comes out
      💎 1000 +           → a full-page poster (holographic frame, crown), the page is closed first so it has it all to itself
    A small gift shares its row with the next small gift, or with the latest tapper, so nothing waits for nothing.
-   Taps: when no gift is waiting, the machine prints whoever tapped LAST (among those who tapped in the last 15 s). */
-var job=null,page={users:[],rows:0},pendSince=0,gapLeft=0,gq=[],gSeq=0;
+   Taps — "who deserves it most", no waiting list:
+     • only people who tapped in the last 20 s compete (whoever stops tapping simply drops out, nothing piles up);
+     • someone never printed in this live goes first; then whoever has waited longest since their last print;
+       a small bonus for having tapped in the last 3 s keeps the "I tap, something happens" feeling;
+     • whoever was just printed rests for a number of pages that grows with the crowd:
+         1–2 tapping: can come back at once · 3–4: on the next page · 5–10: skips one page · 11+: skips two pages;
+     • the two who come next are shown beside the print head (👀), so nobody feels forgotten. */
+var job=null,page={users:[],rows:0,no:0},pendSince=0,gapLeft=0,gq=[],gSeq=0;
 var ROWW=2*CW+0.3,PAGEH=2*CH+ROWGAP;
 function tierOf(c){return c>=1000?3:c>=100?2:c>=10?1:0}
-function eligible(u,now){if((!cfg.repeat&&page.users.indexOf(u)>=0)||u.taps<Math.max(1,cfg.need|0))return false;var again=+cfg.again2;
-  if(!u.lastPrint||again<0)return true;return again>0&&now-u.lastPrint>again*1000}
-function candidates(){var now=perf(),a=[];for(var k in users){var u=users[k];if(now-u.lastTap<=15000&&eligible(u,now))a.push(u)}return a.sort(function(x,y){return y.lastTap-x.lastTap})}
+function active(now){var a=[];for(var k in users){var u=users[k];if(now-u.lastTap<=20000&&u.taps>=Math.max(1,cfg.need|0))a.push(u)}return a}
+function restPages(n){return n<=2?-1:n<=4?0:n<=10?1:2}
+function resting(u,n){if(u.printPage==null)return false;var k=restPages(n);return k<0?false:page.no-u.printPage<=k}
+function score(u,now){var base=u.printPage==null?1e6-(u.firstTap||now)/1000:(now-(u.lastPrint||0))/1000*10;return base+(now-u.lastTap<3000?15:0)}
+/* the ranking used for every row; "skip" leaves out people already on this job */
+function candidates(skip){var now=perf(),act=active(now),n=act.length,busy=job?job.items.map(function(it){return it.u}):[];skip=skip||[];
+  var ok=act.filter(function(u){return !resting(u,n)&&busy.indexOf(u)<0&&skip.indexOf(u)<0});
+  /* everyone is resting (a small crowd): rather than stop, take whoever has waited longest */
+  if(!ok.length&&n)ok=act.filter(function(u){return busy.indexOf(u)<0&&skip.indexOf(u)<0}).sort(function(a,b){return (a.lastPrint||0)-(b.lastPrint||0)}).slice(0,1);
+  return ok.sort(function(a,b){return score(b,now)-score(a,now)})}
 function latest(){return gq.length?gq[0].u:candidates()[0]||null}
 function addGift(u,e){var coins=Math.max(1,e.coins|0)*Math.max(1,e.count|0),n=Math.max(1,e.count|0);
   /* the same person sending again while waiting: one print with the total (it may grow into a bigger print) */
@@ -356,18 +367,14 @@ function tryStart(now){
     gq.shift();var its=[item(g.u,g)];
     var j=-1;for(var i=0;i<gq.length;i++)if(tierOf(gq[i].coins)<=1&&gq[i].u!==g.u){j=i;break}
     if(j>=0){var g2=gq.splice(j,1)[0];its.push(item(g2.u,g2))}
-    else{var c=candidates().filter(function(u){return u!==g.u});if(c.length)its.push(item(c[0],null))}
+    else{var c=candidates([g.u]);if(c.length)its.push(item(c[0],null))}
     startJob(its,"cards",now);return}
   var c=candidates();
-  if(!c.length){pendSince=0;
-    /* only people who are already on this page keep tapping (e.g. a single tapper): after a few seconds the page is closed,
-       so they can be printed again on the next one instead of the machine waiting forever */
-    if(page.users.length&&now-(G.rowEnd||0)>6000){var blocked=page.users.some(function(u){return now-u.lastTap<6000&&u.taps>=Math.max(1,cfg.need|0)});if(blocked)closePage()}
-    return}
+  if(!c.length){pendSince=0;return}
   /* one person waiting: give a second one a moment to tap, so the row is full */
   if(c.length<2){if(!pendSince)pendSince=now;if(now-pendSince<2500)return}
   pendSince=0;startJob(c.slice(0,2).map(function(u){return item(u,null)}),"cards",now)}
-function closePage(){gapLeft=PGAP;perforation(feedS+PGAP/2);page={users:[],rows:0}}
+function closePage(){gapLeft=PGAP;perforation(feedS+PGAP/2);page={users:[],rows:0,no:page.no+1}}
 function startJob(its,kind,now){its.forEach(function(it){ensurePhoto(it.u);page.users.push(it.u);if(it.g&&it.g.img)giftPic(it.g.img)});
   var h=kind==="page"?PAGEH:CH,top=its.reduce(function(m,it){return Math.max(m,it.tier)},-1);
   job={items:its,kind:kind,h:h,tier:top,t0:now,drawn:false,u0:0};paintHint();if(top>=2)flashGift(top)}
@@ -386,9 +393,9 @@ function stepPrinter(now,dt){var sp=+cfg.speed||1;
     G.head.position.x=Math.sin(now/110)*(PW/2-0.6);
     var gold=job.tier>=0;G.led.color.setHex(Math.sin(now/80)>0?(gold?0xffc93c:0x33ff88):0x0b3a1f);
     if(Math.random()<0.8)ink(G.head.position.x,PL+0.05);if(gold&&Math.random()<(job.tier+1)*0.3)sparkle(G.head.position.x,0.3,PL+0.3,job.tier);
-    if(feedS>=job.u0+job.h-0.005){job.items.forEach(function(it){it.u.lastPrint=now;mon.p++});paintMon();G.rowEnd=now;G.led.color.setHex(0x33ff88);
+    if(feedS>=job.u0+job.h-0.005){job.items.forEach(function(it){it.u.lastPrint=now;it.u.printPage=page.no;mon.p++});paintMon();G.rowEnd=now;G.led.color.setHex(0x33ff88);
       if(job.tier>=2)G.burstAt=now;var k=job.kind;job=null;
-      if(k==="page"){gapLeft=PGAP;perforation(feedS+PGAP/2);page={users:[],rows:0}}
+      if(k==="page")closePage();
       else{page.rows++;if(page.rows>=2)closePage();else gapLeft=ROWGAP}paintHint()}}
   else G.head.position.x=damp(G.head.position.x,0,3,dt);
   /* confetti from the printer when a poster comes out */
@@ -457,7 +464,7 @@ function onEvent(e){if(!e||!e.type)return;
   if(e.type==="status"){setStatus(e.ok,e.text);return}
   if(YT&&e.type==="chat")e={type:"like",user:e.user,nick:e.nick,avatar:e.avatar,count:1};   /* YouTube has no taps: a comment prints */
   if(e.type==="gift"){mon.g=(mon.g||0)+Math.max(1,e.count|0);addGift(userOf(e),e);paintHint();paintMon();return}
-  if(e.type==="like"){var c=Math.max(1,e.count|0);mon.l+=c;var u=userOf(e),now=perf();u.taps+=c;u.lastTap=now;
+  if(e.type==="like"){var c=Math.max(1,e.count|0);mon.l+=c;var u=userOf(e),now=perf();u.taps+=c;u.lastTap=now;if(!u.firstTap)u.firstTap=now;
     if(eligible(u,now))ensurePhoto(u);
     paintHint();paintMon()}}
 
@@ -543,6 +550,18 @@ function drawPlaque(t){var W2=1600,H2=230,c=PLQ.c,x=PLQ.x;x.clearRect(0,0,W2,H2)
   coin(L(4)+66,cy,"1000",1.4,4);arrow(L(4)+148,cy,3.2);miniCard(L(4)+235,cy,104,136,false,true,false,1);
   x.strokeStyle="rgba(255,201,60,.45)";x.lineWidth=2;for(var i=1;i<5;i++){x.beginPath();x.moveTo(20+cw*i,40);x.lineTo(20+cw*i,H2-40);x.stroke()}
   PLQ.t.needsUpdate=true}
+/* 👀 the next two, on both sides of the print head */
+var NEXT={s:[],at:0,key:""};
+function nextBadge(u){var c=document.createElement("canvas");c.width=c.height=192;var x=c.getContext("2d");
+  x.fillStyle="rgba(10,8,20,.78)";x.beginPath();x.arc(96,96,92,0,7);x.fill();
+  x.save();x.beginPath();x.arc(96,96,76,0,7);x.clip();if(u.img){var im=u.img,k=Math.max(152/im.width,152/im.height);try{x.drawImage(im,96-im.width*k/2,96-im.height*k/2,im.width*k,im.height*k)}catch(e){}}
+  else{x.fillStyle="hsl("+u.hue+",70%,45%)";x.fillRect(0,0,192,192);x.fillStyle="#fff";x.font="800 80px 'Barlow Condensed',Arial";x.textAlign="center";x.textBaseline="middle";x.fillText(initial(u.nick),96,100)}x.restore();
+  x.lineWidth=8;x.strokeStyle="#ffc93c";x.beginPath();x.arc(96,96,80,0,7);x.stroke();x.font="54px serif";x.textAlign="center";x.textBaseline="middle";x.fillText("👀",150,40);return tex(c)}
+function stepNext(now){if(!ok3d||now-NEXT.at<500)return;NEXT.at=now;
+  if(!NEXT.s.length)[-1,1].forEach(function(sd){var sp=new T.Sprite(new T.SpriteMaterial({transparent:true,depthWrite:false,toneMapped:false}));sp.scale.set(0.85,0.85,1);sp.position.set(sd*3.0,1.0,PL+0.8);sp.renderOrder=8;sp.visible=false;scene.add(sp);NEXT.s.push(sp)});
+  var g=gq.slice(0,2).map(function(x){return x.u}),c=g.length<2?candidates(g).slice(0,2-g.length):[],list=g.concat(c).slice(0,2),key=list.map(function(u){return u.uid+(u.img?"*":"")}).join("|");
+  if(key===NEXT.key)return;NEXT.key=key;
+  NEXT.s.forEach(function(sp,i){var u=list[i];if(sp.material.map){sp.material.map.dispose();sp.material.map=null}sp.visible=!!u;if(u){ensurePhoto(u);sp.material.map=nextBadge(u)}sp.material.needsUpdate=true})}
 function stepPlaque(now){if(!PLQ||!G.plaque.visible||now-PLQ.at<50)return;PLQ.at=now;drawPlaque(now/1000)}
 function buildPlaque(){var pg=new T.Group();G.bridge.add(pg);G.plaque=pg;
   var bez=new T.Mesh(new T.BoxGeometry(7.2,1.08,0.08),new T.MeshStandardMaterial({color:0x0c0a14,roughness:0.3,metalness:0.8}));pg.add(bez);
@@ -558,7 +577,7 @@ function stepCamera(now){var t=now/1000,portrait=W/H<0.75;
 /* ---------- loop ---------- */
 var last=perf(),fpsAcc=0,fpsN=0,fpsT=perf(),slow=0;
 function frame(){var now=perf(),dt=Math.min(0.05,(now-last)/1000);last=now;
-  if(ok3d){stepPrinter(now,dt);stepInk(dt);stepFX(dt);stepFlash(now);stepPlaque(now);stepCamera(now);
+  if(ok3d){stepPrinter(now,dt);stepInk(dt);stepFX(dt);stepFlash(now);stepPlaque(now);stepNext(now);stepCamera(now);
     if(composer)composer.render(dt);else R.render(scene,cam);
     fpsAcc+=dt;fpsN++;if(now-fpsT>2000){var fps=fpsN/fpsAcc;fpsT=now;fpsAcc=0;fpsN=0;$("perf").textContent=Math.round(fps)+" fps · "+cfg.q+(APP&&BusApp.version?" · versión "+BusApp.version():"");
       if(cfg.auto&&fps<40){if(++slow>=3){slow=0;var qi=QORDER.indexOf(cfg.q);if(qi<QORDER.length-1){cfg.q=QORDER[qi+1];save();applyQuality();fill()}}}else slow=0}}
@@ -573,9 +592,9 @@ function resize(){W=innerWidth;H=innerHeight;if(!ok3d)return;var pr=Math.min(win
 window.addEventListener("resize",resize);
 
 /* ---------- settings ---------- */
-function fill(){$("oPlaque").checked=cfg.plaque;$("oLookMin").value=String(cfg.lookMin);$("oQ").value=cfg.q;$("oAuto").checked=cfg.auto;$("oNeed").value=String(cfg.need);$("oAgain").value=String(cfg.again2);$("oSpeed").value=String(cfg.speed);$("oHint").checked=cfg.hint;$("oRepeat").checked=cfg.repeat}
+function fill(){$("oPlaque").checked=cfg.plaque;$("oLookMin").value=String(cfg.lookMin);$("oQ").value=cfg.q;$("oAuto").checked=cfg.auto;$("oNeed").value=String(cfg.need);$("oSpeed").value=String(cfg.speed);$("oHint").checked=cfg.hint}
 function bind(id,key,num){var el=$(id);el.onchange=function(){cfg[key]=el.type==="checkbox"?el.checked:num?+el.value:el.value;save();if(key==="plaque"&&G.plaque){G.plaque.visible=cfg.plaque;paintHint()}if(key==="q")applyQuality();paintHint()}}
-bind("oQ","q");bind("oPlaque","plaque");bind("oLookMin","lookMin",1);bind("oAuto","auto");bind("oNeed","need",1);bind("oAgain","again2",1);bind("oSpeed","speed",1);bind("oHint","hint");bind("oRepeat","repeat");
+bind("oQ","q");bind("oPlaque","plaque");bind("oLookMin","lookMin",1);bind("oAuto","auto");bind("oNeed","need",1);bind("oSpeed","speed",1);bind("oHint","hint");
 function openSheet(o){$("sheet").hidden=!o;$("gear").hidden=o;if(o){fill();paintMon()}}
 $("gear").onclick=function(){openSheet(true)};$("close").onclick=function(){openSheet(false)};
 Array.prototype.forEach.call(document.querySelectorAll(".tab"),function(b){b.onclick=function(){
