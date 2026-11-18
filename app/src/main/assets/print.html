@@ -226,12 +226,18 @@ function buildPrinter(){var met=G.mMetal=std(0xbfc5cf,0.25,0.95),dark=G.mBody=st
 /* ---------- viewers ---------- */
 var users={},mon={l:0,p:0};
 function userOf(e){var uid=String(e.user||e.nick||"?"),u=users[uid];
-  if(!u)u=users[uid]={uid:uid,nick:String(e.nick||e.user||"Fan"),av:"",img:null,hue:hashHue(uid),taps:0,lastPrint:0,lastTap:0,queued:false};
+  if(!u){if(++userN>60000)trimUsers();u=users[uid]={uid:uid,nick:String(e.nick||e.user||"Fan"),av:"",img:null,hue:hashHue(uid),taps:0,lastPrint:0,lastTap:0,queued:false}}
   if(e.nick)u.nick=String(e.nick);if(e.avatar&&e.avatar!==u.av){u.av=String(e.avatar);u.photoAsked=false}return u}
-var imgWait={},imgN=0;
+var imgWait={},imgN=0,userN=0;
+/* over 60 000 viewers remembered: forget the ones idle longest (never someone tapping now or with a gift waiting) */
+function trimUsers(){var now=perf(),keep={};gq.forEach(function(g){keep[g.u.uid]=1});var a=[];for(var k in users){var u=users[k];if(ACTI[k]===undefined&&!keep[k])a.push(u)}
+  a.sort(function(x,y){return x.lastTap-y.lastTap});var drop=Math.max(0,userN-45000);for(var i=0;i<drop&&i<a.length;i++){delete users[a[i].uid];userN--}}
 window.__busImg=function(id,data){var cb=imgWait[id];delete imgWait[id];if(cb)cb(data)};
+/* photos are fetched only for whoever is being printed or comes next, and at most 120 stay in memory */
+var PHOTOS=[];
 function ensurePhoto(u){if(!u.av||u.photoAsked)return;u.photoAsked=true;var url=u.av;
-  var done=function(src){if(!src||u.av!==url)return;u.src=src;var im=new Image();im.onload=function(){if(u.av===url)u.img=im};im.src=src};
+  var done=function(src){if(!src||u.av!==url)return;u.src=src;var im=new Image();im.onload=function(){if(u.av!==url)return;u.img=im;PHOTOS.push(u);
+      while(PHOTOS.length>120){var o=PHOTOS.shift();if(job&&job.items.some(function(it){return it.u===o})){PHOTOS.push(o);break}o.img=null;o.src=null;o.photoAsked=false}};im.src=src};
   if(APP&&BusApp.image){var id="i"+(++imgN);imgWait[id]=done;try{BusApp.image(url,id)}catch(e){}}else done(url)}
 
 /* ---------- the taps' card: many looks, mixed at random so two cards in a row never look alike ----------
@@ -338,21 +344,38 @@ function perforation(u){onTape(u,0.05,function(y){tapeX.fillStyle="rgba(80,60,40
 var job=null,page={users:[],rows:0,no:0},pendSince=0,gapLeft=0,gq=[],gSeq=0;
 var ROWW=2*CW+0.3,PAGEH=2*CH+ROWGAP;
 function tierOf(c){return c>=1000?3:c>=100?2:c>=10?1:0}
-function active(now){var a=[];for(var k in users){var u=users[k];if(now-u.lastTap<=20000&&u.taps>=Math.max(1,cfg.need|0))a.push(u)}return a}
+/* ---- the active tappers, kept so that every tap costs the same whether 1 or 1 000 000 people are tapping ----
+   an array + index (add, remove and random pick in constant time), pruned through one bucket per second */
+var ACT=[],ACTI={},BK=[];
+function actAdd(u,now){if(ACTI[u.uid]===undefined){ACTI[u.uid]=ACT.length;ACT.push(u)}var sec=Math.floor(now/1000),b=BK[BK.length-1];
+  if(!b||b.s!==sec){b={s:sec,u:[],seen:{}};BK.push(b)}if(!b.seen[u.uid]){b.seen[u.uid]=1;b.u.push(u)}}
+function actDel(u){var i=ACTI[u.uid];if(i===undefined)return;var last=ACT.pop();if(last!==u){ACT[i]=last;ACTI[last.uid]=i}delete ACTI[u.uid]}
+function actPrune(now){var lim=Math.floor((now-20000)/1000);while(BK.length&&BK[0].s<lim){var b=BK.shift();for(var i=0;i<b.u.length;i++)if(now-b.u[i].lastTap>20000)actDel(b.u[i])}}
+setInterval(function(){actPrune(perf())},1000);
+function active(){return ACT}
 function restPages(n){return n<=2?-1:n<=4?0:n<=10?1:2}
 function resting(u,n){if(u.printPage==null)return false;var k=restPages(n);return k<0?false:page.no-u.printPage<=k}
 function score(u,now){var base=u.printPage==null?1e6-(u.firstTap||now)/1000:(now-(u.lastPrint||0))/1000*10;return base+(now-u.lastTap<3000?15:0)}
-/* the ranking used for every row; "skip" leaves out people already on this job */
-function candidates(skip){var now=perf(),act=active(now),n=act.length,busy=job?job.items.map(function(it){return it.u}):[];skip=skip||[];
-  var ok=act.filter(function(u){return !resting(u,n)&&busy.indexOf(u)<0&&skip.indexOf(u)<0});
+/* the ranking used for every row; "skip" leaves out people already on this job.
+   Up to 300 active tappers: everyone is scored. Beyond that: 96 picked at random are scored (constant time); since the
+   pick is random, everyone still tapping keeps the same chance, and the never-printed among them still go first. */
+var candMemo={at:0,key:"",v:null};
+function candidates(skip){var now=perf(),n=ACT.length,busy=job?job.items.map(function(it){return it.u}):[];skip=skip||[];
+  var key=n+"|"+skip.map(function(u){return u.uid}).join(",")+"|"+busy.map(function(u){return u.uid}).join(",")+"|"+page.no;
+  if(candMemo.v&&now-candMemo.at<150&&candMemo.key===key)return candMemo.v.slice();
+  var pool;if(n<=300)pool=ACT.slice();else{pool=[];var seen={};for(var i=0;i<96;i++){var u=ACT[(Math.random()*n)|0];if(!seen[u.uid]){seen[u.uid]=1;pool.push(u)}}}
+  var free=function(u){return busy.indexOf(u)<0&&skip.indexOf(u)<0};
+  var ok=pool.filter(function(u){return free(u)&&!resting(u,n)});
   /* everyone is resting (a small crowd): rather than stop, take whoever has waited longest */
-  if(!ok.length&&n)ok=act.filter(function(u){return busy.indexOf(u)<0&&skip.indexOf(u)<0}).sort(function(a,b){return (a.lastPrint||0)-(b.lastPrint||0)}).slice(0,1);
-  return ok.sort(function(a,b){return score(b,now)-score(a,now)})}
+  if(!ok.length&&n){var best=null;pool.forEach(function(u){if(free(u)&&(!best||(u.lastPrint||0)<(best.lastPrint||0)))best=u});ok=best?[best]:[]}
+  ok.sort(function(a,b){return score(b,now)-score(a,now)});if(ok.length>6)ok.length=6;
+  candMemo={at:now,key:key,v:ok};return ok.slice()}
 function latest(){return gq.length?gq[0].u:candidates()[0]||null}
 function addGift(u,e){var coins=Math.max(1,e.coins|0)*Math.max(1,e.count|0),n=Math.max(1,e.count|0);
   /* the same person sending again while waiting: one print with the total (it may grow into a bigger print) */
   for(var i=0;i<gq.length;i++)if(gq[i].u===u){gq[i].coins+=coins;gq[i].count+=n;if(e.img)gq[i].img=e.img;sortG();return}
-  gq.push({u:u,coins:coins,count:n,img:e.img||"",name:String(e.gift||e.label||""),at:gSeq++});sortG();ensurePhoto(u);if(e.img)giftPic(e.img)}
+  var g={u:u,coins:coins,count:n,img:e.img||"",name:String(e.gift||e.label||""),at:gSeq++},lo=0,hi=gq.length;
+  while(lo<hi){var mid=(lo+hi)>>1;if(gq[mid].coins>=coins)lo=mid+1;else hi=mid}gq.splice(lo,0,g);if(gq.length<=4)ensurePhoto(u);if(e.img)giftPic(e.img)}
 function sortG(){gq.sort(function(a,b){return (b.coins-a.coins)||(a.at-b.at)})}
 /* gift pictures reach the canvas like photos do (through the app, so the canvas stays drawable) */
 var gpics={};function giftPic(url){if(!url)return null;var g=gpics[url];if(g)return g.img;gpics[url]=g={img:null};
@@ -360,36 +383,42 @@ var gpics={};function giftPic(url){if(!url)return null;var g=gpics[url];if(g)ret
   if(APP&&BusApp.image){var id="g"+(++imgN);imgWait[id]=done;try{BusApp.image(url,id)}catch(e){}}else done(url);return null}
 
 function item(u,g){return {u:u,g:g,tier:g?tierOf(g.coins):-1}}
+/* more people tapping → more, smaller cards per row, so many more people appear per minute (the main cure for "I never show up"):
+   up to 8 tapping: 2 per row · up to 25: 3 per row · more: 4 per row */
+function densityK(){var n=ACT.length;return n<=8?2:n<=25?3:4}
+function slotSize(k){var gap=0.3,cw=k===2?CW:(PW-0.3-gap*(k-1))/k;return {cw:cw,ch:k===2?CH:cw/0.81,gap:gap}}
+function slotX(k,i){var z=slotSize(k),tot=k*z.cw+(k-1)*z.gap;return k===2?COLX[i]:-tot/2+z.cw/2+i*(z.cw+z.gap)}
 function tryStart(now){
   if(gq.length){var g=gq[0],t=tierOf(g.coins);
     if(t===3){if(page.rows>0){closePage();return}gq.shift();startJob([item(g.u,g)],"page",now);return}
     if(t===2){gq.shift();startJob([item(g.u,g)],"row",now);return}
-    gq.shift();var its=[item(g.u,g)];
-    var j=-1;for(var i=0;i<gq.length;i++)if(tierOf(gq[i].coins)<=1&&gq[i].u!==g.u){j=i;break}
-    if(j>=0){var g2=gq.splice(j,1)[0];its.push(item(g2.u,g2))}
-    else{var c=candidates([g.u]);if(c.length)its.push(item(c[0],null))}
-    startJob(its,"cards",now);return}
+    gq.shift();var its=[item(g.u,g)],k=densityK(),taken=[g.u];
+    /* the rest of the row: more small gifts first, then the tappers who deserve it most */
+    for(var i=0;i<gq.length&&its.length<k;i++)if(tierOf(gq[i].coins)<=1&&taken.indexOf(gq[i].u)<0){var g2=gq.splice(i,1)[0];i--;its.push(item(g2.u,g2));taken.push(g2.u)}
+    if(its.length<k)candidates(taken).slice(0,k-its.length).forEach(function(u){its.push(item(u,null))});
+    startJob(its,"cards",now,k);return}
   var c=candidates();
   if(!c.length){pendSince=0;return}
-  /* one person waiting: give a second one a moment to tap, so the row is full */
-  if(c.length<2){if(!pendSince)pendSince=now;if(now-pendSince<2500)return}
-  pendSince=0;startJob(c.slice(0,2).map(function(u){return item(u,null)}),"cards",now)}
+  var k=densityK();
+  /* one person waiting in a quiet live: give a second one a moment to tap, so the row is full */
+  if(k===2&&c.length<2){if(!pendSince)pendSince=now;if(now-pendSince<2500)return}
+  pendSince=0;startJob(c.slice(0,k).map(function(u){return item(u,null)}),"cards",now,k)}
 function closePage(){gapLeft=PGAP;perforation(feedS+PGAP/2);page={users:[],rows:0,no:page.no+1}}
-function startJob(its,kind,now){its.forEach(function(it){ensurePhoto(it.u);page.users.push(it.u);if(it.g&&it.g.img)giftPic(it.g.img)});
-  var h=kind==="page"?PAGEH:CH,top=its.reduce(function(m,it){return Math.max(m,it.tier)},-1);
-  job={items:its,kind:kind,h:h,tier:top,t0:now,drawn:false,u0:0};paintHint();if(top>=2)flashGift(top)}
+function startJob(its,kind,now,k){k=k||2;its.forEach(function(it){ensurePhoto(it.u);page.users.push(it.u);if(it.g&&it.g.img)giftPic(it.g.img)});
+  var h=kind==="page"?PAGEH:kind==="row"?CH:slotSize(k).ch,top=its.reduce(function(m,it){return Math.max(m,it.tier)},-1);
+  job={items:its,kind:kind,h:h,k:k,tier:top,t0:now,drawn:false,u0:0};paintHint();if(top>=2)flashGift(top)}
 
 function stepPrinter(now,dt){var sp=+cfg.speed||1;
   if(gapLeft>0){var g=Math.min(gapLeft,dt*Math.max(0.6,gapLeft*3)*sp);gapLeft-=g;feedTo+=g}            /* a smooth pull between rows and pages */
-  else if(!job)tryStart(now);
+  else if(!job&&now-(G.tryAt||0)>120){G.tryAt=now;tryStart(now)}
   if(job){
     if(!job.drawn){var ready=job.items.every(function(it){return (it.u.img||!it.u.av)&&(!it.g||!it.g.img||giftPic(it.g.img))});if(!ready&&now-job.t0<1500)return;
       clearTo(feedS+job.h+3);job.u0=feedS;
-      if(job.kind==="cards")job.items.forEach(function(it,i){drawOnTape(it.g?drawGiftCard(it.u,it.g):drawCard(it.u),COLX[job.items.length===1?0:i],job.u0,CW,CH)});
+      if(job.kind==="cards"){var z=slotSize(job.k);job.items.forEach(function(it,i){drawOnTape(it.g?drawGiftCard(it.u,it.g):drawCard(it.u),slotX(job.k,i),job.u0,z.cw,z.ch)})}
       else drawOnTape(job.kind==="row"?drawPoster(job.items[0].u,job.items[0].g):drawMega(job.items[0].u,job.items[0].g),0,job.u0,ROWW,job.h);
       job.drawn=true;job.last=now}
     /* line feed: the motor pulls the paper in small steps while the head runs across; big prints take a little longer, never much */
-    var dur=(job.kind==="page"?4.4:job.kind==="row"?3.2:2.6)/sp,step=0.07;if(now-job.last>step/(job.h/dur)*1000){job.last=now;feedTo=Math.min(job.u0+job.h,feedTo+step)}
+    var dur=(job.kind==="page"?4.4:job.kind==="row"?3.2:2.6*job.h/CH)/sp,step=0.07;if(now-job.last>step/(job.h/dur)*1000){job.last=now;feedTo=Math.min(job.u0+job.h,feedTo+step)}
     G.head.position.x=Math.sin(now/110)*(PW/2-0.6);
     var gold=job.tier>=0;G.led.color.setHex(Math.sin(now/80)>0?(gold?0xffc93c:0x33ff88):0x0b3a1f);
     if(Math.random()<0.8)ink(G.head.position.x,PL+0.05);if(gold&&Math.random()<(job.tier+1)*0.3)sparkle(G.head.position.x,0.3,PL+0.3,job.tier);
@@ -465,11 +494,12 @@ function onEvent(e){if(!e||!e.type)return;
   if(YT&&e.type==="chat")e={type:"like",user:e.user,nick:e.nick,avatar:e.avatar,count:1};   /* YouTube has no taps: a comment prints */
   if(e.type==="gift"){mon.g=(mon.g||0)+Math.max(1,e.count|0);addGift(userOf(e),e);paintHint();paintMon();return}
   if(e.type==="like"){var c=Math.max(1,e.count|0);mon.l+=c;var u=userOf(e),now=perf();u.taps+=c;u.lastTap=now;if(!u.firstTap)u.firstTap=now;
-    if(eligible(u,now))ensurePhoto(u);
-    paintHint();paintMon()}}
+    if(u.taps>=Math.max(1,cfg.need|0))actAdd(u,now);
+    hintSoon();monSoon()}}
+var hintT=0,monT=0;function hintSoon(){if(!hintT)hintT=setTimeout(function(){hintT=0;paintHint()},300)}function monSoon(){if(!monT)monT=setTimeout(function(){monT=0;paintMon()},400)}
 
 /* ---------- hint ---------- */
-function paintHint(){var el=$("hint");el.hidden=!cfg.hint||!!cfg.plaque;var u=job?job.items[0].u:latest();
+function paintHint(){var el=$("hint");el.hidden=!cfg.hint||!!cfg.plaque;if(el.hidden)return;var u=job?job.items[0].u:latest();
   $("hintMe").innerHTML=u&&u.src?'<img alt="" referrerpolicy="no-referrer" src="'+esc(u.src)+'">':u?'<span style="display:grid;place-items:center;width:100%;height:100%;background:hsl('+u.hue+',70%,45%)">'+esc(initial(u.nick))+'</span>':"📷";
 }
 
@@ -630,10 +660,10 @@ $("bFloat").onclick=function(){if(!APP||!BusApp.floatShow)return;var on=flState(
 document.addEventListener("visibilitychange",function(){if(!document.hidden)paintFloat()});
 paintFloat();
 
-setInterval(function(){var now=perf();for(var k in users){var u=users[k];if(now-u.lastTap>1800000)delete users[k]}},60000);
+setInterval(function(){var now=perf(),keep={};gq.forEach(function(g){keep[g.u.uid]=1});for(var k in users){var u=users[k];if(now-u.lastTap>1800000&&ACTI[k]===undefined&&!keep[k]){delete users[k];userN--}}},60000);
 function wake(){try{navigator.wakeLock&&navigator.wakeLock.request("screen").catch(function(){})}catch(e){}}
 document.addEventListener("visibilitychange",function(){if(!document.hidden)wake()});
-window.__print=function(){return {next:(latest()||{}).nick,job:job&&(job.kind+':'+job.items.map(function(it){return it.u.nick+(it.g?'('+it.g.coins+')':'')}).join('+')),gifts:gq.map(function(g){return g.u.nick+':'+g.coins}),feed:+feedS.toFixed(2),printed:mon.p}};
+window.__print=function(){return {act:ACT.length,users:userN,photos:PHOTOS.length,next:(latest()||{}).nick,job:job&&(job.kind+':'+job.items.map(function(it){return it.u.nick+(it.g?'('+it.g.coins+')':'')}).join('+')),gifts:gq.map(function(g){return g.u.nick+':'+g.coins}),feed:+feedS.toFixed(2),printed:mon.p}};
 applyLook(PTH[cfg.look]?cfg.look:"wood");fill();applyQuality();paintHint();wake();if(ok3d)requestAnimationFrame(frame);
 })();
 </script>
