@@ -280,7 +280,7 @@ public class MainActivity extends Activity {
             return on ? "on" : "off";
         }
         @JavascriptInterface public boolean hasBusyAudio() { return busyFile().exists(); }
-        @JavascriptInterface public void busyAudio(final boolean on, final double vol, final double atSec) { ui.post(() -> busyAudio(on, (float) vol, (float) atSec)); }
+        @JavascriptInterface public void busyAudio(final boolean on, final double vol, final double atSec) { ui.post(() -> MainActivity.this.busyAudio(on, (float) vol, (float) atSec)); }   // the outer method: a bare call would pick this bridge method itself
         @JavascriptInterface public void busyDelete() { ui.post(() -> { stopBusyAudio(); //noinspection ResultOfMethodCallIgnored
             busyFile().delete(); }); }
         @JavascriptInterface public void floatTest() { ui.post(() -> FloatOverlay.get(MainActivity.this).test()); }
