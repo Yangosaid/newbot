@@ -1,0 +1,10 @@
+tools/
+apk2aab
+apk2aab.exe
+*.apk
+*.xapk
+*.apks
+*.apkm
+*.aab
+*.keystore
+*.jks
