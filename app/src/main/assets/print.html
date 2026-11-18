@@ -504,16 +504,20 @@ function paintLookBtns(){var el=$("lookBtns");if(!el)return;if(!el.children.leng
    four cells: the gift (🌹, 🪙10, 🪙100, 🪙1000), an arrow, and a small drawing of what it prints. Pictures and numbers only. */
 /* drawn again ~20 times a second so everything on it moves: the finger taps and hearts rise, the rose sways, coins spin,
    arrows pulse, a glint runs over the gold prints and the crown bobs */
-var PLQ=null;
+var PLQ;   /* set by buildPlaque, which runs before this line (no "= null" here: it would wipe it) */
 function drawPlaque(t){var W2=1600,H2=230,c=PLQ.c,x=PLQ.x;x.clearRect(0,0,W2,H2);
   var bg=x.createLinearGradient(0,0,0,H2);bg.addColorStop(0,"#1d1830");bg.addColorStop(0.5,"#0f0c1c");bg.addColorStop(1,"#191428");x.fillStyle=bg;x.fillRect(0,0,W2,H2);
   var gl=x.createLinearGradient(0,0,0,H2*0.5);gl.addColorStop(0,"rgba(255,255,255,.16)");gl.addColorStop(1,"rgba(255,255,255,0)");x.fillStyle=gl;x.fillRect(0,0,W2,H2*0.5);
   x.lineWidth=8;x.strokeStyle=goldGrad(x,0,0,W2,H2);x.strokeRect(6,6,W2-12,H2-12);x.lineWidth=2;x.strokeRect(20,20,W2-40,H2-40);
   var cw=(W2-40)/5,cy=H2/2+2,L=function(i){return 20+cw*i};
-  function coin(cx,cy,n,ph){var sx=Math.abs(Math.cos(t*2.4+ph))*0.85+0.15;x.save();x.translate(cx,cy-20);x.scale(sx,1);
+  var on=Math.floor(t/1.1)%5,pk=(t/1.1)%1,glow=Math.sin(Math.min(1,pk*1.4)*Math.PI);
+  var sg=x.createRadialGradient(L(on)+cw/2,cy,10,L(on)+cw/2,cy,cw*0.62);sg.addColorStop(0,"rgba(255,215,90,"+(0.38*glow).toFixed(3)+")");sg.addColorStop(1,"rgba(255,215,90,0)");x.fillStyle=sg;x.fillRect(L(on),24,cw,H2-48);
+  x.save();x.lineWidth=5;x.strokeStyle="rgba(255,215,90,"+(0.85*glow).toFixed(3)+")";x.strokeRect(L(on)+8,30,cw-16,H2-60);x.restore();
+  function pop(i){return i===on?1+0.12*glow:1}
+  function coin(cx,cy,n,ph,i){var sx=Math.abs(Math.cos(t*3+ph))*0.85+0.15,ps=pop(i);x.save();x.translate(cx,cy-20-Math.abs(Math.sin(t*3+ph))*8);x.scale(sx*ps,ps);
     var g=x.createRadialGradient(-8,-8,4,0,0,30);g.addColorStop(0,"#fff3b0");g.addColorStop(1,"#d39b12");x.fillStyle=g;x.beginPath();x.arc(0,0,27,0,7);x.fill();x.lineWidth=3;x.strokeStyle="#8a5d00";x.stroke();x.restore();
     x.font="800 44px 'Barlow Condensed',Arial";x.fillStyle="#ffd76a";x.textAlign="center";x.textBaseline="middle";x.fillText(n,cx,cy+40)}
-  function arrow(cx,cy,ph){var dx=Math.sin(t*4+ph)*5,a=0.55+0.35*(0.5+0.5*Math.sin(t*4+ph));x.save();x.strokeStyle="rgba(255,255,255,"+a.toFixed(2)+")";x.lineWidth=7;x.lineCap="round";x.beginPath();
+  function arrow(cx,cy,ph){var dx=Math.sin(t*5+ph)*10,a=0.55+0.35*(0.5+0.5*Math.sin(t*4+ph));x.save();x.strokeStyle="rgba(255,255,255,"+a.toFixed(2)+")";x.lineWidth=7;x.lineCap="round";x.beginPath();
     x.moveTo(cx-22+dx,cy);x.lineTo(cx+18+dx,cy);x.moveTo(cx+4+dx,cy-14);x.lineTo(cx+20+dx,cy);x.lineTo(cx+4+dx,cy+14);x.stroke();x.restore()}
   function miniCard(cx,cy,w,h,gold,rainbow,plain,ph){x.save();x.fillStyle=gold?"#fff4d0":"#fffdf8";x.fillRect(cx-w/2,cy-h/2,w,h);
     x.lineWidth=gold||rainbow?7:5;if(rainbow){var rb=x.createLinearGradient(cx-w/2,0,cx+w/2,0);for(var k=0;k<=6;k++)rb.addColorStop(k/6,"hsl("+((k*60+t*90)%360)+",90%,60%)");x.strokeStyle=rb}
@@ -524,19 +528,19 @@ function drawPlaque(t){var W2=1600,H2=230,c=PLQ.c,x=PLQ.x;x.clearRect(0,0,W2,H2)
     if(gold||rainbow){/* a glint sweeping across */var gp=((t*0.45+ph)%1.6)/1.6,gx=cx-w/2-40+(w+80)*gp;x.save();x.beginPath();x.rect(cx-w/2,cy-h/2,w,h);x.clip();
       var sh=x.createLinearGradient(gx-30,0,gx+30,0);sh.addColorStop(0,"rgba(255,255,255,0)");sh.addColorStop(0.5,"rgba(255,255,255,.75)");sh.addColorStop(1,"rgba(255,255,255,0)");x.fillStyle=sh;
       x.translate(gx,cy);x.rotate(0.35);x.fillRect(-30,-h,60,2*h);x.restore();
-      var bob=rainbow?Math.sin(t*3)*5:0;x.font=Math.round(Math.min(w,h)*0.26)+"px serif";x.textAlign="center";x.textBaseline="middle";x.fillText(rainbow?"👑":"✨",px,cy-h/2+Math.min(w,h)*0.12+bob)}
+      var bob=rainbow?Math.sin(t*4)*9:0;x.font=Math.round(Math.min(w,h)*0.26)+"px serif";x.textAlign="center";x.textBaseline="middle";x.fillText(rainbow?"👑":"✨",px,cy-h/2+Math.min(w,h)*0.12+bob)}
     x.restore()}
   x.textAlign="center";x.textBaseline="middle";
   /* 👆 taps with hearts rising */
-  var press=Math.max(0,Math.sin(t*7))*8;x.font="76px serif";x.fillText("👆",L(0)+66,cy+8+press);
-  for(var k=0;k<3;k++){var p=(t*0.7+k/3)%1;x.globalAlpha=1-p;x.font=Math.round(26+p*10)+"px serif";x.fillText("❤️",L(0)+66+(k-1)*30+Math.sin(p*6+k)*6,cy-26-p*62)}x.globalAlpha=1;
+  var press=Math.max(0,Math.sin(t*7))*16;x.save();x.translate(L(0)+66,cy+8+press);x.scale(pop(0),pop(0));x.font="80px serif";x.fillText("👆",0,0);x.restore();
+  for(var k=0;k<3;k++){var p=(t*0.9+k/3)%1;x.globalAlpha=1-p;x.font=Math.round(30+p*16)+"px serif";x.fillText("❤️",L(0)+66+(k-1)*34+Math.sin(p*6+k)*10,cy-20-p*80)}x.globalAlpha=1;
   arrow(L(0)+148,cy,0);miniCard(L(0)+235,cy,92,118,false,false,true,0);
   /* 🌹 sways */
-  x.save();x.translate(L(1)+66,cy+30);x.rotate(Math.sin(t*2.2)*0.14);x.font="76px serif";x.fillText("🌹",0,-30);x.restore();
+  x.save();x.translate(L(1)+66,cy+34);x.rotate(Math.sin(t*2.6)*0.32);x.scale(pop(1),pop(1));x.font="80px serif";x.fillText("🌹",0,-34);x.restore();
   arrow(L(1)+148,cy,0.8);miniCard(L(1)+235,cy,92,118,false,false,false,0);
-  coin(L(2)+66,cy,"10",0);arrow(L(2)+148,cy,1.6);miniCard(L(2)+235,cy,92,118,true,false,false,0);
-  coin(L(3)+66,cy,"100",0.7);arrow(L(3)+148,cy,2.4);miniCard(L(3)+232,cy,140,92,true,false,false,0.5);
-  coin(L(4)+66,cy,"1000",1.4);arrow(L(4)+148,cy,3.2);miniCard(L(4)+235,cy,104,136,false,true,false,1);
+  coin(L(2)+66,cy,"10",0,2);arrow(L(2)+148,cy,1.6);miniCard(L(2)+235,cy,92,118,true,false,false,0);
+  coin(L(3)+66,cy,"100",0.7,3);arrow(L(3)+148,cy,2.4);miniCard(L(3)+232,cy,140,92,true,false,false,0.5);
+  coin(L(4)+66,cy,"1000",1.4,4);arrow(L(4)+148,cy,3.2);miniCard(L(4)+235,cy,104,136,false,true,false,1);
   x.strokeStyle="rgba(255,201,60,.45)";x.lineWidth=2;for(var i=1;i<5;i++){x.beginPath();x.moveTo(20+cw*i,40);x.lineTo(20+cw*i,H2-40);x.stroke()}
   PLQ.t.needsUpdate=true}
 function stepPlaque(now){if(!PLQ||!G.plaque.visible||now-PLQ.at<50)return;PLQ.at=now;drawPlaque(now/1000)}
@@ -556,7 +560,7 @@ var last=perf(),fpsAcc=0,fpsN=0,fpsT=perf(),slow=0;
 function frame(){var now=perf(),dt=Math.min(0.05,(now-last)/1000);last=now;
   if(ok3d){stepPrinter(now,dt);stepInk(dt);stepFX(dt);stepFlash(now);stepPlaque(now);stepCamera(now);
     if(composer)composer.render(dt);else R.render(scene,cam);
-    fpsAcc+=dt;fpsN++;if(now-fpsT>2000){var fps=fpsN/fpsAcc;fpsT=now;fpsAcc=0;fpsN=0;$("perf").textContent=Math.round(fps)+" fps · "+cfg.q;
+    fpsAcc+=dt;fpsN++;if(now-fpsT>2000){var fps=fpsN/fpsAcc;fpsT=now;fpsAcc=0;fpsN=0;$("perf").textContent=Math.round(fps)+" fps · "+cfg.q+(APP&&BusApp.version?" · versión "+BusApp.version():"");
       if(cfg.auto&&fps<40){if(++slow>=3){slow=0;var qi=QORDER.indexOf(cfg.q);if(qi<QORDER.length-1){cfg.q=QORDER[qi+1];save();applyQuality();fill()}}}else slow=0}}
   requestAnimationFrame(frame)}
 function applyQuality(){if(!ok3d)return;Q=QUALITY[cfg.q]||QUALITY.ultra;R.shadowMap.enabled=cfg.q!=="ahorro";
