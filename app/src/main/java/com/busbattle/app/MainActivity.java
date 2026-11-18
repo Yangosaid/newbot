@@ -399,9 +399,11 @@ public class MainActivity extends Activity {
             try (java.io.InputStream in = getContentResolver().openInputStream(u); java.io.OutputStream out = new java.io.FileOutputStream(tmp)) {
                 byte[] buf = new byte[65536]; int n;
                 while (in != null && (n = in.read(buf)) > 0) out.write(buf, 0, n);
-            } catch (Exception e) { tmp.delete(); return; }
+            } catch (Exception e) { tmp.delete(); log("No se pudo copiar el vídeo: " + e); return; }
             //noinspection ResultOfMethodCallIgnored
-            tmp.renameTo(busyFile());
+            busyFile().delete();
+            boolean ok = tmp.renameTo(busyFile());
+            log(ok ? "Vídeo listo para sonar junto a Spotify (" + (busyFile().length() / 1024) + " KB)" : "No se pudo guardar el vídeo");
         }, "copy-video").start();
     }
     private void stopBusyAudio() {
@@ -415,14 +417,15 @@ public class MainActivity extends Activity {
                 busyPlayer = new android.media.MediaPlayer();
                 busyPlayer.setAudioAttributes(new android.media.AudioAttributes.Builder()
                         .setUsage(android.media.AudioAttributes.USAGE_MEDIA).setContentType(android.media.AudioAttributes.CONTENT_TYPE_MOVIE).build());
-                busyPlayer.setDataSource(busyFile().getAbsolutePath());
+                /* the media player runs in another process that cannot open the app's private files by path: hand it an open file */
+                try (java.io.FileInputStream fis = new java.io.FileInputStream(busyFile())) { busyPlayer.setDataSource(fis.getFD()); }
                 busyPlayer.setLooping(true);
                 busyPlayer.prepare();
                 busyPlayer.seekTo(Math.max(0, (int) (atSec * 1000)));
                 busyPlayer.start();
             } else if (atSec >= 0 && Math.abs(busyPlayer.getCurrentPosition() - atSec * 1000) > 400) busyPlayer.seekTo((int) (atSec * 1000));
             busyPlayer.setVolume(vol, vol);
-        } catch (Exception e) { stopBusyAudio(); }
+        } catch (Exception e) { log("Sonido del vídeo: " + e); stopBusyAudio(); }
     }
 
     @Override
