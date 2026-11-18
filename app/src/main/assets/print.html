@@ -36,6 +36,14 @@ body{background:var(--night);color:var(--ink);font-family:var(--body);overflow:h
 #hint .me{width:46px;height:46px;border-radius:50%;overflow:hidden;border:2px solid #fff;display:grid;place-items:center;font:800 18px/1 var(--display);background:rgba(255,255,255,.12)}
 #hint .me img{width:100%;height:100%;object-fit:cover}
 #hint .q{font:800 18px/1 var(--display);color:var(--ink-dim);min-width:18px}
+/* what each gift prints: shown for a few seconds every few minutes, pictures and numbers only */
+#gh{position:absolute;left:50%;top:calc(env(safe-area-inset-top,0px) + 12% + 70px);transform:translateX(-50%) translateY(-8px);display:flex;gap:8px;padding:6px 10px;border-radius:16px;
+  background:rgba(20,12,6,.66);border:1px solid rgba(255,201,60,.45);pointer-events:none;opacity:0;transition:opacity .5s ease,transform .5s ease;box-shadow:0 0 18px rgba(255,201,60,.25)}
+#gh.on{opacity:1;transform:translateX(-50%)}
+#gh .t{display:flex;flex-direction:column;align-items:center;gap:2px;min-width:52px}
+#gh .a{font-size:22px;line-height:1}#gh .c{font:800 13px/1 var(--display);color:#ffc93c}#gh .r{font-size:24px;line-height:1}
+#gh .t:nth-child(4) .r{animation:bob 1s ease-in-out infinite}
+@keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-4px)}}
 @keyframes tap{0%,100%{transform:translateY(0)}50%{transform:translateY(5px) scale(.92)}}
 #gear{position:absolute;right:10px;bottom:10px;width:40px;height:40px;border-radius:50%;border:1px solid rgba(255,255,255,.12);background:rgba(10,6,24,.45);
   color:var(--ink);font-size:19px;line-height:1;cursor:pointer;opacity:.3}
@@ -70,6 +78,7 @@ input[type=checkbox]{width:20px;height:20px;accent-color:var(--hot)}
   <div id="fade"></div>
   <div id="nogl" hidden>Este teléfono no puede mostrar gráficos 3D.</div>
   <div id="hint" aria-hidden="true"><span class="tap">👆<i>❤️</i><i>❤️</i></span><svg viewBox="0 0 34 22"><path d="M2 11h24M18 3l9 8-9 8" fill="none" stroke="#fff" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"/></svg><span class="pr">🖨️</span><div class="me" id="hintMe">📷</div></div>
+  <div id="gh" aria-hidden="true"><div class="t"><span class="a">🌹</span><span class="r">🎴</span></div><div class="t"><span class="c">🪙10</span><span class="r">✨🎴</span></div><div class="t"><span class="c">🪙100</span><span class="r">🖼️</span></div><div class="t"><span class="c">🪙1000</span><span class="r">👑📜</span></div></div>
   <button id="gear" aria-label="Ajustes">⚙<i id="dot"></i></button>
 
   <div id="sheet" hidden>
@@ -92,6 +101,11 @@ input[type=checkbox]{width:20px;height:20px;accent-color:var(--hot)}
         <label class="ln"><input type="checkbox" id="oFlWall"><span>⭐ Fila con los 5 últimos que apoyan</span></label>
         <label class="ln"><input type="checkbox" id="oFlJoin"><span>👋 Los que entran al directo</span></label>
         <div class="ln"><label for="oFlSize">Tamaño</label><select id="oFlSize"><option value="0.8">Pequeño</option><option value="1">Normal</option><option value="1.25">Grande</option></select></div>
+      </div>
+      <div class="grp"><h3>🎁 Qué imprime cada regalo</h3>
+        <p class="note">Unos segundos cada pocos minutos, arriba, con dibujos: 🌹 ➜ tarjeta · 🪙10 ➜ tarjeta dorada · 🪙100 ➜ póster · 🪙1000 ➜ página entera. Ojo: TikTok castiga pedir regalos de forma automática; lo más seguro es explicarlo tú con tu voz de vez en cuando y dejar esto apagado o poco frecuente.</p>
+        <label class="ln"><input type="checkbox" id="oGh"><span>Mostrarlo</span></label>
+        <div class="ln"><label for="oGhEvery">Cada</label><select id="oGhEvery"><option value="2">2 min</option><option value="3">3 min</option><option value="5">5 min</option><option value="10">10 min</option></select></div>
       </div>
       <div class="grp"><h3>🎨 Aspecto</h3>
         <p class="note">La mesa, la máquina y la luz cambian solas cada pocos minutos para que el directo no canse (espera a que termine la tarjeta que se está imprimiendo).</p>
@@ -140,7 +154,7 @@ var APP=!!window.BusApp;
 var SRC=APP&&BusApp.getSource?String(BusApp.getSource()):"tiktok",YT=SRC==="youtube";
 try{localStorage.setItem("game","print")}catch(e){}
 
-var DEF={look:"wood",lookMin:15,need:1,again2:-1,repeat:true,speed:1,hint:true,q:"ultra",auto:true,flTaps:true,flGifts:true,flWall:true,flJoin:false,flSize:1};
+var DEF={gh:true,ghEvery:3,look:"wood",lookMin:15,need:1,again2:-1,repeat:true,speed:1,hint:true,q:"ultra",auto:true,flTaps:true,flGifts:true,flWall:true,flJoin:false,flSize:1};
 var cfg=Object.assign({},DEF);
 try{var sv=JSON.parse(localStorage.getItem("print1")||"null");if(sv)cfg=Object.assign(cfg,sv)}catch(e){}
 function save(){try{localStorage.setItem("print1",JSON.stringify(cfg))}catch(e){}}
@@ -496,6 +510,9 @@ setInterval(function(){var m=+cfg.lookMin||0;if(!m||pthBusy||job)return;if(perf(
 function paintLookBtns(){var el=$("lookBtns");if(!el)return;if(!el.children.length){el.innerHTML=PORDER.map(function(n){return '<button class="btn" data-l="'+n+'">'+PTH[n].n+'</button>'}).join("");
     Array.prototype.forEach.call(el.children,function(b){b.onclick=function(){switchLook(b.dataset.l)}})}
   Array.prototype.forEach.call(el.children,function(b){b.classList.toggle("go",b.dataset.l===pthName)})}
+/* the gift guide: 7 seconds every few minutes, never while a gift's poster is being printed (it shows the real thing then) */
+var ghAt=perf()-120000;setInterval(function(){var now=perf(),el=$("gh");if(!cfg.gh){el.classList.remove("on");return}
+  if(!el.classList.contains("on")&&now-ghAt>Math.max(1,+cfg.ghEvery||3)*60000&&!(job&&job.tier>=2)){ghAt=now;el.classList.add("on");setTimeout(function(){el.classList.remove("on")},7000)}},1000);
 /* ---------- camera ---------- */
 function stepCamera(now){var t=now/1000,portrait=W/H<0.75;
   cam.position.set(Math.sin(t*0.15)*0.6,portrait?15.5:11,portrait?8.2:7.4);cam.lookAt(0,-0.4,portrait?-0.4:-0.8)}
@@ -518,9 +535,9 @@ function resize(){W=innerWidth;H=innerHeight;if(!ok3d)return;var pr=Math.min(win
 window.addEventListener("resize",resize);
 
 /* ---------- settings ---------- */
-function fill(){$("oLookMin").value=String(cfg.lookMin);$("oQ").value=cfg.q;$("oAuto").checked=cfg.auto;$("oNeed").value=String(cfg.need);$("oAgain").value=String(cfg.again2);$("oSpeed").value=String(cfg.speed);$("oHint").checked=cfg.hint;$("oRepeat").checked=cfg.repeat}
+function fill(){$("oGh").checked=cfg.gh;$("oGhEvery").value=String(cfg.ghEvery);$("oLookMin").value=String(cfg.lookMin);$("oQ").value=cfg.q;$("oAuto").checked=cfg.auto;$("oNeed").value=String(cfg.need);$("oAgain").value=String(cfg.again2);$("oSpeed").value=String(cfg.speed);$("oHint").checked=cfg.hint;$("oRepeat").checked=cfg.repeat}
 function bind(id,key,num){var el=$(id);el.onchange=function(){cfg[key]=el.type==="checkbox"?el.checked:num?+el.value:el.value;save();if(key==="q")applyQuality();paintHint()}}
-bind("oQ","q");bind("oLookMin","lookMin",1);bind("oAuto","auto");bind("oNeed","need",1);bind("oAgain","again2",1);bind("oSpeed","speed",1);bind("oHint","hint");bind("oRepeat","repeat");
+bind("oQ","q");bind("oGh","gh");bind("oGhEvery","ghEvery",1);bind("oLookMin","lookMin",1);bind("oAuto","auto");bind("oNeed","need",1);bind("oAgain","again2",1);bind("oSpeed","speed",1);bind("oHint","hint");bind("oRepeat","repeat");
 function openSheet(o){$("sheet").hidden=!o;$("gear").hidden=o;if(o){fill();paintMon()}}
 $("gear").onclick=function(){openSheet(true)};$("close").onclick=function(){openSheet(false)};
 Array.prototype.forEach.call(document.querySelectorAll(".tab"),function(b){b.onclick=function(){
