@@ -126,4 +126,6 @@ Switching later keeps your apps and data inside the container where possible.</s
     <string name="render_scale_50">50% — lightest and fastest (recommended)</string>
     <string name="render_scale_75">75% — balanced</string>
     <string name="render_scale_100">100% — sharpest (heavy)</string>
+    <string name="keepalive_channel">Virtual system</string>
+    <string name="keepalive_text">The virtual system is running at full performance</string>
 </resources>

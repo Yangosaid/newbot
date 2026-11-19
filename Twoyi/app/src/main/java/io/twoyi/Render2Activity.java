@@ -172,6 +172,9 @@ public class Render2Activity extends Activity implements View.OnTouchListener {
     }
 
     private void bootSystem() {
+        KeepAliveService.start(getApplicationContext());
+        requestBatteryExemptionOnce();
+
         boolean romExist = RomManager.romExist(this);
         boolean factoryRomUpdated = RomManager.needsUpgrade(this);
         boolean forceInstall = AppKV.getBooleanConfig(getApplicationContext(), AppKV.FORCE_ROM_BE_RE_INSTALL, false);
@@ -249,6 +252,21 @@ public class Render2Activity extends Activity implements View.OnTouchListener {
                 mLoadingLayout.setVisibility(View.GONE);
             });
         }, "waiting-boot").start();
+    }
+
+    /** Ask once to be excluded from battery optimisation so the container is not throttled. */
+    private void requestBatteryExemptionOnce() {
+        if (AppKV.getBooleanConfig(this, "battery_exemption_asked", false)) return;
+        AppKV.setBooleanConfig(this, "battery_exemption_asked", true);
+        try {
+            android.os.PowerManager pm = getSystemService(android.os.PowerManager.class);
+            if (pm != null && !pm.isIgnoringBatteryOptimizations(getPackageName())) {
+                startActivity(new android.content.Intent(
+                        android.provider.Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS,
+                        android.net.Uri.parse("package:" + getPackageName())));
+            }
+        } catch (Throwable ignored) {
+        }
     }
 
     private void showBootFailure() {

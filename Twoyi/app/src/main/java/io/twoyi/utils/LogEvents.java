@@ -118,6 +118,9 @@ public class LogEvents {
             }
         }
 
+        // Result of the boot-time ROM fixes (SurfaceFlinger patch, codecs).
+        reportItems.add(ReportItem.create(RomManager.getPatchStatusFile(context)));
+
         // ANR traces written by the guest system (why an app/system froze)
         File anrDir = new File(romDataDir, "anr");
         File[] anrs = anrDir.listFiles();

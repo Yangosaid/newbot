@@ -127,4 +127,6 @@
     <string name="render_scale_50">50% — الأخف والأسرع (موصى به)</string>
     <string name="render_scale_75">75% — متوازن</string>
     <string name="render_scale_100">100% — الأوضح (ثقيل)</string>
+    <string name="keepalive_channel">النظام الافتراضي</string>
+    <string name="keepalive_text">النظام الافتراضي يعمل بكامل الأداء</string>
 </resources>

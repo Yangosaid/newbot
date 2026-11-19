@@ -276,6 +276,11 @@ public final class RomManager {
     }
 
     public static void shutdown(Context context) {
+        try {
+            // Otherwise START_STICKY would bring the notification back without a container.
+            context.stopService(new Intent(context, io.twoyi.KeepAliveService.class));
+        } catch (Throwable ignored) {
+        }
         System.exit(0);
         Process.killProcess(Process.myPid());
     }
@@ -384,31 +389,130 @@ public final class RomManager {
      * boosts CPU, so make vsyncHint() return immediately.
      */
     public static void applySystemPatches(Context context) {
-        File sf = new File(getRootfsDir(context), "system/lib64/libsurfaceflinger.so");
-        if (!sf.exists()) return;
-        // Patch a copy and rename it over the original, so an already-running process that has
-        // the old file mapped is never affected.
-        File tmp = new File(sf.getPath() + ".patching");
-        ElfPatcher.Result r;
+        StringBuilder status = new StringBuilder();
+        File lib64 = new File(getRootfsDir(context), "system/lib64");
+        status.append("codecs: ").append(installMissingCodecs(context)).append('\n');
+        // Fallback addresses from the 0.5.4 ROM's crash traces (vsyncHint+268 returns from powerHint).
+        status.append("libsurfaceflinger PowerHAL::vsyncHint: ").append(patchLib(
+                new File(lib64, "libsurfaceflinger.so"), "_ZN7android8PowerHAL9vsyncHintEb", 0x57610, 0x5771c)).append('\n');
+        // Second line of defence: make the client side of the power hint a no-op as well.
+        // No camera HAL in the container: cameraserver never registers, and
+        // Camera.getNumberOfCameras() loops forever waiting for it (froze Opera). Report 0 cameras.
+        status.append("libcamera_client getNumberOfCameras: ").append(patchLib(
+                new File(lib64, "libcamera_client.so"),
+                "_ZN7android10CameraBaseINS_6CameraENS_12CameraTraitsIS1_EEE18getNumberOfCamerasEv", -1, -1)).append('\n');
+        status.append("build.prop memory: ").append(tuneBuildProp(context)).append('\n');
+        status.append("libpowermanager BpPowerManager::powerHint: ").append(patchLib(
+                new File(lib64, "libpowermanager.so"), "_ZN7android14BpPowerManager9powerHintEii", -1, -1)).append('\n');
+        Log.i(TAG, "system patches:\n" + status);
         try {
-            Files.copy(sf.toPath(), tmp.toPath(), StandardCopyOption.REPLACE_EXISTING);
-            r = ElfPatcher.patchReturnZero(tmp, "_ZN7android8PowerHAL9vsyncHintEb");
-            if (r == ElfPatcher.Result.SYMBOL_NOT_FOUND) {
-                // Offsets from the 0.5.4 ROM's crash traces (vsyncHint+268 returns from powerHint).
-                r = ElfPatcher.patchReturnZeroAtVerified(tmp, 0x57610, 0x5771c);
+            Files.write(getPatchStatusFile(context).toPath(), status.toString().getBytes());
+        } catch (IOException ignored) {
+        }
+    }
+
+    /**
+     * The ROM ships media_codecs.xml listing Google's software codecs but not the libraries
+     * (libstagefright_soft_*.so), so every video/audio decoder fails with ComponentNotFound and
+     * no video plays. Copy the AOSP 8.1 arm64 libraries bundled in assets/codecs/lib64, only
+     * for files that are missing: nothing already in the ROM is overwritten.
+     */
+    private static String installMissingCodecs(Context context) {
+        File lib64 = new File(getRootfsDir(context), "system/lib64");
+        if (!lib64.isDirectory()) return "no system/lib64";
+        int installed = 0, present = 0;
+        try {
+            String[] names = context.getAssets().list("codecs/lib64");
+            if (names == null) return "no bundle";
+            for (String name : names) {
+                File target = new File(lib64, name);
+                if (target.exists()) {
+                    present++;
+                    continue;
+                }
+                File tmp = new File(lib64, name + ".tmp");
+                try (InputStream in = context.getAssets().open("codecs/lib64/" + name);
+                     OutputStream out = new FileOutputStream(tmp)) {
+                    byte[] buf = new byte[65536];
+                    int n;
+                    while ((n = in.read(buf)) > 0) out.write(buf, 0, n);
+                }
+                tmp.setReadable(true, false);
+                if (!tmp.renameTo(target)) {
+                    tmp.delete();
+                    continue;
+                }
+                installed++;
+            }
+        } catch (IOException e) {
+            return "ERROR " + e;
+        }
+        return "installed " + installed + ", already present " + present;
+    }
+
+    /** Larger Java heaps for apps inside the container (browsers/TikTok hit the 192m default). */
+    private static String tuneBuildProp(Context context) {
+        File buildProp = new File(getRootfsDir(context), "system/build.prop");
+        if (!buildProp.exists()) return "missing";
+        try {
+            java.util.List<String> lines = Files.readAllLines(buildProp.toPath());
+            java.util.Map<String, String> want = new java.util.LinkedHashMap<>();
+            want.put("dalvik.vm.heapgrowthlimit", "384m");
+            want.put("dalvik.vm.heapsize", "768m");
+            boolean changed = false;
+            for (int i = 0; i < lines.size(); i++) {
+                String l = lines.get(i);
+                int eq = l.indexOf('=');
+                if (eq <= 0 || l.startsWith("#")) continue;
+                String key = l.substring(0, eq).trim();
+                String v = want.remove(key);
+                if (v != null && !l.substring(eq + 1).trim().equals(v)) {
+                    lines.set(i, key + "=" + v);
+                    changed = true;
+                }
+            }
+            for (java.util.Map.Entry<String, String> e : want.entrySet()) {
+                lines.add(e.getKey() + "=" + e.getValue());
+                changed = true;
+            }
+            if (changed) {
+                File tmp = new File(buildProp.getPath() + ".tmp");
+                Files.write(tmp.toPath(), lines);
+                tmp.setReadable(true, false);
+                Files.move(tmp.toPath(), buildProp.toPath(), StandardCopyOption.REPLACE_EXISTING, StandardCopyOption.ATOMIC_MOVE);
+            }
+            return changed ? "updated" : "ok";
+        } catch (Throwable e) {
+            return "ERROR " + e;
+        }
+    }
+
+    public static File getPatchStatusFile(Context context) {
+        return new File(context.getDataDir(), "patch_status.txt");
+    }
+
+    /** Patches a copy and atomically renames it over the original (running processes keep the old inode). */
+    private static String patchLib(File lib, String symbol, long fallbackFunc, long fallbackCallRet) {
+        if (!lib.exists()) return "missing";
+        File tmp = new File(lib.getPath() + ".patching");
+        try {
+            Files.copy(lib.toPath(), tmp.toPath(), StandardCopyOption.REPLACE_EXISTING);
+            ElfPatcher.Result r = ElfPatcher.patchReturnZero(tmp, symbol);
+            if (r == ElfPatcher.Result.SYMBOL_NOT_FOUND && fallbackFunc > 0) {
+                r = ElfPatcher.patchReturnZeroAtVerified(tmp, fallbackFunc, fallbackCallRet);
             }
             if (r == ElfPatcher.Result.PATCHED) {
                 tmp.setReadable(true, false);
                 tmp.setExecutable(true, false);
-                Files.move(tmp.toPath(), sf.toPath(), StandardCopyOption.REPLACE_EXISTING, StandardCopyOption.ATOMIC_MOVE);
+                Files.move(tmp.toPath(), lib.toPath(), StandardCopyOption.REPLACE_EXISTING, StandardCopyOption.ATOMIC_MOVE);
             }
+            return r.name();
         } catch (Throwable e) {
-            r = ElfPatcher.Result.ERROR;
-            Log.e(TAG, "patch failed", e);
+            Log.e(TAG, "patch " + lib + " failed", e);
+            return "ERROR " + e;
         } finally {
             tmp.delete();
         }
-        Log.i(TAG, "surfaceflinger vsyncHint patch: " + r);
     }
 
     /** Removes system/ and vendor/ before installing a different ROM; user data is kept. */

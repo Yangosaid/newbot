@@ -1,0 +1,4 @@
+Software media codecs and their dependencies from the official Android 8.1 (API 27)
+arm64-v8a emulator system image (system-images;android-27;default;arm64-v8a,
+build OSM1.180201.044.D2), Android Open Source Project, Apache License 2.0.
+Copied into the container only when the ROM lacks them.

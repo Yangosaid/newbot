@@ -32,64 +32,102 @@ public final class ElfPatcher {
     private ElfPatcher() {
     }
 
-    /** File offset of a defined function symbol, or -1. */
+    /** File offset of a defined function symbol, or -1 (-2 if not an ELF64 LE file). */
     public static long findSymbolFileOffset(File so, String symbol) throws IOException {
+        byte[] all;
         try (RandomAccessFile raf = new RandomAccessFile(so, "r")) {
-            byte[] all = new byte[(int) raf.length()];
+            all = new byte[(int) raf.length()];
             raf.readFully(all);
-            ByteBuffer b = ByteBuffer.wrap(all).order(ByteOrder.LITTLE_ENDIAN);
-
-            if (all.length < 64 || b.getInt(0) != 0x464c457f /* \x7fELF */ || all[4] != 2 /* 64-bit */ || all[5] != 1 /* LE */) {
-                return -2;
-            }
-            long phoff = b.getLong(0x20);
-            long shoff = b.getLong(0x28);
-            int phentsize = b.getShort(0x36) & 0xffff;
-            int phnum = b.getShort(0x38) & 0xffff;
-            int shentsize = b.getShort(0x3a) & 0xffff;
-            int shnum = b.getShort(0x3c) & 0xffff;
-
-            byte[] want = symbol.getBytes(StandardCharsets.US_ASCII);
-            long vaddr = -1;
-
-            for (int i = 0; i < shnum && vaddr < 0; i++) {
-                int sh = (int) (shoff + (long) i * shentsize);
-                int type = b.getInt(sh + 4);
-                if (type != 2 /* SHT_SYMTAB */ && type != 11 /* SHT_DYNSYM */) continue;
-                long symOff = b.getLong(sh + 0x18);
-                long symSize = b.getLong(sh + 0x20);
-                int link = b.getInt(sh + 0x28);
-                long entSize = b.getLong(sh + 0x38);
-                if (entSize == 0) entSize = 24;
-                int strSh = (int) (shoff + (long) link * shentsize);
-                long strOff = b.getLong(strSh + 0x18);
-
-                for (long s = symOff; s + entSize <= symOff + symSize; s += entSize) {
-                    int nameIdx = b.getInt((int) s);
-                    int shndx = b.getShort((int) s + 6) & 0xffff;
-                    long value = b.getLong((int) s + 8);
-                    if (shndx == 0 || value == 0) continue; // undefined
-                    if (nameEquals(all, (int) (strOff + nameIdx), want)) {
-                        vaddr = value;
-                        break;
-                    }
-                }
-            }
-            if (vaddr < 0) return -1;
-
-            // vaddr -> file offset through the PT_LOAD segment that contains it.
-            for (int i = 0; i < phnum; i++) {
-                int ph = (int) (phoff + (long) i * phentsize);
-                if (b.getInt(ph) != 1 /* PT_LOAD */) continue;
-                long pOffset = b.getLong(ph + 0x08);
-                long pVaddr = b.getLong(ph + 0x10);
-                long pFilesz = b.getLong(ph + 0x20);
-                if (vaddr >= pVaddr && vaddr < pVaddr + pFilesz) {
-                    return vaddr - pVaddr + pOffset;
-                }
-            }
-            return -1;
         }
+        if (!isElf64(all)) return -2;
+        long vaddr = findSymbolVaddr(all, symbol.getBytes(StandardCharsets.US_ASCII), true);
+        if (vaddr < 0) return -1;
+        return vaddrToFileOffset(all, vaddr);
+    }
+
+    private static boolean isElf64(byte[] all) {
+        return all.length >= 64 && all[0] == 0x7f && all[1] == 'E' && all[2] == 'L' && all[3] == 'F'
+                && all[4] == 2 && all[5] == 1;
+    }
+
+    /**
+     * Searches .symtab/.dynsym; if not found, the xz-compressed ELF in .gnu_debugdata
+     * ("MiniDebugInfo", where Android keeps local symbols such as PowerHAL::vsyncHint).
+     */
+    private static long findSymbolVaddr(byte[] all, byte[] want, boolean allowDebugData) throws IOException {
+        ByteBuffer b = ByteBuffer.wrap(all).order(ByteOrder.LITTLE_ENDIAN);
+        long shoff = b.getLong(0x28);
+        int shentsize = b.getShort(0x3a) & 0xffff;
+        int shnum = b.getShort(0x3c) & 0xffff;
+        int shstrndx = b.getShort(0x3e) & 0xffff;
+        if (shoff <= 0 || shoff + (long) shnum * shentsize > all.length) return -1;
+
+        for (int i = 0; i < shnum; i++) {
+            int sh = (int) (shoff + (long) i * shentsize);
+            int type = b.getInt(sh + 4);
+            if (type != 2 /* SHT_SYMTAB */ && type != 11 /* SHT_DYNSYM */) continue;
+            long symOff = b.getLong(sh + 0x18);
+            long symSize = b.getLong(sh + 0x20);
+            int link = b.getInt(sh + 0x28);
+            long entSize = b.getLong(sh + 0x38);
+            if (entSize == 0) entSize = 24;
+            if (symOff + symSize > all.length) continue;
+            int strSh = (int) (shoff + (long) link * shentsize);
+            long strOff = b.getLong(strSh + 0x18);
+
+            for (long s = symOff; s + entSize <= symOff + symSize; s += entSize) {
+                int nameIdx = b.getInt((int) s);
+                int shndx = b.getShort((int) s + 6) & 0xffff;
+                long value = b.getLong((int) s + 8);
+                if (shndx == 0 || value == 0) continue; // undefined
+                if (nameEquals(all, (int) (strOff + nameIdx), want)) {
+                    return value;
+                }
+            }
+        }
+
+        if (!allowDebugData || shstrndx >= shnum) return -1;
+        int strSh = (int) (shoff + (long) shstrndx * shentsize);
+        long shstrOff = b.getLong(strSh + 0x18);
+        byte[] dbgName = ".gnu_debugdata".getBytes(StandardCharsets.US_ASCII);
+        for (int i = 0; i < shnum; i++) {
+            int sh = (int) (shoff + (long) i * shentsize);
+            if (!nameEquals(all, (int) (shstrOff + b.getInt(sh)), dbgName)) continue;
+            long off = b.getLong(sh + 0x18);
+            long size = b.getLong(sh + 0x20);
+            if (off + size > all.length) return -1;
+            byte[] inner;
+            try (java.io.InputStream in = new org.tukaani.xz.XZInputStream(
+                    new java.io.ByteArrayInputStream(all, (int) off, (int) size))) {
+                java.io.ByteArrayOutputStream bos = new java.io.ByteArrayOutputStream();
+                byte[] buf = new byte[65536];
+                int n;
+                while ((n = in.read(buf)) > 0) bos.write(buf, 0, n);
+                inner = bos.toByteArray();
+            }
+            // Symbol values in MiniDebugInfo use the same virtual addresses as the main file.
+            return isElf64(inner) ? findSymbolVaddr(inner, want, false) : -1;
+        }
+        return -1;
+    }
+
+    /** Virtual address -> file offset through the PT_LOAD segment containing it, or -1. */
+    static long vaddrToFileOffset(byte[] all, long vaddr) {
+        ByteBuffer b = ByteBuffer.wrap(all).order(ByteOrder.LITTLE_ENDIAN);
+        long phoff = b.getLong(0x20);
+        int phentsize = b.getShort(0x36) & 0xffff;
+        int phnum = b.getShort(0x38) & 0xffff;
+        for (int i = 0; i < phnum; i++) {
+            int ph = (int) (phoff + (long) i * phentsize);
+            if (b.getInt(ph) != 1 /* PT_LOAD */) continue;
+            long pOffset = b.getLong(ph + 0x08);
+            long pVaddr = b.getLong(ph + 0x10);
+            long pFilesz = b.getLong(ph + 0x20);
+            if (vaddr >= pVaddr && vaddr < pVaddr + pFilesz) {
+                return vaddr - pVaddr + pOffset;
+            }
+        }
+        return -1;
     }
 
     private static boolean nameEquals(byte[] all, int at, byte[] want) {
@@ -105,8 +143,15 @@ public final class ElfPatcher {
      * code there looks like what the crash traces showed (a function prologue at {@code funcOff}
      * and a call instruction right before {@code callRetOff}).
      */
-    public static Result patchReturnZeroAtVerified(File so, long funcOff, long callRetOff) {
+    public static Result patchReturnZeroAtVerified(File so, long funcVaddr, long callRetVaddr) {
         try (RandomAccessFile raf = new RandomAccessFile(so, "rw")) {
+            byte[] all = new byte[(int) raf.length()];
+            raf.readFully(all);
+            if (!isElf64(all)) return Result.NOT_ELF;
+            // Addresses from crash traces are virtual addresses, not file offsets.
+            long funcOff = vaddrToFileOffset(all, funcVaddr);
+            long callRetOff = vaddrToFileOffset(all, callRetVaddr);
+            if (funcOff < 0 || callRetOff < 4) return Result.SYMBOL_NOT_FOUND;
             if (raf.length() < callRetOff + 4) return Result.SYMBOL_NOT_FOUND;
             byte[] cur = new byte[RETURN_ZERO.length];
             raf.seek(funcOff);
