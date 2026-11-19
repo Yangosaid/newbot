@@ -130,7 +130,7 @@ public class LogEvents {
         // Live state from inside the container (needs it to be running).
         String[][] guestCommands = {
                 {"guest_logcat.txt", "logcat -d -v threadtime -b main,system,crash,events"},
-                {"guest_top.txt", "top -b -n 1 -m 30 || top -n 1 -m 30"},
+                {"guest_top.txt", "top -n 1 | head -45"},
                 {"guest_meminfo.txt", "cat /proc/meminfo; echo; dumpsys meminfo | head -60"},
                 {"guest_activity.txt", "dumpsys window | grep -E 'mCurrentFocus|mFocusedApp|ANR'; dumpsys activity processes | head -80"},
                 {"guest_input.txt", "dumpsys input | head -120"},

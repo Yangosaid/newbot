@@ -82,6 +82,10 @@ public final class RomManager {
 
         // Avoid SurfaceFlinger frame stalls inside the container.
         properties.setProperty("debug.sf.disable_backpressure", "1");
+
+        // The renderer implements OpenGL ES 2.0. Without this, Android reports ES 1.0 and apps
+        // refuse to start ("this phone cannot show 3D graphics").
+        properties.setProperty("ro.opengles.version", "131072");
         properties.setProperty("debug.sf.latch_unsignaled", "1");
 
         try (Writer writer = new FileWriter(propFile)) {
@@ -290,6 +294,7 @@ public final class RomManager {
                 cpu, rootfs7z, context.getDataDir()));
         if (ret == 0) {
             applyCommunityFixesIfNeeded(context);
+            applySystemPatches(context);
         }
         return ret;
     }
@@ -364,6 +369,44 @@ public final class RomManager {
         File systemDir = new File(rootfsDir, partition);
 
         IOUtils.deleteDirectory(systemDir);
+    }
+
+    /**
+     * Fixes for the closed-source ROM, applied before every boot (idempotent):
+     *
+     * SurfaceFlinger deadlock: EventThread holds its mutex while PowerHAL::vsyncHint() sends a
+     * oneway binder call to system_server. Twoyi's virtual binder sometimes never completes that
+     * call (e.g. while system_server restarts), so the mutex is held forever, vsync stops and the
+     * whole screen freezes (seen in ANR traces: DispSync and Binder threads blocked on the
+     * EventThread lock, "POSIX timer" thread stuck in BpPowerManager::powerHint). The hint only
+     * boosts CPU, so make vsyncHint() return immediately.
+     */
+    public static void applySystemPatches(Context context) {
+        File sf = new File(getRootfsDir(context), "system/lib64/libsurfaceflinger.so");
+        if (!sf.exists()) return;
+        // Patch a copy and rename it over the original, so an already-running process that has
+        // the old file mapped is never affected.
+        File tmp = new File(sf.getPath() + ".patching");
+        ElfPatcher.Result r;
+        try {
+            Files.copy(sf.toPath(), tmp.toPath(), StandardCopyOption.REPLACE_EXISTING);
+            r = ElfPatcher.patchReturnZero(tmp, "_ZN7android8PowerHAL9vsyncHintEb");
+            if (r == ElfPatcher.Result.SYMBOL_NOT_FOUND) {
+                // Offsets from the 0.5.4 ROM's crash traces (vsyncHint+268 returns from powerHint).
+                r = ElfPatcher.patchReturnZeroAtVerified(tmp, 0x57610, 0x5771c);
+            }
+            if (r == ElfPatcher.Result.PATCHED) {
+                tmp.setReadable(true, false);
+                tmp.setExecutable(true, false);
+                Files.move(tmp.toPath(), sf.toPath(), StandardCopyOption.REPLACE_EXISTING, StandardCopyOption.ATOMIC_MOVE);
+            }
+        } catch (Throwable e) {
+            r = ElfPatcher.Result.ERROR;
+            Log.e(TAG, "patch failed", e);
+        } finally {
+            tmp.delete();
+        }
+        Log.i(TAG, "surfaceflinger vsyncHint patch: " + r);
     }
 
     /** Removes system/ and vendor/ before installing a different ROM; user data is kept. */
