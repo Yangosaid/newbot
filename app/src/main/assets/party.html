@@ -241,7 +241,8 @@ input[type=checkbox]{width:20px;height:20px;accent-color:var(--hot)}
           <p class="note">El vídeo se repite solo. Mueve el dedo sobre la vista previa para elegir la parte que se ve, acerca con 🔍 y elige el volumen con 🔊 (a la izquierda del todo = sin sonido). El sonido del vídeo se mezcla con Spotify: los dos suenan a la vez.</p>
           <div id="hvEdit"><div id="hvPrev"><video id="hvPrevVid" loop muted playsinline></video></div>
             <div class="sl"><label>🔍<input type="range" id="hvZ" min="1" max="3" step="0.05"></label><label>↔<input type="range" id="hvX" min="0" max="100" step="1"></label><label>↕<input type="range" id="hvY" min="0" max="100" step="1"></label>
-              <label>🔊<input type="range" id="hvV" min="0" max="100" step="1"></label><span class="note" id="hvVn"></span><span class="note" id="hvOld" hidden>🔊 Vuelve a elegir el vídeo una vez para que suene junto a Spotify.</span></div></div>
+              <label>🔊<input type="range" id="hvV" min="0" max="100" step="1"></label><span class="note" id="hvVn"></span>
+              <div class="ln"><label for="oHostSnd">Sonido</label><select id="oHostSnd"><option value="mix">🎵 Con Spotify (suena junto a tu música)</option><option value="video">🎬 Sonido del vídeo (siempre sincronizado, pausa Spotify)</option></select></div><span class="note" id="hvOld" hidden>🔊 Vuelve a elegir el vídeo una vez para que suene junto a Spotify.</span></div></div>
         </div>
         <div class="ln" id="busyBtns"><button class="btn" data-b="">🎥</button><button class="btn" data-b="☕">☕</button><button class="btn" data-b="🍽️">🍽️</button><button class="btn" data-b="📞">📞</button><button class="btn" data-b="🎮">🎮</button><button class="btn" data-b="🚗">🚗</button><button class="btn" data-b="💤">💤</button></div>
         <label class="ln"><input type="checkbox" id="oHostSup"><span>Mientras estoy ocupado, mi burbuja enseña la foto del último que envía un regalo ❤️</span></label>
@@ -345,7 +346,7 @@ var SRC=APP&&BusApp.getSource?String(BusApp.getSource()):"tiktok",YT=SRC==="yout
 try{localStorage.setItem("game","party")}catch(e){}
 
 /* ---------- settings ---------- */
-var DEF={hintOn:false,per:2,max:24,fill:10,chat:YT,words:"",cd:YT?10:3,bpm:124,q:"ultra",auto:true,music:true,safe:true,hint:true,flag:true,prio:true,top3:true,kingScreen:true,memory:true,safeLive:true,flTaps:true,flGifts:true,flWall:true,flJoin:false,flSize:1,joinChar:true,host:false,hostSize:"m",hostShape2:"card",hostVx:50,hostVy:50,hostVz:1,hostVol:0,hostMirror:true,hostSup:true,hostX:null,hostY:null,hostIcon:"☕",hallMin:15,hall:"club",sync:false,syncSrc:"output",like:true,tapMode:"full",likeN:3,likeCam2:5,tapHold2:2.2,goal:2000,coinE:10,tapE:1,vipMin:100,vipLen:1};
+var DEF={hostSnd:"mix",hintOn:false,per:2,max:24,fill:10,chat:YT,words:"",cd:YT?10:3,bpm:124,q:"ultra",auto:true,music:true,safe:true,hint:true,flag:true,prio:true,top3:true,kingScreen:true,memory:true,safeLive:true,flTaps:true,flGifts:true,flWall:true,flJoin:false,flSize:1,joinChar:true,host:false,hostSize:"m",hostShape2:"card",hostVx:50,hostVy:50,hostVz:1,hostVol:0,hostMirror:true,hostSup:true,hostX:null,hostY:null,hostIcon:"☕",hallMin:15,hall:"club",sync:false,syncSrc:"output",like:true,tapMode:"full",likeN:3,likeCam2:5,tapHold2:2.2,goal:2000,coinE:10,tapE:1,vipMin:100,vipLen:1};
 var cfg=Object.assign({},DEF);
 /* TikTok-safe mode (on by default): no gift requests on screen, comments put viewers in the hall too */
 function safeLive(){return !!cfg.safeLive}
@@ -1000,11 +1001,14 @@ $("hostFile").onchange=function(){var f=this.files&&this.files[0];if(!f)return;v
 /* the video's sound: inside the app it is played by Android itself without taking the audio focus, so Spotify keeps playing
    (the picture in the bubble stays muted); in a browser preview the video element plays it */
 window.__busySndOff=function(){HOST.snd=false};   /* Android stopped the sound (app left the screen): start it fresh next time */
-function nativeSound(){return APP&&!!BusApp.busyAudio}
+/* "mix" (default): Android plays the sound without taking the audio focus, so Spotify keeps playing (the picture may drift a
+   little from the sound); "video": the video plays its own sound, always in sync, but Android pauses Spotify */
+function nativeSound(){return APP&&!!BusApp.busyAudio&&cfg.hostSnd!=="video"}
 function busySound(hv){var vol=clamp((+cfg.hostVol||0)/100,0,1);
   /* the position is sent only when the sound starts; after that Android loops it on its own (re-syncing made it stutter) */
-  if(nativeSound()){if(hv)hv.muted=true;var on=!!hv&&vol>0&&!document.hidden;try{BusApp.busyAudio(on,vol,on&&!HOST.snd?hv.currentTime:-1)}catch(e){}HOST.snd=on;return}
-  if(hv){hv.volume=vol;hv.muted=vol<=0}}
+  if(nativeSound()){if(hv)hv.muted=true;var on=!!hv&&vol>0&&!document.hidden;try{BusApp.busyAudio(on,vol,on&&!HOST.snd?hv.currentTime:-1)}catch(e){}HOST.snd=on;HOST.nat=on;return}
+  if(HOST.nat){try{BusApp.busyAudio(false,0,-1)}catch(e){}HOST.nat=false;HOST.snd=false}
+  if(hv){hv.volume=vol;hv.muted=vol<=0;if(vol>0&&hv.paused&&!hv.hidden)hv.play().catch(function(){})}}
 function frameMedia(el){var x=+cfg.hostVx,y=+cfg.hostVy,z=Math.max(1,+cfg.hostVz||1);el.style.objectPosition=x+"% "+y+"%";el.style.backgroundPosition=x+"% "+y+"%";el.style.transformOrigin=x+"% "+y+"%";el.style.transform="scale("+z+")"}
 function mediaDB(cb){try{var rq=indexedDB.open("party_media",1);rq.onupgradeneeded=function(){rq.result.createObjectStore("m")};rq.onsuccess=function(){cb(rq.result)};rq.onerror=function(){cb(null)}}catch(e){cb(null)}}
 function setVid(blob){if(HOST.vidURL){URL.revokeObjectURL(HOST.vidURL);HOST.vidURL=""}if(blob)HOST.vidURL=URL.createObjectURL(blob);
@@ -1017,6 +1021,7 @@ $("hostVidFile").onchange=function(){var f=this.files&&this.files[0];if(!f)retur
   mediaDB(function(db){if(!db)return;try{db.transaction("m","readwrite").objectStore("m").put(f,"busyVid")}catch(e){}})};
 $("bHostVidDel").onclick=function(){if(APP&&BusApp.busyDelete)try{BusApp.busyDelete()}catch(e){}setVid(null);mediaDB(function(db){if(!db)return;try{db.transaction("m","readwrite").objectStore("m").delete("busyVid")}catch(e){}})};
 function vidFrame(){save();frameMedia($("hvPrevVid"));frameMedia($("hbVid"));frameMedia($("hbBg"))}
+$("oHostSnd").value=cfg.hostSnd||"mix";$("oHostSnd").onchange=function(){cfg.hostSnd=this.value;save();HOST.snd=false;var hv=$("hbVid");busySound(hv.hidden||hv.paused?null:hv)};
 $("hvV").oninput=function(){cfg.hostVol=+this.value;save();paintVidCtl();var hv=$("hbVid");busySound(hv.hidden||hv.paused?null:hv)};
 document.addEventListener("visibilitychange",function(){var hv=$("hbVid");busySound(!document.hidden&&!hv.hidden&&!hv.paused?hv:null)});
 [["hvZ","hostVz"],["hvX","hostVx"],["hvY","hostVy"]].forEach(function(p){$(p[0]).oninput=function(){cfg[p[1]]=+this.value;vidFrame()}});
