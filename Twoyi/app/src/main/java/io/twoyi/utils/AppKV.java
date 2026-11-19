@@ -34,6 +34,21 @@ public class AppKV {
 
     /** The stored ROM is the community build that needs build.prop/rom.ini fixes after extraction. */
     public static final String ROM_IS_COMMUNITY = "rom_is_community";
+
+    /** Internal render resolution in percent of the real screen (50, 75 or 100). */
+    public static final String RENDER_SCALE = "render_scale_percent";
+    public static final int DEFAULT_RENDER_SCALE = 50;
+
+    public static int getRenderScale(Context context) {
+        int v = getPref(context).getInt(RENDER_SCALE, DEFAULT_RENDER_SCALE);
+        return (v == 50 || v == 75 || v == 100) ? v : DEFAULT_RENDER_SCALE;
+    }
+
+    @SuppressLint("ApplySharedPref")
+    public static void setRenderScale(Context context, int percent) {
+        getPref(context).edit().putInt(RENDER_SCALE, percent).commit();
+    }
+
     public static boolean getBooleanConfig(Context context,  String key, boolean fallback) {
         return getPref(context).getBoolean(key, fallback);
     }

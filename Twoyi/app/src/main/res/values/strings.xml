@@ -122,4 +122,9 @@
     <string name="kill_app_summary">يوقف التطبيق المفتوح داخل النظام الافتراضي إذا علِق</string>
     <string name="kill_app_done">تم إيقاف %1$s</string>
     <string name="kill_app_none">لا يوجد تطبيق مفتوح لإيقافه</string>
+    <string name="settings_key_render_scale">دقة العرض الداخلية</string>
+    <string name="render_scale_summary">%1$d%% — أقل = أخف وأسرع وأقل تعليقاً (يعيد تشغيل النظام)</string>
+    <string name="render_scale_50">50% — الأخف والأسرع (موصى به)</string>
+    <string name="render_scale_75">75% — متوازن</string>
+    <string name="render_scale_100">100% — الأوضح (ثقيل)</string>
 </resources>

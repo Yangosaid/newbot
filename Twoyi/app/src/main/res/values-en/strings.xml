@@ -121,4 +121,9 @@ Switching later keeps your apps and data inside the container where possible.</s
     <string name="kill_app_summary">Force-stops the app open inside the virtual system</string>
     <string name="kill_app_done">Stopped %1$s</string>
     <string name="kill_app_none">No app is open</string>
+    <string name="settings_key_render_scale">Internal resolution</string>
+    <string name="render_scale_summary">%1$d%% — lower is lighter, faster and freezes less (restarts the system)</string>
+    <string name="render_scale_50">50% — lightest and fastest (recommended)</string>
+    <string name="render_scale_75">75% — balanced</string>
+    <string name="render_scale_100">100% — sharpest (heavy)</string>
 </resources>

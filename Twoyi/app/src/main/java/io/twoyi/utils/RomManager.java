@@ -78,7 +78,9 @@ public final class RomManager {
         Log.i(TAG, "timezone: " + timeZoneID);
         properties.setProperty("persist.sys.timezone", timeZoneID);
 
-        properties.setProperty("ro.sf.lcd_density", String.valueOf(DisplayMetrics.DENSITY_DEVICE_STABLE));
+        // Density follows the internal render scale so the UI keeps its physical size.
+        int scale = AppKV.getRenderScale(context);
+        properties.setProperty("ro.sf.lcd_density", String.valueOf(Math.max(120, DisplayMetrics.DENSITY_DEVICE_STABLE * scale / 100)));
 
         // Avoid SurfaceFlinger frame stalls inside the container.
         properties.setProperty("debug.sf.disable_backpressure", "1");

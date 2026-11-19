@@ -30,6 +30,10 @@
     <PreferenceCategory android:title="@string/settings_category_advanced">
 
         <Preference
+            android:key="@string/settings_key_render_scale"
+            android:title="@string/settings_key_render_scale" />
+
+        <Preference
             android:key="@string/settings_key_kill_app"
             android:summary="@string/kill_app_summary"
             android:title="@string/settings_key_kill_app" />

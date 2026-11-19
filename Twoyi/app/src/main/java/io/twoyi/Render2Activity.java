@@ -67,6 +67,9 @@ public class Render2Activity extends Activity implements View.OnTouchListener {
 
     private final AtomicBoolean mIsExtracting = new AtomicBoolean(false);
 
+    private int mRenderScale = 100;
+    private final android.graphics.Matrix mTouchMatrix = new android.graphics.Matrix();
+
     private final SurfaceHolder.Callback mSurfaceCallback = new SurfaceHolder.Callback() {
         @Override
         public void surfaceCreated(@NonNull SurfaceHolder holder) {
@@ -76,8 +79,9 @@ public class Render2Activity extends Activity implements View.OnTouchListener {
             DisplayMetrics displayMetrics = new DisplayMetrics();
             defaultDisplay.getRealMetrics(displayMetrics);
 
-            float xdpi = displayMetrics.xdpi;
-            float ydpi = displayMetrics.ydpi;
+            float scale = mRenderScale / 100f;
+            float xdpi = displayMetrics.xdpi * scale;
+            float ydpi = displayMetrics.ydpi * scale;
 
             Renderer.init(surface, RomManager.getLoaderPath(getApplicationContext()), xdpi, ydpi, (int) getBestFps());
 
@@ -87,7 +91,8 @@ public class Render2Activity extends Activity implements View.OnTouchListener {
         @Override
         public void surfaceChanged(@NonNull SurfaceHolder holder, int format, int width, int height) {
             Surface surface = holder.getSurface();
-            Renderer.resetWindow(surface, 0, 0, mSurfaceView.getWidth(), mSurfaceView.getHeight());
+            // width/height are the (possibly reduced) buffer size set with setFixedSize().
+            Renderer.resetWindow(surface, 0, 0, width, height);
             Log.i(TAG, "surfaceChanged: " + mSurfaceView.getWidth() + "x" + mSurfaceView.getHeight());
         }
 
@@ -131,6 +136,17 @@ public class Render2Activity extends Activity implements View.OnTouchListener {
 
         mSurfaceView = new SurfaceView(this);
         mSurfaceView.getHolder().addCallback(mSurfaceCallback);
+
+        // Render the guest at a lower resolution and let the compositor scale it up:
+        // far less GPU work and graphics memory (fixes EGL_BAD_ALLOC crashes and lag).
+        mRenderScale = AppKV.getRenderScale(this);
+        if (mRenderScale < 100) {
+            DisplayMetrics real = new DisplayMetrics();
+            getWindowManager().getDefaultDisplay().getRealMetrics(real);
+            int w = Math.max(2, Math.round(real.widthPixels * mRenderScale / 100f) & ~1);
+            int h = Math.max(2, Math.round(real.heightPixels * mRenderScale / 100f) & ~1);
+            mSurfaceView.getHolder().setFixedSize(w, h);
+        }
 
         mLoadingLayout = findViewById(R.id.loadingLayout);
         mLoadingView = findViewById(R.id.loading);
@@ -286,7 +302,20 @@ public class Render2Activity extends Activity implements View.OnTouchListener {
 
     @Override
     public boolean onTouch(View v, MotionEvent event) {
-        Renderer.handleTouch(event);
+        if (mRenderScale >= 100) {
+            Renderer.handleTouch(event);
+            return true;
+        }
+        // Map view coordinates to the reduced guest resolution.
+        android.graphics.Rect frame = mSurfaceView.getHolder().getSurfaceFrame();
+        if (v.getWidth() == 0 || v.getHeight() == 0 || frame.width() == 0) {
+            return true;
+        }
+        mTouchMatrix.setScale(frame.width() / (float) v.getWidth(), frame.height() / (float) v.getHeight());
+        MotionEvent scaled = MotionEvent.obtain(event);
+        scaled.transform(mTouchMatrix);
+        Renderer.handleTouch(scaled);
+        scaled.recycle();
         return true;
     }
 

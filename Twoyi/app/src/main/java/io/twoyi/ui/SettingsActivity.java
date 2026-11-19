@@ -108,6 +108,31 @@ public class SettingsActivity extends AppCompatActivity {
             Preference sendLog = findPreference(R.string.settings_key_sendlog);
             Preference about = findPreference(R.string.settings_key_about);
 
+            Preference renderScale = findPreference(R.string.settings_key_render_scale);
+            if (renderScale != null) {
+                final int[] values = {50, 75, 100};
+                int current = io.twoyi.utils.AppKV.getRenderScale(getActivity());
+                renderScale.setSummary(getString(R.string.render_scale_summary, current));
+                renderScale.setOnPreferenceClickListener(preference -> {
+                    Activity activity = getActivity();
+                    String[] labels = {getString(R.string.render_scale_50), getString(R.string.render_scale_75), getString(R.string.render_scale_100)};
+                    int checked = 0;
+                    for (int i = 0; i < values.length; i++) if (values[i] == io.twoyi.utils.AppKV.getRenderScale(activity)) checked = i;
+                    UIHelper.getDialogBuilder(activity)
+                            .setTitle(R.string.settings_key_render_scale)
+                            .setSingleChoiceItems(labels, checked, (d, which) -> {
+                                d.dismiss();
+                                io.twoyi.utils.AppKV.setRenderScale(activity, values[which]);
+                                // The guest reads its screen size and density at boot.
+                                activity.finishAffinity();
+                                RomManager.reboot(activity);
+                            })
+                            .setNegativeButton(android.R.string.cancel, null)
+                            .show();
+                    return true;
+                });
+            }
+
             Preference killApp = findPreference(R.string.settings_key_kill_app);
             if (killApp != null) {
                 killApp.setOnPreferenceClickListener(preference -> {
