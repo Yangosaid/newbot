@@ -158,13 +158,14 @@ extern "system" fn handle_touch<'local>(mut env: JNIEnv<'local>, _clz: JClass<'l
     };
     if let Some(nonptr) = std::ptr::NonNull::new(p as *mut ndk_sys::AInputEvent) {
         let ev = unsafe { ndk::event::MotionEvent::from_ptr(nonptr) };
-        input::handle_touch(ev)
+        // A panic must never unwind into the JVM.
+        let _ = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| input::handle_touch(ev)));
     }
 }
 
 extern "system" fn send_key_code<'local>(_env: JNIEnv<'local>, _clz: JClass<'local>, keycode: jint) {
     debug!("send key code!");
-    input::send_key_code(keycode);
+    let _ = std::panic::catch_unwind(|| input::send_key_code(keycode));
 }
 
 unsafe fn register_natives(jvm: &JavaVM, class_name: &str, methods: &[NativeMethod]) -> jint {
@@ -207,6 +208,9 @@ pub unsafe extern "system" fn JNI_OnLoad(jvm: JavaVM, _reserved: *mut c_void) ->
     );
 
     debug!("JNI_OnLoad");
+
+    // Writing to a socket the guest closed must not kill the whole app.
+    libc::signal(libc::SIGPIPE, libc::SIG_IGN);
 
     let class_name: &str = "io/twoyi/Renderer";
     let jni_methods = [

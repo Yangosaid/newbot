@@ -72,7 +72,7 @@
     <string name="i_confirm_it">I confirm it</string>
     <string name="menu_not_show_32bit">Don\'t show 32bit apps</string>
     <string name="settings_key_replace_rom">Replace ROM</string>
-    <string name="settings_replace_rom_summary">Boot twoyi with your custom ROM</string>
+    <string name="settings_replace_rom_summary">Choose another system (official, community, or from a file)</string>
     <string name="replace_rom_invalid">The ROM is not a valid ROM :(</string>
     <string name="replace_rom_confirm_title">ROM confirm</string>
     <string name="replace_rom_confirm_message">ROM author: %1$s\nROM version: %2$s\nROM desc: %3$s\n\n the ROM will be replaced in next boot.</string>
@@ -93,12 +93,10 @@
     <string name="open_developer_options">Open Developer options</string>
     <string name="close_app">Close</string>
     <string name="boot_anyway">Boot anyway</string>
-    <string name="import_rom_title">Install the virtual system</string>
-    <string name="import_rom_body">This app needs the Android system image (ROM) to run.
+    <string name="import_rom_title">Choose the system</string>
+    <string name="import_rom_body">Choose the system that runs inside the app. It is downloaded from GitHub and installed automatically.
 
-Tap \"Download automatically\": the official Twoyi ROM (~140 MB) is downloaded from GitHub and installed for you.
-
-Or download the official Twoyi APK yourself (do not install it) and tap \"Choose file\".</string>
+Switching later keeps your apps and data inside the container where possible.</string>
     <string name="import_rom_download">Download automatically</string>
     <string name="import_rom_pick">Choose file</string>
     <string name="import_rom_reading">Reading the file…</string>
@@ -114,4 +112,8 @@ Or download the official Twoyi APK yourself (do not install it) and tap \"Choose
     <string name="settings_key_child_process">Child process restrictions</string>
     <string name="child_process_ok">✅ Disabled — the virtual system can run</string>
     <string name="child_process_not_ok">⚠️ Still active — tap to open Developer options and turn on \"Disable child process restrictions\"</string>
+    <string name="rom_official">📦 Official system — Android 8.1 (~140 MB)\nMost stable, recommended</string>
+    <string name="rom_community">🧩 Community build — Android 8.1 with an app store\nmicroG, F-Droid, Aurora Store, NewPipe (~220 MB)</string>
+    <string name="rom_choice_note">Note: no system newer than Android 8.1 exists for this container; the original ROM source was never published. The community build is by an independent developer (SUFandom) and not officially tested.</string>
+    <string name="rom_trying_mirror">Official source failed, trying a mirror…</string>
 </resources>

@@ -181,6 +181,8 @@ public class Render2Activity extends Activity implements View.OnTouchListener {
                 });
             }, "extract-rom").start();
         } else {
+            // Refresh language/timezone/density and renderer props on every boot.
+            RomManager.initRootfs(getApplicationContext());
             mRootView.addView(mSurfaceView, 0);
             showBootingProcedure();
         }

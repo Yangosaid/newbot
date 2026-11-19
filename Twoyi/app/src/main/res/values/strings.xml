@@ -70,7 +70,7 @@
     <string name="i_confirm_it">أؤكد ذلك</string>
     <string name="menu_not_show_32bit">إخفاء تطبيقات 32-bit</string>
     <string name="settings_key_replace_rom">تبديل النظام (ROM)</string>
-    <string name="settings_replace_rom_summary">تشغيل النظام الافتراضي بـ ROM مخصص</string>
+    <string name="settings_replace_rom_summary">اختيار نظام آخر (رسمي أو من المجتمع أو من ملف)</string>
     <string name="replace_rom_invalid">هذا الملف ليس ROM صالحاً :(</string>
     <string name="replace_rom_confirm_title">تأكيد الـ ROM</string>
     <string name="replace_rom_confirm_message">المطوّر: %1$s\nالإصدار: %2$s\nالوصف: %3$s\n\nسيتم تبديل النظام عند التشغيل القادم.</string>
@@ -91,12 +91,10 @@
     <string name="open_developer_options">فتح خيارات المطوّر</string>
     <string name="close_app">إغلاق</string>
     <string name="boot_anyway">تشغيل على أي حال</string>
-    <string name="import_rom_title">تثبيت النظام الافتراضي</string>
-    <string name="import_rom_body">يحتاج التطبيق إلى صورة نظام أندرويد (ROM) ليعمل.
+    <string name="import_rom_title">اختيار نظام التشغيل</string>
+    <string name="import_rom_body">اختر النظام الذي سيعمل داخل التطبيق. يُحمَّل من GitHub ويُثبَّت تلقائياً.
 
-اضغط \"تحميل تلقائي\": يُحمَّل النظام الرسمي (حوالي 140 ميغابايت) من GitHub ويُثبَّت تلقائياً.
-
-أو حمّل ملف Twoyi الرسمي بنفسك (لا تثبّته) واضغط \"اختيار الملف\".</string>
+تغيير النظام لاحقاً يحتفظ بتطبيقاتك وبياناتك داخل النظام الافتراضي قدر الإمكان.</string>
     <string name="import_rom_download">تحميل تلقائي</string>
     <string name="import_rom_pick">اختيار الملف</string>
     <string name="import_rom_reading">جارٍ قراءة الملف…</string>
@@ -115,4 +113,8 @@
     <string name="copy_right" translatable="false">Copyright © %1$d</string>
     <string name="about_author_github" translatable="false">Github(tiann)</string>
     <string name="about_author_xda" translatable="false">XDA(weishu)</string>
+    <string name="rom_official">📦 النظام الرسمي — Android 8.1 (حوالي 140 ميغابايت)\nالأكثر استقراراً، موصى به</string>
+    <string name="rom_community">🧩 نسخة المجتمع — Android 8.1 مع متجر تطبيقات\nmicroG و F-Droid و Aurora Store و NewPipe (حوالي 220 ميغابايت)</string>
+    <string name="rom_choice_note">ملاحظة: لا يوجد نظام أحدث من Android 8.1 لهذه الحاوية؛ لم يُنشر كود النظام الأصلي قط. نسخة المجتمع من مطوّر مستقل (SUFandom) وغير مختبرة رسمياً.</string>
+    <string name="rom_trying_mirror">تعذّر التحميل من المصدر الرسمي، جارٍ المحاولة من نسخة احتياطية…</string>
 </resources>

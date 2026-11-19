@@ -80,6 +80,10 @@ public final class RomManager {
 
         properties.setProperty("ro.sf.lcd_density", String.valueOf(DisplayMetrics.DENSITY_DEVICE_STABLE));
 
+        // Avoid SurfaceFlinger frame stalls inside the container.
+        properties.setProperty("debug.sf.disable_backpressure", "1");
+        properties.setProperty("debug.sf.latch_unsignaled", "1");
+
         try (Writer writer = new FileWriter(propFile)) {
             properties.store(writer, null);
         } catch (IOException ignored) {
@@ -282,8 +286,12 @@ public final class RomManager {
     public static int extractRootfs(Context context, File rootfs7z) {
 
         int cpu = Runtime.getRuntime().availableProcessors();
-        return P7ZipApi.executeCommand(String.format(Locale.US, "7z x -mmt=%d -aoa '%s' '-o%s'",
+        int ret = P7ZipApi.executeCommand(String.format(Locale.US, "7z x -mmt=%d -aoa '%s' '-o%s'",
                 cpu, rootfs7z, context.getDataDir()));
+        if (ret == 0) {
+            applyCommunityFixesIfNeeded(context);
+        }
+        return ret;
     }
 
     public static boolean extractRootfsInAssets(Context context) {
@@ -356,6 +364,40 @@ public final class RomManager {
         File systemDir = new File(rootfsDir, partition);
 
         IOUtils.deleteDirectory(systemDir);
+    }
+
+    /** Removes system/ and vendor/ before installing a different ROM; user data is kept. */
+    public static void removeSystemAndVendor(Context context) {
+        removeSystemPartition(context);
+        removeVendorPartition(context);
+    }
+
+    /**
+     * The community ROM (github.com/SUFandom/twoyi-customrom) ships without a usable build.prop
+     * and rom.ini; its build script generates them. Apply the same result after every extraction.
+     */
+    public static void applyCommunityFixesIfNeeded(Context context) {
+        if (!AppKV.getBooleanConfig(context, AppKV.ROM_IS_COMMUNITY, false)) {
+            return;
+        }
+        File rootfs = getRootfsDir(context);
+        File buildProp = new File(rootfs, "system/build.prop");
+        try (InputStream in = context.getAssets().open("community_build.prop");
+             OutputStream out = new FileOutputStream(buildProp)) {
+            byte[] buf = new byte[8192];
+            int n;
+            while ((n = in.read(buf)) > 0) out.write(buf, 0, n);
+        } catch (IOException e) {
+            Log.e(TAG, "write community build.prop failed", e);
+        }
+        File romIni = new File(rootfs, ROM_INFO_FILE);
+        if (!romIni.exists()) {
+            try (Writer w = new FileWriter(romIni)) {
+                w.write("author=SUFandom (community)\ncode=1\nversion=community-0.1\ndesc=AOSP 8.1 + microG, F-Droid, Aurora Store, NewPipe\n");
+            } catch (IOException e) {
+                Log.e(TAG, "write community rom.ini failed", e);
+            }
+        }
     }
 
     private static void removeSystemPartition(Context context) {

@@ -145,18 +145,7 @@ public class SettingsActivity extends AppCompatActivity {
             });
 
             replaceRom.setOnPreferenceClickListener(preference -> {
-
-                Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
-
-                // you can only select one rootfs
-                intent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, false);
-                intent.setType("*/*"); // apk file
-                intent.addCategory(Intent.CATEGORY_OPENABLE);
-                try {
-                    startActivityForResult(intent, REQUEST_GET_FILE);
-                } catch (Throwable ignored) {
-                    Toast.makeText(getContext(), "Error", Toast.LENGTH_SHORT).show();
-                }
+                startActivity(new Intent(getActivity(), io.twoyi.ImportRomActivity.class));
                 return true;
             });
 

@@ -31,6 +31,9 @@ public class AppKV {
 
     // 是否应该使用第三方 ROM
     public static final String SHOULD_USE_THIRD_PARTY_ROM = "should_use_third_party_rom";
+
+    /** The stored ROM is the community build that needs build.prop/rom.ini fixes after extraction. */
+    public static final String ROM_IS_COMMUNITY = "rom_is_community";
     public static boolean getBooleanConfig(Context context,  String key, boolean fallback) {
         return getPref(context).getBoolean(key, fallback);
     }
