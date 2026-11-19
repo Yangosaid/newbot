@@ -22,8 +22,8 @@ android {
         minSdkVersion 27
         //noinspection ExpiredTargetSdkVersion
         targetSdkVersion 27
-        versionCode 10700
-        versionName "0.7.0-${buildSerial}"
+        versionCode 10800
+        versionName "0.8.0-${buildSerial}"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
 

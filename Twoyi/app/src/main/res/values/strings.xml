@@ -117,4 +117,9 @@
     <string name="rom_community">🧩 نسخة المجتمع — Android 8.1 مع متجر تطبيقات\nmicroG و F-Droid و Aurora Store و NewPipe (حوالي 220 ميغابايت)</string>
     <string name="rom_choice_note">ملاحظة: لا يوجد نظام أحدث من Android 8.1 لهذه الحاوية؛ لم يُنشر كود النظام الأصلي قط. نسخة المجتمع من مطوّر مستقل (SUFandom) وغير مختبرة رسمياً.</string>
     <string name="rom_trying_mirror">تعذّر التحميل من المصدر الرسمي، جارٍ المحاولة من نسخة احتياطية…</string>
+    <string name="collecting_log">جارٍ جمع السجل من النظام الافتراضي (حتى دقيقة)…</string>
+    <string name="settings_key_kill_app">إيقاف التطبيق المعلّق</string>
+    <string name="kill_app_summary">يوقف التطبيق المفتوح داخل النظام الافتراضي إذا علِق</string>
+    <string name="kill_app_done">تم إيقاف %1$s</string>
+    <string name="kill_app_none">لا يوجد تطبيق مفتوح لإيقافه</string>
 </resources>

@@ -108,6 +108,36 @@ public class SettingsActivity extends AppCompatActivity {
             Preference sendLog = findPreference(R.string.settings_key_sendlog);
             Preference about = findPreference(R.string.settings_key_about);
 
+            Preference killApp = findPreference(R.string.settings_key_kill_app);
+            if (killApp != null) {
+                killApp.setOnPreferenceClickListener(preference -> {
+                    Activity activity = getActivity();
+                    ProgressDialog dialog = UIHelper.getProgressDialog(activity);
+                    dialog.setCancelable(false);
+                    dialog.show();
+                    new Thread(() -> {
+                        // Find the app in front inside the container and force-stop it.
+                        String focus = io.twoyi.utils.Installer.adbShell(activity,
+                                "dumpsys window | grep -m1 mCurrentFocus", 15);
+                        java.util.regex.Matcher m = java.util.regex.Pattern
+                                .compile("([a-zA-Z][\\w.]+)/").matcher(focus);
+                        String pkg = m.find() ? m.group(1) : null;
+                        String msg;
+                        if (pkg == null || pkg.startsWith("com.android.launcher") || pkg.equals("android")) {
+                            msg = getString(R.string.kill_app_none);
+                        } else {
+                            io.twoyi.utils.Installer.adbShell(activity, "am force-stop " + pkg, 15);
+                            msg = getString(R.string.kill_app_done, pkg);
+                        }
+                        activity.runOnUiThread(() -> {
+                            UIHelper.dismiss(dialog);
+                            android.widget.Toast.makeText(activity, msg, android.widget.Toast.LENGTH_LONG).show();
+                        });
+                    }, "kill-app").start();
+                    return true;
+                });
+            }
+
             Preference childProcess = findPreference(R.string.settings_key_child_process);
             if (childProcess != null) {
                 boolean ok = io.twoyi.UITips.isPhantomProcessKillerDisabled(getActivity());
@@ -175,23 +205,28 @@ public class SettingsActivity extends AppCompatActivity {
             });
 
             sendLog.setOnPreferenceClickListener(preference -> {
-                Context context = getActivity();
-                byte[] bugreport = LogEvents.getBugreport(context);
-                File tmpLog = new File(context.getCacheDir(), "bugreport.zip");
-                try {
-                    Files.write(tmpLog.toPath(), bugreport);
-                } catch (IOException e) {
-                    android.util.Log.e("Settings", "bugreport", e);
-                }
-                Uri uri = FileProvider.getUriForFile(context, "io.twoyi.fileprovider", tmpLog);
-
-                Intent shareIntent = new Intent(Intent.ACTION_SEND);
-                shareIntent.putExtra(Intent.EXTRA_STREAM, uri);
-                shareIntent.setDataAndType(uri, "application/zip");
-                shareIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
-
-                context.startActivity(Intent.createChooser(shareIntent, getString(R.string.settings_key_sendlog)));
-
+                Activity activity = getActivity();
+                ProgressDialog dialog = UIHelper.getProgressDialog(activity);
+                dialog.setMessage(getString(R.string.collecting_log));
+                dialog.setCancelable(false);
+                dialog.show();
+                new Thread(() -> {
+                    File tmpLog = new File(activity.getCacheDir(), "bugreport.zip");
+                    try {
+                        Files.write(tmpLog.toPath(), LogEvents.getBugreport(activity));
+                    } catch (Throwable e) {
+                        android.util.Log.e("Settings", "bugreport", e);
+                    }
+                    activity.runOnUiThread(() -> {
+                        UIHelper.dismiss(dialog);
+                        Uri uri = FileProvider.getUriForFile(activity, "io.twoyi.fileprovider", tmpLog);
+                        Intent shareIntent = new Intent(Intent.ACTION_SEND);
+                        shareIntent.putExtra(Intent.EXTRA_STREAM, uri);
+                        shareIntent.setDataAndType(uri, "application/zip");
+                        shareIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+                        activity.startActivity(Intent.createChooser(shareIntent, getString(R.string.settings_key_sendlog)));
+                    });
+                }, "bugreport").start();
                 return true;
             });
 

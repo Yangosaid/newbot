@@ -116,4 +116,9 @@ Switching later keeps your apps and data inside the container where possible.</s
     <string name="rom_community">🧩 Community build — Android 8.1 with an app store\nmicroG, F-Droid, Aurora Store, NewPipe (~220 MB)</string>
     <string name="rom_choice_note">Note: no system newer than Android 8.1 exists for this container; the original ROM source was never published. The community build is by an independent developer (SUFandom) and not officially tested.</string>
     <string name="rom_trying_mirror">Official source failed, trying a mirror…</string>
+    <string name="collecting_log">Collecting logs from the virtual system (up to a minute)…</string>
+    <string name="settings_key_kill_app">Stop frozen app</string>
+    <string name="kill_app_summary">Force-stops the app open inside the virtual system</string>
+    <string name="kill_app_done">Stopped %1$s</string>
+    <string name="kill_app_none">No app is open</string>
 </resources>

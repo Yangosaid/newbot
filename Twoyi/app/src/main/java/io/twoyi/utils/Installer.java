@@ -37,6 +37,42 @@ public class Installer {
 
     public static final int REQUEST_INSTALL_APP = 101;
 
+    private static final String ADB_TARGET = "localhost:22122";
+    private static final int ADB_SERVER_PORT = 9563;
+
+    /**
+     * Runs a shell command inside the container through the bundled adb and returns stdout+stderr.
+     * Never throws; returns the error text instead. Must not be called on the UI thread.
+     */
+    public static String adbShell(Context context, String command, long timeoutSeconds) {
+        String adb = context.getApplicationInfo().nativeLibraryDir + File.separator + "libadb.so";
+        String home = context.getCacheDir().getAbsolutePath();
+        try {
+            // Server (idempotent) + connect.
+            run(context, home, timeoutSeconds, adb, "-P", String.valueOf(ADB_SERVER_PORT), "start-server");
+            run(context, home, timeoutSeconds, adb, "-P", String.valueOf(ADB_SERVER_PORT), "connect", ADB_TARGET);
+            return run(context, home, timeoutSeconds, adb, "-P", String.valueOf(ADB_SERVER_PORT),
+                    "-s", ADB_TARGET, "shell", command);
+        } catch (Throwable e) {
+            return "adb error: " + e;
+        }
+    }
+
+    private static String run(Context context, String home, long timeoutSeconds, String... cmd) throws Exception {
+        ProcessBuilder pb = new ProcessBuilder(cmd).redirectErrorStream(true);
+        pb.environment().put("HOME", home);
+        pb.environment().put("TMPDIR", home);
+        File out = File.createTempFile("adb", ".txt", context.getCacheDir());
+        pb.redirectOutput(out);
+        Process p = pb.start();
+        if (!p.waitFor(timeoutSeconds, TimeUnit.SECONDS)) {
+            p.destroyForcibly();
+        }
+        String text = new String(java.nio.file.Files.readAllBytes(out.toPath()), java.nio.charset.StandardCharsets.UTF_8);
+        out.delete();
+        return text;
+    }
+
     public static void installAsync(Context context, String path, InstallResult callback) {
         installAsync(context, Collections.singletonList(new File(path)), callback);
     }

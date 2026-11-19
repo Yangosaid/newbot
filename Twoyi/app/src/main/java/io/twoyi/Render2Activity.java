@@ -241,9 +241,8 @@ public class Render2Activity extends Activity implements View.OnTouchListener {
                 .setMessage(R.string.boot_failed_help)
                 .setCancelable(false)
                 .setPositiveButton(R.string.settings_key_sendlog, (d, w) -> {
-                    shareBugreport();
-                    finish();
-                    RomManager.shutdown(this);
+                    Toast.makeText(this, R.string.collecting_log, Toast.LENGTH_LONG).show();
+                    new Thread(this::shareBugreport, "bugreport").start();
                 })
                 .setNeutralButton(R.string.open_developer_options, (d, w) -> {
                     UITips.openDeveloperOptions(this);
@@ -266,7 +265,7 @@ public class Render2Activity extends Activity implements View.OnTouchListener {
             share.putExtra(android.content.Intent.EXTRA_STREAM, uri);
             share.setType("application/zip");
             share.addFlags(android.content.Intent.FLAG_GRANT_READ_URI_PERMISSION);
-            startActivity(android.content.Intent.createChooser(share, getString(R.string.settings_key_sendlog)));
+            runOnUiThread(() -> startActivity(android.content.Intent.createChooser(share, getString(R.string.settings_key_sendlog))));
         } catch (Throwable e) {
             Log.e(TAG, "share bugreport failed", e);
         }

@@ -118,6 +118,33 @@ public class LogEvents {
             }
         }
 
+        // ANR traces written by the guest system (why an app/system froze)
+        File anrDir = new File(romDataDir, "anr");
+        File[] anrs = anrDir.listFiles();
+        if (anrs != null) {
+            for (File anr : anrs) {
+                reportItems.add(ReportItem.create(anr, "anr/" + anr.getName()));
+            }
+        }
+
+        // Live state from inside the container (needs it to be running).
+        String[][] guestCommands = {
+                {"guest_logcat.txt", "logcat -d -v threadtime -b main,system,crash,events"},
+                {"guest_top.txt", "top -b -n 1 -m 30 || top -n 1 -m 30"},
+                {"guest_meminfo.txt", "cat /proc/meminfo; echo; dumpsys meminfo | head -60"},
+                {"guest_activity.txt", "dumpsys window | grep -E 'mCurrentFocus|mFocusedApp|ANR'; dumpsys activity processes | head -80"},
+                {"guest_input.txt", "dumpsys input | head -120"},
+                {"guest_props.txt", "getprop"},
+        };
+        for (String[] gc : guestCommands) {
+            File f = new File(context.getCacheDir(), gc[0]);
+            try (java.io.FileWriter w = new java.io.FileWriter(f)) {
+                w.write(Installer.adbShell(context, gc[1], 20));
+            } catch (Throwable ignored) {
+            }
+            reportItems.add(ReportItem.create(f));
+        }
+
         // proc info
         File procInfo = new File(context.getCacheDir(), "proc.txt");
         ProcessBuilder pb = new ProcessBuilder("ps", "-ef");
