@@ -154,6 +154,11 @@ input[type=checkbox]{width:20px;height:20px;accent-color:var(--hot)}
       <div class="grp"><h3>Impresión</h3>
         <div class="ln"><label for="oNeed">Toques para salir impreso</label><select id="oNeed"><option value="1">1</option><option value="5">5</option><option value="15">15</option><option value="30">30</option></select></div>
         <div class="ln"><label for="oSpeed">Velocidad de la máquina</label><select id="oSpeed"><option value="0.7">Lenta</option><option value="1">Normal</option><option value="1.5">Rápida</option></select></div>
+        <p class="note">Imprimir también (además de los toques):</p>
+        <label class="ln"><input type="checkbox" id="oPChat"><span>💬 Los que comentan (su comentario sale en la tarjeta)</span></label>
+        <label class="ln"><input type="checkbox" id="oPFollow"><span>➕ Los que te siguen</span></label>
+        <label class="ln"><input type="checkbox" id="oPShare"><span>🔗 Los que comparten el directo</span></label>
+        <label class="ln"><input type="checkbox" id="oPJoin"><span>👋 Los que entran al directo</span></label>
         <label class="ln"><input type="checkbox" id="oHint"><span>Mostrar el dibujo 👆 ➜ 🖨️ arriba</span></label>
       </div>
     </div>
@@ -178,7 +183,7 @@ var APP=!!window.BusApp;
 var SRC=APP&&BusApp.getSource?String(BusApp.getSource()):"tiktok",YT=SRC==="youtube";
 try{localStorage.setItem("game","print")}catch(e){}
 
-var DEF={hostSnd:"mix",plaque2:false,hint2:false,host:false,hostSize:"m",hostShape2:"card",hostMirror:true,hostSup:true,hostX:null,hostY:null,hostIcon:"☕",hostVx:50,hostVy:50,hostVz:1,hostVol:0,look:"wood",lookMin:15,need:1,again2:-1,repeat:true,speed:1,hint:true,q:"ultra",auto:true,flTaps:true,flGifts:true,flWall:true,flJoin:false,flSize:1};
+var DEF={pChat:true,pFollow:true,pShare:true,pJoin:true,hostSnd:"mix",plaque2:false,hint2:false,host:false,hostSize:"m",hostShape2:"card",hostMirror:true,hostSup:true,hostX:null,hostY:null,hostIcon:"☕",hostVx:50,hostVy:50,hostVz:1,hostVol:0,look:"wood",lookMin:15,need:1,again2:-1,repeat:true,speed:1,hint:true,q:"ultra",auto:true,flTaps:true,flGifts:true,flWall:true,flJoin:false,flSize:1};
 var cfg=Object.assign({},DEF);
 try{var sv=JSON.parse(localStorage.getItem("print1")||"null");if(sv)cfg=Object.assign(cfg,sv)}catch(e){}
 function save(){try{localStorage.setItem("print1",JSON.stringify(cfg))}catch(e){}}
@@ -327,6 +332,12 @@ function drawCard(u){var L=pickLook(),P=L.p,c=document.createElement("canvas");c
   x.restore();x.lineWidth=7;x.strokeStyle=L.f==="neon"?P.acc:P.ink;shapePath(x,L.s,cx,cy,r);x.stroke();
   /* emoji stickers around the photo */
   if(L.d==="emoji"||Math.random()<0.4){x.font="46px serif";x.textAlign="center";x.textBaseline="middle";var e1=pick(EMO),e2=pick(EMO);x.fillText(e1,cx-r-8,cy-r+20);x.fillText(e2,cx+r+6,cy+r-30)}
+  /* what they did: 💬 their words in a bubble over the bottom of the photo, or a small round mark */
+  if(u.kind==="chat"&&u.said){var tx=u.said.length>34?u.said.slice(0,33)+"…":u.said;x.font="700 30px 'Barlow',Arial,sans-serif";var bw=Math.min(440,x.measureText(tx).width+50),bx=256-bw/2,by=360;
+    x.fillStyle="rgba(255,255,255,.96)";x.strokeStyle=P.ink;x.lineWidth=4;x.beginPath();x.moveTo(bx+22,by);x.arcTo(bx+bw,by,bx+bw,by+60,22);x.arcTo(bx+bw,by+60,bx,by+60,22);x.arcTo(bx,by+60,bx,by,22);x.arcTo(bx,by,bx+bw,by,22);x.closePath();x.fill();x.stroke();
+    x.beginPath();x.moveTo(236,by);x.lineTo(256,by-22);x.lineTo(276,by);x.closePath();x.fill();x.fillStyle="#1b1b1f";x.textAlign="center";x.textBaseline="middle";x.fillText("💬 "+tx,256,by+31)}
+  else{var mk={follow:"➕",share:"🔗",join:"👋",like:"❤️"}[u.kind||"like"];if(mk){x.fillStyle="#ffffff";x.beginPath();x.arc(410,92,44,0,7);x.fill();x.lineWidth=5;x.strokeStyle=P.acc;x.stroke();
+    x.font="48px serif";x.textAlign="center";x.textBaseline="middle";x.fillText(mk,410,96)}}
   /* the name */
   var nm=u.nick.length>16?u.nick.slice(0,15)+"…":u.nick,ty=L.f==="polaroid"?520:510;x.textAlign="center";x.textBaseline="middle";
   if(L.n==="ribbon"){x.fillStyle=P.acc;x.beginPath();x.moveTo(60,ty-34);x.lineTo(W2-60,ty-34);x.lineTo(W2-90,ty);x.lineTo(W2-60,ty+34);x.lineTo(60,ty+34);x.lineTo(90,ty);x.closePath();x.fill();
@@ -528,9 +539,13 @@ function stepInk(dt){var a=G.ink.geometry.attributes.position.array;G.inkP.forEa
 /* ---------- events: only taps print ---------- */
 function onEvent(e){if(!e||!e.type)return;
   if(e.type==="status"){setStatus(e.ok,e.text);return}
-  if(YT&&e.type==="chat")e={type:"like",user:e.user,nick:e.nick,avatar:e.avatar,count:1};   /* YouTube has no taps: a comment prints */
+  /* every interaction can print: comments, follows, shares and people entering count like taps (each can be switched off);
+     the card then carries a small mark of what they did (💬 with their words, ➕ follow, 🔗 share, 👋 entered) */
+  var KIND={chat:"pChat",follow:"pFollow",share:"pShare",join:"pJoin"};
+  if(KIND[e.type]){if(!cfg[KIND[e.type]]&&!(YT&&e.type==="chat"))return;var ui=userOf(e),ni=perf();ui.kind=e.type;ui.kindAt=ni;if(e.type==="chat")ui.said=String(e.text||"").slice(0,60);
+    if(e.type==="chat")mon.c=(mon.c||0)+1;ui.taps=Math.max(ui.taps,Math.max(1,cfg.need|0));ui.lastTap=ni;if(!ui.firstTap)ui.firstTap=ni;actAdd(ui,ni);hintSoon();monSoon();return}
   if(e.type==="gift"){mon.g=(mon.g||0)+Math.max(1,e.count|0);addGift(userOf(e),e);paintHint();paintMon();return}
-  if(e.type==="like"){var c=Math.max(1,e.count|0);mon.l+=c;var u=userOf(e),now=perf();u.taps+=c;u.lastTap=now;if(!u.firstTap)u.firstTap=now;
+  if(e.type==="like"){var c=Math.max(1,e.count|0);mon.l+=c;var u=userOf(e),now=perf();u.taps+=c;u.lastTap=now;if(!u.firstTap)u.firstTap=now;if(now-(u.kindAt||0)>10000)u.kind="like";
     if(u.taps>=Math.max(1,cfg.need|0))actAdd(u,now);
     hintSoon();monSoon()}}
 var hintT=0,monT=0;function hintSoon(){if(!hintT)hintT=setTimeout(function(){hintT=0;paintHint()},300)}function monSoon(){if(!monT)monT=setTimeout(function(){monT=0;paintMon()},400)}
@@ -659,9 +674,9 @@ function resize(){W=innerWidth;H=innerHeight;if(!ok3d)return;var pr=Math.min(win
 window.addEventListener("resize",resize);
 
 /* ---------- settings ---------- */
-function fill(){$("oPlaque").checked=cfg.plaque2;$("oHost").checked=cfg.host;$("oHostSize").value=cfg.hostSize;$("oHostShape").value=cfg.hostShape2;$("oHostMirror").checked=cfg.hostMirror;$("oHostSup").checked=cfg.hostSup;$("oLookMin").value=String(cfg.lookMin);$("oQ").value=cfg.q;$("oAuto").checked=cfg.auto;$("oNeed").value=String(cfg.need);$("oSpeed").value=String(cfg.speed);$("oHint").checked=cfg.hint2}
+function fill(){$("oPChat").checked=cfg.pChat;$("oPFollow").checked=cfg.pFollow;$("oPShare").checked=cfg.pShare;$("oPJoin").checked=cfg.pJoin;$("oPlaque").checked=cfg.plaque2;$("oHost").checked=cfg.host;$("oHostSize").value=cfg.hostSize;$("oHostShape").value=cfg.hostShape2;$("oHostMirror").checked=cfg.hostMirror;$("oHostSup").checked=cfg.hostSup;$("oLookMin").value=String(cfg.lookMin);$("oQ").value=cfg.q;$("oAuto").checked=cfg.auto;$("oNeed").value=String(cfg.need);$("oSpeed").value=String(cfg.speed);$("oHint").checked=cfg.hint2}
 function bind(id,key,num){var el=$(id);el.onchange=function(){cfg[key]=el.type==="checkbox"?el.checked:num?+el.value:el.value;save();if(key==="plaque2"&&G.plaque){G.plaque.visible=cfg.plaque2;paintHint()}if(key==="q")applyQuality();paintHint()}}
-bind("oQ","q");bind("oPlaque","plaque2");bind("oLookMin","lookMin",1);bind("oAuto","auto");bind("oNeed","need",1);bind("oSpeed","speed",1);bind("oHint","hint2");
+bind("oQ","q");bind("oPChat","pChat");bind("oPFollow","pFollow");bind("oPShare","pShare");bind("oPJoin","pJoin");bind("oPlaque","plaque2");bind("oLookMin","lookMin",1);bind("oAuto","auto");bind("oNeed","need",1);bind("oSpeed","speed",1);bind("oHint","hint2");
 function openSheet(o){$("sheet").hidden=!o;$("gear").hidden=o;if(o){fill();paintMon()}}
 $("gear").onclick=function(){openSheet(true)};$("close").onclick=function(){openSheet(false)};
 Array.prototype.forEach.call(document.querySelectorAll(".tab"),function(b){b.onclick=function(){

@@ -304,6 +304,7 @@ public final class TikTokLive implements LiveSource {
                 else if ("WebcastChatMessage".equals(method)) onChat(body);
                 else if ("WebcastLikeMessage".equals(method)) onLike(body);
                 else if ("WebcastMemberMessage".equals(method)) onMember(body);
+                else if ("WebcastSocialMessage".equals(method)) onSocial(body);
                 else if ("WebcastControlMessage".equals(method)) {
                     Proto.Reader c = new Proto.Reader(body);
                     long action = 0;
@@ -389,6 +390,20 @@ public final class TikTokLive implements LiveSource {
         }
         if (who == null || count <= 0) return;
         try { out.onEvent(who.json().put("type", "like").put("count", count).put("total", total).toString()); } catch (Exception ignored) {}
+    }
+
+    /** Follow or share (action 1 = follow; 2 and 3 = shares). */
+    void onSocial(byte[] body) {
+        Who who = null;
+        long action = 0;
+        Proto.Reader r = new Proto.Reader(body);
+        while (r.next()) {
+            if (r.field == 2 && r.wire == 2) who = Who.parse(r.bytes());
+            else if (r.field == 4 && r.wire == 0) action = r.varint();
+            else r.skip();
+        }
+        if (who == null || who.user.isEmpty() || action <= 0) return;
+        try { out.onEvent(who.json().put("type", action == 1 ? "follow" : "share").toString()); } catch (Exception ignored) {}
     }
 
     /** Someone enters the live (action 1 = joined). */
