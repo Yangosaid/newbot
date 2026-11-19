@@ -143,7 +143,7 @@ input[type=checkbox]{width:20px;height:20px;accent-color:var(--hot)}
         <div class="ln"><label for="oFlSize">Tamaño</label><select id="oFlSize"><option value="0.8">Pequeño</option><option value="1">Normal</option><option value="1.25">Grande</option></select></div>
       </div>
       <div class="grp"><h3>🎮 Juegos</h3>
-        <div class="ln"><button class="btn" id="bParty">🕺 Ir a la sala</button><button class="btn" id="bPrint">🖨️ Imprenta</button><button class="btn" id="bBus">🚌 Batalla de buses</button></div>
+        <div class="ln"><button class="btn" id="bParty">🕺 Ir a la sala</button><button class="btn" id="bPrint">🖨️ Imprenta</button><button class="btn" id="bWin">🏆 Desafío</button><button class="btn" id="bBus">🚌 Batalla de buses</button></div>
       </div>
       <div class="grp"><h3>Probar</h3>
         <div class="ln"><button class="btn" data-test="gift">Regalo</button><button class="btn" data-test="big">Regalo grande</button><button class="btn" data-test="like">Toques</button><button class="btn" data-test="chat">Comentario</button><button class="btn" data-test="fans">+6 fans</button></div>
@@ -510,6 +510,7 @@ $("bEnd").onclick=function(){if(phase==="race")toFinish()};
 $("bParty").onclick=function(){try{localStorage.setItem("game","party")}catch(e){}location.href="party.html"};
 $("bBus").onclick=function(){try{localStorage.setItem("game","bus")}catch(e){}location.href="index.html"};
 $("bPrint").onclick=function(){try{localStorage.setItem("game","print")}catch(e){}location.href="print.html"};
+$("bWin").onclick=function(){try{localStorage.setItem("game","win")}catch(e){}location.href="win.html"};
 var tn=0;Array.prototype.forEach.call(document.querySelectorAll("[data-test]"),function(b){b.onclick=function(){var v=b.dataset.test;tn++;var who={user:"t"+(tn%6),nick:["Fatima","Carlos","Sara","Youssef","Lucia","Omar"][tn%6]};
   if(v==="gift")onEvent(Object.assign({type:"gift",gift:"Rose",coins:1,count:1},who));
   else if(v==="big")onEvent(Object.assign({type:"gift",gift:"Lion",coins:500,count:1},who));

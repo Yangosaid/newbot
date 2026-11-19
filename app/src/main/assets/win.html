@@ -1,0 +1,502 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Desafío del Cielo</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800&family=Barlow:wght@400;500;600&display=swap">
+<style>
+/* Sky challenge: the hero jumps from island to island without stopping. Gifts named as "help" send a creature that carries him
+   forward and add wins; gifts named as "hurt" send one that knocks him down and takes wins. Goal: reach the target (500). */
+:root{
+  color-scheme:dark;
+  --night:#05020c; --panel:#140d2a; --panel-2:#1f1640; --line:#3b2d6b;
+  --ink:#f7f4ff; --ink-dim:#b4a9d6; --ok:#4ade80; --bad:#ff6b5e; --hot:#ff3d8b; --gold:#ffc93c;
+  --display:"Barlow Condensed","Arial Narrow","Roboto Condensed",system-ui,sans-serif;
+  --body:"Barlow","Segoe UI",Roboto,system-ui,sans-serif;
+}
+html,body{height:100%;margin:0}
+[hidden]{display:none!important}
+body{background:var(--night);color:var(--ink);font-family:var(--body);overflow:hidden}
+#stage{position:relative;height:100%;overflow:hidden;touch-action:manipulation;user-select:none;-webkit-user-select:none}
+#gl{position:absolute;inset:0;width:100%;height:100%;display:block}
+#busyBtns{flex-wrap:wrap}
+/* the wins banner */
+#win{position:absolute;left:50%;top:calc(env(safe-area-inset-top,0px) + 10%);transform:translateX(-50%);display:flex;align-items:center;gap:8px;padding:6px 18px 6px 12px;border-radius:999px;
+  background:linear-gradient(180deg,#a23cff,#6a12c9);border:3px solid #ffd76a;box-shadow:0 6px 24px rgba(80,0,140,.45);font:900 36px/1 var(--display);color:#fff;pointer-events:none;white-space:nowrap}
+#win .cup{font-size:30px}#win #wN{color:#fff}#win #wN.neg{color:#ff4d4d;text-shadow:0 0 8px rgba(0,0,0,.5)}#win .sl{opacity:.85}
+#win.bump{animation:bump .45s cubic-bezier(.2,.9,.3,1.4)}@keyframes bump{0%{transform:translateX(-50%) scale(1.25)}100%{transform:translateX(-50%) scale(1)}}
+/* the side columns: latest helpers left, latest attackers right, with photo, creature and name */
+.col{position:absolute;top:calc(env(safe-area-inset-top,0px) + 20%);display:flex;flex-direction:column;gap:10px;pointer-events:none}
+#colL{left:8px}#colR{right:8px;align-items:flex-end}
+.col .c{position:relative;display:flex;flex-direction:column;align-items:center;width:64px;animation:cin .4s cubic-bezier(.2,.9,.3,1.3)}
+.col .ph{width:48px;height:48px;border-radius:50%;overflow:hidden;border:3px solid #7dffb0;box-shadow:0 2px 8px rgba(0,0,0,.35);display:grid;place-items:center;font:800 20px/1 var(--display);color:#fff}
+#colR .ph{border-color:#ff6b6b}.col .ph img{width:100%;height:100%;object-fit:cover}
+.col .e{position:absolute;top:28px;right:0;font-size:24px;filter:drop-shadow(0 2px 3px rgba(0,0,0,.4))}
+.col b{font:800 13px/1.1 var(--display);color:#fff;text-shadow:0 1px 3px #000,0 0 6px rgba(0,0,0,.6);max-width:72px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:2px}
+@keyframes cin{0%{transform:scale(.3);opacity:0}100%{transform:none;opacity:1}}
+/* language-free requests: 👆❤️ ➜ 🦘 (taps make him jump higher) and, if switched on, 💚🎁 ➜ ⬆️ / ❤️🎁 ➜ ⬇️ */
+#hint{position:absolute;left:50%;top:calc(env(safe-area-inset-top,0px) + 10% + 58px);transform:translateX(-50%);display:flex;align-items:center;gap:10px;padding:5px 14px;border-radius:999px;
+  background:rgba(20,30,70,.55);border:1px solid rgba(255,255,255,.3);pointer-events:none;font-size:28px;line-height:1;white-space:nowrap}
+#hint .tap{position:relative;display:inline-block;width:34px;text-align:center;animation:tap .8s ease-in-out infinite}
+#hint .tap i{position:absolute;font-style:normal;font-size:14px;left:22px;top:-6px;animation:heart 1.6s ease-out infinite}#hint .tap i+i{left:0;top:-2px;animation-delay:.8s}
+#hint .sep{width:1px;height:26px;background:rgba(255,255,255,.35)}#hint .g{display:flex;align-items:center;gap:4px}
+#hint svg{width:22px;height:16px}
+@keyframes tap{0%,100%{transform:translateY(0)}50%{transform:translateY(5px) scale(.92)}}
+@keyframes heart{0%{opacity:0;transform:translateY(6px) scale(.6)}25%{opacity:1}100%{opacity:0;transform:translateY(-18px) scale(1.1)}}
+#goal{position:absolute;left:0;right:0;top:32%;text-align:center;font:900 64px/1.1 var(--display);color:#ffd76a;text-shadow:0 4px 0 #6a12c9,0 0 30px rgba(255,215,106,.9);pointer-events:none}
+#goal.in{animation:bump2 .8s cubic-bezier(.2,.9,.3,1.4)}@keyframes bump2{0%{transform:scale(.2);opacity:0}100%{transform:none;opacity:1}}
+
+#host{position:absolute;z-index:6;border-radius:50%;overflow:hidden;background:#111;touch-action:none;box-shadow:0 0 0 3px #fff,0 0 18px 4px rgba(255,45,122,.55);transition:transform .5s ease,opacity .5s ease;animation:hostGlow 2.4s ease-in-out infinite}
+#host.card{border-radius:20px}#host.dim{transform:scale(.78);opacity:.82}
+#host.drag{transition:none;animation:none;box-shadow:0 0 0 3px #ffc93c,0 0 26px 6px rgba(255,201,60,.75)}
+#host.away{box-shadow:0 0 0 3px #ffc93c,0 0 18px 4px rgba(255,201,60,.5)}
+@keyframes hostGlow{0%,100%{box-shadow:0 0 0 3px #fff,0 0 14px 3px rgba(255,45,122,.5)}50%{box-shadow:0 0 0 3px #fff,0 0 22px 6px rgba(24,214,255,.55)}}
+#hostCam{width:100%;height:100%;object-fit:cover;display:block;pointer-events:none}#hostCam.mir{transform:scaleX(-1)}#hostCam.blur{filter:blur(14px)}
+#hostMsg{position:absolute;inset:0;display:grid;place-items:center;font-size:.26em;background:#111;pointer-events:none}
+#hostBusy{position:absolute;inset:0;pointer-events:none}
+#hbBg{position:absolute;inset:0;background:#2a1240 center/cover no-repeat;filter:brightness(.7) saturate(.9)}
+#hbVid,#hvPrevVid{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block}#host.vid #hbIcon{top:12%;left:16%;font-size:.17em;animation:none}
+#hvPrev{position:relative;width:96px;height:154px;border-radius:14px;overflow:hidden;background:#111;touch-action:none;flex:none;box-shadow:0 0 0 2px #fff}
+#hvEdit{display:flex;gap:12px;align-items:center}#hvEdit .sl{flex:1;display:flex;flex-direction:column;gap:8px}#hvEdit input[type=range]{width:100%}#hbBg.sup{filter:none}
+#hbIcon{position:absolute;left:50%;top:42%;transform:translate(-50%,-50%);font-size:.36em;line-height:1;animation:bob 1.6s ease-in-out infinite;filter:drop-shadow(0 2px 6px rgba(0,0,0,.6))}
+#hbTime{position:absolute;left:0;right:0;bottom:9%;text-align:center;font:800 .14em/1 var(--display);color:#fff;text-shadow:0 1px 4px #000}
+#hbHeart{position:absolute;right:12%;top:9%;font-size:.17em;animation:bob 1s ease-in-out infinite}
+@keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-4px)}}#gear{position:absolute;right:10px;bottom:10px;width:40px;height:40px;border-radius:50%;border:1px solid rgba(255,255,255,.12);background:rgba(10,6,24,.45);
+  color:var(--ink);font-size:19px;line-height:1;cursor:pointer;opacity:.3}
+#gear i{position:absolute;top:3px;right:3px;width:8px;height:8px;border-radius:50%;background:var(--bad)}
+#gear i.ok{background:var(--ok)}
+#sheet{position:absolute;left:0;right:0;bottom:0;max-height:78%;overflow:auto;background:var(--panel);border-top:1px solid var(--line);
+  border-radius:18px 18px 0 0;padding:0 16px 22px;box-shadow:0 -12px 40px rgba(0,0,0,.5);z-index:20}
+#tabs{position:sticky;top:0;display:flex;gap:4px;align-items:center;background:var(--panel);padding:12px 0 8px;z-index:1}
+.tab{flex:1;background:none;border:0;border-bottom:3px solid transparent;color:var(--ink-dim);font:800 16px/1 var(--display);letter-spacing:.06em;text-transform:uppercase;padding:8px 2px;cursor:pointer}
+.tab[aria-selected="true"]{color:var(--ink);border-bottom-color:var(--hot)}
+#close{background:var(--panel-2);border:0;color:var(--ink);width:36px;height:36px;border-radius:50%;font-size:16px;cursor:pointer;flex:none}
+.grp{background:var(--panel-2);border-radius:12px;padding:10px 12px;margin:10px 0}
+.grp h3{margin:0 0 6px;font:800 15px/1.2 var(--display);letter-spacing:.06em;text-transform:uppercase;color:var(--ink-dim)}
+.ln{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:7px 0}
+.ln label{flex:1;min-width:150px;font-size:14px}
+.ln .grow{flex:1;min-width:0}
+label.ln{flex-wrap:nowrap}label.ln span{flex:1;min-width:0}label.ln input{flex:none}
+.note{font-size:13px;line-height:1.45;color:var(--ink-dim);margin:8px 0}
+.btn{background:var(--panel-2);color:var(--ink);border:1px solid var(--line);border-radius:10px;padding:10px 14px;font:700 15px/1 var(--display);letter-spacing:.04em;text-transform:uppercase;cursor:pointer}
+.btn.go{background:var(--hot);border-color:var(--hot);color:#fff}
+input[type=text],select{background:#0c0820;color:var(--ink);border:1px solid var(--line);border-radius:8px;padding:9px 10px;font:500 15px var(--body)}
+input[type=checkbox]{width:20px;height:20px;accent-color:var(--hot)}
+#st.ok{color:var(--ok)}#st.bad{color:var(--bad)}
+#apLog{max-height:30vh;overflow:auto;white-space:pre-wrap;font:12px/1.35 monospace;color:var(--ink-dim);background:rgba(0,0,0,.35);border-radius:8px;padding:8px;margin:8px 0 0}
+#perf{font:12px monospace;color:var(--ink-dim)}
+#monC{display:flex;gap:14px;font:800 20px/1 var(--display);margin:6px 0}
+</style>
+</head>
+<body>
+<div id="stage">
+  <canvas id="gl"></canvas>
+  <div id="win" aria-hidden="true"><span class="cup">🏆</span><span>Win</span><span id="wN">0</span><span class="sl">/</span><span id="wT">500</span></div>
+  <div id="hint" aria-hidden="true"><span class="tap">👆<i>❤️</i><i>❤️</i></span><svg viewBox="0 0 34 22"><path d="M2 11h24M18 3l9 8-9 8" fill="none" stroke="#fff" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"/></svg><span>🦘</span><span class="sep" id="hSep"></span><span class="g" id="hG1">💚🎁<svg viewBox="0 0 34 22"><path d="M2 11h24M18 3l9 8-9 8" fill="none" stroke="#fff" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"/></svg>⬆️</span><span class="g" id="hG2">❤️🎁<svg viewBox="0 0 34 22"><path d="M2 11h24M18 3l9 8-9 8" fill="none" stroke="#fff" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"/></svg>⬇️</span></div>
+  <div class="col" id="colL" aria-hidden="true"></div><div class="col" id="colR" aria-hidden="true"></div>
+  <div id="goal" aria-hidden="true" hidden>🏆<br>WIN!</div>
+  <div id="host" aria-hidden="true" hidden><video id="hostCam" autoplay playsinline muted></video><div id="hostMsg" hidden></div>
+    <div id="hostBusy" hidden><div id="hbBg"></div><video id="hbVid" loop muted playsinline hidden></video><span id="hbIcon">☕</span><span id="hbHeart">❤️</span></div></div>
+  <button id="gear" aria-label="Ajustes">⚙<i id="dot"></i></button>
+  <div id="sheet" hidden>
+    <div id="tabs" role="tablist">
+      <button class="tab" role="tab" data-p="pCtl" aria-selected="true">Control</button>
+      <button class="tab" role="tab" data-p="pRules" aria-selected="false">Reglas</button>
+      <button class="tab" role="tab" data-p="pLink" aria-selected="false">Conexión</button>
+      <button id="close" aria-label="Cerrar">✕</button>
+    </div>
+    <div class="pane" id="pCtl">
+      <div class="grp"><h3>🏆 Desafío del cielo</h3>
+        <p class="note">El héroe salta de isla en isla sin parar. Los regalos de «ayuda» mandan una criatura que lo lleva varias islas adelante y suman wins; los de «sabotaje» mandan una que lo tira y restan wins. A la izquierda salen los últimos que ayudan, a la derecha los últimos que sabotean, con foto y nombre. Al llegar al objetivo: ¡WIN! y el contador vuelve a 0.</p>
+        <div class="ln"><button class="btn" id="bMinus">−1</button><button class="btn" id="bPlus">+1</button><button class="btn" id="bReset">Poner a 0</button></div>
+      </div>
+      <div class="grp"><h3>🎥 Mi cámara</h3>
+        <label class="ln"><input type="checkbox" id="oHost"><span>Salir yo con la cámara delantera en una burbuja pequeña</span></label>
+        <p class="note">Arrástrala con el dedo a un borde donde no tape a nadie (se queda ahí). Siempre empieza con tu vídeo (o tu foto), nunca con la cámara: la cámara solo se enciende cuando tú pulsas 🎥 o das doble toque en la burbuja; otro doble toque y vuelve el vídeo. Cuando llega un regalo grande, la burbuja se hace pequeña para dejar el protagonismo a quien apoya.</p>
+        <div class="ln"><label for="oHostSize">Tamaño</label><select id="oHostSize"><option value="s">Pequeña</option><option value="m">Mediana</option><option value="l">Grande</option></select><select id="oHostShape"><option value="card">▯ Vertical</option><option value="circle">⚪ Círculo</option></select></div>
+        <label class="ln"><input type="checkbox" id="oHostMirror"><span>Modo espejo</span></label>
+        <div class="ln"><button class="btn" id="bBlur">🌫️ Difuminar</button><button class="btn" id="bHostPic">🖼️ Mi foto para «ocupado»</button><input type="file" id="hostFile" accept="image/*" hidden></div>
+        <div class="ln"><button class="btn" id="bHostVid">🎬 Mi vídeo para «ocupado»</button><button class="btn" id="bHostVidDel" hidden>✖</button><input type="file" id="hostVidFile" accept="video/*" hidden></div>
+        <div id="hvBox" hidden>
+          <p class="note">El vídeo se repite solo. Mueve el dedo sobre la vista previa para elegir la parte que se ve, acerca con 🔍 y elige el volumen con 🔊 (a la izquierda del todo = sin sonido). El sonido del vídeo se mezcla con Spotify: los dos suenan a la vez.</p>
+          <div id="hvEdit"><div id="hvPrev"><video id="hvPrevVid" loop muted playsinline></video></div>
+            <div class="sl"><label>🔍<input type="range" id="hvZ" min="1" max="3" step="0.05"></label><label>↔<input type="range" id="hvX" min="0" max="100" step="1"></label><label>↕<input type="range" id="hvY" min="0" max="100" step="1"></label>
+              <label>🔊<input type="range" id="hvV" min="0" max="100" step="1"></label><span class="note" id="hvVn"></span>
+              <div class="ln"><label for="oHostSnd">Sonido</label><select id="oHostSnd"><option value="mix">🎵 Con Spotify (suena junto a tu música)</option><option value="video">🎬 Sonido del vídeo (siempre sincronizado, pausa Spotify)</option></select></div><span class="note" id="hvOld" hidden>🔊 Vuelve a elegir el vídeo una vez para que suene junto a Spotify.</span></div></div>
+        </div>
+        <div class="ln" id="busyBtns"><button class="btn" data-b="">🎥</button><button class="btn" data-b="☕">☕</button><button class="btn" data-b="🍽️">🍽️</button><button class="btn" data-b="📞">📞</button><button class="btn" data-b="🎮">🎮</button><button class="btn" data-b="🚗">🚗</button><button class="btn" data-b="💤">💤</button></div>
+        <label class="ln"><input type="checkbox" id="oHostSup"><span>Mientras estoy ocupado, mi burbuja enseña la foto del último que envía un regalo ❤️</span></label>
+      </div>
+      <div class="grp"><h3>🫧 Estrellas flotantes (encima de cualquier juego)</h3>
+        <p class="note">Sale encima de cualquier app que abras durante el directo (otro juego, YouTube…): los que tocan suben como burbujas con su foto y su nombre, y cada regalo entra como una tarjeta con la foto, el nombre y el regalo (el de más valor primero). No bloquea el juego de debajo. Muévela arrastrando el pequeño ✥; doble toque en ✥ la esconde un momento. La primera vez Android pide permiso para «mostrar sobre otras apps».</p>
+        <div class="ln"><button class="btn go" id="bFloat">Activar</button><button class="btn" id="bFloatTest">🧪 Probar 20 s</button><span class="note" id="floatSt"></span></div>
+        <p class="note">Para probar sin directo: activa, pulsa 🧪 y abre enseguida tu juego. Durante 20 segundos llegan toques y regalos de prueba.</p>
+        <label class="ln"><input type="checkbox" id="oFlTaps"><span>👆 Burbujas de los que tocan</span></label>
+        <label class="ln"><input type="checkbox" id="oFlGifts"><span>🎁 Tarjetas de los regalos</span></label>
+        <label class="ln"><input type="checkbox" id="oFlWall"><span>⭐ Fila con los 5 últimos que apoyan</span></label>
+        <label class="ln"><input type="checkbox" id="oFlJoin"><span>👋 Los que entran al directo</span></label>
+        <div class="ln"><label for="oFlSize">Tamaño</label><select id="oFlSize"><option value="0.8">Pequeño</option><option value="1">Normal</option><option value="1.25">Grande</option></select></div>
+      </div>
+      <div class="grp"><h3>🎮 Juegos</h3>
+        <div class="ln"><button class="btn" id="bParty">🕺 Sala</button><button class="btn" id="bRace">🏁 Carrera</button><button class="btn" id="bPrint">🖨️ Imprenta</button></div>
+      </div>
+      <div class="grp"><h3>Probar</h3>
+        <div class="ln"><button class="btn" data-g="Rose:1">💚 Rose</button><button class="btn" data-g="Lion:29999">💚 Lion</button><button class="btn" data-g="GG:1">❤️ GG</button><button class="btn" data-g="Jet:4888">❤️ Jet</button><button class="btn" id="bTaps">Toques</button></div>
+      </div>
+    </div>
+    <div class="pane" id="pRules" hidden>
+      <div class="grp"><h3>Objetivo</h3>
+        <div class="ln"><label for="oTarget">Wins para ganar</label><select id="oTarget"><option value="100">100</option><option value="300">300</option><option value="500">500</option><option value="1000">1000</option></select></div>
+        <div class="ln"><label for="oTapsWin">Cada cuántos toques +1 win</label><select id="oTapsWin"><option value="0">Nunca</option><option value="100">100</option><option value="300">300</option><option value="1000">1000</option></select></div>
+        <label class="ln"><input type="checkbox" id="oHint"><span>Dibujo 👆❤️ ➜ 🦘 (los toques le hacen saltar más alto)</span></label>
+        <label class="ln"><input type="checkbox" id="oGuide"><span>Dibujos 💚🎁 ➜ ⬆️ y ❤️🎁 ➜ ⬇️ (qué hacen los regalos)</span></label>
+        <p class="note">TikTok castiga pedir regalos de forma automática: si vuelve a haber una restricción, apaga primero los dibujos.</p>
+        <label class="ln"><input type="checkbox" id="oCols"><span>Columnas con los últimos que ayudan / sabotean (foto y nombre)</span></label>
+      </div>
+      <div class="grp"><h3>Regalos</h3>
+        <p class="note">Nombres de regalo en inglés, como salen en TikTok, separados por comas. Cuanto más vale el regalo, más wins (de 1 hasta 40 como máximo).</p>
+        <div class="ln"><label for="oHelp">💚 Ayudan</label><input type="text" id="oHelp" class="grow"></div>
+        <div class="ln"><label for="oHurt">❤️ Sabotean</label><input type="text" id="oHurt" class="grow"></div>
+        <div class="ln"><label for="oUnknown">Los demás regalos</label><select id="oUnknown"><option value="help">💚 Ayudan</option><option value="hurt">❤️ Sabotean</option></select></div>
+      </div>
+    </div>
+    <div class="pane" id="pLink" hidden>
+      <div class="ln"><span>Estado:</span><span id="st" class="bad">Sin conexión</span></div>
+      <p class="note" id="lnNote"></p>
+      <div id="monC"><span>🎁 <i id="mG">0</i></span><span id="mLW">👆 <i id="mL">0</i></span></div>
+      <div class="ln"><label for="apUser" id="apUserL">Tu usuario de TikTok</label><input type="text" id="apUser" class="grow" placeholder="usuario (sin @)" autocapitalize="off" autocomplete="off" spellcheck="false"></div>
+      <div class="ln" id="apKeyRow"><label for="apKey">Clave Euler Stream</label><input type="text" id="apKey" class="grow" placeholder="opcional" autocapitalize="off" autocomplete="off" spellcheck="false"></div>
+      <div class="ln"><button class="btn go" id="apGo">Guardar y conectar</button></div>
+      <pre id="apLog"></pre>
+    </div>
+  </div>
+</div>
+<script>
+(function(){
+"use strict";
+var $=function(id){return document.getElementById(id)};
+var APP=!!window.BusApp;
+var SRC=APP&&BusApp.getSource?String(BusApp.getSource()):"tiktok",YT=SRC==="youtube";
+try{localStorage.setItem("game","win")}catch(e){}
+
+var HELP0="Rose, Heart Me, Finger Heart, Hand Hearts, Perfume, Lion, Galaxy, Universe, Swan, Corgi, Love you",HURT0="TikTok, GG, Doughnut, Ice Cream Cone, Jet, Rocket, Sports Car, Private Jet, Gamepad, Cap";
+var DEF={hint:true,guide:false,target:500,help:HELP0,hurt:HURT0,unknown:"help",tapsWin:0,cols:true,
+  host:false,hostSize:"m",hostShape2:"card",hostMirror:true,hostSup:true,hostX:null,hostY:null,hostIcon:"☕",hostVx:50,hostVy:50,hostVz:1,hostVol:0,hostSnd:"mix",
+  flTaps:true,flGifts:true,flWall:true,flJoin:false,flSize:1};
+var cfg=Object.assign({},DEF);
+try{var sv=JSON.parse(localStorage.getItem("win1")||"null");if(sv)cfg=Object.assign(cfg,sv)}catch(e){}
+function save(){try{localStorage.setItem("win1",JSON.stringify(cfg))}catch(e){}}
+function clamp(v,a,b){return v<a?a:v>b?b:v}
+function rnd(a,b){return a+Math.random()*(b-a)}
+function pick(a){return a[(Math.random()*a.length)|0]}
+function perf(){return performance.now()}
+function esc(s){return String(s).replace(/[&<>"]/g,function(m){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[m]})}
+function hashHue(s){var h=2166136261;s=String(s);for(var i=0;i<s.length;i++){h^=s.charCodeAt(i);h=Math.imul(h,16777619)}return (h>>>0)%360}
+function initial(s){var c=String(s).replace(/[^A-Za-z0-9À-ÿ؀-ۿ]/g,"").charAt(0);return (c||String(s).charAt(0)||"?").toUpperCase()}
+function norm(s){s=String(s==null?"":s).toLowerCase();try{s=s.normalize("NFD").replace(/[̀-ͯ]/g,"")}catch(e){}return s.replace(/[^a-z0-9]+/g," ").trim()}
+
+/* ---------- state: the wins counter survives a restart of the app ---------- */
+var ST={wins:0,level:1};try{var ss=JSON.parse(localStorage.getItem("win1state")||"null");if(ss)ST=Object.assign(ST,ss)}catch(e){}
+function saveST(){try{localStorage.setItem("win1state",JSON.stringify(ST))}catch(e){}}
+
+/* ---------- canvas ---------- */
+var cv=$("gl"),X=cv.getContext("2d"),W=0,H=0,DPR=1;
+function resize(){DPR=Math.min(2.5,window.devicePixelRatio||1);W=innerWidth;H=innerHeight;cv.width=Math.round(W*DPR);cv.height=Math.round(H*DPR);X.setTransform(DPR,0,0,DPR,0,0)}
+window.addEventListener("resize",resize);resize();
+
+/* ---------- the world: one floating island per level, generated from the level number so it never changes ---------- */
+var GAPX=250;
+function seeded(n){var s=(n*2654435761)>>>0;return function(){s^=s<<13;s^=s>>>17;s^=s<<5;return ((s>>>0)%10000)/10000}}
+function isle(n){var r=seeded(n+7);return {x:n*GAPX,y:Math.sin(n*0.9)*55+(r()-0.5)*70,w:150+r()*70,trees:(r()*3)|0,flowers:(r()*5)|0,seed:n}}
+/* soft clouds in two layers */
+var CL=[];for(var i=0;i<16;i++)CL.push({x:Math.random()*2000,y:Math.random()*0.55,s:rnd(0.6,1.6),l:i%2});
+
+/* ---------- viewers ---------- */
+var users={},userN=0;
+function userOf(e){var uid=String(e.user||e.nick||"?"),u=users[uid];
+  if(!u){if(++userN>30000){for(var k in users){if(userN<25000)break;if(!users[k].sum){delete users[k];userN--}}}u=users[uid]={uid:uid,nick:String(e.nick||e.user||"Fan"),av:"",img:null,hue:hashHue(uid),sum:0}}
+  if(e.nick)u.nick=String(e.nick);if(e.avatar&&e.avatar!==u.av){u.av=String(e.avatar);u.photoAsked=false}return u}
+var imgWait={},imgN=0;window.__busImg=function(id,data){var cb=imgWait[id];delete imgWait[id];if(cb)cb(data)};
+function ensurePhoto(u){if(!u.av||u.photoAsked)return;u.photoAsked=true;var url=u.av;
+  var done=function(src){if(!src||u.av!==url)return;u.src=src;var im=new Image();im.onload=function(){if(u.av===url)u.img=im};im.src=src};
+  if(APP&&BusApp.image){var id="i"+(++imgN);imgWait[id]=done;try{BusApp.image(url,id)}catch(e){}}else done(url)}
+
+/* ---------- gifts: which side, how much ----------
+   a gift named in "help" lifts the hero and adds wins, one named in "hurt" knocks him down and takes wins; an unnamed gift goes
+   to the side chosen in Reglas. Wins grow with the gift's value but never by more than 40 at once, so nobody wins alone. */
+function listOf(s){return String(s||"").split(",").map(norm).filter(Boolean)}
+function sideOf(name){var n=norm(name);if(listOf(cfg.hurt).indexOf(n)>=0)return "hurt";if(listOf(cfg.help).indexOf(n)>=0)return "help";return cfg.unknown==="hurt"?"hurt":"help"}
+function winsOf(c){return c<5?1:c<10?2:c<50?3:c<100?5:c<500?10:c<1000?15:c<5000?25:40}
+function tierOf(c){return c<10?0:c<100?1:c<1000?2:c<5000?3:4}
+var CRE={help:["🕊️","🦅","🦄","🐉","🌟"],hurt:["🐝","🦇","👾","🦖","☄️"]};
+
+/* ---------- the hero: jumps from island to island without stopping ---------- */
+var HERO={lv:ST.level,from:ST.level,to:ST.level,t:1,dur:0.62,rest:0.5,restT:0,mode:"jump",hit:0,boost:0,fallV:0,y:0,spin:0,glow:0};
+var cam={x:0,y:0},shake=0;
+function heroPos(){var a=isle(HERO.from),b=isle(HERO.to),k=clamp(HERO.t,0,1),hx=a.x+(b.x-a.x)*k,arc=HERO.mode==="boost"?260:110*(1+(HERO.spring||0)*0.9),hy=a.y+(b.y-a.y)*k-Math.sin(k*Math.PI)*arc;return {x:hx,y:hy}}
+function stepHero(dt){var h=HERO;h.spring=Math.max(0,(h.spring||0)-dt*0.25);
+  if(h.mode==="fall"){h.fallV+=1400*dt;h.y+=h.fallV*dt;h.spin+=dt*9;if(h.y>H*0.9){h.mode="poof";h.poofT=0;h.from=h.to=h.lv;h.t=1;h.y=0;h.spin=0;poof(isle(h.lv).x,isle(h.lv).y-40)}return}
+  if(h.mode==="poof"){h.poofT+=dt;if(h.poofT>0.45){h.mode="jump";h.restT=0}return}
+  if(h.t<1){h.t=Math.min(1,h.t+dt/(h.mode==="boost"?1.15:h.dur));if(h.t>=1){h.lv=h.to;ST.level=h.lv;saveST();h.restT=0;h.mode="jump";dust(isle(h.lv).x,isle(h.lv).y)}return}
+  h.restT+=dt;if(h.restT>=h.rest*(1-(h.spring||0)*0.6)){h.from=h.lv;h.to=h.lv+1;h.t=0}}
+function boostHero(n){var h=HERO;if(h.mode==="fall"||h.mode==="poof")return;var at=h.t<1?h.to:h.lv;h.from=h.t<1?h.to:h.lv;h.lv=h.from;h.to=at+n;h.t=0;h.mode="boost";h.glow=1}
+function knockHero(n){var h=HERO;var p=heroPos();h.mode="fall";h.fallV=-520;h.y=0;h.spin=0;h.lv=Math.max(1,(h.t<1?h.from:h.lv)-n);h.fallFrom=p;shake=Math.max(shake,0.5)}
+
+/* ---------- flying creatures (one per gift, with the sender's photo and name) ---------- */
+var flyers=[],fx=[],pops=[];
+function launch(u,side,coins,count){var t=tierOf(coins),e=CRE[side][t];var startX=side==="help"?-90:W+90,startY=rnd(H*0.25,H*0.6);
+  flyers.push({u:u,side:side,e:e,size:46+t*14,x:startX,y:startY,t:0,dur:0.95,coins:coins,count:count,tier:t,hit:false,sx:startX,sy:startY})}
+function stepFlyers(dt){var hp=toScreen(heroPos());
+  for(var i=flyers.length-1;i>=0;i--){var f=flyers[i];f.t+=dt/f.dur;
+    if(!f.hit){var k=Math.min(1,f.t);f.x=f.sx+(hp.x-f.sx)*k;f.y=f.sy+(hp.y-50-f.sy)*k-Math.sin(k*Math.PI)*90;
+      if(k>=1){f.hit=true;f.t=0;apply(f)}}
+    else{f.x+=(f.side==="help"?1:-1)*dt*380;f.y-=dt*260;if(f.t>1.2)flyers.splice(i,1)}}}
+function apply(f){var d=winsOf(f.coins)*1,n=f.count,dw=Math.min(40,d*Math.max(1,n));
+  if(f.side==="help"){ST.wins+=dw;boostHero(Math.min(6,1+f.tier+(n>3?1:0)));burst(f.x,f.y,"help",f.tier);popText("+"+dw,"#4ade80")}
+  else{ST.wins-=dw;knockHero(Math.min(8,1+f.tier*2));burst(f.x,f.y,"hurt",f.tier);popText("-"+dw,"#ff4d4d")}
+  f.u.sum+=f.coins;saveST();paintWin(true);addCol(f.u,f.side,f.e);checkGoal()}
+function burst(x,y,side,t){var n=16+t*14;for(var i=0;i<n;i++){var a=Math.random()*6.28,v=rnd(80,260+t*60);fx.push({x:x,y:y,vx:Math.cos(a)*v,vy:Math.sin(a)*v-80,life:rnd(0.5,1.1),c:side==="help"?pick(["#ffe066","#7dffb0","#ffffff","#8be9ff"]):pick(["#ff4d4d","#ffb020","#2b2b2b","#ff7ad9"]),r:rnd(3,7)})}if(side==="hurt")shake=Math.max(shake,0.25+t*0.12)}
+function dust(wx,wy){var p=toScreen({x:wx,y:wy});for(var i=0;i<6;i++)fx.push({x:p.x+rnd(-20,20),y:p.y-6,vx:rnd(-60,60),vy:rnd(-60,-20),life:rnd(0.3,0.6),c:"rgba(255,255,255,.8)",r:rnd(2,4)})}
+function poof(wx,wy){var p=toScreen({x:wx,y:wy});for(var i=0;i<22;i++){var a=Math.random()*6.28;fx.push({x:p.x,y:p.y,vx:Math.cos(a)*140,vy:Math.sin(a)*140,life:0.6,c:"rgba(255,255,255,.9)",r:rnd(6,12)})}}
+function popText(s,c){pops.push({s:s,c:c,t:0})}
+function stepFx(dt){for(var i=fx.length-1;i>=0;i--){var p=fx[i];p.life-=dt;if(p.life<=0){fx.splice(i,1);continue}p.vy+=420*dt;p.x+=p.vx*dt;p.y+=p.vy*dt}
+  for(var j=pops.length-1;j>=0;j--){pops[j].t+=dt;if(pops[j].t>1.3)pops.splice(j,1)}if(fx.length>900)fx.splice(0,fx.length-900)}
+
+/* ---------- the goal ---------- */
+var goalAt=0;
+function checkGoal(){var tg=Math.max(1,+cfg.target||500);if(ST.wins>=tg){goalAt=perf();ST.wins=0;saveST();paintWin(true);
+  for(var i=0;i<6;i++)setTimeout(function(){burst(rnd(W*0.2,W*0.8),rnd(H*0.2,H*0.5),"help",4)},i*350);var el=$("goal");el.hidden=false;el.classList.remove("in");void el.offsetWidth;el.classList.add("in");setTimeout(function(){el.hidden=true},4200)}}
+
+/* ---------- side columns: the latest helpers (left) and attackers (right) ---------- */
+var cols={help:[],hurt:[]};
+function addCol(u,side,e){var c=cols[side];for(var i=0;i<c.length;i++)if(c[i].u===u){c.splice(i,1);break}c.unshift({u:u,e:e,at:perf()});if(c.length>5)c.length=5;paintCols()}
+function face(u){return u.src?'<img alt="" referrerpolicy="no-referrer" src="'+esc(u.src)+'">':'<span style="display:grid;place-items:center;width:100%;height:100%;background:hsl('+u.hue+',70%,45%)">'+esc(initial(u.nick))+'</span>'}
+function paintCols(){["help","hurt"].forEach(function(side){var el=$(side==="help"?"colL":"colR");el.hidden=!cfg.cols;
+  el.innerHTML=cols[side].map(function(c){return '<div class="c"><div class="ph">'+face(c.u)+'</div><span class="e">'+c.e+'</span><b>'+esc(c.u.nick.length>9?c.u.nick.slice(0,8)+"…":c.u.nick)+'</b></div>'}).join("")})}
+
+/* ---------- the wins banner ---------- */
+var shownWins=ST.wins;
+function paintWin(force){var tg=Math.max(1,+cfg.target||500);$("wN").textContent=String(Math.round(shownWins));$("wN").className=shownWins<0?"neg":"";$("wT").textContent=String(tg);
+  if(force){var b=$("win");b.classList.remove("bump");void b.offsetWidth;b.classList.add("bump")}}
+
+/* ---------- drawing ---------- */
+function toScreen(p){return {x:p.x-cam.x+W*0.42,y:p.y-cam.y+H*0.58}}
+function drawSky(t){var g=X.createLinearGradient(0,0,0,H);g.addColorStop(0,"#2f7de0");g.addColorStop(0.55,"#7cc0ff");g.addColorStop(1,"#d9f0ff");X.fillStyle=g;X.fillRect(0,0,W,H);
+  var sg=X.createRadialGradient(W*0.82,H*0.16,10,W*0.82,H*0.16,H*0.35);sg.addColorStop(0,"rgba(255,250,220,.95)");sg.addColorStop(0.15,"rgba(255,244,200,.55)");sg.addColorStop(1,"rgba(255,244,200,0)");X.fillStyle=sg;X.fillRect(0,0,W,H);
+  CL.forEach(function(c){var par=c.l?0.15:0.3,cx=((c.x-cam.x*par)%(W+400)+W+400)%(W+400)-200,cy=c.y*H;X.fillStyle=c.l?"rgba(255,255,255,.55)":"rgba(255,255,255,.85)";
+    for(var k=0;k<4;k++){X.beginPath();X.ellipse(cx+k*30*c.s,cy+Math.sin(k)*6,46*c.s,24*c.s,0,0,7);X.fill()}});
+  /* far islands */
+  for(var i=-2;i<8;i++){var fxp=((i*330-cam.x*0.35)%(W+660)+W+660)%(W+660)-330,fy=H*0.72+Math.sin(i*1.7)*30;X.fillStyle="rgba(120,160,190,.45)";X.beginPath();X.ellipse(fxp,fy,70,14,0,0,7);X.fill();
+    X.beginPath();X.moveTo(fxp-60,fy);X.lineTo(fxp,fy+70);X.lineTo(fxp+60,fy);X.fill()}}
+function drawIsle(n){var s=isle(n),p=toScreen(s),w=s.w,r=seeded(n+99);if(p.x<-w||p.x>W+w)return;
+  /* rocky underside */
+  X.fillStyle="#7a5a3c";X.beginPath();X.moveTo(p.x-w/2,p.y);for(var k=0;k<=8;k++){var fx2=p.x-w/2+k*w/8;X.lineTo(fx2,p.y+18+Math.sin(k*1.3+n)*10+(k>2&&k<6?40+r()*50:r()*20))}X.lineTo(p.x+w/2,p.y);X.closePath();X.fill();
+  X.fillStyle="#5b4229";X.beginPath();X.moveTo(p.x-w*0.2,p.y+10);X.lineTo(p.x,p.y+90+r()*40);X.lineTo(p.x+w*0.18,p.y+12);X.fill();
+  /* grass top */
+  X.fillStyle="#5cc14a";X.beginPath();X.ellipse(p.x,p.y,w/2,16,0,0,7);X.fill();X.fillStyle="#7ee06a";X.beginPath();X.ellipse(p.x,p.y-4,w/2-8,10,0,0,7);X.fill();
+  for(var t=0;t<s.trees;t++){var tx=p.x-w*0.35+t*w*0.3+r()*20;X.fillStyle="#6b4a2b";X.fillRect(tx-3,p.y-30,6,26);X.fillStyle="#3fa34d";X.beginPath();X.arc(tx,p.y-36,15,0,7);X.fill();X.beginPath();X.arc(tx+9,p.y-30,11,0,7);X.fill()}
+  for(var f=0;f<s.flowers;f++){X.fillStyle=pick(["#ff7ad9","#ffe066","#ffffff"]);X.beginPath();X.arc(p.x-w*0.4+r()*w*0.8,p.y-6,3,0,7);X.fill()}
+  /* level number above the island */
+  X.font="900 30px 'Barlow Condensed',Arial";X.textAlign="center";X.textBaseline="middle";X.lineWidth=6;X.strokeStyle="rgba(30,40,70,.75)";X.strokeText(String(n),p.x,p.y-74);X.fillStyle="#fff";X.fillText(String(n),p.x,p.y-74)}
+var hostFace=null;try{var hp0=localStorage.getItem("party_hostpic");if(hp0){hostFace=new Image();hostFace.src=hp0}}catch(e){}
+function drawHero(t){var h=HERO,p;if(h.mode==="fall"){p=toScreen(h.fallFrom||heroPos());p.y+=h.y}else p=toScreen(heroPos());if(h.mode==="poof")return;
+  var squash=h.t>=1?1-0.08*Math.max(0,Math.sin(h.restT*12)):1;X.save();X.translate(p.x,p.y);X.rotate(h.spin);X.scale(1/squash*0.98,squash);
+  if(h.glow>0){var gg=X.createRadialGradient(0,-40,5,0,-40,70);gg.addColorStop(0,"rgba(255,240,150,"+(0.7*h.glow)+")");gg.addColorStop(1,"rgba(255,240,150,0)");X.fillStyle=gg;X.fillRect(-80,-120,160,160)}
+  /* shadow-free cartoon kid: shoes, legs, hoodie, arms, big head with a cap */
+  X.fillStyle="#222";X.beginPath();X.ellipse(-10,-4,9,5,0,0,7);X.ellipse(10,-4,9,5,0,0,7);X.fill();
+  X.fillStyle="#2b3a67";X.fillRect(-12,-22,9,18);X.fillRect(3,-22,9,18);
+  X.fillStyle="#1fa3ff";X.beginPath();X.moveTo(-20,-22);X.lineTo(20,-22);X.lineTo(17,-58);X.lineTo(-17,-58);X.closePath();X.fill();X.fillStyle="#ffffff";X.fillRect(-14,-40,28,4);
+  var sw=h.t<1?-0.9:Math.sin(t*6)*0.3;X.strokeStyle="#1fa3ff";X.lineWidth=8;X.lineCap="round";X.beginPath();X.moveTo(-17,-52);X.lineTo(-30,-38+sw*18);X.moveTo(17,-52);X.lineTo(30,-38+sw*18);X.stroke();
+  X.fillStyle="#f3c9a5";X.beginPath();X.arc(0,-82,26,0,7);X.fill();
+  if(hostFace&&hostFace.complete){X.save();X.beginPath();X.arc(0,-82,24,0,7);X.clip();X.drawImage(hostFace,-24,-106,48,48);X.restore()}
+  else{X.fillStyle="#2a1a10";X.beginPath();X.arc(-9,-84,3,0,7);X.arc(9,-84,3,0,7);X.fill();X.strokeStyle="#2a1a10";X.lineWidth=2.5;X.beginPath();X.arc(0,-76,8,0.15*Math.PI,0.85*Math.PI);X.stroke()}
+  X.fillStyle="#ff4757";X.beginPath();X.arc(0,-92,26,Math.PI,0);X.fill();X.fillRect(0,-96,34,7);
+  X.restore();h.glow=Math.max(0,h.glow-0.016)}
+function drawFlyers(){flyers.forEach(function(f){X.save();X.translate(f.x,f.y);var flip=f.side==="hurt"&&!f.hit?-1:1;X.scale(flip,1);X.font=f.size+"px serif";X.textAlign="center";X.textBaseline="middle";X.fillText(f.e,0,0);X.restore();
+  /* the sender: round photo and name above */
+  var r=17+f.tier*2,py=f.y-f.size*0.62-r;X.save();X.beginPath();X.arc(f.x,py,r,0,7);X.closePath();X.fillStyle="hsl("+f.u.hue+",70%,45%)";X.fill();X.clip();
+  if(f.u.img){try{X.drawImage(f.u.img,f.x-r,py-r,2*r,2*r)}catch(e){}}else{X.fillStyle="#fff";X.font="800 "+r+"px 'Barlow Condensed',Arial";X.fillText(initial(f.u.nick),f.x,py+1)}X.restore();
+  X.lineWidth=3;X.strokeStyle=f.side==="help"?"#7dffb0":"#ff6b6b";X.beginPath();X.arc(f.x,py,r,0,7);X.stroke();
+  X.font="800 14px 'Barlow Condensed',Arial";X.lineWidth=4;X.strokeStyle="rgba(0,0,0,.6)";var nm=f.u.nick.length>12?f.u.nick.slice(0,11)+"…":f.u.nick;X.strokeText(nm,f.x,py-r-9);X.fillStyle="#fff";X.fillText(nm,f.x,py-r-9)})}
+function drawFx(){fx.forEach(function(p){X.globalAlpha=clamp(p.life*1.5,0,1);X.fillStyle=p.c;X.beginPath();X.arc(p.x,p.y,p.r,0,7);X.fill()});X.globalAlpha=1;
+  var hp=toScreen(heroPos());pops.forEach(function(p){var a=1-p.t/1.3;X.globalAlpha=clamp(a,0,1);X.font="900 "+Math.round(40+p.t*10)+"px 'Barlow Condensed',Arial";X.textAlign="center";X.lineWidth=7;X.strokeStyle="rgba(0,0,0,.55)";
+    X.strokeText(p.s,hp.x,hp.y-140-p.t*70);X.fillStyle=p.c;X.fillText(p.s,hp.x,hp.y-140-p.t*70)});X.globalAlpha=1}
+
+/* ---------- loop ---------- */
+var last=perf();
+function frame(){var now=perf(),dt=Math.min(0.05,(now-last)/1000);last=now,t=now/1000;
+  stepHero(dt);stepFlyers(dt);stepFx(dt);
+  var hp=HERO.mode==="fall"?(HERO.fallFrom||heroPos()):heroPos();cam.x+=(hp.x-cam.x)*(1-Math.exp(-3*dt));cam.y+=(hp.y*0.6-cam.y)*(1-Math.exp(-2*dt));
+  shownWins+=(ST.wins-shownWins)*(1-Math.exp(-8*dt));if(Math.abs(ST.wins-shownWins)<0.5)shownWins=ST.wins;paintWin(false);
+  var sx=shake>0?rnd(-1,1)*shake*16:0,sy=shake>0?rnd(-1,1)*shake*16:0;shake=Math.max(0,shake-dt*1.6);
+  X.save();X.translate(sx,sy);drawSky(t);var c0=Math.floor((cam.x-W)/GAPX),c1=Math.ceil((cam.x+W)/GAPX)+1;for(var n=Math.max(1,c0);n<=c1;n++)drawIsle(n);drawHero(t);drawFlyers();drawTapBubs(dt);drawFx();X.restore();
+  requestAnimationFrame(frame)}
+var t=0;
+
+/* ---------- events ---------- */
+var mon={g:0,l:0};
+function onEvent(e){if(!e||!e.type)return;
+  if(e.type==="status"){setStatus(e.ok,e.text);return}
+  if(e.type==="gift"){var u=userOf(e),n=Math.max(1,e.count|0),c=Math.max(1,e.coins|0)*n;mon.g+=n;ensurePhoto(u);if(e.img)u.giftImg=e.img;lastSup=u;
+    launch(u,YT?"help":sideOf(e.gift||e.label||""),c,n);monSoon();return}
+  if(e.type==="like"){var ul=userOf(e),cl=Math.max(1,e.count|0);mon.l+=cl;
+    if(+cfg.tapsWin>0){G.taps=(G.taps||0)+cl;while(G.taps>=+cfg.tapsWin){G.taps-=+cfg.tapsWin;ST.wins+=1;saveST();checkGoal()}}
+    /* every tap: a little more spring in the hero's jumps (higher and faster), hearts, and now and then the tapper's photo floating up */
+    HERO.spring=Math.min(1,(HERO.spring||0)+Math.min(cl,15)*0.02);
+    for(var i=0;i<Math.min(3,cl);i++)fx.push({x:rnd(W*0.2,W*0.8),y:H-20,vx:rnd(-20,20),vy:rnd(-260,-160),life:rnd(0.9,1.5),c:pick(["#ff4f8b","#ff7ad9","#ff2d55"]),r:rnd(4,7)});
+    var now=perf();if(now-(ul.bubAt||0)>2500&&now-(G.bubAt||0)>350&&tapBubs.length<10){ul.bubAt=now;G.bubAt=now;ensurePhoto(ul);tapBubs.push({u:ul,x:rnd(W*0.15,W*0.85),y:H+30,t:0})}
+    monSoon()}}
+var tapBubs=[];
+function drawTapBubs(dt){var hp=toScreen(heroPos());for(var i=tapBubs.length-1;i>=0;i--){var b=tapBubs[i];b.t+=dt/2.2;if(b.t>=1){tapBubs.splice(i,1);
+      for(var k=0;k<6;k++)fx.push({x:hp.x,y:hp.y-60,vx:rnd(-90,90),vy:rnd(-160,-40),life:0.7,c:pick(["#ffe066","#ff7ad9","#ffffff"]),r:rnd(2,4)});continue}
+    var k2=b.t,x=b.x+(hp.x-b.x)*k2*k2,y=b.y+(hp.y-60-b.y)*k2,r=20;X.globalAlpha=k2>0.85?(1-k2)/0.15:1;
+    X.save();X.beginPath();X.arc(x,y,r,0,7);X.fillStyle="hsl("+b.u.hue+",70%,45%)";X.fill();X.clip();if(b.u.img){try{X.drawImage(b.u.img,x-r,y-r,2*r,2*r)}catch(e){}}else{X.fillStyle="#fff";X.font="800 18px 'Barlow Condensed',Arial";X.textAlign="center";X.textBaseline="middle";X.fillText(initial(b.u.nick),x,y+1)}X.restore();
+    X.lineWidth=3;X.strokeStyle="#ff7ad9";X.beginPath();X.arc(x,y,r,0,7);X.stroke();X.font="16px serif";X.textAlign="center";X.textBaseline="middle";X.fillText("❤️",x+r*0.8,y-r*0.8);
+    X.font="800 12px 'Barlow Condensed',Arial";X.lineWidth=3;X.strokeStyle="rgba(0,0,0,.6)";var nm=b.u.nick.length>10?b.u.nick.slice(0,9)+"…":b.u.nick;X.strokeText(nm,x,y+r+10);X.fillStyle="#fff";X.fillText(nm,x,y+r+10);X.globalAlpha=1}}
+var G={},lastSup=null,monT=0;function monSoon(){if(!monT)monT=setTimeout(function(){monT=0;paintMon()},400)}
+
+/* ---------- settings ---------- */
+function fill(){$("oTarget").value=String(cfg.target);$("oHelp").value=cfg.help;$("oHurt").value=cfg.hurt;$("oUnknown").value=cfg.unknown;$("oTapsWin").value=String(cfg.tapsWin);$("oCols").checked=cfg.cols;$("oHint").checked=cfg.hint;$("oGuide").checked=cfg.guide;
+  $("oHost").checked=cfg.host;$("oHostSize").value=cfg.hostSize;$("oHostShape").value=cfg.hostShape2;$("oHostMirror").checked=cfg.hostMirror;$("oHostSup").checked=cfg.hostSup}
+function bind(id,key,num){var el=$(id);el.onchange=function(){cfg[key]=el.type==="checkbox"?el.checked:num?+el.value:el.value;save();paintWin(false);paintCols();paintHint()}}
+function paintHint(){$("hint").hidden=!cfg.hint&&!cfg.guide;var t=$("hint").children;for(var i=0;i<3;i++)t[i].hidden=!cfg.hint;$("hSep").hidden=!(cfg.hint&&cfg.guide);$("hG1").hidden=$("hG2").hidden=!cfg.guide}
+bind("oTarget","target",1);bind("oHelp","help");bind("oHurt","hurt");bind("oUnknown","unknown");bind("oTapsWin","tapsWin",1);bind("oCols","cols");bind("oHint","hint");bind("oGuide","guide");
+function openSheet(o){$("sheet").hidden=!o;$("gear").hidden=o;if(o){fill();paintMon()}}
+$("gear").onclick=function(){openSheet(true)};$("close").onclick=function(){openSheet(false)};
+Array.prototype.forEach.call(document.querySelectorAll(".tab"),function(b){b.onclick=function(){
+  Array.prototype.forEach.call(document.querySelectorAll(".tab"),function(x){x.setAttribute("aria-selected",x===b);$(x.dataset.p).hidden=x!==b})}});
+$("bPlus").onclick=function(){ST.wins+=1;saveST();paintWin(true);checkGoal()};$("bMinus").onclick=function(){ST.wins-=1;saveST();paintWin(true)};
+$("bReset").onclick=function(){ST.wins=0;saveST();paintWin(true)};
+function go(g,page){try{localStorage.setItem("game",g)}catch(e){}location.href=page}
+$("bParty").onclick=function(){go("party","party.html")};$("bRace").onclick=function(){go("race","race.html")};$("bPrint").onclick=function(){go("print","print.html")};
+var tn=0,TN=["Fatima","Carlos","Sara","Youssef","Lucia","Omar","Maria","Hamza"];
+Array.prototype.forEach.call(document.querySelectorAll("[data-g]"),function(b){b.onclick=function(){tn++;var v=b.dataset.g.split(":");onEvent({type:"gift",user:"t"+tn,nick:TN[tn%TN.length],gift:v[0],coins:+v[1],count:1})}});
+$("bTaps").onclick=function(){for(var i=0;i<5;i++)onEvent({type:"like",user:"l"+i,nick:"fan"+i,count:5})};
+function paintMon(){if($("sheet").hidden)return;$("mG").textContent=mon.g;$("mL").textContent=mon.l}
+/* ---------- connection (same bridge as the other games) ---------- */
+function setStatus(ok,text){var el=$("st");el.className=ok?"ok":"bad";el.textContent=text||(ok?"Conectado":"Sin conexión");$("dot").className=ok?"ok":""}
+function appLog(l){var el=$("apLog");el.textContent+=(el.textContent?"\n":"")+l;var x=el.textContent.split("\n");if(x.length>200)el.textContent=x.slice(-200).join("\n");el.scrollTop=el.scrollHeight}
+if(YT){$("apUserL").textContent="Tu canal o directo de YouTube";$("apUser").placeholder="@tucanal o enlace del directo";$("apKeyRow").hidden=true}
+$("lnNote").textContent=!APP?"Vista previa: abre esta página desde la app para recibir regalos reales.":YT?"Escribe tu canal de YouTube (@usuario) o pega el enlace del directo.":"Escribe tu usuario de TikTok. La app se conecta sola cuando empieza tu directo.";
+if(APP){try{$("apUser").value=BusApp.getUser();$("apKey").value=BusApp.getKey()}catch(e){}
+  $("apGo").onclick=function(){var u=$("apUser").value.trim();if(!YT)u=u.replace(/^@/,"");$("apUser").value=u;$("apLog").textContent="";try{BusApp.connect(u,$("apKey").value.trim())}catch(e){}};
+  window.__bus=function(e){try{onEvent(e)}catch(x){}};window.__busLog=appLog;try{BusApp.ready()}catch(e){}}
+else window.__bus=function(e){try{onEvent(e)}catch(x){}};
+
+
+
+/* the camera bubble: "a big gift's moment" = a big creature on its way */
+function vipOn(){return flyers.some(function(f){return f.tier>=3&&!f.hit})}
+/* ---------- the host's own camera bubble: small, at the edge, draggable; a "busy" card when the host steps away ---------- */
+var HOST={stream:null,busy:cfg.hostIcon||"☕",busyAt:0,starting:false,frame:null};
+var HOSTSIZE={s:90,m:118,l:156};
+function hostEl(){return $("host")}
+function hostLayout(){var el=hostEl(),sz=HOSTSIZE[cfg.hostSize]||128;el.hidden=!cfg.host;if(!cfg.host){hostStop();return}
+  el.style.fontSize=sz+"px";el.style.width=sz+"px";el.style.height=Math.round(sz*(cfg.hostShape2==="card"?1.6:1))+"px";el.classList.toggle("card",cfg.hostShape2==="card");
+  var st=$("stage").getBoundingClientRect(),w=el.offsetWidth,h=el.offsetHeight;
+  var x=clamp((cfg.hostX==null?1:cfg.hostX)*(st.width-w-16)+8,8,Math.max(8,st.width-w-8)),y=clamp((cfg.hostY==null?0.25:cfg.hostY)*st.height,8,Math.max(8,st.height-h-8));
+  el.style.left=x+"px";el.style.top=y+"px";$("hostCam").classList.toggle("mir",cfg.hostMirror);$("hostCam").classList.toggle("blur",!!HOST.blur);
+  paintBusy();if(!HOST.busy)hostStart()}
+function hostStart(){if(HOST.stream||HOST.starting||!cfg.host||HOST.busy||document.hidden)return;
+  if(!navigator.mediaDevices||!navigator.mediaDevices.getUserMedia){hostMsg("📷✖");return}
+  HOST.starting=true;navigator.mediaDevices.getUserMedia({video:{facingMode:"user",width:{ideal:640},height:{ideal:640},frameRate:{ideal:30,max:30}},audio:false}).then(function(st){HOST.starting=false;
+    if(!cfg.host||HOST.busy||document.hidden){st.getTracks().forEach(function(t){t.stop()});return}
+    HOST.stream=st;var v=$("hostCam");v.srcObject=st;v.play().catch(function(){});hostMsg("");
+    st.getVideoTracks().forEach(function(t){t.onended=function(){HOST.stream=null;setTimeout(hostStart,800)}})}).catch(function(){HOST.starting=false;hostMsg("📷✖")})}
+function hostStop(){if(HOST.stream){HOST.stream.getTracks().forEach(function(t){t.onended=null;t.stop()});HOST.stream=null}var v=$("hostCam");if(v)v.srcObject=null}
+function hostMsg(t){$("hostMsg").textContent=t;$("hostMsg").hidden=!t}
+/* busy: the camera turns off (privacy and battery) and a card shows my photo or a soft still of my last frame, an icon and how long I've been away */
+function setBusy(ic){if(ic&&!HOST.busy){var v=$("hostCam");try{if(v.videoWidth){var c=document.createElement("canvas");c.width=160;c.height=160;var x=c.getContext("2d"),s=Math.min(v.videoWidth,v.videoHeight);
+      x.filter="blur(6px)";x.drawImage(v,(v.videoWidth-s)/2,(v.videoHeight-s)/2,s,s,0,0,160,160);HOST.frame=c.toDataURL("image/jpeg",0.7)}}catch(e){}}
+  HOST.busy=ic||"";HOST.busyAt=perf();if(HOST.busy)hostStop();hostLayout();paintHostBtns()}
+function hostPic(){try{return localStorage.getItem("party_hostpic")||""}catch(e){return ""}}
+function paintBusy(){var b=$("hostBusy"),hv=$("hbVid");b.hidden=!HOST.busy;$("host").classList.toggle("away",!!HOST.busy);
+  var useVid=!!(HOST.busy&&HOST.vidURL);$("host").classList.toggle("vid",useVid);hv.hidden=!useVid;
+  if(useVid){if(hv.dataset.src!==HOST.vidURL){hv.dataset.src=HOST.vidURL;hv.src=HOST.vidURL}frameMedia(hv);busySound(hv);if(hv.paused)hv.play().catch(function(){hv.muted=true;hv.play().catch(function(){})})}
+  else{if(!hv.paused)hv.pause();busySound(null)}
+  if(!HOST.busy)return;
+  var sup=!useVid&&cfg.hostSup&&lastSup&&lastSup.av,bg=useVid?"":sup?lastSup.av:hostPic()||HOST.frame||"";frameMedia($("hbBg"));
+  $("hbBg").style.backgroundImage=bg?'url("'+bg.replace(/"/g,"%22")+'")':"none";$("hbBg").classList.toggle("sup",!!sup);
+  $("hbIcon").textContent=HOST.busy;$("hbHeart").hidden=!sup}
+setInterval(function(){if(!cfg.host)return;var el=hostEl();
+  if(HOST.busy){paintBusy()}
+  /* a big gift's moment belongs to the supporter: the bubble steps back a little */
+  el.classList.toggle("dim",!!vipOn())},1000);
+document.addEventListener("visibilitychange",function(){if(document.hidden)hostStop();else if(cfg.host&&!HOST.busy)hostStart()});
+window.addEventListener("resize",function(){if(cfg.host)hostLayout()});
+/* drag with one finger to move; double tap = busy ☕ on/off */
+(function(){var el=null,sx=0,sy=0,ox=0,oy=0,moved=false,lastTap=0;
+  document.addEventListener("pointerdown",function(e){var h=hostEl();if(!h||h.hidden||!h.contains(e.target))return;el=h;moved=false;sx=e.clientX;sy=e.clientY;ox=h.offsetLeft;oy=h.offsetTop;try{h.setPointerCapture(e.pointerId)}catch(x){}e.preventDefault()});
+  document.addEventListener("pointermove",function(e){if(!el)return;var dx=e.clientX-sx,dy=e.clientY-sy;if(!moved&&Math.hypot(dx,dy)<8)return;moved=true;el.classList.add("drag");
+    var st=$("stage").getBoundingClientRect();el.style.left=clamp(ox+dx,8,st.width-el.offsetWidth-8)+"px";el.style.top=clamp(oy+dy,8,st.height-el.offsetHeight-8)+"px"});
+  document.addEventListener("pointerup",function(e){if(!el)return;var h=el;el=null;h.classList.remove("drag");var st=$("stage").getBoundingClientRect();
+    if(moved){cfg.hostX=clamp((h.offsetLeft-8)/Math.max(1,st.width-h.offsetWidth-16),0,1);cfg.hostY=clamp(h.offsetTop/st.height,0,1);save();return}
+    var now=perf();if(now-lastTap<350){lastTap=0;setBusy(HOST.busy?"":(cfg.hostIcon||"☕"))}else lastTap=now})})();
+function paintHostBtns(){var el=$("busyBtns");if(!el)return;Array.prototype.forEach.call(el.children,function(b){b.classList.toggle("go",b.dataset.b===HOST.busy||(!HOST.busy&&b.dataset.b===""))})}
+
+Array.prototype.forEach.call(document.querySelectorAll("#busyBtns button"),function(b){b.onclick=function(){if(b.dataset.b)cfg.hostIcon=b.dataset.b,save();setBusy(b.dataset.b)}});
+$("bBlur").onclick=function(){HOST.blur=!HOST.blur;$("bBlur").classList.toggle("go",HOST.blur);hostLayout()};
+$("bHostPic").onclick=function(){$("hostFile").click()};
+$("hostFile").onchange=function(){var f=this.files&&this.files[0];if(!f)return;var rd=new FileReader();rd.onload=function(){var im=new Image();im.onload=function(){var c=document.createElement("canvas");c.width=c.height=256;var x=c.getContext("2d"),s=Math.min(im.width,im.height);
+    x.drawImage(im,(im.width-s)/2,(im.height-s)/2,s,s,0,0,256,256);try{localStorage.setItem("party_hostpic",c.toDataURL("image/jpeg",0.85))}catch(e){}paintBusy()};im.src=rd.result};rd.readAsDataURL(f)};
+/* my looping video for "busy": kept in the phone's storage (IndexedDB), framed with pan and zoom */
+/* the video's sound: inside the app it is played by Android itself without taking the audio focus, so Spotify keeps playing
+   (the picture in the bubble stays muted); in a browser preview the video element plays it */
+window.__busySndOff=function(){HOST.snd=false};   /* Android stopped the sound (app left the screen): start it fresh next time */
+/* "mix" (default): Android plays the sound without taking the audio focus, so Spotify keeps playing (the picture may drift a
+   little from the sound); "video": the video plays its own sound, always in sync, but Android pauses Spotify */
+function nativeSound(){return APP&&!!BusApp.busyAudio&&cfg.hostSnd!=="video"}
+function busySound(hv){var vol=clamp((+cfg.hostVol||0)/100,0,1);
+  /* the position is sent only when the sound starts; after that Android loops it on its own (re-syncing made it stutter) */
+  if(nativeSound()){if(hv)hv.muted=true;var on=!!hv&&vol>0&&!document.hidden;try{BusApp.busyAudio(on,vol,on&&!HOST.snd?hv.currentTime:-1)}catch(e){}HOST.snd=on;HOST.nat=on;return}
+  if(HOST.nat){try{BusApp.busyAudio(false,0,-1)}catch(e){}HOST.nat=false;HOST.snd=false}
+  if(hv){hv.volume=vol;hv.muted=vol<=0;if(vol>0&&hv.paused&&!hv.hidden)hv.play().catch(function(){})}}
+function frameMedia(el){var x=+cfg.hostVx,y=+cfg.hostVy,z=Math.max(1,+cfg.hostVz||1);el.style.objectPosition=x+"% "+y+"%";el.style.backgroundPosition=x+"% "+y+"%";el.style.transformOrigin=x+"% "+y+"%";el.style.transform="scale("+z+")"}
+function mediaDB(cb){try{var rq=indexedDB.open("party_media",1);rq.onupgradeneeded=function(){rq.result.createObjectStore("m")};rq.onsuccess=function(){cb(rq.result)};rq.onerror=function(){cb(null)}}catch(e){cb(null)}}
+function setVid(blob){if(HOST.vidURL){URL.revokeObjectURL(HOST.vidURL);HOST.vidURL=""}if(blob)HOST.vidURL=URL.createObjectURL(blob);
+  $("hvBox").hidden=$("bHostVidDel").hidden=!HOST.vidURL;var pv=$("hvPrevVid");if(HOST.vidURL){pv.src=HOST.vidURL;frameMedia(pv);pv.play().catch(function(){})}else{pv.removeAttribute("src");pv.load()}
+  $("hbVid").dataset.src="";paintBusy();paintVidCtl()}
+function paintVidCtl(){var old=HOST.vidURL&&APP&&BusApp.hasBusyAudio&&!BusApp.hasBusyAudio();$("hvOld").hidden=!old;$("hvV").value=String(cfg.hostVol||0);$("hvVn").textContent=(+cfg.hostVol>0?cfg.hostVol+"%":"🔇");$("hvZ").value=String(cfg.hostVz);$("hvX").value=String(cfg.hostVx);$("hvY").value=String(cfg.hostVy)}
+mediaDB(function(db){if(!db)return;try{var g=db.transaction("m").objectStore("m").get("busyVid");g.onsuccess=function(){if(g.result)setVid(g.result)}}catch(e){}});
+$("bHostVid").onclick=function(){$("hostVidFile").click()};
+$("hostVidFile").onchange=function(){var f=this.files&&this.files[0];if(!f)return;cfg.hostVx=50;cfg.hostVy=50;cfg.hostVz=1;save();setVid(f);
+  mediaDB(function(db){if(!db)return;try{db.transaction("m","readwrite").objectStore("m").put(f,"busyVid")}catch(e){}})};
+$("bHostVidDel").onclick=function(){if(APP&&BusApp.busyDelete)try{BusApp.busyDelete()}catch(e){}setVid(null);mediaDB(function(db){if(!db)return;try{db.transaction("m","readwrite").objectStore("m").delete("busyVid")}catch(e){}})};
+function vidFrame(){save();frameMedia($("hvPrevVid"));frameMedia($("hbVid"));frameMedia($("hbBg"))}
+$("oHostSnd").value=cfg.hostSnd||"mix";$("oHostSnd").onchange=function(){cfg.hostSnd=this.value;save();HOST.snd=false;var hv=$("hbVid");busySound(hv.hidden||hv.paused?null:hv)};
+$("hvV").oninput=function(){cfg.hostVol=+this.value;save();paintVidCtl();var hv=$("hbVid");busySound(hv.hidden||hv.paused?null:hv)};
+document.addEventListener("visibilitychange",function(){var hv=$("hbVid");busySound(!document.hidden&&!hv.hidden&&!hv.paused?hv:null)});
+[["hvZ","hostVz"],["hvX","hostVx"],["hvY","hostVy"]].forEach(function(p){$(p[0]).oninput=function(){cfg[p[1]]=+this.value;vidFrame()}});
+/* drag on the preview to choose the part of the video that shows */
+(function(){var on=false,sx=0,sy=0,ox=0,oy=0,pv=$("hvPrev");
+  pv.addEventListener("pointerdown",function(e){on=true;sx=e.clientX;sy=e.clientY;ox=+cfg.hostVx;oy=+cfg.hostVy;try{pv.setPointerCapture(e.pointerId)}catch(x){}e.preventDefault()});
+  pv.addEventListener("pointermove",function(e){if(!on)return;var k=100/(pv.offsetWidth*Math.max(1,+cfg.hostVz));cfg.hostVx=clamp(ox-(e.clientX-sx)*k,0,100);cfg.hostVy=clamp(oy-(e.clientY-sy)*k*pv.offsetWidth/pv.offsetHeight,0,100);paintVidCtl();vidFrame()});
+  pv.addEventListener("pointerup",function(){on=false});pv.addEventListener("pointercancel",function(){on=false})})();
+
+
+[["oHost","host"],["oHostSize","hostSize"],["oHostShape","hostShape2"],["oHostMirror","hostMirror"],["oHostSup","hostSup"]].forEach(function(p){var el=$(p[0]);
+  el.onchange=function(){cfg[p[1]]=el.type==="checkbox"?el.checked:el.value;save();if(p[1]==="host"&&cfg.host)HOST.busy=HOST.busy||cfg.hostIcon||"☕";hostLayout()}});
+/* ---------- floating stars over any app (native window, see FloatOverlay.java) ---------- */
+function flOpts(){return JSON.stringify({taps:cfg.flTaps,gifts:cfg.flGifts,wall:cfg.flWall,join:cfg.flJoin,size:+cfg.flSize||1})}
+function flState(){try{return APP&&BusApp.floatState?String(BusApp.floatState()):"none"}catch(e){return "none"}}
+function paintFloat(){var s=flState();$("bFloat").textContent=s==="on"?"Desactivar":"Activar";$("bFloat").classList.toggle("go",s!=="on");
+  $("floatSt").textContent=s==="on"?"✅":s==="noperm"?"Falta el permiso":s==="none"?"Solo en la app":""}
+$("bFloatTest").onclick=function(){if(!APP||!BusApp.floatTest)return;if(flState()!=="on"){try{BusApp.floatShow(true,flOpts())}catch(e){}}setTimeout(function(){try{BusApp.floatTest()}catch(e){}},500);setTimeout(paintFloat,400)};
+$("bFloat").onclick=function(){if(!APP||!BusApp.floatShow)return;var on=flState()!=="on";try{BusApp.floatShow(on,flOpts())}catch(e){}setTimeout(paintFloat,400)};
+[["oFlTaps","flTaps"],["oFlGifts","flGifts"],["oFlWall","flWall"],["oFlJoin","flJoin"],["oFlSize","flSize"]].forEach(function(p){var el=$(p[0]);
+  el.checked=!!cfg[p[1]];if(el.tagName==="SELECT")el.value=String(cfg[p[1]]);
+  el.onchange=function(){cfg[p[1]]=el.tagName==="SELECT"?+el.value:el.checked;save();
+    if(flState()==="on"){try{if(p[1]==="flSize")BusApp.floatShow(false,flOpts());BusApp.floatShow(true,flOpts())}catch(e){}}}});
+document.addEventListener("visibilitychange",function(){if(!document.hidden)paintFloat()});
+paintFloat();
+
+
+function wake(){try{navigator.wakeLock&&navigator.wakeLock.request("screen").catch(function(){})}catch(e){}}
+document.addEventListener("visibilitychange",function(){if(!document.hidden)wake()});
+window.__win=function(){return {wins:ST.wins,level:HERO.lv,mode:HERO.mode,flyers:flyers.length}};
+fill();paintWin(false);paintCols();paintHint();hostLayout();wake();requestAnimationFrame(frame);
+})();
+</script>
+</body>
+</html>

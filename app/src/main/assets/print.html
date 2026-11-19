@@ -139,7 +139,7 @@ input[type=checkbox]{width:20px;height:20px;accent-color:var(--hot)}
         <div class="ln" id="lookBtns"></div>
       </div>
       <div class="grp"><h3>🎮 Juegos</h3>
-        <div class="ln"><button class="btn" id="bParty">🕺 Sala</button><button class="btn" id="bRace">🏁 Carrera</button><button class="btn" id="bBus">🚌 Buses</button></div>
+        <div class="ln"><button class="btn" id="bParty">🕺 Sala</button><button class="btn" id="bRace">🏁 Carrera</button><button class="btn" id="bWin">🏆 Desafío</button><button class="btn" id="bBus">🚌 Buses</button></div>
       </div>
       <div class="grp"><h3>Probar</h3>
         <div class="ln"><button class="btn" data-test="1">Toques</button><button class="btn" data-test="6">6 personas tocando</button><button class="btn" data-gift="1">🌹 Regalo</button><button class="btn" data-gift="30">⭐ 30</button><button class="btn" data-gift="300">👑 300</button><button class="btn" data-gift="1500">💎 1500</button></div>
@@ -682,7 +682,7 @@ $("gear").onclick=function(){openSheet(true)};$("close").onclick=function(){open
 Array.prototype.forEach.call(document.querySelectorAll(".tab"),function(b){b.onclick=function(){
   Array.prototype.forEach.call(document.querySelectorAll(".tab"),function(x){x.setAttribute("aria-selected",x===b);$(x.dataset.p).hidden=x!==b})}});
 function go(g,page){try{localStorage.setItem("game",g)}catch(e){}location.href=page}
-$("bParty").onclick=function(){go("party","party.html")};$("bRace").onclick=function(){go("race","race.html")};$("bBus").onclick=function(){go("bus","index.html")};
+$("bParty").onclick=function(){go("party","party.html")};$("bRace").onclick=function(){go("race","race.html")};$("bBus").onclick=function(){go("bus","index.html")};$("bWin").onclick=function(){go("win","win.html")};
 var tn=0,TN=["Fatima","Carlos","Sara","Youssef","Lucia","Omar","Maria","Hamza"];
 Array.prototype.forEach.call(document.querySelectorAll("[data-test]"),function(b){b.onclick=function(){var n=+b.dataset.test;for(var i=0;i<n;i++){tn++;onEvent({type:"like",user:"t"+tn,nick:TN[tn%TN.length],count:5})}}});
 Array.prototype.forEach.call(document.querySelectorAll("[data-gift]"),function(b){b.onclick=function(){tn++;onEvent({type:"gift",user:"g"+tn,nick:TN[tn%TN.length],coins:+b.dataset.gift,count:1,gift:"Regalo"})}});
