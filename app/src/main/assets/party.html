@@ -345,7 +345,7 @@ var SRC=APP&&BusApp.getSource?String(BusApp.getSource()):"tiktok",YT=SRC==="yout
 try{localStorage.setItem("game","party")}catch(e){}
 
 /* ---------- settings ---------- */
-var DEF={per:2,max:24,fill:10,chat:YT,words:"",cd:YT?10:3,bpm:124,q:"ultra",auto:true,music:true,safe:true,hint:true,flag:true,prio:true,top3:true,kingScreen:true,memory:true,safeLive:true,flTaps:true,flGifts:true,flWall:true,flJoin:false,flSize:1,joinChar:true,host:false,hostSize:"m",hostShape2:"card",hostVx:50,hostVy:50,hostVz:1,hostVol:0,hostMirror:true,hostSup:true,hostX:null,hostY:null,hostIcon:"☕",hallMin:15,hall:"club",sync:false,syncSrc:"output",like:true,tapMode:"full",likeN:3,likeCam2:5,tapHold2:2.2,goal:2000,coinE:10,tapE:1,vipMin:100,vipLen:1};
+var DEF={hintOn:false,per:2,max:24,fill:10,chat:YT,words:"",cd:YT?10:3,bpm:124,q:"ultra",auto:true,music:true,safe:true,hint:true,flag:true,prio:true,top3:true,kingScreen:true,memory:true,safeLive:true,flTaps:true,flGifts:true,flWall:true,flJoin:false,flSize:1,joinChar:true,host:false,hostSize:"m",hostShape2:"card",hostVx:50,hostVy:50,hostVz:1,hostVol:0,hostMirror:true,hostSup:true,hostX:null,hostY:null,hostIcon:"☕",hallMin:15,hall:"club",sync:false,syncSrc:"output",like:true,tapMode:"full",likeN:3,likeCam2:5,tapHold2:2.2,goal:2000,coinE:10,tapE:1,vipMin:100,vipLen:1};
 var cfg=Object.assign({},DEF);
 /* TikTok-safe mode (on by default): no gift requests on screen, comments put viewers in the hall too */
 function safeLive(){return !!cfg.safeLive}
@@ -862,7 +862,7 @@ function showSlide(i){hintSlide=i;$("slRose").classList.toggle("off",i!==0);$("s
 function snap(){var el=$("hint");el.classList.remove("snap");void el.offsetWidth;el.classList.add("snap")}
 /* u: a supporter who just sent a rose (shown in the camera frame); liker: someone whose taps just brought their dancer in */
 function tapOnly(){return safeLive()&&!YT}
-function paintHint(u,liker){var el=$("hint");var pic=tapOnly()&&cfg.tapMode==="full";el.hidden=!cfg.hint||(safeLive()&&!pic);$("stage").style.setProperty("--hintTop",cfg.safe?"13.5%":"3%");
+function paintHint(u,liker){var el=$("hint");var pic=tapOnly()&&cfg.tapMode==="full";el.hidden=!cfg.hintOn||(safeLive()&&!pic);$("stage").style.setProperty("--hintTop",cfg.safe?"13.5%":"3%");
   if(YT)$("hintIcon").textContent="💬";
   photoInto($("hintMe"),u,PERSON);if(liker||!tapOnly()||perf()>=hintHold)photoInto($("hintTapMe"),liker,"<span>🕺</span>");
   if(tapOnly()){u=null;showSlide(1)}
@@ -1501,7 +1501,7 @@ $("close").onclick=function(){openSheet(false)};
 Array.prototype.forEach.call(document.querySelectorAll(".tab"),function(b){b.onclick=function(){
   Array.prototype.forEach.call(document.querySelectorAll(".tab"),function(x){x.setAttribute("aria-selected",x===b);$(x.dataset.p).hidden=x!==b})}});
 function fill(){$("oPer").value=String(cfg.per);$("oMax").value=String(cfg.max);$("oFill").value=String(cfg.fill);$("oChat").checked=cfg.chat;$("oWords").value=cfg.words;
-  $("oCd").value=String(cfg.cd);$("oBpm").value=String(cfg.bpm);$("oQ").value=cfg.q;$("oAuto").checked=cfg.auto;$("oSafe").checked=cfg.safe;$("oHint").checked=cfg.hint;$("oFlag").checked=cfg.flag;$("oPrio").checked=cfg.prio;$("oTop3").checked=cfg.top3;$("oKing").checked=cfg.kingScreen;$("oMemory").checked=cfg.memory;$("oSafeLive").checked=cfg.safeLive;$("oHost").checked=cfg.host;$("oHostSize").value=cfg.hostSize;$("oHostShape").value=cfg.hostShape2;$("oHostMirror").checked=cfg.hostMirror;$("oHostSup").checked=cfg.hostSup;$("oJoin").checked=cfg.joinChar;$("oHallMin").value=String(cfg.hallMin);$("oSync").checked=cfg.sync;$("oSyncSrc").value=cfg.syncSrc;paintTapSeg();$("oLikeN").value=String(cfg.likeN);$("oLikeCam").value=String(cfg.likeCam2);$("oTapHold").value=String(cfg.tapHold2);$("oGoal").value=String(cfg.goal);$("oVipMin").value=String(cfg.vipMin);$("oVipLen").value=String(cfg.vipLen);musicLabel()}
+  $("oCd").value=String(cfg.cd);$("oBpm").value=String(cfg.bpm);$("oQ").value=cfg.q;$("oAuto").checked=cfg.auto;$("oSafe").checked=cfg.safe;$("oHint").checked=cfg.hintOn;$("oFlag").checked=cfg.flag;$("oPrio").checked=cfg.prio;$("oTop3").checked=cfg.top3;$("oKing").checked=cfg.kingScreen;$("oMemory").checked=cfg.memory;$("oSafeLive").checked=cfg.safeLive;$("oHost").checked=cfg.host;$("oHostSize").value=cfg.hostSize;$("oHostShape").value=cfg.hostShape2;$("oHostMirror").checked=cfg.hostMirror;$("oHostSup").checked=cfg.hostSup;$("oJoin").checked=cfg.joinChar;$("oHallMin").value=String(cfg.hallMin);$("oSync").checked=cfg.sync;$("oSyncSrc").value=cfg.syncSrc;paintTapSeg();$("oLikeN").value=String(cfg.likeN);$("oLikeCam").value=String(cfg.likeCam2);$("oTapHold").value=String(cfg.tapHold2);$("oGoal").value=String(cfg.goal);$("oVipMin").value=String(cfg.vipMin);$("oVipLen").value=String(cfg.vipLen);musicLabel()}
 function bind(id,key,num){var el=$(id);el.onchange=el.oninput=function(){cfg[key]=el.type==="checkbox"?el.checked:num?Math.max(0,+el.value||0):el.value;save();
   if(key==="flag"&&G.flag)G.flag.visible=cfg.flag;
   if(key==="prio"||key==="tapMode")paintPrio();
@@ -1511,8 +1511,8 @@ function bind(id,key,num){var el=$(id);el.onchange=el.oninput=function(){cfg[key
   if(key==="host"&&cfg.host)HOST.busy=HOST.busy||cfg.hostIcon||"☕";
   if(key.indexOf("host")===0)hostLayout();
   if(key==="safeLive"){paintPrio();paintHint();lastTop3="";paintTop3();paintHappy();paintEnergy();for(var uk in users){var uu=users[uk];if(uu.label){uu.label.dispose();uu.label=null;relabel(uu)}}}
-  if(key==="q")applyQuality();if(key==="fill")layoutFillers();if(key==="hint"||key==="safe")paintHint()}}
-bind("oPer","per",1);bind("oMax","max",1);bind("oFill","fill",1);bind("oChat","chat");bind("oWords","words");bind("oCd","cd",1);bind("oBpm","bpm",1);bind("oQ","q");bind("oAuto","auto");bind("oSafe","safe");bind("oHint","hint");bind("oFlag","flag");bind("oPrio","prio");bind("oTop3","top3");bind("oKing","kingScreen");bind("oMemory","memory");bind("oSafeLive","safeLive");bind("oHost","host");bind("oHostSize","hostSize");bind("oHostShape","hostShape2");bind("oHostMirror","hostMirror");bind("oHostSup","hostSup");bind("oJoin","joinChar");bind("oHallMin","hallMin",1);bind("oSync","sync");bind("oSyncSrc","syncSrc");bind("oLikeN","likeN",1);bind("oLikeCam","likeCam2",1);bind("oTapHold","tapHold2",1);bind("oGoal","goal",1);bind("oVipMin","vipMin",1);bind("oVipLen","vipLen",1);
+  if(key==="q")applyQuality();if(key==="fill")layoutFillers();if(key==="hintOn"||key==="safe")paintHint()}}
+bind("oPer","per",1);bind("oMax","max",1);bind("oFill","fill",1);bind("oChat","chat");bind("oWords","words");bind("oCd","cd",1);bind("oBpm","bpm",1);bind("oQ","q");bind("oAuto","auto");bind("oSafe","safe");bind("oHint","hintOn");bind("oFlag","flag");bind("oPrio","prio");bind("oTop3","top3");bind("oKing","kingScreen");bind("oMemory","memory");bind("oSafeLive","safeLive");bind("oHost","host");bind("oHostSize","hostSize");bind("oHostShape","hostShape2");bind("oHostMirror","hostMirror");bind("oHostSup","hostSup");bind("oJoin","joinChar");bind("oHallMin","hallMin",1);bind("oSync","sync");bind("oSyncSrc","syncSrc");bind("oLikeN","likeN",1);bind("oLikeCam","likeCam2",1);bind("oTapHold","tapHold2",1);bind("oGoal","goal",1);bind("oVipMin","vipMin",1);bind("oVipLen","vipLen",1);
 var TAPNOTE={full:"Quien toca aparece con su personaje, se lleva la cámara un momento y llena la barra de energía.",
   energy:"Los toques solo llenan la barra de energía ⚡ entre todos. Personajes y cámara quedan para quien envía regalos.",
   off:"Los toques no hacen nada y el dibujo 👆 desaparece. Solo cuentan los regalos."};

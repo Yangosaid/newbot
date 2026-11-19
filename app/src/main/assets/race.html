@@ -191,7 +191,7 @@ var APP=!!window.BusApp;
 var SRC=APP&&BusApp.getSource?String(BusApp.getSource()):"tiktok",YT=SRC==="youtube";
 try{localStorage.setItem("game","race")}catch(e){}
 
-var DEF={flTaps:true,flGifts:true,flWall:true,flJoin:false,flSize:1,len:750,lobby:15,max:12,bots:5,tapsJoin:1,camTaps:true,join:true,hint:true,pos:true,q:"ultra",auto:true};
+var DEF={hint2:false,flTaps:true,flGifts:true,flWall:true,flJoin:false,flSize:1,len:750,lobby:15,max:12,bots:5,tapsJoin:1,camTaps:true,join:true,hint:true,pos:true,q:"ultra",auto:true};
 var cfg=Object.assign({},DEF);
 try{var sv=JSON.parse(localStorage.getItem("race1")||"null");if(sv)cfg=Object.assign(cfg,sv)}catch(e){}
 function save(){try{localStorage.setItem("race1",JSON.stringify(cfg))}catch(e){}}
@@ -452,7 +452,7 @@ function paintHud(force){var now=perf();if(!force&&now-hudT<120)return;hudT=now;
   var lob=$("lobby");lob.hidden=phase!=="lobby";if(phase==="lobby"){var left=Math.max(0,cfg.lobby*1000-(now-phaseAt)),f=left/(cfg.lobby*1000);
     $("clkN").textContent=Math.ceil(left/1000);$("clkArc").style.strokeDashoffset=String(144.5*(1-f));
     var real=racers.filter(function(r){return !r.u.bot}).length;$("lobN").textContent=real+"/"+(cfg.max|0);
-    $("lobHint").hidden=!cfg.hint;$("hintIc").textContent=YT?"💬":"👆"}}
+    $("lobHint").hidden=!cfg.hint2;$("hintIc").textContent=YT?"💬":"👆"}}
 
 function setBig(t,go){var el=$("big");if(el.textContent===t&&!el.hidden)return;el.hidden=!t;el.textContent=t;el.classList.toggle("go",!!go);el.classList.remove("pop");void el.offsetWidth;el.classList.add("pop")}
 
@@ -496,11 +496,11 @@ window.addEventListener("resize",resize);
 
 /* ---------- settings ---------- */
 function fill(){$("oQ").value=cfg.q;$("oAuto").checked=cfg.auto;$("oLen").value=String(cfg.len);$("oLobby").value=String(cfg.lobby);$("oMax").value=String(cfg.max);$("oBots").value=String(cfg.bots);
-  $("oTapsJoin").value=String(cfg.tapsJoin);$("oCamTaps").checked=cfg.camTaps;$("oJoin").checked=cfg.join;$("oHint").checked=cfg.hint;$("oPos").checked=cfg.pos}
+  $("oTapsJoin").value=String(cfg.tapsJoin);$("oCamTaps").checked=cfg.camTaps;$("oJoin").checked=cfg.join;$("oHint").checked=cfg.hint2;$("oPos").checked=cfg.pos}
 function bind(id,key,num){var el=$(id);el.onchange=function(){cfg[key]=el.type==="checkbox"?el.checked:num?+el.value:el.value;save();
   if(key==="q")applyQuality();if(key==="len")location.reload();if(key==="max"&&phase==="lobby")toLobby();paintHud(true)}}
 bind("oQ","q");bind("oAuto","auto");bind("oLen","len",1);bind("oLobby","lobby",1);bind("oMax","max",1);bind("oBots","bots",1);bind("oTapsJoin","tapsJoin",1);
-bind("oCamTaps","camTaps");bind("oJoin","join");bind("oHint","hint");bind("oPos","pos");
+bind("oCamTaps","camTaps");bind("oJoin","join");bind("oHint","hint2");bind("oPos","pos");
 function openSheet(o){$("sheet").hidden=!o;$("gear").hidden=o;if(o){fill();paintMon()}}
 $("gear").onclick=function(){openSheet(true)};$("close").onclick=function(){openSheet(false)};
 Array.prototype.forEach.call(document.querySelectorAll(".tab"),function(b){b.onclick=function(){
