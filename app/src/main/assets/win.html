@@ -139,7 +139,7 @@ input[type=checkbox]{width:20px;height:20px;accent-color:var(--hot)}
         <div class="ln"><label for="oFlSize">Tamaño</label><select id="oFlSize"><option value="0.8">Pequeño</option><option value="1">Normal</option><option value="1.25">Grande</option></select></div>
       </div>
       <div class="grp"><h3>🎮 Juegos</h3>
-        <div class="ln"><button class="btn" id="bParty">🕺 Sala</button><button class="btn" id="bRace">🏁 Carrera</button><button class="btn" id="bPrint">🖨️ Imprenta</button></div>
+        <div class="ln"><button class="btn" id="bParty">🕺 Sala</button><button class="btn" id="bRace">🏁 Carrera</button><button class="btn" id="bPrint">🖨️ Imprenta</button><button class="btn" id="bNat">🌍 Naciones</button></div>
       </div>
       <div class="grp"><h3>Probar</h3>
         <div class="ln"><button class="btn" data-g="Rose:1">💚 Rose</button><button class="btn" data-g="Lion:29999">💚 Lion</button><button class="btn" data-g="GG:1">❤️ GG</button><button class="btn" data-g="Jet:4888">❤️ Jet</button><button class="btn" id="bTaps">Toques</button></div>
@@ -438,7 +438,7 @@ Array.prototype.forEach.call(document.querySelectorAll(".tab"),function(b){b.onc
 $("bPlus").onclick=function(){ST.wins+=1;saveST();paintWin(true);checkGoal()};$("bMinus").onclick=function(){ST.wins-=1;saveST();paintWin(true)};
 $("bReset").onclick=function(){ST.wins=0;saveST();paintWin(true)};
 function go(g,page){try{localStorage.setItem("game",g)}catch(e){}location.href=page}
-$("bParty").onclick=function(){go("party","party.html")};$("bRace").onclick=function(){go("race","race.html")};$("bPrint").onclick=function(){go("print","print.html")};
+$("bParty").onclick=function(){go("party","party.html")};$("bRace").onclick=function(){go("race","race.html")};$("bPrint").onclick=function(){go("print","print.html")};$("bNat").onclick=function(){go("nations","nations.html")};
 var tn=0,TN=["Fatima","Carlos","Sara","Youssef","Lucia","Omar","Maria","Hamza"];
 Array.prototype.forEach.call(document.querySelectorAll("[data-g]"),function(b){b.onclick=function(){tn++;var v=b.dataset.g.split(":");onEvent({type:"gift",user:"t"+tn,nick:TN[tn%TN.length],gift:v[0],coins:+v[1],count:1})}});
 $("bTaps").onclick=function(){for(var i=0;i<5;i++)onEvent({type:"like",user:"l"+i,nick:"fan"+i,count:5})};
