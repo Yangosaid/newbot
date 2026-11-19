@@ -1,0 +1,9 @@
+{
+  "name": "ymrefornova-web",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "node src/build.mjs",
+    "dev": "node src/build.mjs && npx --yes serve public -l 4173"
+  }
+}

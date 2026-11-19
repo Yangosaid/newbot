@@ -1,0 +1,32 @@
+Y&M REFORNOVA - Tarjeta de Youssef
+
+CONTENIDO
+- PDF de imprenta de dos páginas: anverso y reverso.
+- PNG de cada cara a 600 ppp, cortados al tamaño final.
+- Vista previa de ambas caras.
+- Código de composición editable en create_business_card.py.
+
+INDICACIONES PARA IMPRIMIR
+Formato final: 85 x 55 mm, horizontal.
+Sangrado: 3 mm en cada lado. Cada página PDF mide 91 x 61 mm.
+El PDF define TrimBox y BleedBox. No escalar para ajustar a la página.
+Colores CMYK y fuentes incrustadas. El negro del QR utiliza solo K.
+Acabado propuesto: papel mate de 350 g/m², impresión a dos caras.
+Confirmar el perfil de color y requisitos finales con la imprenta.
+El dorado es un color CMYK, sin estampación metálica.
+
+DATOS
+Youssef - Propietario
+Y&M REFORNOVA SOCIEDAD LIMITADA
+Teléfono y WhatsApp: +34 688 45 75 30
+Correo: reformamacro@gmail.com
+Web: https://ymrefornova.com/
+QR: https://wa.me/34688457530
+
+El nombre se ha transliterado como Youssef a partir de يوسف.
+La tarjeta usa el teléfono de la empresa; no incluye el contacto del desarrollador.
+
+EDICIÓN TÉCNICA
+El archivo Python usa reportlab, pypdf, pymupdf y pillow.
+Configurar las rutas SANS, BOLD y SERIF a Liberation Sans y DejaVu Serif.
+Los textos, colores y medidas se definen al principio y en front()/back().
