@@ -10,7 +10,6 @@ dependencyResolutionManagement {
         google()
         mavenCentral()
         maven { url 'https://jitpack.io' }
-        jcenter() // a few legacy libraries are only published here (read-only mirror)
     }
 }
 include ':app'

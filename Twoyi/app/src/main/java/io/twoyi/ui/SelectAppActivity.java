@@ -43,8 +43,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.SearchView;
 import androidx.core.widget.CompoundButtonCompat;
 
-import com.afollestad.materialdialogs.MaterialDialog;
-import com.github.clans.fab.FloatingActionButton;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -101,8 +100,6 @@ public class SelectAppActivity extends AppCompatActivity {
         mListView.setEmptyView(mEmptyView);
 
         FloatingActionButton mFloatButton = findViewById(R.id.create_app_from_external);
-        mFloatButton.setColorNormalResId(R.color.colorPrimary);
-        mFloatButton.setColorPressedResId(R.color.colorPrimaryOpacity);
 
         mFloatButton.setOnClickListener((v) -> {
             Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
@@ -421,7 +418,7 @@ public class SelectAppActivity extends AppCompatActivity {
 
         mDisplayItems.clear();
 
-        MaterialDialog progressDialog = UIHelper.getNumberProgressDialog(this);
+        ProgressDialog progressDialog = UIHelper.getNumberProgressDialog(this);
         UIHelper.show(progressDialog);
 
         // 是否从别的地方过来的，这种情况下不做任何过滤。
@@ -436,7 +433,7 @@ public class SelectAppActivity extends AppCompatActivity {
             }
             List<ApplicationInfo> apps = packageManager.getInstalledApplications(PackageManager.GET_META_DATA);
 
-            runOnUiThread(() -> progressDialog.setMaxProgress(apps.size()));
+            runOnUiThread(() -> progressDialog.setMax(apps.size()));
 
             List<AppItem> appItems = new ArrayList<>();
             int mask = ApplicationInfo.FLAG_SYSTEM | ApplicationInfo.FLAG_UPDATED_SYSTEM_APP;
@@ -450,7 +447,7 @@ public class SelectAppActivity extends AppCompatActivity {
 
             for (ApplicationInfo app : apps) {
                 // 自己忽略
-                runOnUiThread(() -> progressDialog.incrementProgress(1));
+                runOnUiThread(() -> progressDialog.incrementProgressBy(1));
 
                 if (TextUtils.equals(getPackageName(), app.packageName)) {
                     continue;

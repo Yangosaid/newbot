@@ -28,7 +28,6 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.FileProvider;
 import androidx.core.util.Pair;
 
-import com.microsoft.appcenter.crashes.Crashes;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -109,6 +108,16 @@ public class SettingsActivity extends AppCompatActivity {
             Preference sendLog = findPreference(R.string.settings_key_sendlog);
             Preference about = findPreference(R.string.settings_key_about);
 
+            Preference childProcess = findPreference(R.string.settings_key_child_process);
+            if (childProcess != null) {
+                boolean ok = io.twoyi.UITips.isPhantomProcessKillerDisabled(getActivity());
+                childProcess.setSummary(ok ? R.string.child_process_ok : R.string.child_process_not_ok);
+                childProcess.setOnPreferenceClickListener(preference -> {
+                    io.twoyi.UITips.openDeveloperOptions(getActivity());
+                    return true;
+                });
+            }
+
             importApp.setOnPreferenceClickListener(preference -> {
                 UIHelper.startActivity(getContext(), SelectAppActivity.class);
                 return true;
@@ -183,7 +192,7 @@ public class SettingsActivity extends AppCompatActivity {
                 try {
                     Files.write(tmpLog.toPath(), bugreport);
                 } catch (IOException e) {
-                    Crashes.trackError(e);
+                    android.util.Log.e("Settings", "bugreport", e);
                 }
                 Uri uri = FileProvider.getUriForFile(context, "io.twoyi.fileprovider", tmpLog);
 

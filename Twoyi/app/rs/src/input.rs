@@ -2,8 +2,8 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
-use libc::*;
-use libc::{c_char, c_int};
+
+use libc::{c_char, c_int, clock_gettime, timeval, CLOCK_MONOTONIC};
 use ndk::event::{MotionAction, MotionEvent};
 use std::mem;
 use std::thread;
@@ -249,7 +249,7 @@ fn generate_touch_device(width: i32, height: i32) -> device_info {
 fn touch_server(width: i32, height: i32) {
     let device = generate_touch_device(width, height);
     let _ = std::fs::remove_file(TOUCH_PATH);
-    let listener = unix_socket::UnixListener::bind(TOUCH_PATH).unwrap();
+    let listener = std::os::unix::net::UnixListener::bind(TOUCH_PATH).unwrap();
     for stream in listener.incoming() {
         match stream {
             Ok(mut stream) => {
@@ -304,7 +304,7 @@ pub fn send_key_code(_keycode: i32) {
 fn key_server() {
     let device = generate_key_device();
     let _ = std::fs::remove_file(KEY_PATH);
-    let listener = unix_socket::UnixListener::bind(KEY_PATH).unwrap();
+    let listener = std::os::unix::net::UnixListener::bind(KEY_PATH).unwrap();
     for stream in listener.incoming() {
         match stream {
             Ok(mut stream) => {

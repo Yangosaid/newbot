@@ -234,12 +234,8 @@ public class AboutActivity extends AppCompatActivity {
                 "Copyright 2013 Philip Schiffer", new ApacheSoftwareLicense20()));
         notices.addNotice(new Notice("material-dialogs", "https://github.com/afollestad/material-dialogs",
                 "Aidan Follestad (@afollestad)", new ApacheSoftwareLicense20()));
-        notices.addNotice(new Notice("FloatingActionButton", "https://github.com/Clans/FloatingActionButton",
-                "Clans", new ApacheSoftwareLicense20()));
         notices.addNotice(new Notice("android-about-page", "https://github.com/medyo/android-about-page",
                 "Copyright (c) 2016 Mehdi Sakout", new MITLicense()));
-        notices.addNotice(new Notice("AlipayZeroSdk", "https://github.com/fython/AlipayZeroSdk",
-                "Copyright 2016 Fung Go (fython)", new ApacheSoftwareLicense20()));
         notices.addNotice(new Notice("Glide", "https://github.com/bumptech/glide",
                 "Copyright 2014 Google, Inc.", new BSD2ClauseLicense()));
         notices.addNotice(new Notice("Once", "https://github.com/jonfinerty/Once",

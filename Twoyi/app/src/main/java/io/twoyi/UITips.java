@@ -26,7 +26,7 @@ public class UITips {
     public static boolean checkForAndroid12(Activity activity, Runnable bootCallback) {
         boolean showTips = AppKV.getBooleanConfig(activity, AppKV.SHOW_ANDROID12_TIPS, true);
 
-        if (!RomManager.isAndroid12() || !showTips) {
+        if (!RomManager.isAndroid12() || !showTips || isPhantomProcessKillerDisabled(activity)) {
             bootCallback.run();
             return true;
         }
@@ -52,6 +52,39 @@ public class UITips {
                 .show();
 
         return false;
+    }
+
+    /**
+     * True when the user turned on "Disable child process restrictions" (Android 14+ developer
+     * option) or ran: adb shell settings put global settings_enable_monitor_phantom_procs false
+     */
+    public static boolean isPhantomProcessKillerDisabled(android.content.Context context) {
+        if (!RomManager.isAndroid12()) {
+            return true;
+        }
+        try {
+            String g = android.provider.Settings.Global.getString(context.getContentResolver(),
+                    "settings_enable_monitor_phantom_procs");
+            if ("false".equalsIgnoreCase(g)) {
+                return true;
+            }
+        } catch (Throwable ignored) {
+        }
+        String prop = getprop("persist.sys.fflag.override.settings_enable_monitor_phantom_procs");
+        return "false".equalsIgnoreCase(prop);
+    }
+
+    private static String getprop(String key) {
+        try {
+            Process p = new ProcessBuilder("getprop", key).redirectErrorStream(true).start();
+            try (java.io.BufferedReader r = new java.io.BufferedReader(new java.io.InputStreamReader(p.getInputStream()))) {
+                String line = r.readLine();
+                p.waitFor();
+                return line == null ? "" : line.trim();
+            }
+        } catch (Throwable e) {
+            return "";
+        }
     }
 
     public static void openDeveloperOptions(Activity activity) {

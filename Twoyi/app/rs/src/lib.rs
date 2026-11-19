@@ -2,11 +2,11 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
-use jni::objects::JValue;
-use jni::sys::{jclass, jfloat, jint, jobject, JNI_ERR, jstring};
+use jni::objects::{JClass, JObject, JString};
+use jni::sys::{jfloat, jint, JNI_ERR};
 use jni::JNIEnv;
 use jni::{JavaVM, NativeMethod};
-use log::{error, info, Level, debug};
+use log::{error, info, debug};
 use ndk_sys;
 use std::ffi::c_void;
 
@@ -37,18 +37,17 @@ macro_rules! jni_method {
 
 static RENDERER_STARTED: AtomicBool = AtomicBool::new(false);
 
-#[no_mangle]
-pub fn renderer_init(
-    env: JNIEnv,
-    _clz: jclass,
-    surface: jobject,
-    loader: jstring,
+extern "system" fn renderer_init<'local>(
+    mut env: JNIEnv<'local>,
+    _clz: JClass<'local>,
+    surface: JObject<'local>,
+    loader: JString<'local>,
     xdpi: jfloat,
     ydpi: jfloat,
     fps: jint,
 ) {
     debug!("renderer_init");
-    let window = unsafe { ndk_sys::ANativeWindow_fromSurface(env.get_native_interface(), surface) };
+    let window = unsafe { ndk_sys::ANativeWindow_fromSurface(env.get_native_interface() as *mut _, surface.as_raw() as *mut _) };
 
     let window = match std::ptr::NonNull::new(window) {
         Some(x) => x,
@@ -93,25 +92,40 @@ pub fn renderer_init(
             }
         });
 
-        let loader_path: String = env.get_string(loader.into()).unwrap().into();
+        let loader_path: String = match env.get_string(&loader) {
+            Ok(s) => s.into(),
+            Err(e) => {
+                error!("invalid loader path: {:?}", e);
+                return;
+            }
+        };
         let working_dir = "/data/data/io.twoyi/rootfs";
         let log_path = "/data/data/io.twoyi/log.txt";
-        let outputs = File::create(log_path).unwrap();
-        let errors = outputs.try_clone().unwrap();
-        let _ = Command::new("./init")
+        let outputs = match File::create(log_path) {
+            Ok(f) => f,
+            Err(e) => {
+                error!("cannot create {}: {}", log_path, e);
+                return;
+            }
+        };
+        let errors = outputs.try_clone().expect("dup log fd");
+        match Command::new("./init")
             .current_dir(working_dir)
             .env("TYLOADER", loader_path)
             .stdout(Stdio::from(outputs))
             .stderr(Stdio::from(errors))
-            .spawn();
+            .spawn()
+        {
+            Ok(child) => info!("container init started, pid {}", child.id()),
+            Err(e) => error!("failed to start container init: {}", e),
+        }
     }
 }
 
-#[no_mangle]
-pub fn renderer_reset_window(
-    env: JNIEnv,
-    _clz: jclass,
-    surface: jobject,
+extern "system" fn renderer_reset_window<'local>(
+    env: JNIEnv<'local>,
+    _clz: JClass<'local>,
+    surface: JObject<'local>,
     _top: jint,
     _left: jint,
     _width: jint,
@@ -119,45 +133,46 @@ pub fn renderer_reset_window(
 ) {
     debug!("reset_window");
     unsafe {
-        let window = ndk_sys::ANativeWindow_fromSurface(env.get_native_interface(), surface);
+        let window = ndk_sys::ANativeWindow_fromSurface(env.get_native_interface() as *mut _, surface.as_raw() as *mut _);
         renderer_bindings::resetSubWindow(window as *mut c_void, 0, 0, _width, _height, _width, _height, 1.0, 0.0);
     }
 }
 
-#[no_mangle]
-pub fn renderer_remove_window(env: JNIEnv, _clz: jclass, surface: jobject) {
+extern "system" fn renderer_remove_window<'local>(env: JNIEnv<'local>, _clz: JClass<'local>, surface: JObject<'local>) {
     debug!("renderer_remove_window");
 
     unsafe {
-        let window = ndk_sys::ANativeWindow_fromSurface(env.get_native_interface(), surface);
+        let window = ndk_sys::ANativeWindow_fromSurface(env.get_native_interface() as *mut _, surface.as_raw() as *mut _);
         renderer_bindings::removeSubWindow(window as *mut c_void);
     }
 }
 
-#[no_mangle]
-pub fn handle_touch(env: JNIEnv, _clz: jclass, event: jobject) {
-    // TODO: cache the field id.
-    let ptr = env.get_field(event, "mNativePtr", "J").unwrap();
-
-    if let JValue::Long(p) = ptr {
-        let ev = unsafe {
-            let nonptr =
-            std::ptr::NonNull::new(std::mem::transmute::<i64, *mut ndk_sys::AInputEvent>(p))
-                .unwrap();
-            ndk::event::MotionEvent::from_ptr(nonptr)
-        };
+extern "system" fn handle_touch<'local>(mut env: JNIEnv<'local>, _clz: JClass<'local>, event: JObject<'local>) {
+    // MotionEvent.mNativePtr holds the native AInputEvent*.
+    let p = match env.get_field(&event, "mNativePtr", "J").and_then(|v| v.j()) {
+        Ok(p) => p,
+        Err(_) => {
+            let _ = env.exception_clear();
+            return;
+        }
+    };
+    if let Some(nonptr) = std::ptr::NonNull::new(p as *mut ndk_sys::AInputEvent) {
+        let ev = unsafe { ndk::event::MotionEvent::from_ptr(nonptr) };
         input::handle_touch(ev)
     }
 }
 
-pub fn send_key_code(_env: JNIEnv, _clz: jclass, keycode: jint) {
+extern "system" fn send_key_code<'local>(_env: JNIEnv<'local>, _clz: JClass<'local>, keycode: jint) {
     debug!("send key code!");
     input::send_key_code(keycode);
 }
 
 unsafe fn register_natives(jvm: &JavaVM, class_name: &str, methods: &[NativeMethod]) -> jint {
-    let env: JNIEnv = jvm.get_env().unwrap();
-    let jni_version = env.get_version().unwrap();
+    let mut env: JNIEnv = match jvm.get_env() {
+        Ok(e) => e,
+        Err(_) => return JNI_ERR,
+    };
+    let jni_version = env.get_version().unwrap_or(jni::JNIVersion::V6);
     let version: jint = jni_version.into();
 
     debug!("JNI Version : {:#?} ", jni_version);
@@ -171,7 +186,7 @@ unsafe fn register_natives(jvm: &JavaVM, class_name: &str, methods: &[NativeMeth
     };
     debug!("clazz: {:#?}", clazz);
 
-    let result = env.register_native_methods(clazz, &methods);
+    let result = env.register_native_methods(&clazz, methods);
 
     if result.is_ok() {
         debug!("register_natives : succeed");
@@ -184,10 +199,10 @@ unsafe fn register_natives(jvm: &JavaVM, class_name: &str, methods: &[NativeMeth
 
 #[no_mangle]
 #[allow(non_snake_case)]
-unsafe fn JNI_OnLoad(jvm: JavaVM, _reserved: *mut c_void) -> jint {
+pub unsafe extern "system" fn JNI_OnLoad(jvm: JavaVM, _reserved: *mut c_void) -> jint {
     android_logger::init_once(
         Config::default()
-            .with_min_level(Level::Info)
+            .with_max_level(log::LevelFilter::Info)
             .with_tag("CLIENT_EGL"),
     );
 

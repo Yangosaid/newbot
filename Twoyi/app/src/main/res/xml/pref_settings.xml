@@ -29,6 +29,10 @@
 
     <PreferenceCategory android:title="@string/settings_category_advanced">
 
+        <Preference
+            android:key="@string/settings_key_child_process"
+            android:title="@string/settings_key_child_process" />
+
 
         <Preference
             android:key="@string/settings_key_replace_rom"

@@ -37,7 +37,6 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 
-import com.cleveroad.androidmanimation.LoadingAnimationView;
 
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -61,7 +60,7 @@ public class Render2Activity extends Activity implements View.OnTouchListener {
     private SurfaceView mSurfaceView;
 
     private ViewGroup mRootView;
-    private LoadingAnimationView mLoadingView;
+    private android.widget.ProgressBar mLoadingView;
     private TextView mLoadingText;
     private View mLoadingLayout;
     private View mBootLogView;
@@ -139,7 +138,6 @@ public class Render2Activity extends Activity implements View.OnTouchListener {
         mBootLogView = findViewById(R.id.bootlog);
 
         mLoadingLayout.setVisibility(View.VISIBLE);
-        mLoadingView.startAnimation();
 
         UITips.checkForAndroid12(this, this::bootSystem);
 
@@ -229,7 +227,6 @@ public class Render2Activity extends Activity implements View.OnTouchListener {
             }
 
             runOnUiThread(() -> {
-                mLoadingView.stopAnimation();
                 mLoadingLayout.setVisibility(View.GONE);
             });
         }, "waiting-boot").start();

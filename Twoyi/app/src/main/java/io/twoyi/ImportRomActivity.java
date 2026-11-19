@@ -20,6 +20,11 @@ import android.widget.ScrollView;
 import android.widget.TextView;
 
 import java.io.BufferedInputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.util.zip.ZipFile;
+import org.json.JSONArray;
+import org.json.JSONObject;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -27,7 +32,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.zip.ZipEntry;
-import java.util.zip.ZipInputStream;
 
 import io.twoyi.utils.RomManager;
 
@@ -42,11 +46,13 @@ public class ImportRomActivity extends Activity {
     private static final int REQUEST_PICK = 1001;
     private static final String RELEASES_URL = "https://github.com/twoyi/twoyi/releases";
     private static final String ROM_ENTRY_IN_APK = "assets/rootfs.7z";
+    private static final String LATEST_RELEASE_API = "https://api.github.com/repos/twoyi/twoyi/releases/latest";
 
     private TextView mStatus;
     private ProgressBar mProgress;
     private Button mPick;
     private Button mDownload;
+    private Button mBrowser;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -73,19 +79,29 @@ public class ImportRomActivity extends Activity {
         mDownload = new Button(this);
         mDownload.setText(R.string.import_rom_download);
         mDownload.setOnClickListener(v -> {
+            setBusy(true, getString(R.string.import_rom_connecting));
+            new Thread(this::downloadAndImport, "download-rom").start();
+        });
+        root.addView(mDownload);
+
+        mBrowser = new Button(this);
+        mBrowser.setText(R.string.import_rom_open_browser);
+        mBrowser.setOnClickListener(v -> {
             try {
                 startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(RELEASES_URL)));
             } catch (Throwable ignored) {
             }
         });
-        root.addView(mDownload);
+        root.addView(mBrowser);
 
         mPick = new Button(this);
         mPick.setText(R.string.import_rom_pick);
         mPick.setOnClickListener(v -> pickFile());
         root.addView(mPick);
 
-        mProgress = new ProgressBar(this);
+        mProgress = new ProgressBar(this, null, android.R.attr.progressBarStyleHorizontal);
+        mProgress.setMax(1000);
+        mProgress.setIndeterminate(true);
         mProgress.setVisibility(View.GONE);
         root.addView(mProgress);
 
@@ -121,15 +137,103 @@ public class ImportRomActivity extends Activity {
         new Thread(() -> importRom(uri), "import-rom").start();
     }
 
+    /** Downloads the official Twoyi release APK from GitHub (the phone can reach it) and imports its ROM. */
+    private void downloadAndImport() {
+        File tmp = new File(getCacheDir(), "rom_import.tmp");
+        try {
+            HttpURLConnection api = open(LATEST_RELEASE_API);
+            api.setRequestProperty("Accept", "application/vnd.github+json");
+            String json;
+            try (InputStream in = api.getInputStream()) {
+                java.io.ByteArrayOutputStream bos = new java.io.ByteArrayOutputStream();
+                copy(in, bos);
+                json = bos.toString("UTF-8");
+            }
+            JSONArray assets = new JSONObject(json).getJSONArray("assets");
+            String url = null;
+            long size = -1;
+            for (int i = 0; i < assets.length(); i++) {
+                JSONObject a = assets.getJSONObject(i);
+                if (a.getString("name").endsWith(".apk")) {
+                    url = a.getString("browser_download_url");
+                    size = a.optLong("size", -1);
+                    break;
+                }
+            }
+            if (url == null) {
+                fail(getString(R.string.import_rom_no_asset));
+                return;
+            }
+
+            HttpURLConnection conn = open(url);
+            long total = conn.getContentLengthLong() > 0 ? conn.getContentLengthLong() : size;
+            try (InputStream in = new BufferedInputStream(conn.getInputStream());
+                 OutputStream out = new FileOutputStream(tmp)) {
+                byte[] buf = new byte[256 * 1024];
+                long done = 0;
+                long lastUi = 0;
+                int n;
+                while ((n = in.read(buf)) > 0) {
+                    out.write(buf, 0, n);
+                    done += n;
+                    long now = android.os.SystemClock.uptimeMillis();
+                    if (now - lastUi > 300) {
+                        lastUi = now;
+                        final long d = done, t = total;
+                        runOnUiThread(() -> showProgress(d, t));
+                    }
+                }
+            }
+            importLocal(tmp);
+        } catch (Throwable e) {
+            Log.e(TAG, "download failed", e);
+            tmp.delete();
+            fail(getString(R.string.import_rom_download_failed, e.getMessage()));
+        }
+    }
+
+    private static HttpURLConnection open(String url) throws IOException {
+        HttpURLConnection c = (HttpURLConnection) new URL(url).openConnection();
+        c.setConnectTimeout(20000);
+        c.setReadTimeout(60000);
+        c.setInstanceFollowRedirects(true);
+        c.setRequestProperty("User-Agent", "twoyi-virtual-phone");
+        return c;
+    }
+
+    private void showProgress(long done, long total) {
+        if (total > 0) {
+            mProgress.setIndeterminate(false);
+            mProgress.setProgress((int) (done * 1000 / total));
+            mStatus.setText(getString(R.string.import_rom_downloading, done >> 20, total >> 20));
+        } else {
+            mStatus.setText(getString(R.string.import_rom_downloading, done >> 20, 0L));
+        }
+    }
+
     private void importRom(Uri uri) {
         File tmp = new File(getCacheDir(), "rom_import.tmp");
-        File target = RomManager.getStoredRomFile(this);
         try {
-            // 1. Copy the picked file locally.
             try (InputStream in = getContentResolver().openInputStream(uri);
                  OutputStream out = new FileOutputStream(tmp)) {
                 copy(in, out);
             }
+            importLocal(tmp);
+        } catch (Throwable e) {
+            Log.e(TAG, "import failed", e);
+            tmp.delete();
+            fail(e.toString());
+        }
+    }
+
+    /** tmp is either an APK containing assets/rootfs.7z, or a rootfs.7z itself. */
+    private void importLocal(File tmp) {
+        File target = RomManager.getStoredRomFile(this);
+        runOnUiThread(() -> {
+            mProgress.setIndeterminate(true);
+            mStatus.setText(R.string.import_rom_reading);
+        });
+        try {
 
             // 2. Figure out what it is: an APK (zip) holding the ROM, or the ROM itself (7z).
             byte[] magic = new byte[6];
@@ -138,16 +242,13 @@ public class ImportRomActivity extends Activity {
             }
             if (magic[0] == 'P' && magic[1] == 'K') {
                 boolean found = false;
-                try (ZipInputStream zin = new ZipInputStream(new BufferedInputStream(new FileInputStream(tmp)))) {
-                    ZipEntry e;
-                    while ((e = zin.getNextEntry()) != null) {
-                        if (ROM_ENTRY_IN_APK.equals(e.getName())) {
-                            try (OutputStream out = new FileOutputStream(target)) {
-                                copy(zin, out);
-                            }
-                            found = true;
-                            break;
+                try (ZipFile zip = new ZipFile(tmp)) {
+                    ZipEntry e = zip.getEntry(ROM_ENTRY_IN_APK);
+                    if (e != null) {
+                        try (InputStream in = zip.getInputStream(e); OutputStream out = new FileOutputStream(target)) {
+                            copy(in, out);
                         }
+                        found = true;
                     }
                 }
                 tmp.delete();
@@ -199,6 +300,7 @@ public class ImportRomActivity extends Activity {
     private void setBusy(boolean busy, String status) {
         mPick.setEnabled(!busy);
         mDownload.setEnabled(!busy);
+        mBrowser.setEnabled(!busy);
         mProgress.setVisibility(busy ? View.VISIBLE : View.GONE);
         mStatus.setText(status);
     }
