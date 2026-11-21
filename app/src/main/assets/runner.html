@@ -73,7 +73,7 @@ body{background:var(--night);color:var(--ink);font-family:var(--body);overflow:h
 #flash{position:absolute;inset:0;background:#fff;opacity:0;pointer-events:none;transition:opacity .4s}
 
 #autoB{position:absolute;left:10px;bottom:10px;width:40px;height:40px;border-radius:50%;border:1px solid rgba(255,255,255,.12);background:rgba(20,8,20,.45);color:var(--ink);font-size:19px;line-height:1;cursor:pointer;opacity:.3;z-index:5}
-#autoB.on{opacity:.9;background:rgba(40,140,90,.75)}
+#autoB.on::after{content:"";position:absolute;top:4px;right:4px;width:5px;height:5px;border-radius:50%;background:rgba(255,255,255,.8)}
 #autoTag{position:absolute;left:50%;bottom:calc(env(safe-area-inset-bottom,0px) + 16px);transform:translateX(-50%);padding:6px 14px;border-radius:999px;background:rgba(20,8,20,.55);
   font:800 14px/1 var(--display);letter-spacing:.08em;color:#bff5d4;white-space:nowrap;pointer-events:none}
 #gear{position:absolute;right:10px;bottom:10px;width:40px;height:40px;border-radius:50%;border:1px solid rgba(255,255,255,.12);background:rgba(20,8,20,.45);
@@ -139,7 +139,7 @@ input[type=checkbox]{width:20px;height:20px;accent-color:var(--hot)}
         <p class="note">Para cuando estás ocupado: el juego corre solo (salta, se desliza, esquiva y recoge monedas) y empieza otra carrera sola si choca, así el directo nunca se para. En cuanto deslizas el dedo, vuelves a jugar tú. El botón 🤖 abajo a la izquierda lo enciende y lo apaga.</p>
         <label class="ln"><input type="checkbox" id="oIdle"><span>Empezar solo si no toco la pantalla durante…</span></label>
         <div class="ln"><label for="oIdleSec">Tiempo sin tocar</label><select id="oIdleSec"><option value="10">10 s</option><option value="20">20 s</option><option value="30">30 s</option><option value="60">1 min</option></select></div>
-        <label class="ln"><input type="checkbox" id="oAutoTag"><span>Mostrar «Juego automático» abajo mientras juega solo</span></label>
+        <label class="ln"><input type="checkbox" id="oAutoTag"><span>Mostrar «Juego automático» abajo mientras juega solo (apagado: no se nota nada en pantalla)</span></label>
         <p class="note">Las carreras automáticas no cambian tu récord personal.</p>
       </div>
       <div class="grp"><h3>🎮 Juegos</h3>
@@ -200,7 +200,7 @@ var APP=!!window.BusApp;
 var SRC=APP&&BusApp.getSource?String(BusApp.getSource()):"tiktok",YT=SRC==="youtube";
 try{localStorage.setItem("game","runner")}catch(e){}
 
-var DEF={hero:"adventurer",idle:true,idleSec:20,autoTag:true,q:"ultra",auto:true,sfx:false,shake:true,photo:true,follow:true,share:false,repeat:true,toast:true,min:1,names:""};
+var DEF={hero:"adventurer",idle:true,idleSec:20,autoTag:false,q:"ultra",auto:true,sfx:false,shake:true,photo:true,follow:true,share:false,repeat:true,toast:true,min:1,names:""};
 var cfg=Object.assign({},DEF);
 try{var sv=JSON.parse(localStorage.getItem("runner1")||"null");if(sv)cfg=Object.assign(cfg,sv)}catch(e){}
 function save(){try{localStorage.setItem("runner1",JSON.stringify(cfg))}catch(e){}}
