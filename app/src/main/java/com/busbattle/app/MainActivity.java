@@ -92,8 +92,24 @@ public class MainActivity extends Activity {
                 try { startActivity(new Intent(Intent.ACTION_VIEW, u)); } catch (ActivityNotFoundException ignored) {}
                 return true;
             }
+            /* the page's renderer died (usually out of memory with heavy 3D): rebuild the activity instead of leaving a black screen;
+               the page notices the unfinished start and comes back in light mode */
+            @android.annotation.TargetApi(26)
+            @Override
+            public boolean onRenderProcessGone(WebView v, android.webkit.RenderProcessGoneDetail d) {
+                log("La página se cerró por falta de memoria; se vuelve a abrir en modo ligero.");
+                ui.post(MainActivity.this::recreate);
+                return true;
+            }
         });
         web.setWebChromeClient(new WebChromeClient() {
+            /* page errors go to the connection log, so they can be read on the phone */
+            @Override
+            public boolean onConsoleMessage(android.webkit.ConsoleMessage m) {
+                if (m.messageLevel() == android.webkit.ConsoleMessage.MessageLevel.ERROR)
+                    log("JS: " + m.message() + " (" + m.sourceId().replaceAll(".*/", "") + ":" + m.lineNumber() + ")");
+                return false;
+            }
             /* the host's own camera bubble in the hall: the page asks for the front camera (video only) */
             @Override
             public void onPermissionRequest(final android.webkit.PermissionRequest req) {

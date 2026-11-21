@@ -182,6 +182,7 @@ input[type=checkbox]{width:20px;height:20px;accent-color:var(--hot)}
         <p class="note">Apaga la música si quieres poner la tuya (Spotify…) durante el directo.</p>
         <label class="ln"><input type="checkbox" id="oShake"><span>Vibración de cámara al chocar</span></label>
         <div class="ln"><label for="oQ">Calidad</label><select id="oQ"><option value="ultra">Ultra (teléfonos muy potentes)</option><option value="alta">Alta (recomendada)</option><option value="media">Media</option><option value="ahorro">Ahorro de batería</option></select></div>
+        <label class="ln"><input type="checkbox" id="oLite"><span>🪶 Modo ligero (sin cielos reales ni texturas de fotos; para teléfonos con poca memoria)</span></label>
         <label class="ln"><input type="checkbox" id="oAuto"><span>Bajar la calidad sola si el teléfono va lento</span></label>
         <div id="perf"></div>
       </div>
@@ -225,24 +226,26 @@ input[type=checkbox]{width:20px;height:20px;accent-color:var(--hot)}
   </div>
 </div>
 <script src="lib/three-plus.js"></script>
-<script src="runner/assets.js"></script>
-<script src="runner/vehicles.js"></script>
-<script src="runner/sfx.js"></script>
-<script src="runner/skies.js"></script>
-<script src="runner/photo.js"></script>
-<script src="runner/town-models.js"></script>
-<script src="runner/town-tex.js"></script>
 <script>
 (function(){
 "use strict";
 var $=function(id){return document.getElementById(id)};
+/* any error is shown on screen (so it can be photographed), and a start that never finished means light mode next time */
+function showErr(t){var el=document.getElementById("err");if(!el){el=document.createElement("div");el.id="err";el.style.cssText="position:absolute;left:8px;right:8px;bottom:60px;z-index:30;background:rgba(120,0,0,.88);color:#fff;font:12px/1.35 monospace;padding:8px;border-radius:8px;white-space:pre-wrap;max-height:30%;overflow:auto;pointer-events:auto";
+  el.onclick=function(){el.remove()};(document.getElementById("stage")||document.body).appendChild(el)}if(el.textContent.length<1500)el.textContent+=(el.textContent?"\n":"")+t}
+window.addEventListener("error",function(e){showErr("⚠ "+(e.message||"error")+" · "+String(e.filename||"").split("/").pop()+":"+(e.lineno||""))});
+window.addEventListener("unhandledrejection",function(e){showErr("⚠ "+String(e.reason&&e.reason.message||e.reason))});
+var CRASHED=false,G0LITE=false;try{var bt=+localStorage.getItem("runnerBoot")||0;CRASHED=bt>0&&Date.now()-bt<180000;localStorage.setItem("runnerBoot",String(Date.now()))}catch(e){}
+function bootOk(){try{localStorage.removeItem("runnerBoot")}catch(e){}}
+setTimeout(bootOk,30000);window.addEventListener("pagehide",bootOk);
 var APP=!!window.BusApp;
 var SRC=APP&&BusApp.getSource?String(BusApp.getSource()):"tiktok",YT=SRC==="youtube";
 try{localStorage.setItem("game","runner")}catch(e){}
 
-var DEF={perf3:1,cycle:true,weather:true,chase:true,vote:true,powers:true,rain:100,hero:"soldier_real",idle:true,idleSec:20,autoTag:false,q:"alta",auto:true,sfx:true,music:true,musicVol:0.55,sfxVol:0.85,shake:true,photo:true,follow:true,share:false,repeat:true,toast:true,min:1,names:""};
+var DEF={lite:false,perf3:1,cycle:true,weather:true,chase:true,vote:true,powers:true,rain:100,hero:"soldier_real",idle:true,idleSec:20,autoTag:false,q:"alta",auto:true,sfx:true,music:true,musicVol:0.55,sfxVol:0.85,shake:true,photo:true,follow:true,share:false,repeat:true,toast:true,min:1,names:""};
 var cfg=Object.assign({},DEF);
 try{var sv=JSON.parse(localStorage.getItem("runner1")||"null");if(sv)cfg=Object.assign(cfg,sv)}catch(e){}
+if(CRASHED&&!cfg.lite){cfg.lite=true;cfg.q="ahorro";G0LITE=true;save()}
 if(!cfg.perf3){if(cfg.q==="ultra")cfg.q="alta";cfg.auto=true;cfg.perf3=1}
 if(!cfg.snd2){cfg.sfx=true;cfg.music=true;cfg.snd2=1}   /* sound is on by default from this version */
 function save(){try{localStorage.setItem("runner1",JSON.stringify(cfg))}catch(e){}}
@@ -261,6 +264,7 @@ function esc(s){return String(s).replace(/[&<>"]/g,function(m){return {"&":"&amp
 
 /* ================================================================ 3D setup */
 var T=window.THREE,R=null,ok3d=true,Q=QUALITY[cfg.q]||QUALITY.ultra,composer=null,W=0,H=0;
+$("gl").addEventListener("webglcontextlost",function(e){e.preventDefault();cfg.lite=true;cfg.q="ahorro";save();bootOk();showErr("⚠ Gráficos perdidos (memoria). Recargando en modo ligero…");setTimeout(function(){location.reload()},900)});
 try{if(!T||!T.WebGLRenderer)throw 0;R=new T.WebGLRenderer({canvas:$("gl"),antialias:false,powerPreference:"high-performance",stencil:false})}catch(e){ok3d=false;$("nogl").hidden=false}
 var scene,cam,sun,G={};
 /* curved world: every vertex is bent sideways/up by distance² ahead, in all built-in shaders (shadows included).
@@ -589,7 +593,7 @@ function vehicleModel(kind,prefer){var real=VEHR[kind].filter(function(n){return
   else if(kind==="truck"&&f.h<3.1){var k=3.3/f.h;f.g.children[0].scale.multiplyScalar(k);f.g.children[0].position.y*=k;f.h=3.3;f.w*=k;f.len*=k}
   if(kind==="car")f.h=Math.min(f.h,1.75);
   return f}
-function artReady(){
+function artReady(){window.RUNNER_ASSETS=null;window.RUNNER_VEH=null;
   Object.keys(VLEN).forEach(function(n){if(ART[n]&&!ART[n].merged){try{var mg=mergeByMaterial(ART[n].scene);ART[n].scene=mg;ART[n].merged=true}catch(e){console.warn("merge "+n,e&&e.message)}}});
   /* hero */
   var hn=ART[cfg.hero]?cfg.hero:ART.soldier_real?"soldier_real":ART.adventurer?"adventurer":ART.soldier?"soldier":null;
@@ -615,12 +619,12 @@ function artReady(){
 var SUNDIR=new T.Vector3(-12,11,13).normalize();
 function imgOf(src,cb){var im=new Image();im.onload=function(){cb(im)};im.src=src}
 function texOf(src,rep,srgb,cb){imgOf(src,function(im){var t=new T.Texture(im);t.wrapS=t.wrapT=T.RepeatWrapping;t.repeat.set(rep[0],rep[1]);t.colorSpace=srgb?T.SRGBColorSpace:T.NoColorSpace;t.anisotropy=Math.min(8,R.capabilities.getMaxAnisotropy());t.needsUpdate=true;cb(t)})}
-function loadPhoto(){var P=window.RUNNER_PHOTO;if(!ok3d||!P)return;
+function loadPhoto(){var P=window.RUNNER_PHOTO;if(!ok3d||!P)return;window.RUNNER_PHOTO=null;
   /* 1. sky: HDR photo domes (day now, sunset and night next), turned so the sun matches the shadows */
   try{G.skyDay=skyLayer(P.sky_hdr,-0.6,0.8,0);G.hdrDome=G.skyDay.dome;scene.environment=G.skyDay.env;scene.environmentIntensity=0.9;if(G.sky)G.sky.visible=false;G.dome.visible=false;
     SUNDIR.copy(G.skyDay.sun);SUNDIR.y=Math.max(SUNDIR.y,0.35);SUNDIR.normalize();scene.fog.color.copy(G.skyDay.hz);
     if(G.ranges)G.ranges.forEach(function(m,k){m.material.color.copy(G.skyDay.hz).lerp(new T.Color(0x7a6050),0.25+k*0.2)});sun.color.set(0xfff0dc);sun.intensity=3.2;
-    setTimeout(loadSkies,1200)}catch(e){console.warn("hdr",e&&e.message)}
+    P.sky_hdr=null}catch(e){console.warn("hdr",e&&e.message)}
   /* 2. ground: photo-scanned dry earth, 4 m per tile, scrolls with the run */
   var GT=4;G.groundTile=GT;G.groundMaps=[];var gm=G.ground.material,rep=[1200/GT,1200/GT];
   texOf(P.tex.dry_ground_01_diff,rep,true,function(t){gm.map=t;gm.color.set(0xf2e2cc);gm.needsUpdate=true;G.groundMaps.push(t)});
@@ -653,7 +657,7 @@ function loadTown(){var TW=window.RUNNER_TOWN;if(!ok3d||!TW)return;townMats();
   names.forEach(function(n){gl.parse(glbOrJson(TW.models[n]),"",function(g){g.scene.traverse(function(m){if(m.isMesh){m.castShadow=true;m.receiveShadow=true;m.material.shared=true}});TOWNM[n]=g.scene;
       if(--left===0)townReady()},function(e){console.warn("town "+n,e&&e.message);if(--left===0)townReady()})});
   if(!left)townReady()}
-function townReady(){if(TOWNM.street_lamp_01)TOWNM.street_lamp_01.traverse(function(m){if(m.isMesh&&/bulb|glass/.test(m.material.name)){(G.lampBulbs=G.lampBulbs||[]).push(m.material)}});buildHousePool();
+function townReady(){if(window.RUNNER_TOWN)window.RUNNER_TOWN.models=null;if(TOWNM.street_lamp_01)TOWNM.street_lamp_01.traverse(function(m){if(m.isMesh&&/bulb|glass/.test(m.material.name)){(G.lampBulbs=G.lampBulbs||[]).push(m.material)}});buildHousePool();
   /* desert: quiver trees and shrubs replace the cartoon bushes */
   G.props.forEach(function(pr,i){if(pr.userData.scanned)return;var n=i%2?"quiver_tree_01":"shrub_02",o=modelCopy(n,n==="quiver_tree_01"?rnd(3.5,6):rnd(0.9,1.6));if(!o)return;
     o.rotation.y=rnd(0,6);pr.children.slice().forEach(function(c){pr.remove(c)});pr.scale.setScalar(1);pr.add(o);pr.userData.scanned=true;pr.userData.x=Math.sign(pr.userData.x||1)*rnd(9,30);pr.traverse(function(m){m.frustumCulled=false;m.castShadow=false})})}
@@ -879,7 +883,7 @@ function skyLayer(b64,wx,wz,order){var hd=new T.RGBELoader().parse(b64buf(b64)),
   var val=function(i){return isHalf?T.DataUtils.fromHalfFloat(d[i]):d[i]};
   var best=-1,bi=0;for(var y=0;y<h/2;y+=2)for(var x=0;x<w;x+=4){var i=(y*w+x)*4,l=val(i)+val(i+1)+val(i+2);if(l>best){best=l;bi=y*w+x}}
   var hr=0,hg=0,hb=0,n=0,row=Math.floor(h*0.49);for(var x2=0;x2<w;x2+=8){var j=(row*w+x2)*4;hr+=val(j);hg+=val(j+1);hb+=val(j+2);n++}
-  var tx=new T.DataTexture(d,w,h,T.RGBAFormat,hd.type);tx.colorSpace=T.LinearSRGBColorSpace;tx.flipY=true;tx.minFilter=T.LinearFilter;tx.magFilter=T.LinearFilter;tx.generateMipmaps=false;tx.needsUpdate=true;
+  var tx=new T.DataTexture(d,w,h,T.RGBAFormat,hd.type);tx.colorSpace=T.LinearSRGBColorSpace;tx.flipY=true;tx.minFilter=T.LinearFilter;tx.magFilter=T.LinearFilter;tx.generateMipmaps=false;tx.needsUpdate=true;tx.onUpdate=function(){setTimeout(function(){if(tx.image)tx.image.data=null},0)};
   var su=((bi%w)+0.5)/w,sth=(Math.floor(bi/w)+0.5)/h*Math.PI,sd=new T.Vector3(-Math.cos(su*2*Math.PI)*Math.sin(sth),Math.cos(sth),Math.sin(su*2*Math.PI)*Math.sin(sth));
   var rot=Math.atan2(sd.z,sd.x)-Math.atan2(wz,wx);
   var dome=new T.Mesh(new T.SphereGeometry(800-order*5,64,32),new T.MeshBasicMaterial({map:tx,side:T.BackSide,fog:false,depthWrite:false,toneMapped:true,transparent:order>0,opacity:order>0?0:1}));
@@ -890,7 +894,7 @@ function skyLayer(b64,wx,wz,order){var hd=new T.RGBELoader().parse(b64buf(b64)),
   return {dome:dome,env:env,sun:sun2,hz:hz}}
 var CYCLE=360,cycT0=perf(),NF=0,DAYW=[1,0,0],G2={};
 function loadSkies(){var S=window.RUNNER_SKIES;if(!ok3d||!S||!G.skyDay)return;
-  try{G.skyDusk=skyLayer(S.dusk,-0.38,-0.92,1);G.skyNight=skyLayer(S.night,-0.6,0.8,2)}catch(e){console.warn("skies",e&&e.message)}}
+  try{G.skyDusk=skyLayer(S.dusk,-0.38,-0.92,1);G.skyNight=skyLayer(S.night,-0.6,0.8,2)}catch(e){console.warn("skies",e&&e.message)}window.RUNNER_SKIES=null}
 function cycleWeights(){var t=((perf()-cycT0)/1000+(cfg.cycOff||0))%CYCLE;   /* day 150 s · fade 20 · sunset 60 · fade 20 · night 80 · fade 30 */
   function sm(a,b,x){var k=clamp((x-a)/(b-a),0,1);return k*k*(3-2*k)}
   var toDusk=sm(150,170,t)-sm(230,250,t),toNight=sm(230,250,t)-sm(330,360,t);return [Math.max(0,1-toDusk-toNight),Math.max(0,toDusk),Math.max(0,toNight)]}
@@ -1123,8 +1127,8 @@ window.addEventListener("keydown",function(e){if(e.target&&/INPUT|TEXTAREA|SELEC
 /* ---------- sounds: tiny synth, off by default so the host's music is never interrupted ---------- */
 /* ---------- sound: adventure music (crossfaded playlist on <audio>), CC0 effects through Web Audio ---------- */
 var AC=null,SFXB={},sfxGain=null;
-function audioCtx(){if(!AC){try{AC=new (window.AudioContext||window.webkitAudioContext)();sfxGain=AC.createGain();sfxGain.connect(AC.destination);
-    var S=window.RUNNER_SFX||{};Object.keys(S).forEach(function(k){try{var bin=atob(S[k].split(",")[1]),u=new Uint8Array(bin.length);for(var i=0;i<bin.length;i++)u[i]=bin.charCodeAt(i);AC.decodeAudioData(u.buffer,function(b){SFXB[k]=b},function(){})}catch(e){}})}catch(e){}}
+function decodeSfx(){if(!AC||!window.RUNNER_SFX)return;var S=window.RUNNER_SFX;window.RUNNER_SFX=null;Object.keys(S).forEach(function(k){try{var bin=atob(S[k].split(",")[1]),u=new Uint8Array(bin.length);for(var i=0;i<bin.length;i++)u[i]=bin.charCodeAt(i);AC.decodeAudioData(u.buffer,function(b){SFXB[k]=b},function(){})}catch(e){}})}
+function audioCtx(){if(!AC){try{AC=new (window.AudioContext||window.webkitAudioContext)();sfxGain=AC.createGain();sfxGain.connect(AC.destination);decodeSfx()}catch(e){}}
   if(AC&&AC.state==="suspended")try{AC.resume()}catch(e){}return AC}
 /* name: [sample, volume, pitch] */
 var SMAP={coin:["coin",0.32,1],jump:["dash",0.55,1.1],slide:["step",0.7,0.75],land:["land",0.5,1],crash:["impact",0.95,0.9],hurt:["hurt",0.7,1],shield:["revive",0.8,1],pup:["gem",0.7,1],
@@ -1344,10 +1348,10 @@ function resize(){W=innerWidth;H=innerHeight;if(!ok3d)return;var pr=Math.min(win
   cam.aspect=W/H;cam.fov=W/H<0.75?70:58;cam.updateProjectionMatrix();if(composer){composer.setPixelRatio(pr);composer.setSize(W,H)}}
 window.addEventListener("resize",resize);
 
-function fill(){$("oQ").value=cfg.q;$("oAuto").checked=cfg.auto;$("oSfx").checked=cfg.sfx;$("oCycle").checked=cfg.cycle;$("oWeather").checked=cfg.weather;$("oChase").checked=cfg.chase;$("oVote").checked=cfg.vote;$("oMusic").checked=cfg.music;$("oMusicVol").value=String(cfg.musicVol);$("oSfxVol").value=String(cfg.sfxVol);$("oShake").checked=cfg.shake;$("oPhoto").checked=cfg.photo;$("oFollow").checked=cfg.follow;
+function fill(){$("oQ").value=cfg.q;$("oAuto").checked=cfg.auto;$("oSfx").checked=cfg.sfx;$("oLite").checked=cfg.lite;$("oCycle").checked=cfg.cycle;$("oWeather").checked=cfg.weather;$("oChase").checked=cfg.chase;$("oVote").checked=cfg.vote;$("oMusic").checked=cfg.music;$("oMusicVol").value=String(cfg.musicVol);$("oSfxVol").value=String(cfg.sfxVol);$("oShake").checked=cfg.shake;$("oPhoto").checked=cfg.photo;$("oFollow").checked=cfg.follow;
   $("oShare").checked=cfg.share;$("oRepeat").checked=cfg.repeat;$("oToast").checked=cfg.toast;$("oMin").value=String(cfg.min);$("oNames").value=cfg.names||"";$("oIdle").checked=cfg.idle;$("oIdleSec").value=String(cfg.idleSec);$("oAutoTag").checked=cfg.autoTag;$("oPowers").checked=cfg.powers;$("oRain").value=String(cfg.rain)}
 function bind(id,key,num){var el=$(id);el.onchange=function(){cfg[key]=el.type==="checkbox"?el.checked:num?+el.value:el.value;save();if(key==="q")applyQuality()}}
-bind("oQ","q");bind("oAuto","auto");bind("oSfx","sfx");bind("oCycle","cycle");bind("oWeather","weather");bind("oChase","chase");bind("oVote","vote");bind("oMusic","music");bind("oMusicVol","musicVol",1);bind("oSfxVol","sfxVol",1);bind("oShake","shake");bind("oPhoto","photo");bind("oFollow","follow");bind("oShare","share");bind("oRepeat","repeat");bind("oToast","toast");bind("oMin","min",1);bind("oIdle","idle");bind("oIdleSec","idleSec",1);bind("oAutoTag","autoTag");bind("oPowers","powers");bind("oRain","rain",1);
+bind("oQ","q");bind("oAuto","auto");bind("oSfx","sfx");$("oLite").onchange=function(){cfg.lite=$("oLite").checked;save();location.reload()};bind("oCycle","cycle");bind("oWeather","weather");bind("oChase","chase");bind("oVote","vote");bind("oMusic","music");bind("oMusicVol","musicVol",1);bind("oSfxVol","sfxVol",1);bind("oShake","shake");bind("oPhoto","photo");bind("oFollow","follow");bind("oShare","share");bind("oRepeat","repeat");bind("oToast","toast");bind("oMin","min",1);bind("oIdle","idle");bind("oIdleSec","idleSec",1);bind("oAutoTag","autoTag");bind("oPowers","powers");bind("oRain","rain",1);
 $("oNames").oninput=function(){cfg.names=$("oNames").value;save()};
 $("bNames").onclick=function(){cfg.names=$("oNames").value;save();handNames();openSheet(false)};
 function openSheet(o){$("sheet").hidden=!o;$("gear").hidden=o;if(o){fill();paintMon()}}
@@ -1418,7 +1422,14 @@ setInterval(function(){var now=perf();
   if(Math.random()<0.3){var bestL=pl.lane,bc=coinsIn(pl.lane);[pl.lane-1,pl.lane+1].forEach(function(l){if(l<-1||l>1||!safe(l))return;var c=coinsIn(l),t=threat(l);if(t&&t.veh&&t.rel<v*1.2)return;if(c>bc+1){bc=c;bestL=l}});
     if(bestL!==pl.lane){act(bestL<pl.lane?"left":"right",true);pilotNext=now+260}}},45);
 
-loadArt();loadPhoto();loadTown();fill();applyQuality();resetRun();paintCard();wake();handNames();if(ok3d)requestAnimationFrame(frame);
+fill();applyQuality();resetRun();paintCard();wake();handNames();if(ok3d)requestAnimationFrame(frame);
+/* heavy data, one file at a time after the first frames; each global is dropped once decoded so its memory can be freed */
+function loadScript(src,cb){var el=document.createElement("script");el.src=src;el.onload=function(){cb()};el.onerror=function(){showErr("⚠ no se pudo cargar "+src);cb()};document.body.appendChild(el)}
+(function stageLoad(){if(!ok3d)return;var lite=cfg.lite,steps=[["runner/assets.js",null],["runner/vehicles.js",function(){loadArt()}],["runner/sfx.js",function(){decodeSfx()}],["runner/town-models.js",null]];
+  if(!lite)steps.push(["runner/town-tex.js",null]);steps.push([null,function(){loadTown()}]);
+  if(!lite){steps.push(["runner/photo.js",function(){loadPhoto()}]);if(cfg.cycle)steps.push(["runner/skies.js",function(){loadSkies()}])}
+  var i=0;(function next(){if(i>=steps.length){if(G0LITE)misToast("Modo ligero activado (el teléfono se quedó sin memoria)");return}var st=steps[i++];
+    setTimeout(function(){if(st[0])loadScript(st[0],function(){try{st[1]&&st[1]()}catch(e){showErr("⚠ "+e.message)}next()});else{try{st[1]()}catch(e){showErr("⚠ "+e.message)}next()}},250)})()})();
 })();
 </script>
 </body>
