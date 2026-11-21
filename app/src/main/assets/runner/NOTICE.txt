@@ -34,3 +34,4 @@ Music (CC0 1.0, from the Hugging Face dataset SoundSafari/Public-Domain-Music):
 Sound effects (runner/sfx.js): Kenney (kenney.nl) impact/interface/RPG packs, CC0 1.0.
 Sunset and night skies (HDRIs qwantani_sunset_puresky, qwantani_night_puresky): Poly Haven, CC0 1.0. In runner/skies.js.
 Runner "X-Bot" (Xbot.glb) from the three.js examples, Mixamo character and animations. In runner/heroes.js.
+Spectators (runner/crowd.js): Kenney Mini Characters, CC0 1.0.
