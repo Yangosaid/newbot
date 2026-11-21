@@ -270,7 +270,7 @@ input[type=checkbox]{width:20px;height:20px;accent-color:var(--hot)}
         <label class="ln"><input type="checkbox" id="oMemory"><span>Recordar a los que apoyan entre directos (vuelven con su nivel y su ropa)</span></label>
         <div class="ln"><button class="btn" id="bForget">Olvidar a todos</button></div>
       </div>
-      <div class="ln"><button class="btn go" id="bRace">🏁 Ir a la carrera</button><button class="btn go" id="bPrint">🖨️ Ir a la imprenta</button><button class="btn go" id="bWin">🏆 Desafío del cielo</button><button class="btn go" id="bNat">🌍 Batalla de naciones</button><button class="btn" id="bBus">🚌 Ir a la batalla de buses</button></div>
+      <div class="ln"><button class="btn go" id="bRace">🏁 Ir a la carrera</button><button class="btn go" id="bPrint">🖨️ Ir a la imprenta</button><button class="btn go" id="bWin">🏆 Desafío del cielo</button><button class="btn go" id="bNat">🌍 Batalla de naciones</button><button class="btn" onclick="try{localStorage.setItem('game','runner')}catch(e){};location.href='runner.html'">🏃 Ruta</button><button class="btn" id="bBus">🚌 Ir a la batalla de buses</button></div>
       <div class="grp"><h3>Probar</h3>
         <div class="ln"><button class="btn" data-test="gift">Regalo</button><button class="btn" data-test="chat">Comentario</button></div>
       </div>

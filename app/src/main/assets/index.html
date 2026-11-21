@@ -170,6 +170,7 @@ input[type=color]{width:40px;height:36px;border:0;background:none;padding:0}
       <div class="row"><button class="btn go" id="bNew">Nueva ronda</button><button class="btn" id="bZero">Marcador a 0</button><button class="btn" id="bFull">Pantalla completa</button>
         <button class="btn" id="bSnd"></button><button class="btn" id="bDemo"></button></div>
       <div class="row"><button class="btn go" id="bParty">🕺 Ir a la Fiesta de Fans</button></div>
+      <div class="row"><button class="btn go" onclick="try{localStorage.setItem('game','runner')}catch(e){};location.href='runner.html'">🏃 Ruta de Leyendas</button></div>
       <div class="grp">
         <div class="row"><label for="oDur">Duración de la ronda</label><select id="oDur"><option value="120">2 min</option><option value="180">3 min</option><option value="300">5 min</option><option value="600">10 min</option><option value="0">Sin límite</option></select></div>
         <label class="row"><input type="checkbox" id="oSafe"><span>Dejar libre la zona que tapa TikTok (barra de arriba y chat)</span></label>
@@ -210,7 +211,7 @@ input[type=color]{width:40px;height:36px;border:0;background:none;padding:0}
 "use strict";
 var $=function(id){return document.getElementById(id)};
 var APP=!!window.BusApp;                                                      /* running inside the Android app */
-try{var gm=localStorage.getItem("game");if(APP&&gm!=="bus"){location.replace(gm==="race"?"race.html":gm==="print"?"print.html":gm==="win"?"win.html":gm==="nations"?"nations.html":"party.html");return}}catch(e){}   /* the 3D hall is the default */
+try{var gm=localStorage.getItem("game");if(APP&&gm!=="bus"){location.replace(gm==="runner"?"runner.html":gm==="race"?"race.html":gm==="print"?"print.html":gm==="win"?"win.html":gm==="nations"?"nations.html":"party.html");return}}catch(e){}   /* the 3D hall is the default */
 var SRC=APP&&BusApp.getSource?String(BusApp.getSource()):"tiktok",YT=SRC==="youtube";
 var LOCAL=APP||/^(localhost|127\.0\.0\.1)$/.test(location.hostname);
 var DEF={teams:[
