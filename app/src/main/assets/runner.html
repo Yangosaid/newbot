@@ -149,7 +149,11 @@ input[type=checkbox]{width:20px;height:20px;accent-color:var(--hot)}
         <div class="ln"><button class="btn" data-go="party">🕺 Sala</button><button class="btn" data-go="race">🏁 Carrera</button><button class="btn" data-go="win">🏆 Desafío</button><button class="btn" data-go="nations">🌍 Naciones</button><button class="btn" data-go="print">🖨️ Imprenta</button><button class="btn" data-go="bus">🚌 Buses</button></div>
       </div>
       <div class="grp"><h3>Sonido e imagen</h3>
-        <label class="ln"><input type="checkbox" id="oSfx"><span>Sonidos del juego (apagado = tu música sigue sonando sin cortes)</span></label>
+        <label class="ln"><input type="checkbox" id="oMusic"><span>🎵 Música de aventura</span></label>
+        <div class="ln"><label for="oMusicVol">Volumen de la música</label><select id="oMusicVol"><option value="0.25">Bajo</option><option value="0.55">Medio</option><option value="0.8">Alto</option><option value="1">Máximo</option></select></div>
+        <label class="ln"><input type="checkbox" id="oSfx"><span>🔊 Efectos de sonido (monedas, saltos, coches, golpes…)</span></label>
+        <div class="ln"><label for="oSfxVol">Volumen de los efectos</label><select id="oSfxVol"><option value="0.4">Bajo</option><option value="0.85">Medio</option><option value="1.2">Alto</option></select></div>
+        <p class="note">Apaga la música si quieres poner la tuya (Spotify…) durante el directo.</p>
         <label class="ln"><input type="checkbox" id="oShake"><span>Vibración de cámara al chocar</span></label>
         <div class="ln"><label for="oQ">Calidad</label><select id="oQ"><option value="ultra">Ultra (brillo, 120 Hz)</option><option value="alta">Alta</option><option value="media">Media</option><option value="ahorro">Ahorro de batería</option></select></div>
         <label class="ln"><input type="checkbox" id="oAuto"><span>Bajar la calidad sola si el teléfono va lento</span></label>
@@ -197,6 +201,7 @@ input[type=checkbox]{width:20px;height:20px;accent-color:var(--hot)}
 <script src="lib/three-plus.js"></script>
 <script src="runner/assets.js"></script>
 <script src="runner/vehicles.js"></script>
+<script src="runner/sfx.js"></script>
 <script src="runner/photo.js"></script>
 <script src="runner/town-models.js"></script>
 <script src="runner/town-tex.js"></script>
@@ -208,9 +213,10 @@ var APP=!!window.BusApp;
 var SRC=APP&&BusApp.getSource?String(BusApp.getSource()):"tiktok",YT=SRC==="youtube";
 try{localStorage.setItem("game","runner")}catch(e){}
 
-var DEF={powers:true,rain:100,hero:"soldier_real",idle:true,idleSec:20,autoTag:false,q:"ultra",auto:true,sfx:false,shake:true,photo:true,follow:true,share:false,repeat:true,toast:true,min:1,names:""};
+var DEF={powers:true,rain:100,hero:"soldier_real",idle:true,idleSec:20,autoTag:false,q:"ultra",auto:true,sfx:true,music:true,musicVol:0.55,sfxVol:0.85,shake:true,photo:true,follow:true,share:false,repeat:true,toast:true,min:1,names:""};
 var cfg=Object.assign({},DEF);
 try{var sv=JSON.parse(localStorage.getItem("runner1")||"null");if(sv)cfg=Object.assign(cfg,sv)}catch(e){}
+if(!cfg.snd2){cfg.sfx=true;cfg.music=true;cfg.snd2=1}   /* sound is on by default from this version */
 function save(){try{localStorage.setItem("runner1",JSON.stringify(cfg))}catch(e){}}
 var best=0;try{best=+localStorage.getItem("runnerBest")||0}catch(e){}
 var QUALITY={ultra:{pr:2.5,samples:4,bloom:true,sh:2048},alta:{pr:1.75,samples:4,bloom:true,sh:1024},media:{pr:1.25,samples:0,bloom:false,sh:1024},ahorro:{pr:1,samples:0,bloom:false,sh:0}};
@@ -829,9 +835,9 @@ function buildRamp(o){var mdl=vehicleModel("truck",["box_truck","bus"]),g,len,to
 /* ---------- viewer events: taps rain coins, big gifts give powers to the runner (credited on screen) ---------- */
 var likeAcc=0,powerMsgUntil=0;
 function coinRain(u){if(state!=="run")return;var s0=dist+22;for(var i=0;i<26;i++){var l=[-1,0,1][i%3],s=s0+Math.floor(i/3)*3.2;addCoin(l,s,0.9+(i%2)*0.6)}
-  burst(0,6,-20,60,6,1.2,[1,0.85,0.3]);misToast("🌧️ Lluvia de monedas · gracias "+(u?u.nick:"a todos"))}
+  burst(0,6,-20,60,6,1.2,[1,0.85,0.3]);sfx("rain");misToast("🌧️ Lluvia de monedas · gracias "+(u?u.nick:"a todos"))}
 function power(kind,u){if(state!=="run"||!cfg.powers)return;if(kind==="fly"){pups.fly=7;pups.turbo=Math.max(pups.turbo||0,8.5);for(var i=0;i<60;i++)addCoin([-1,0,1][Math.floor(i/6)%3],dist+12+i*2.3,9.4)}
-  else pups.turbo=Math.max(pups.turbo||0,5);flash(0.2);burst(pl.x,1.5,0,80,7,1,[1,0.7,0.2]);misToast((kind==="fly"?"🚀 ¡A volar! Regalo de ":"⚡ ¡Turbo! Regalo de ")+u.nick)}
+  else pups.turbo=Math.max(pups.turbo||0,5);flash(0.2);sfx("power");burst(pl.x,1.5,0,80,7,1,[1,0.7,0.2]);misToast((kind==="fly"?"🚀 ¡A volar! Regalo de ":"⚡ ¡Turbo! Regalo de ")+u.nick)}
 
 /* ================================================================ levels and challenges
    Every level has three challenges; finishing all three moves you up and raises the score multiplier (level N = ×N, up to ×10).
@@ -857,7 +863,7 @@ function mval(m){return m.run?(runP[m.k]||0):(LV.p[m.k]||0)}
 function track(k,v){if(state!=="run")return;runP[k]=(runP[k]||0)+v;if(k==="jump"||k==="slide"||k==="dodge"||k==="pup"||k==="tcoin")LV.p[k]=(LV.p[k]||0)+v;checkMis()}
 function setRun(k,v){runP[k]=v;checkMis()}
 function checkMis(){var changed=false;MIS.forEach(function(m,i){if(!LV.done[i]&&mval(m)>=m.n){LV.done[i]=1;changed=true;misToast("✔ "+m.txt)}});
-  if(changed){if(LV.done.every(Boolean)){LV.lv++;LV.done=[0,0,0];LV.p={};MIS=missions(LV.lv);setTimeout(function(){misToast("⬆ ¡NIVEL "+LV.lv+"! Puntos ×"+levelMult())},1900)}saveLv()}}
+  if(changed){if(LV.done.every(Boolean)){LV.lv++;LV.done=[0,0,0];LV.p={};MIS=missions(LV.lv);setTimeout(function(){misToast("⬆ ¡NIVEL "+LV.lv+"! Puntos ×"+levelMult());sfx("level")},1900)}saveLv()}}
 var misUntil=0;function misToast(t){$("mis").textContent=t;$("mis").classList.add("on");misUntil=perf()+1800;sfx("pup")}
 function misHtml(){return '<div class="lv">NIVEL '+LV.lv+' · PUNTOS ×'+levelMult()+'</div><div class="ms">'+MIS.map(function(m,i){var v=Math.min(m.n,mval(m)),ok=LV.done[i];
   return '<div class="m'+(ok?' ok':'')+'"><b>'+(ok?'✔':i+1)+'</b><span>'+esc(m.txt)+(m.run?'':'')+'</span><i>'+(ok?'':v.toLocaleString("es-ES")+'/'+m.n.toLocaleString("es-ES"))+'</i></div>'}).join("")+'</div>'}
@@ -925,12 +931,12 @@ function killItem(it){if(!it.g)return;scene.remove(it.g);if(it.model){it.g=null;
 
 function start(){if(state==="run")return;resetRun();state="run";stateAt=perf();paintCard();sfx("start")}
 function crash(o){if(pups.shield>0){pups.shield=0;runP.shieldUsed=1;if(o){burst(o.lane*LANE,1,0,40,7,0.7,[0.4,0.8,1]);killItem(o);o.dead=true}flash(0.25);sfx("shield");return}
-  pl.dead=true;state="over";stateAt=perf();flash(0.55);if(cfg.shake)shake=0.6;sfx("crash");
+  pl.dead=true;state="over";stateAt=perf();flash(0.55);if(cfg.shake)shake=0.6;sfx("crash");setTimeout(function(){sfx("hurt")},120);
   var fs=Math.floor(score);if(fs>best&&!runByBot){best=fs;try{localStorage.setItem("runnerBest",String(best))}catch(e){}G.newBest=true}else G.newBest=false;
   setTimeout(paintCard,700)}
 
 /* input: swipes (touch), arrows/WASD/space (keyboard) */
-function act(a,bot){if($("sheet").hidden===false)return;
+function act(a,bot){if($("sheet").hidden===false)return;if(!bot)audioCtx();
   if(!bot){lastInput=perf();if(auto.on){setAuto(false);if(state==="run"){}}}
   if(state!=="run"){if(state==="ready"||perf()-stateAt>900){start();runByBot=!!bot}return}
   if(!bot)runByBot=false;
@@ -951,15 +957,44 @@ window.addEventListener("keydown",function(e){if(e.target&&/INPUT|TEXTAREA|SELEC
   if(m){e.preventDefault();act(m)}});
 
 /* ---------- sounds: tiny synth, off by default so the host's music is never interrupted ---------- */
-var AC=null;function sfx(k){if(!cfg.sfx)return;try{AC=AC||new (window.AudioContext||window.webkitAudioContext)();var t=AC.currentTime,o=AC.createOscillator(),g=AC.createGain();o.connect(g);g.connect(AC.destination);
-  var P={coin:[880,1320,0.08,"square",0.05],jump:[300,620,0.15,"sine",0.12],slide:[420,180,0.18,"sawtooth",0.06],crash:[160,40,0.5,"sawtooth",0.2],shield:[600,200,0.3,"triangle",0.15],pup:[520,1040,0.25,"triangle",0.12],start:[440,880,0.2,"sine",0.1],rock:[220,330,0.35,"sine",0.06]}[k];if(!P)return;
-  o.type=P[3];o.frequency.setValueAtTime(P[0],t);o.frequency.exponentialRampToValueAtTime(P[1],t+P[2]);g.gain.setValueAtTime(P[4],t);g.gain.exponentialRampToValueAtTime(0.0001,t+P[2]);o.start(t);o.stop(t+P[2]+0.02)}catch(e){}}
+/* ---------- sound: adventure music (crossfaded playlist on <audio>), CC0 effects through Web Audio ---------- */
+var AC=null,SFXB={},sfxGain=null;
+function audioCtx(){if(!AC){try{AC=new (window.AudioContext||window.webkitAudioContext)();sfxGain=AC.createGain();sfxGain.connect(AC.destination);
+    var S=window.RUNNER_SFX||{};Object.keys(S).forEach(function(k){try{var bin=atob(S[k].split(",")[1]),u=new Uint8Array(bin.length);for(var i=0;i<bin.length;i++)u[i]=bin.charCodeAt(i);AC.decodeAudioData(u.buffer,function(b){SFXB[k]=b},function(){})}catch(e){}})}catch(e){}}
+  if(AC&&AC.state==="suspended")try{AC.resume()}catch(e){}return AC}
+/* name: [sample, volume, pitch] */
+var SMAP={coin:["coin",0.32,1],jump:["dash",0.55,1.1],slide:["step",0.7,0.75],land:["land",0.5,1],crash:["impact",0.95,0.9],hurt:["hurt",0.7,1],shield:["revive",0.8,1],pup:["gem",0.7,1],
+  start:["confirm",0.6,1],banner:["level_up",0.5,1.05],level:["level_up",0.95,0.95],power:["big_kill",0.9,1],rain:["boss",0.55,1.25],step:["step",0.1,1.1],smash:["hit",0.85,0.9],ui:["ui",0.5,1]};
+function sfx(k){if(!cfg.sfx)return;var c=audioCtx();if(!c)return;var m=SMAP[k];if(!m)return;var b=SFXB[m[0]];if(!b)return;
+  try{var s=c.createBufferSource(),g=c.createGain();s.buffer=b;s.playbackRate.value=m[2]*(0.94+Math.random()*0.12);g.gain.value=m[1]*cfg.sfxVol;s.connect(g);g.connect(sfxGain);s.start()}catch(e){}}
+/* a car passing close by: band-passed noise sweeping down, panned to its side */
+function whoosh(pan,str){if(!cfg.sfx)return;var c=audioCtx();if(!c)return;try{var len=0.65,buf=G.noiseBuf;
+  if(!buf){buf=G.noiseBuf=c.createBuffer(1,Math.floor(c.sampleRate*len),c.sampleRate);var d=buf.getChannelData(0);for(var i=0;i<d.length;i++)d[i]=Math.random()*2-1}
+  var s=c.createBufferSource(),f=c.createBiquadFilter(),g=c.createGain(),p=c.createStereoPanner?c.createStereoPanner():null,t=c.currentTime;s.buffer=buf;f.type="bandpass";f.Q.value=0.9;
+  f.frequency.setValueAtTime(1500,t);f.frequency.exponentialRampToValueAtTime(360,t+len);g.gain.setValueAtTime(0.0001,t);g.gain.exponentialRampToValueAtTime(Math.max(0.001,0.4*str*cfg.sfxVol),t+0.12);g.gain.exponentialRampToValueAtTime(0.0001,t+len);
+  s.connect(f);f.connect(g);if(p){p.pan.value=clamp(pan,-1,1);g.connect(p);p.connect(sfxGain)}else g.connect(sfxGain);s.start(t);s.stop(t+len)}catch(e){}}
+var MUS={a:null,b:null,cur:null,prev:null,mode:"",list:[]};
+function musicEl(){var a=new Audio();a.preload="auto";a.volume=0;return a}
+function playTrack(src,loop){var nx=MUS.cur===MUS.a?(MUS.b||(MUS.b=musicEl())):(MUS.a||(MUS.a=musicEl()));if(MUS.prev&&MUS.prev!==MUS.cur)MUS.prev.pause();
+  nx.src=src;nx.loop=!!loop;nx.volume=0;try{var pr=nx.play();if(pr&&pr.catch)pr.catch(function(){})}catch(e){}MUS.prev=MUS.cur;MUS.cur=nx;
+  nx.onended=function(){if(MUS.cur===nx&&MUS.mode==="run")nextRunTrack()}}
+function nextRunTrack(){if(!MUS.list.length)MUS.list=["run1","run2","run3","run4","run5","run6","run7","run8"].sort(function(){return Math.random()-0.5});playTrack("runner/music/"+MUS.list.shift()+".mp3",false)}
+function setMusic(mode){MUS.mode=mode;if(mode==="menu")playTrack("runner/music/menu.mp3",true);else if(mode==="run")nextRunTrack();else if(mode==="power")playTrack("runner/music/power.mp3",true)}
+function stopMusic(){[MUS.a,MUS.b].forEach(function(a){if(a)a.pause()});MUS.mode="";MUS.cur=null;MUS.prev=null}
+function stepMusic(dt){if(!cfg.music){if(MUS.mode)stopMusic();return}
+  var want=state==="run"?(pups.fly>0||pups.turbo>1.5?"power":"run"):"menu";
+  if(want!==MUS.mode&&!(MUS.mode==="power"&&want==="run"&&(pups.turbo>0||pups.fly>0)))setMusic(want);
+  if(MUS.cur&&MUS.cur.paused&&MUS.cur.src&&!MUS.cur.ended){try{var pr=MUS.cur.play();if(pr&&pr.catch)pr.catch(function(){})}catch(e){}}
+  var tv=cfg.musicVol*(state==="over"?0.4:1)*($("sheet").hidden?1:0.5);
+  if(MUS.cur)MUS.cur.volume=clamp(damp(MUS.cur.volume,tv,1.4,dt),0,1);
+  if(MUS.prev){MUS.prev.volume=clamp(damp(MUS.prev.volume,0,2.4,dt),0,1);if(MUS.prev.volume<0.01){MUS.prev.pause();MUS.prev=null}}}
+
 
 /* ================================================================ frame */
 var last=perf(),shake=0,fpsN=0,fpsT=0,fpsLow=0,toastUntil=0;
 function frame(){var now=perf(),dt=Math.min(0.05,(now-last)/1000);last=now;
   var paused=!$("sheet").hidden;
-  var move=0;stepBend(dt,now);
+  var move=0;stepBend(dt,now);stepMusic(dt);
   if(state==="run"&&!paused){runT+=dt;speed=Math.min(MAXV,BASE+runT*0.14)*(pups.turbo>0?1.35:1);move=speed*dt;dist+=move;
     for(var vi=0;vi<items.length;vi++){var vit=items[vi];if(vit.v)vit.s+=vit.v*dt}
     if(pups.turbo>0)pups.turbo=Math.max(0,pups.turbo-dt);if(pups.fly>0)pups.fly=Math.max(0,pups.fly-dt);
@@ -979,10 +1014,12 @@ function frame(){var now=perf(),dt=Math.min(0.05,(now-last)/1000);last=now;
     if(cfg.auto&&fps<40&&state==="run"){if(++fpsLow>=2){fpsLow=0;var qi=QORDER.indexOf(cfg.q);if(qi<QORDER.length-1){cfg.q=QORDER[qi+1];save();$("oQ").value=cfg.q;applyQuality()}}}else fpsLow=0}
   requestAnimationFrame(frame)}
 
+var stepAcc=0;
 function stepPlayer(dt,now){var tx=pl.lane*LANE;pl.x=damp(pl.x,tx,14,dt);
+  if(!pl.air&&!sliding(now)&&pups.fly<=0){stepAcc+=dt*speed;if(stepAcc>2.3){stepAcc=0;sfx("step")}}
   if(pups.fly>0){pl.y=damp(pl.y,8.6,3.2,dt);pl.vy=0;pl.air=true;return}
   var gnd=groundAt();pl.gnd=gnd;
-  if(pl.air){pl.vy-=32*dt;pl.y+=pl.vy*dt;if(pl.y<=gnd){pl.y=gnd;pl.vy=0;pl.air=false;burst(pl.x,gnd+0.1,0,8,2,0.4,[0.9,0.6,0.4])}}
+  if(pl.air){pl.vy-=32*dt;pl.y+=pl.vy*dt;if(pl.y<=gnd){pl.y=gnd;pl.vy=0;pl.air=false;sfx("land");burst(pl.x,gnd+0.1,0,8,2,0.4,[0.9,0.6,0.4])}}
   else if(gnd>=pl.y-0.7)pl.y=gnd;else{pl.air=true;pl.vy=0}
   if(!pl.air&&gnd===0&&zoneAt(dist).type==="desert"&&Math.random()<0.25)burst(pl.x+rnd(-0.2,0.2),0.08,0.3,1,0.8,0.5,[0.75,0.6,0.45],0.4)}
 function stepDead(dt,now){}
@@ -1005,15 +1042,16 @@ function collide(now){var h=sliding(now)?0.85:1.8;
       if(front<0.35&&back>-0.35&&Math.abs(it.lane*LANE-pl.x)<1.3&&pl.y<it.top-0.6&&!(pl.gnd>0)){if(pups.turbo>0||pups.fly>0)continue;crash(it);if(state!=="run")return}
       if(!it.passed&&back<-0.4){it.passed=true;track("dodge",1)}continue}
     if(pups.fly>0)continue;
+    if(!it.whoosh&&(it.kind==="car"||it.kind==="truck")&&front<(it.v<0?6:2.5)&&back>-1&&it.lane!==pl.lane){it.whoosh=1;whoosh((it.lane*LANE-pl.x)/4,(it.v<0?1.4:0.8)*(it.kind==="truck"?1.25:1))}
     if(!it.passed&&back<-0.4){it.passed=true;if(it.kind==="car"||it.kind==="truck")track("dodge",1);else if(it.lane===pl.lane)track(it.kind==="fence"?"jump":"slide",1)}
     if(front<0.35&&back>-0.35&&Math.abs(it.lane*LANE-pl.x)<it.w+0.3&&pl.y<it.yMax&&pl.y+h>it.yMin){
-      if(pups.turbo>0){burst(it.lane*LANE,1.2,0,50,8,0.8,[1,0.6,0.2]);if(cfg.shake)shake=0.25;killItem(it);it.dead=true;track("dodge",1);continue}
+      if(pups.turbo>0){sfx("smash");burst(it.lane*LANE,1.2,0,50,8,0.8,[1,0.6,0.2]);if(cfg.shake)shake=0.25;killItem(it);it.dead=true;track("dodge",1);continue}
       crash(it);if(state!=="run")return}}}
 
 /* banners: hung far ahead (in the haze), at least BAN.gap metres apart; the rest wait, biggest gifts first */
 function feedBanners(now){var spawnS=dist+VIEW*0.78;
   if(spawnS-lastBanS>BAN.gap){
-    if(banQ.length){spawnBanner(banQ.shift(),spawnS);sfx("pup")}
+    if(banQ.length){spawnBanner(banQ.shift(),spawnS);sfx("banner")}
     else if(cfg.repeat&&now-lastRepeat>10000&&state==="run"){var pool=Object.keys(users).map(function(k){return users[k]}).filter(function(u){return u.coins>0||u.follow});
       if(pool.length){lastRepeat=now;pool.sort(function(a,b){return (a.shown-b.shown)||(b.coins-a.coins)});var u=pool[0];
         var q={u:u,coins:u.coins,tier:tierOf(u.coins),label:u.coins?"❤ "+u.coins+" monedas":"",kind:"again"};var tg=cfg.toast;cfg.toast=false;spawnBanner(q,spawnS);cfg.toast=tg}}}
@@ -1129,10 +1167,10 @@ function resize(){W=innerWidth;H=innerHeight;if(!ok3d)return;var pr=Math.min(win
   cam.aspect=W/H;cam.fov=W/H<0.75?70:58;cam.updateProjectionMatrix();if(composer){composer.setPixelRatio(pr);composer.setSize(W,H)}}
 window.addEventListener("resize",resize);
 
-function fill(){$("oQ").value=cfg.q;$("oAuto").checked=cfg.auto;$("oSfx").checked=cfg.sfx;$("oShake").checked=cfg.shake;$("oPhoto").checked=cfg.photo;$("oFollow").checked=cfg.follow;
+function fill(){$("oQ").value=cfg.q;$("oAuto").checked=cfg.auto;$("oSfx").checked=cfg.sfx;$("oMusic").checked=cfg.music;$("oMusicVol").value=String(cfg.musicVol);$("oSfxVol").value=String(cfg.sfxVol);$("oShake").checked=cfg.shake;$("oPhoto").checked=cfg.photo;$("oFollow").checked=cfg.follow;
   $("oShare").checked=cfg.share;$("oRepeat").checked=cfg.repeat;$("oToast").checked=cfg.toast;$("oMin").value=String(cfg.min);$("oNames").value=cfg.names||"";$("oIdle").checked=cfg.idle;$("oIdleSec").value=String(cfg.idleSec);$("oAutoTag").checked=cfg.autoTag;$("oPowers").checked=cfg.powers;$("oRain").value=String(cfg.rain)}
 function bind(id,key,num){var el=$(id);el.onchange=function(){cfg[key]=el.type==="checkbox"?el.checked:num?+el.value:el.value;save();if(key==="q")applyQuality()}}
-bind("oQ","q");bind("oAuto","auto");bind("oSfx","sfx");bind("oShake","shake");bind("oPhoto","photo");bind("oFollow","follow");bind("oShare","share");bind("oRepeat","repeat");bind("oToast","toast");bind("oMin","min",1);bind("oIdle","idle");bind("oIdleSec","idleSec",1);bind("oAutoTag","autoTag");bind("oPowers","powers");bind("oRain","rain",1);
+bind("oQ","q");bind("oAuto","auto");bind("oSfx","sfx");bind("oMusic","music");bind("oMusicVol","musicVol",1);bind("oSfxVol","sfxVol",1);bind("oShake","shake");bind("oPhoto","photo");bind("oFollow","follow");bind("oShare","share");bind("oRepeat","repeat");bind("oToast","toast");bind("oMin","min",1);bind("oIdle","idle");bind("oIdleSec","idleSec",1);bind("oAutoTag","autoTag");bind("oPowers","powers");bind("oRain","rain",1);
 $("oNames").oninput=function(){cfg.names=$("oNames").value;save()};
 $("bNames").onclick=function(){cfg.names=$("oNames").value;save();handNames();openSheet(false)};
 function openSheet(o){$("sheet").hidden=!o;$("gear").hidden=o;if(o){fill();paintMon()}}
@@ -1163,7 +1201,7 @@ document.addEventListener("visibilitychange",function(){if(!document.hidden)wake
 
 /* test hooks (used by the automated checks) */
 window.__runner=function(){return {state:state,dist:Math.round(dist),score:Math.floor(score),level:LV.lv,missions:MIS.map(function(m,i){return m.k+":"+mval(m)+"/"+m.n+(LV.done[i]?"✓":"")}),coins:coins,speed:+speed.toFixed(1),lane:pl.lane,banners:banners.map(function(b){return b.u.nick+":"+TIERS[b.tier].name+"@"+Math.round(b.s-dist)}),queue:banQ.length,items:items.length}};
-window.__runnerAct=act;window.__dbg2=function(){return {cam:cam.position.toArray().map(function(v){return +v.toFixed(2)}),fov:cam.fov,pl:[pl.x,pl.y,pl.vy,pl.gnd],bend:[BEND.x,BEND.y],piv:G.rig?[G.rig.piv.position.y,G.rig.piv.rotation.x]:0,state:state,turbo:pups.turbo,fly:pups.fly,speed:speed}};window.__runnerWarp=function(d){items.forEach(killItem);items=[];dist+=d;nextRowS=dist+40;return zoneAt(dist).type};window.__zone=function(){var z=zoneAt(dist);return z.type+" "+(z.name||"")+" houses:"+houses.length+" pool:"+HPOOL.length+" decos:"+decos.length+" bend:"+BEND.x.toFixed(5)};window.__dbg=function(){var r=G.rig;if(!r)return "norig";var b=new T.Box3().setFromObject(r.o,true);return {acts:Object.keys(r.acts),cur:r.curName,scale:r.o.scale.x,pos:r.o.position.toArray(),box:[b.min.toArray(),b.max.toArray()],vis:r.o.visible,parent:!!r.o.parent}};
+window.__runnerAct=act;window.__audio=function(){return {ctx:AC?AC.state:"none",sfx:Object.keys(SFXB).length,mode:MUS.mode,src:MUS.cur?MUS.cur.src.split("/").pop():"",paused:MUS.cur?MUS.cur.paused:null,t:MUS.cur?+MUS.cur.currentTime.toFixed(1):0,vol:MUS.cur?+MUS.cur.volume.toFixed(2):0}};window.__dbg2=function(){return {cam:cam.position.toArray().map(function(v){return +v.toFixed(2)}),fov:cam.fov,pl:[pl.x,pl.y,pl.vy,pl.gnd],bend:[BEND.x,BEND.y],piv:G.rig?[G.rig.piv.position.y,G.rig.piv.rotation.x]:0,state:state,turbo:pups.turbo,fly:pups.fly,speed:speed}};window.__runnerWarp=function(d){items.forEach(killItem);items=[];dist+=d;nextRowS=dist+40;return zoneAt(dist).type};window.__zone=function(){var z=zoneAt(dist);return z.type+" "+(z.name||"")+" houses:"+houses.length+" pool:"+HPOOL.length+" decos:"+decos.length+" bend:"+BEND.x.toFixed(5)};window.__dbg=function(){var r=G.rig;if(!r)return "norig";var b=new T.Box3().setFromObject(r.o,true);return {acts:Object.keys(r.acts),cur:r.curName,scale:r.o.scale.x,pos:r.o.position.toArray(),box:[b.min.toArray(),b.max.toArray()],vis:r.o.visible,parent:!!r.o.parent}};
 /* ================================================================ auto-play (for when the host is busy)
    Reads the next obstacle in every lane: jumps fences, slides under gates, changes lane before vehicles (to the lane whose
    next threat is farthest), drifts towards coins when the way is clear. A small reaction jitter keeps it looking human. */
