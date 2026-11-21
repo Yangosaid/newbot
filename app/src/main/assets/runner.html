@@ -1428,9 +1428,25 @@ setInterval(function(){var now=perf();
   if(cur&&!cur.veh){var tj=cur.k==="fence"?v*0.3+0.4:v*0.22+0.3;
     if(cur.rel<tj+rnd(-0.3,0.3)&&cur.rel>-0.2){act(cur.k==="fence"?"up":"down",true);pilotNext=now+350;return}
     return}
-  /* clear road: drift towards the lane with more coins, only if that lane is calm */
-  if(Math.random()<0.3){var bestL=pl.lane,bc=coinsIn(pl.lane);[pl.lane-1,pl.lane+1].forEach(function(l){if(l<-1||l>1||!safe(l))return;var c=coinsIn(l),t=threat(l);if(t&&t.veh&&t.rel<v*1.2)return;if(c>bc+1){bc=c;bestL=l}});
-    if(bestL!==pl.lane){act(bestL<pl.lane?"left":"right",true);pilotNext=now+260}}},45);
+  /* clear road: pick the lane that best serves the current missions, among the safe ones */
+  var W=pilotWants(),best=pl.lane,bestS=-1e9;
+  [pl.lane-1,pl.lane,pl.lane+1].forEach(function(l){if(l<-1||l>1)return;if(l!==pl.lane&&!safe(l))return;
+    var t=threat(l),vehR=t&&t.veh?t.rel:999;if(l!==pl.lane&&vehR<v*1.05)return;   /* never step in front of a car that is coming soon */
+    var I=laneInfo(l),sc=Math.min(vehR,v*3)/v*10;
+    sc+=I.coins*(W.coins||W.tcoin?2.4:1.3);
+    if(I.pup<48)sc+=W.pup?45:14;
+    if(I.letter<55)sc+=32;
+    if(I.ramp<42)sc+=14;
+    if(W.jump&&I.fence<42&&I.fence>v*0.34)sc+=24;
+    if(W.slide&&I.gate<42&&I.gate>v*0.28)sc+=24;
+    if(W.combo&&(I.fence<42||I.gate<42))sc+=8;
+    if(l!==pl.lane)sc-=3;   /* a little hysteresis: no zig-zag */
+    if(sc>bestS){bestS=sc;best=l}});
+  if(best!==pl.lane){act(best<pl.lane?"left":"right",true);pilotNext=now+200}},45);
+function pilotWants(){var w={};MIS.forEach(function(m,i){if(!LV.done[i])w[m.k]=1});return w}
+function laneInfo(l){var o={coins:0,pup:999,letter:999,fence:999,gate:999,ramp:999};items.forEach(function(it){if(it.dead||it.lane!==l)return;var r=it.s-dist;
+  if(it.type==="coin"){if(r>0&&r<30&&it.y<2.6)o.coins++}else if(it.type==="pup"){if(r>0&&r<o.pup)o.pup=r}else if(it.type==="letter"){if(r>0&&r<o.letter)o.letter=r}
+  else if(it.type==="obs"){if(it.kind==="fence"&&r>0&&r<o.fence)o.fence=r;else if(it.kind==="gate"&&r>0&&r<o.gate)o.gate=r;else if(it.kind==="ramp"){var rf=r-it.len/2-it.rl;if(rf>-1&&rf<o.ramp)o.ramp=Math.max(0,rf)}}});return o}
 
 fill();applyQuality();resetRun();paintCard();wake();handNames();if(ok3d)requestAnimationFrame(frame);
 /* heavy data, one file at a time after the first frames; each global is dropped once decoded so its memory can be freed */
