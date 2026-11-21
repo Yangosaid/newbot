@@ -23,7 +23,6 @@ optimised (textures resized to 1024 px, WebP, meshopt). Title, author, source:
 - bus: "Generic Town Bus" by own.guest, https://sketchfab.com/3d-models/14fe03d792914d51b6c6250b393c44fd
 - box_truck: "Light Box Truck - Low poly model" by DanielZhabotinsky, https://sketchfab.com/3d-models/cbc508a5ad424d79b2f2c8a3de7e1cd3
 - ambulance: "Old Ambulance van - Low Poly model" by DanielZhabotinsky, https://sketchfab.com/3d-models/2856dd3c61f940909dced9a5c0379484
-- ferrari: "Ferrari 458 Italia" by vicent091036 (Sketchfab, CC BY 4.0), from the three.js examples (examples/models/gltf/ferrari.glb).
 Runner character: "Vanguard" (Soldier.glb) from the three.js examples, a Mixamo character and animations (Adobe Mixamo licence: royalty-free use in projects).
 
 Music (CC0 1.0, from the Hugging Face dataset SoundSafari/Public-Domain-Music):
@@ -33,3 +32,4 @@ Music (CC0 1.0, from the Hugging Face dataset SoundSafari/Public-Domain-Music):
 - run6.mp3: Komiku, "The adventure"                    - run7.mp3: Komiku, "Fight, run, breath deeply"
 - run8.mp3: HoliznaCC0, "50 Over The Speed Limit"      - power.mp3: Komiku, "Action Epic"
 Sound effects (runner/sfx.js): Kenney (kenney.nl) impact/interface/RPG packs, CC0 1.0.
+Sunset and night skies (HDRIs qwantani_sunset_puresky, qwantani_night_puresky): Poly Haven, CC0 1.0. In runner/skies.js.
