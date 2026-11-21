@@ -106,6 +106,10 @@ body{background:var(--night);color:var(--ink);font-family:var(--body);overflow:h
 .si.off{opacity:.55}.si .ic{font-size:24px;flex:none;width:30px;text-align:center}.si .nm{flex:1;min-width:0;font:700 15px/1.2 var(--display)}
 .si .nm i{display:block;font:500 12px/1.3 var(--body);color:var(--ink-dim);font-style:normal}.si .mx{font:800 14px/1 var(--display);color:var(--ok)}
 #walH{font:800 26px/1 var(--display);color:var(--gold);margin:6px 0}
+.emo{position:absolute;bottom:90px;pointer-events:none;z-index:4;animation:emoUp 3s ease-out forwards;filter:drop-shadow(0 2px 3px rgba(0,0,0,.5))}
+@keyframes emoUp{0%{transform:translateY(0) scale(.6);opacity:0}12%{opacity:1;transform:translateY(-30px) scale(1.1)}100%{transform:translateY(-55vh) translateX(-20px) scale(1);opacity:0}}
+#bossW{position:absolute;left:0;right:0;top:40%;text-align:center;font:italic 800 40px/1 var(--display);color:#ff4a2a;text-shadow:0 0 20px rgba(255,60,20,.9),0 3px 0 rgba(0,0,0,.4);pointer-events:none;opacity:0;transition:opacity .2s}
+#bossW.on{opacity:1;animation:pulse .4s ease-in-out infinite}
 #flash{position:absolute;inset:0;background:#fff;opacity:0;pointer-events:none;transition:opacity .4s}
 
 #autoB{position:absolute;left:10px;bottom:10px;width:40px;height:40px;border-radius:50%;border:1px solid rgba(255,255,255,.12);background:rgba(20,8,20,.45);color:var(--ink);font-size:19px;line-height:1;cursor:pointer;opacity:.3;z-index:5}
@@ -161,6 +165,7 @@ input[type=checkbox]{width:20px;height:20px;accent-color:var(--hot)}
   <div id="vote" aria-hidden="true"></div>
   <div id="pred" aria-hidden="true"></div>
   <div id="goPop" aria-hidden="true">¡YA!</div>
+  <div id="bossW" aria-hidden="true"></div>
   <button id="spinB" hidden>🎡 RULETA DIARIA</button>
   <div id="wheel" hidden><div class="wbox"><div class="ptr">▼</div><canvas id="wheelC" width="300" height="300"></canvas><div id="wheelR"></div></div></div>
   <div id="flash"></div>
@@ -202,6 +207,11 @@ input[type=checkbox]{width:20px;height:20px;accent-color:var(--hot)}
         <label class="ln"><input type="checkbox" id="oWeather"><span>🌧️ Lluvia de noche en la ciudad y tormentas de arena en el desierto</span></label>
         <label class="ln"><input type="checkbox" id="oChase"><span>🚨 Persecuciones de la policía (aguanta 25 s y gana un bonus)</span></label>
         <div class="ln"><label for="oGoal">🎆 Meta del directo (monedas de regalos para los fuegos artificiales)</label><select id="oGoal"><option value="0">Sin meta</option><option value="500">500</option><option value="1000">1000</option><option value="3000">3000</option><option value="5000">5000</option></select></div>
+        <label class="ln"><input type="checkbox" id="oEmojis"><span>❤️ Los emojis del chat suben flotando por la pantalla</span></label>
+        <label class="ln"><input type="checkbox" id="oDance"><span>💃 Si alguien escribe «baila», el corredor da una vuelta bailando</span></label>
+        <label class="ln"><input type="checkbox" id="oZap"><span>⚡ Los regalos pequeños lanzan un rayo que rompe el siguiente obstáculo</span></label>
+        <label class="ln"><input type="checkbox" id="oBoss"><span>🚚 Desafío de los camiones monstruo de vez en cuando</span></label>
+        <label class="ln"><input type="checkbox" id="oDrone"><span>🚁 Usar el dron (si lo compraste en la tienda)</span></label>
         <label class="ln"><input type="checkbox" id="oCrowd"><span>👥 Los que comentan, regalan o siguen salen como público en la calle con su nombre (y te animan)</span></label>
         <label class="ln"><input type="checkbox" id="oReplay"><span>🎥 Repetición a cámara lenta al chocar</span></label>
         <label class="ln"><input type="checkbox" id="oVib"><span>📳 Vibración al chocar y en «¡Por poco!»</span></label>
@@ -284,7 +294,7 @@ var APP=!!window.BusApp;
 var SRC=APP&&BusApp.getSource?String(BusApp.getSource()):"tiktok",YT=SRC==="youtube";
 try{localStorage.setItem("game","runner")}catch(e){}
 
-var DEF={crowd:true,goal:1000,vib:true,replay:true,predict:true,lite:false,perf3:1,cycle:true,weather:true,chase:true,vote:true,powers:true,rain:100,hero:"soldier_real",idle:true,idleSec:20,autoTag:false,q:"alta",auto:true,sfx:true,music:true,musicVol:0.55,sfxVol:0.85,shake:true,photo:true,follow:true,share:false,repeat:true,toast:true,min:1,names:""};
+var DEF={emojis:true,dance:true,drone:true,boss:true,zap:true,crowd:true,goal:1000,vib:true,replay:true,predict:true,lite:false,perf3:1,cycle:true,weather:true,chase:true,vote:true,powers:true,rain:100,hero:"soldier_real",idle:true,idleSec:20,autoTag:false,q:"alta",auto:true,sfx:true,music:true,musicVol:0.55,sfxVol:0.85,shake:true,photo:true,follow:true,share:false,repeat:true,toast:true,min:1,names:""};
 var cfg=Object.assign({},DEF);
 try{var sv=JSON.parse(localStorage.getItem("runner1")||"null");if(sv)cfg=Object.assign(cfg,sv)}catch(e){}
 if(CRASHED&&!cfg.lite){cfg.lite=true;cfg.q="ahorro";G0LITE=true;save()}
@@ -1064,7 +1074,7 @@ function paintVote(){if(!VOTE.opts)return;var tot=Math.max(1,VOTE.a+VOTE.b),s=Ma
 /* ================================================================ progression: wallet, shop, characters, achievements, daily wheel,
    mystery boxes, jetpack, the viewers' prediction and a cinematic start */
 var WAL={c:0};try{WAL.c=+localStorage.getItem("runnerWallet")||0}catch(e){}
-var UP={magnet:0,x2:0,fans:0,coin:0,startShield:0,board:0,heroes:{soldier_real:1}};
+var UP={magnet:0,x2:0,fans:0,coin:0,startShield:0,board:0,drone:0,heroes:{soldier_real:1}};
 try{var us=JSON.parse(localStorage.getItem("runnerUp")||"null");if(us){UP=Object.assign(UP,us);UP.heroes=Object.assign({soldier_real:1},us.heroes||{})}}catch(e){}
 function saveWal(){try{localStorage.setItem("runnerWallet",String(Math.floor(WAL.c)));localStorage.setItem("runnerUp",JSON.stringify(UP))}catch(e){}}
 var walDirty=0;function earn(n){WAL.c+=n;walDirty=1}
@@ -1075,6 +1085,7 @@ var SHOP=[
   {id:"fans",ic:"⚡",name:"Poderes de los fans (turbo, vuelo) más largos",max:5,base:400,desc:function(l){return "+"+l+" s"}},
   {id:"coin",ic:"🪙",name:"Monedas de oro: valen más en la cartera",max:4,base:600,desc:function(l){return "×"+(1+l*0.25).toFixed(2)}},
   {id:"startShield",ic:"🛡️",name:"Empezar una carrera con escudo",max:99,base:150,flat:true,desc:function(l){return l+" guardados"}},
+  {id:"drone",ic:"🚁",name:"Dron compañero: vuela a tu lado y recoge las monedas de los carriles vecinos",max:1,base:3000,desc:function(l){return l?"Tuyo":"Para siempre"}},
   {id:"board",ic:"🛹",name:"Tabla voladora: doble toque para usarla (30 s, más rápida, te salva de un choque)",max:99,base:220,flat:true,desc:function(l){return l+" guardadas"}}];
 var HEROES=[{id:"soldier_real",name:"Vanguard",cost:0},{id:"adventurer",name:"Aventurero",cost:2500},{id:"xbot",name:"X-Bot",cost:6000}];
 function shopCost(it){var l=UP[it.id]||0;return it.flat?it.base:Math.round(it.base*Math.pow(l+1,1.6)/10)*10}
@@ -1276,6 +1287,48 @@ function stepRecord(now){if(state!=="run")return;
   if(BEST_D>300&&!G.recPassed&&dist>BEST_D){G.recPassed=true;misToast("🏁 ¡NUEVO RÉCORD DE DISTANCIA!");sfx("level");GOAL.show=now+5000;flash(0.25)}
   var m=Math.floor(dist/1000);if(m>(G.mile||0)){G.mile=m;if(m>0){misToast("🏅 "+(m*1000).toLocaleString("es-ES")+" m");burst(0,4,-10,50,6,1,[0.6,0.9,1])}}}
 
+/* ================================================================ the chat plays along: floating emojis and a dance command; drone companion;
+   monster truck challenge; small gifts throw lightning at the next obstacle */
+/* ---------- emojis from the chat float up the screen; "baila" makes the runner spin-dance ---------- */
+var EMO={n:0,t:0},EMO_RE=/(\p{Extended_Pictographic})/gu;
+function floatEmoji(ch){var now=perf();if(now-EMO.t>1000){EMO.t=now;EMO.n=0}if(++EMO.n>14)return;var el=document.createElement("div");el.className="emo";el.textContent=ch;
+  el.style.left=(72+Math.random()*24)+"%";el.style.animationDuration=(2.6+Math.random()*1.4)+"s";el.style.fontSize=(26+Math.random()*16)+"px";$("stage").appendChild(el);setTimeout(function(){el.remove()},4200)}
+function chatFun(e){var t=String(e.text||"");if(cfg.emojis){var m=t.match(EMO_RE);if(m)m.slice(0,3).forEach(floatEmoji)}
+  if(cfg.dance&&/(^|\s)(baila|bailá|dance|رقص|ارقص)(\s|!|$)/i.test(t)&&perf()-(G.danceAt||0)>6000&&state==="run"){G.danceAt=perf();misToast("💃 "+String(e.nick||"Fan")+" pidió un baile");sfx("pup");floatEmoji("💃")}}
+function danceAngle(now){if(!G.danceAt)return 0;var k=(now-G.danceAt)/1300;if(k>=1){G.danceAt=0;return 0}return Math.PI*2*(k*k*(3-2*k))}
+
+/* ---------- drone companion (shop): hovers next to you and grabs coins in the neighbouring lanes ---------- */
+var DRONE=null;
+function buildDrone(){var g=new T.Group(),body=std(0x1a1d24,0.35,0.7),acc=std(0xff7a2f,0.4,0.3,0x401500);
+  var b=new T.Mesh(new T.BoxGeometry(0.5,0.16,0.5),body);g.add(b);var eye=new T.Mesh(new T.SphereGeometry(0.08,10,8),new T.MeshStandardMaterial({color:0x40c8ff,emissive:0x40c8ff,emissiveIntensity:2}));eye.position.set(0,-0.02,0.27);g.add(eye);
+  var rot=[];[[-1,-1],[1,-1],[-1,1],[1,1]].forEach(function(p){var arm=new T.Mesh(new T.BoxGeometry(0.42,0.04,0.06),acc);arm.position.set(p[0]*0.24,0.04,p[1]*0.24);arm.rotation.y=p[0]*p[1]*0.785;g.add(arm);
+    var r=new T.Mesh(new T.BoxGeometry(0.4,0.01,0.05),std(0x222222,0.5,0.3));r.position.set(p[0]*0.38,0.1,p[1]*0.38);g.add(r);rot.push(r)});
+  var gl=new T.Sprite(new T.SpriteMaterial({map:G.glow,color:0x40c8ff,transparent:true,opacity:0.6,depthWrite:false,blending:T.AdditiveBlending}));gl.scale.set(0.9,0.9,1);gl.position.z=0.3;g.add(gl);
+  g.userData.rot=rot;g.traverse(function(m){m.frustumCulled=false;if(m.isMesh)m.castShadow=true});scene.add(g);return g}
+function droneOn(){return UP.drone>0&&cfg.drone}
+function stepDrone(dt,now){if(!ok3d)return;if(!droneOn()){if(DRONE)DRONE.visible=false;return}if(!DRONE)DRONE=buildDrone();DRONE.visible=true;
+  var side=pl.lane>=1?-1:1,tx=pl.x+side*1.5,ty=2.5+pl.y*0.6+Math.sin(now/300)*0.12;DRONE.position.x=damp(DRONE.position.x,tx,5,dt);DRONE.position.y=damp(DRONE.position.y,ty,5,dt);DRONE.position.z=damp(DRONE.position.z,0.8,5,dt);
+  DRONE.rotation.z=(tx-DRONE.position.x)*-0.25;DRONE.userData.rot.forEach(function(r){r.rotation.y+=dt*40})}
+
+/* ---------- monster truck challenge: three giant flaming trucks charge down your lane; dodge them all ---------- */
+var BOSS={on:false,next:0,sent:0,passed:0,at:0};
+function stepBoss(now){if(state!=="run"||!cfg.boss)return;if(!BOSS.next)BOSS.next=now+rnd(110000,170000);
+  if(!BOSS.on&&now>BOSS.next&&!CH.on&&pups.fly<=0){BOSS.on=true;BOSS.sent=0;BOSS.passed=0;BOSS.at=now;misToast("🚚💥 ¡CAMIONES MONSTRUO! Esquiva los 3");horn();vib(80)}
+  if(BOSS.on&&BOSS.sent<3&&now-BOSS.at>1200+BOSS.sent*2300){BOSS.sent++;var lane=pl.lane,o=addObs("truck",lane,dist+(speed+17)*2.6,-17);if(o&&o.g){o.boss=true;o.g.scale.multiplyScalar(1.3);o.len*=1.3;o.yMax=Math.max(o.yMax||3,3.8);o.w=(o.w||1)*1.15;
+      [-0.7,0.7].forEach(function(px){var f=new T.Sprite(new T.SpriteMaterial({map:G.glow,color:0xff5a10,transparent:true,opacity:0.9,depthWrite:false,blending:T.AdditiveBlending}));f.scale.set(1.6,2.6,1);f.position.set(px,2.4,0);o.g.add(f)});
+      $("bossW").textContent="⚠️ "+(lane<0?"⬅️ IZQUIERDA":lane>0?"DERECHA ➡️":"⬆️ CENTRO");$("bossW").classList.add("on");setTimeout(function(){$("bossW").classList.remove("on")},1600);horn()}}
+  if(BOSS.on&&now-BOSS.at>12000){BOSS.on=false;BOSS.next=now+rnd(170000,260000)}}
+function bossPassed(){if(!BOSS.on)return;BOSS.passed++;if(BOSS.passed>=3){BOSS.on=false;BOSS.next=perf()+rnd(170000,260000);var b=1000*levelMult();score+=b;earn(150);misToast("🏆 ¡Esquivaste los camiones monstruo! +"+b+" · +150 🪙");sfx("level");GOAL.show=perf()+3500}}
+function horn(){if(!cfg.sfx)return;var c=audioCtx();if(!c)return;try{var t=c.currentTime;[220,277].forEach(function(f){var o=c.createOscillator(),g=c.createGain();o.type="square";o.frequency.value=f;g.gain.setValueAtTime(0.0001,t);g.gain.exponentialRampToValueAtTime(0.06*cfg.sfxVol,t+0.05);g.gain.setValueAtTime(0.06*cfg.sfxVol,t+0.5);g.gain.exponentialRampToValueAtTime(0.0001,t+0.7);o.connect(g);g.connect(sfxGain);o.start(t);o.stop(t+0.75)})}catch(e){}}
+
+/* ---------- small gifts throw lightning at the next obstacle in your lane (they help, never hinder) ---------- */
+var ZAP={t:0};
+function zap(u){if(!cfg.zap||state!=="run"||perf()-ZAP.t<900)return;var best=null;items.forEach(function(it){if(it.type!=="obs"||it.dead||it.boss||it.kind==="ramp"||it.lane!==pl.lane)return;var r=it.s-dist;if(r>4&&r<70&&(!best||r<best.s-dist))best=it});
+  if(!best)return;ZAP.t=perf();var z=-(best.s-dist),x=best.lane*LANE;
+  var bolt=new T.Mesh(new T.CylinderGeometry(0.18,0.05,40,6,1,true),new T.MeshBasicMaterial({color:0xcfe8ff,transparent:true,opacity:0.95,blending:T.AdditiveBlending,depthWrite:false}));bolt.position.set(x,20,z);bolt.frustumCulled=false;scene.add(bolt);
+  var fade=function(){bolt.material.opacity*=0.8;if(bolt.material.opacity<0.05){scene.remove(bolt);bolt.geometry.dispose();bolt.material.dispose()}else requestAnimationFrame(fade)};requestAnimationFrame(fade);
+  burst(x,1.2,z,70,9,0.9,[0.7,0.85,1]);killItem(best);best.dead=true;flash(0.12);sfx("smash");misToast("⚡ "+u.nick+" rompió el obstáculo");track("dodge",1)}
+
 /* ================================================================ levels and challenges
    Every level has three challenges; finishing all three moves you up and raises the score multiplier (level N = ×N, up to ×10).
    "per run" challenges must be done in a single run; the others add up over runs. */
@@ -1446,7 +1499,7 @@ var last=perf(),shake=0,fpsN=0,fpsT=0,fpsLow=0,toastUntil=0;
 function frame(){var now=perf(),dt=Math.min(0.05,(now-last)/1000);last=now;if(R)R.info.reset();
   var paused=!$("sheet").hidden;
   stepCombo(now);var rdt=dt;dt*=timeScale;
-  var move=0;stepBend(dt,now);stepMusic(rdt);stepCycle(rdt);stepChase(dt,now);stepVote(now);stepPred(now);stepAch(now);stepGoal(now);stepBoard(now);stepGolden(now);stepRecord(now);if(LT.fever>0)LT.fever=Math.max(0,LT.fever-dt);
+  var move=0;stepBend(dt,now);stepMusic(rdt);stepCycle(rdt);stepChase(dt,now);stepVote(now);stepPred(now);stepAch(now);stepGoal(now);stepBoard(now);stepGolden(now);stepRecord(now);stepBoss(now);if(LT.fever>0)LT.fever=Math.max(0,LT.fever-dt);
   if(state==="run"&&!paused){runT+=dt;speed=Math.min(MAXV,BASE+runT*0.14)*(pups.turbo>0?1.35:1)*(boardActive()?1.1:1);move=speed*dt;daily("dist",speed*dt);dist+=move;
     for(var vi=0;vi<items.length;vi++){var vit=items[vi];if(vit.v)vit.s+=vit.v*dt}
     if(pups.turbo>0)pups.turbo=Math.max(0,pups.turbo-dt);if(pups.fly>0)pups.fly=Math.max(0,pups.fly-dt);
@@ -1458,7 +1511,7 @@ function frame(){var now=perf(),dt=Math.min(0.05,(now-last)/1000);last=now;if(R)
     collide(now)}
   else if(state==="ready"){move=6*dt;dist+=move}   /* the world drifts slowly behind the title card */
   else if(state==="over")stepDead(dt,now);
-  feedBanners(now);if(ok3d&&!paused){feedHouses();feedDecos();stepLife(dt,now,move);stepWeather(dt,now,move);stepCrowd(dt,now)}
+  feedBanners(now);if(ok3d&&!paused){feedHouses();feedDecos();stepLife(dt,now,move);stepWeather(dt,now,move);stepCrowd(dt,now);stepDrone(dt,now)}
   if(ok3d&&!window.__noRender)render(dt,now,move);
   paintHud();
   if(misUntil&&now>misUntil){$("mis").classList.remove("on");misUntil=0}
@@ -1485,7 +1538,7 @@ function collide(now){var h=sliding(now)?0.85:1.8;
     if(rel<-12){killItem(it);items.splice(i,1);continue}
     if(it.type==="coin"){
       if(pups.magnet>0&&rel<14&&rel>-1){it.x=damp(it.x,pl.x,10,1/60);it.y=damp(it.y,pl.y+1,10,1/60);it.s=damp(it.s,dist,6,1/60)}
-      if(Math.abs(rel)<0.9&&Math.abs(it.x-pl.x)<0.95&&Math.abs(it.y-(pl.y+0.9))<1.3){var gm=goldenOn()?5:1;coins++;earn((1+0.25*UP.coin)*gm);daily("coins",1);if(++ACH.coins>=1000)ach("coins1k");score+=10*gm*(pups.x2>0||LT.fever>0?2:1)*levelMult();track("coins",1);track("tcoin",1);burst(it.x,it.y,0,6,3,0.35,[1,0.8,0.25]);sfx("coin");killItem(it);items.splice(i,1)}
+      if((Math.abs(rel)<0.9&&Math.abs(it.x-pl.x)<0.95&&Math.abs(it.y-(pl.y+0.9))<1.3)||(droneOn()&&Math.abs(rel)<1.2&&Math.abs(it.x-pl.x)<LANE*1.15&&it.y<3.4)){var gm=goldenOn()?5:1;coins++;earn((1+0.25*UP.coin)*gm);daily("coins",1);if(++ACH.coins>=1000)ach("coins1k");score+=10*gm*(pups.x2>0||LT.fever>0?2:1)*levelMult();track("coins",1);track("tcoin",1);burst(it.x,it.y,0,6,3,0.35,[1,0.8,0.25]);sfx("coin");killItem(it);items.splice(i,1)}
       continue}
     if(it.type==="spring"){if(Math.abs(rel)<1.1&&Math.abs(it.x-pl.x)<1.1&&!pl.air&&pl.y<0.6)hitSpring(it,now);continue}
     if(it.type==="letter"){if(Math.abs(rel)<1&&Math.abs(it.x-pl.x)<1.1&&Math.abs(it.y-(pl.y+0.9))<1.6){gotLetter();burst(it.x,1.3,0,30,5,0.6,[1,0.8,0.3]);killItem(it);items.splice(i,1)}continue}
@@ -1502,7 +1555,7 @@ function collide(now){var h=sliding(now)?0.85:1.8;
       if(veh&&it.lane===pl.fromLane&&it.lane!==pl.lane&&now-pl.laneAt<900){comboHit("😮 ¡Por poco!",100);slowMo(420);whoosh((it.lane*LANE-pl.x)/3,1.6)}
       else if(veh&&it.lane===pl.lane&&pl.y>=it.yMax-0.3)comboHit("🦘 ¡Por encima!",80);
       else if(!veh&&it.lane===pl.lane)comboHit(it.kind==="fence"?"⤴️ ¡Salto!":"⤵️ ¡Deslizada!",25)}
-    if(!it.passed&&back<-0.4){it.passed=true;if(it.kind==="car"||it.kind==="truck")track("dodge",1);else if(it.lane===pl.lane)track(it.kind==="fence"?"jump":"slide",1)}
+    if(!it.passed&&back<-0.4){it.passed=true;if(it.boss)bossPassed();if(it.kind==="car"||it.kind==="truck")track("dodge",1);else if(it.lane===pl.lane)track(it.kind==="fence"?"jump":"slide",1)}
     if(front<0.35&&back>-0.35&&Math.abs(it.lane*LANE-pl.x)<it.w+0.3&&pl.y<it.yMax&&pl.y+h>it.yMin){
       if(pups.turbo>0){sfx("smash");comboHit("💥 ¡Destrozado!",40);burst(it.lane*LANE,1.2,0,50,8,0.8,[1,0.6,0.2]);if(cfg.shake)shake=0.25;killItem(it);it.dead=true;track("dodge",1);continue}
       crash(it);if(state!=="run")return}}}
@@ -1571,7 +1624,7 @@ function render(dt,now,move){var t=now/1000;
       tr=G.body.rotation.z}
     else if(state==="ready")playRig(rg.acts.idle?"idle":"run",0.3);
     else if(state==="over"){playRig(rg.acts.death?"death":"idle",0.1);if(!rg.acts.death){var kd=Math.min(1,(now-stateAt)/450);tx2=1.45*kd;ty2=0.95-0.62*kd;tz2=-0.6*kd}}
-    rg.piv.rotation.x=damp(rg.piv.rotation.x,tx2,state==="over"?10:16,dt);rg.piv.position.y=damp(rg.piv.position.y,ty2,16,dt);rg.piv.position.z=damp(rg.piv.position.z,tz2,16,dt);rg.piv.rotation.z=tr;
+    rg.piv.rotation.x=damp(rg.piv.rotation.x,tx2,state==="over"?10:16,dt);rg.piv.position.y=damp(rg.piv.position.y,ty2,16,dt);rg.piv.position.z=damp(rg.piv.position.z,tz2,16,dt);rg.piv.rotation.z=tr;rg.piv.rotation.y=danceAngle(now);
     if(G.flip&&state==="run"){var fk=(now-G.flip)/1150;if(fk<1)rg.piv.rotation.x=-Math.PI*2*(fk*fk*(3-2*fk));else{G.flip=0;rg.piv.rotation.x=0}}   /* springboard backflip */
     rg.mixer.update(state==="over"&&!rg.acts.death&&now-stateAt>500?0:dt);G.P.position.y=state==="run"?pl.y+(boardActive()?0.22:0):0}
   G.shadow.scale.setScalar(1/(1+pl.y*0.35));G.shadow.position.y=0.03-pl.y;
@@ -1612,9 +1665,9 @@ function onEvent(e){if(!e||!e.type)return;
   if(e.type==="status"){setStatus(e.ok,e.text);return}
   if(e.type==="gift"){mon.g+=Math.max(1,e.count|0);var u=userOf(e),c=Math.max(1,e.coins|0)*Math.max(1,e.count|0);u.coins+=c;
     if(c>=cfg.min||u.coins>=cfg.min)queueBanner(u,c,(e.gift?String(e.gift):"🎁")+(e.count>1?" ×"+e.count:""),"gift");
-    if(c>=1000)power("fly",u);else if(c>=100)power("turbo",u);goalAdd(u,c);crowdAdd(u,"gift");logChat(u.nick,"🎁 "+(e.gift||"regalo")+(e.count>1?" ×"+e.count:""),"gift");
+    if(c>=1000)power("fly",u);else if(c>=100)power("turbo",u);else zap(u);goalAdd(u,c);crowdAdd(u,"gift");logChat(u.nick,"🎁 "+(e.gift||"regalo")+(e.count>1?" ×"+e.count:""),"gift");
     decos.forEach(function(d){if(d.kind==="billboard"&&d.canvas){ensurePhoto(u,function(){paintBillboard(d)});paintBillboard(d)}});paintMon();return}
-  if(e.type==="chat"){logChat(e.nick||e.user,e.text);crowdAdd(userOf(e),"chat");if(!predChat(e))voteChat(e);return}
+  if(e.type==="chat"){logChat(e.nick||e.user,e.text);chatFun(e);crowdAdd(userOf(e),"chat");if(!predChat(e))voteChat(e);return}
   if(e.type==="like"){likeAcc+=Math.max(1,e.count|0);if(cfg.rain&&likeAcc>=cfg.rain){likeAcc=0;coinRain(userOf(e))}return}
   if(e.type==="follow"){logChat(e.nick||e.user,"➕ ¡te sigue!","follow");crowdAdd(userOf(e),"follow")}
   if(e.type==="follow"&&cfg.follow){mon.f++;var uf=userOf(e);if(!uf.follow){uf.follow=true;queueBanner(uf,0,"te sigue ➕","follow")}paintMon();return}
@@ -1637,10 +1690,10 @@ function resize(){W=innerWidth;H=innerHeight;if(!ok3d)return;var pr=Math.min(win
   cam.aspect=W/H;cam.fov=W/H<0.75?70:58;cam.updateProjectionMatrix();if(composer){composer.setPixelRatio(pr);composer.setSize(W,H)}}
 window.addEventListener("resize",resize);
 
-function fill(){$("oQ").value=cfg.q;$("oAuto").checked=cfg.auto;$("oSfx").checked=cfg.sfx;$("oCrowd").checked=cfg.crowd;$("oGoal").value=String(cfg.goal);$("oReplay").checked=cfg.replay;$("oVib").checked=cfg.vib;$("oPredict").checked=cfg.predict;$("oLite").checked=cfg.lite;$("oCycle").checked=cfg.cycle;$("oWeather").checked=cfg.weather;$("oChase").checked=cfg.chase;$("oVote").checked=cfg.vote;$("oMusic").checked=cfg.music;$("oMusicVol").value=String(cfg.musicVol);$("oSfxVol").value=String(cfg.sfxVol);$("oShake").checked=cfg.shake;$("oPhoto").checked=cfg.photo;$("oFollow").checked=cfg.follow;
+function fill(){$("oQ").value=cfg.q;$("oAuto").checked=cfg.auto;$("oSfx").checked=cfg.sfx;$("oEmojis").checked=cfg.emojis;$("oDance").checked=cfg.dance;$("oZap").checked=cfg.zap;$("oBoss").checked=cfg.boss;$("oDrone").checked=cfg.drone;$("oCrowd").checked=cfg.crowd;$("oGoal").value=String(cfg.goal);$("oReplay").checked=cfg.replay;$("oVib").checked=cfg.vib;$("oPredict").checked=cfg.predict;$("oLite").checked=cfg.lite;$("oCycle").checked=cfg.cycle;$("oWeather").checked=cfg.weather;$("oChase").checked=cfg.chase;$("oVote").checked=cfg.vote;$("oMusic").checked=cfg.music;$("oMusicVol").value=String(cfg.musicVol);$("oSfxVol").value=String(cfg.sfxVol);$("oShake").checked=cfg.shake;$("oPhoto").checked=cfg.photo;$("oFollow").checked=cfg.follow;
   $("oShare").checked=cfg.share;$("oRepeat").checked=cfg.repeat;$("oToast").checked=cfg.toast;$("oMin").value=String(cfg.min);$("oNames").value=cfg.names||"";$("oIdle").checked=cfg.idle;$("oIdleSec").value=String(cfg.idleSec);$("oAutoTag").checked=cfg.autoTag;$("oPowers").checked=cfg.powers;$("oRain").value=String(cfg.rain)}
 function bind(id,key,num){var el=$(id);el.onchange=function(){cfg[key]=el.type==="checkbox"?el.checked:num?+el.value:el.value;save();if(key==="q")applyQuality()}}
-bind("oQ","q");bind("oAuto","auto");bind("oSfx","sfx");bind("oCrowd","crowd");bind("oReplay","replay");bind("oVib","vib");$("oGoal").onchange=function(){cfg.goal=+$("oGoal").value;save();GOAL.target=cfg.goal;GOAL.got=Math.min(GOAL.got,cfg.goal);paintGoal()};bind("oPredict","predict");$("oLite").onchange=function(){cfg.lite=$("oLite").checked;save();location.reload()};bind("oCycle","cycle");bind("oWeather","weather");bind("oChase","chase");bind("oVote","vote");bind("oMusic","music");bind("oMusicVol","musicVol",1);bind("oSfxVol","sfxVol",1);bind("oShake","shake");bind("oPhoto","photo");bind("oFollow","follow");bind("oShare","share");bind("oRepeat","repeat");bind("oToast","toast");bind("oMin","min",1);bind("oIdle","idle");bind("oIdleSec","idleSec",1);bind("oAutoTag","autoTag");bind("oPowers","powers");bind("oRain","rain",1);
+bind("oQ","q");bind("oAuto","auto");bind("oSfx","sfx");bind("oEmojis","emojis");bind("oDance","dance");bind("oZap","zap");bind("oBoss","boss");bind("oDrone","drone");bind("oCrowd","crowd");bind("oReplay","replay");bind("oVib","vib");$("oGoal").onchange=function(){cfg.goal=+$("oGoal").value;save();GOAL.target=cfg.goal;GOAL.got=Math.min(GOAL.got,cfg.goal);paintGoal()};bind("oPredict","predict");$("oLite").onchange=function(){cfg.lite=$("oLite").checked;save();location.reload()};bind("oCycle","cycle");bind("oWeather","weather");bind("oChase","chase");bind("oVote","vote");bind("oMusic","music");bind("oMusicVol","musicVol",1);bind("oSfxVol","sfxVol",1);bind("oShake","shake");bind("oPhoto","photo");bind("oFollow","follow");bind("oShare","share");bind("oRepeat","repeat");bind("oToast","toast");bind("oMin","min",1);bind("oIdle","idle");bind("oIdleSec","idleSec",1);bind("oAutoTag","autoTag");bind("oPowers","powers");bind("oRain","rain",1);
 $("oNames").oninput=function(){cfg.names=$("oNames").value;save()};
 $("bNames").onclick=function(){cfg.names=$("oNames").value;save();handNames();openSheet(false)};
 function openSheet(o){$("sheet").hidden=!o;$("gear").hidden=o;if(o){fill();paintMon();paintShop()}}
@@ -1722,7 +1775,7 @@ setInterval(function(){var now=perf();
     var clr=laneClear(l),sc=Math.min(clr,3)*12;if(clr<1.1)sc-=60;   /* a vehicle soon in that lane: bad */
     var I=laneInfo(l),lo=laneObs(l);
     for(var q=0;q<lo.length-1;q++){var a=lo[q],b2=lo[q+1];if(!a.veh&&!b2.veh&&a.k!==b2.k&&b2.tf-a.tf<0.8&&a.tf<2)sc-=25}   /* fence then gate too close */
-    if(l!==pl.lane&&lo[0]&&!lo[0].veh&&!lo[0].ramp){if(lo[0].tf<0.13&&lo[0].b>-0.3)return;if(lo[0].tf<0.55)sc-=30}   /* never arrive on top of a fence/gate */
+    if(l!==pl.lane&&lo[0]&&!lo[0].veh&&!lo[0].ramp){if(lo[0].tf<0.2&&lo[0].b>-0.3)return;if(lo[0].tf<0.55)sc-=30}   /* never arrive on top of a fence/gate */
     sc+=I.coins*(W.coins||W.tcoin?2.4:1.3);
     if(I.pup<48)sc+=W.pup?45:16;
     if(I.letter<55)sc+=34;
