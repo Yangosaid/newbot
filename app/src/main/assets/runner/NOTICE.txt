@@ -3,3 +3,5 @@ Art used by runner.html (Ruta de Leyendas). All CC0 1.0, no attribution required
 Characters, vehicles and desert props: Quaternius (https://quaternius.com) and Kenney (https://kenney.nl),
 taken from the npm package @netforge/asset-library-files (its NOTICE records each pack's licence).
 HDR environment 'sunset': Poly Haven (https://polyhaven.com), from the npm package @pmndrs/assets (CC0-1.0).
+Photo-real sky (HDRI lonely_road_afternoon_puresky), textures (asphalt_02, dry_ground_01, sandy_gravel_02) and scanned
+rocks (namaqualand_boulder_02, namaqualand_boulder_05): Poly Haven (https://polyhaven.com), CC0 1.0. In runner/photo.js.

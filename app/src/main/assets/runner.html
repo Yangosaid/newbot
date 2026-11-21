@@ -191,6 +191,7 @@ input[type=checkbox]{width:20px;height:20px;accent-color:var(--hot)}
 </div>
 <script src="lib/three-plus.js"></script>
 <script src="runner/assets.js"></script>
+<script src="runner/photo.js"></script>
 <script>
 (function(){
 "use strict";
@@ -523,11 +524,60 @@ function artReady(){
     if(acts.slide){acts.slide.setLoop(T.LoopOnce,1);acts.slide.clampWhenFinished=true}
     G.body.visible=false;G.P.add(o);G.rig={o:o,mixer:mixer,acts:acts,cur:null}}
   /* desert props */
-  var pn=["cactus","cactus","rock_large","rock_tall","bush_large","tree_palm"].filter(function(n){return ART[n]});
-  if(pn.length)G.props.forEach(function(pr){var n=pick(pn),o=ART[n].scene.clone(true);keepShared(o);
+  var pn=(window.RUNNER_PHOTO?["bush_large"]:["cactus","cactus","rock_large","rock_tall","bush_large","tree_palm"]).filter(function(n){return ART[n]});
+  if(pn.length)G.props.forEach(function(pr){if(pr.userData.scanned)return;var n=pick(pn),o=ART[n].scene.clone(true);keepShared(o);
     var box=new T.Box3().setFromObject(o),h=box.getSize(new T.Vector3()).y,want=n==="tree_palm"?rnd(6,9):n==="cactus"?rnd(2.5,4.5):n==="rock_tall"?rnd(2,4):n==="rock_large"?rnd(1.2,2.6):rnd(0.8,1.4);
     o.scale.multiplyScalar(want/h);box.setFromObject(o);o.position.y-=box.min.y;
-    pr.children.slice().forEach(function(c){pr.remove(c)});pr.scale.setScalar(1);pr.add(o);if(n==="tree_palm"&&Math.abs(pr.userData.x)<14)pr.userData.x=Math.sign(pr.userData.x)*rnd(14,30)})}
+    pr.children.slice().forEach(function(c){pr.remove(c)});pr.scale.setScalar(1);if(n==="bush_large")o.traverse(function(m){if(m.isMesh){m.material=m.material.clone();m.material.color.multiply(new T.Color(0x9a8a60))}});pr.add(o);if(n==="tree_palm"&&Math.abs(pr.userData.x)<14)pr.userData.x=Math.sign(pr.userData.x)*rnd(14,30)})}
+/* ================================================================ photo-real layer (Poly Haven CC0): HDR sky, PBR ground, scanned rocks */
+var SUNDIR=new T.Vector3(-12,11,13).normalize();
+function imgOf(src,cb){var im=new Image();im.onload=function(){cb(im)};im.src=src}
+function texOf(src,rep,srgb,cb){imgOf(src,function(im){var t=new T.Texture(im);t.wrapS=t.wrapT=T.RepeatWrapping;t.repeat.set(rep[0],rep[1]);t.colorSpace=srgb?T.SRGBColorSpace:T.NoColorSpace;t.anisotropy=Math.min(8,R.capabilities.getMaxAnisotropy());t.needsUpdate=true;cb(t)})}
+function loadPhoto(){var P=window.RUNNER_PHOTO;if(!ok3d||!P)return;
+  /* 1. sky: the HDR photo on a dome we can turn, so the real sun sits behind-left of the runner and matches the shadows */
+  try{var hd=new T.RGBELoader().parse(b64buf(P.sky_hdr)),w=hd.width,h=hd.height,d=hd.data,isHalf=hd.type===T.HalfFloatType;
+    var val=function(i){return isHalf?T.DataUtils.fromHalfFloat(d[i]):d[i]};
+    /* find the sun (brightest pixel) and the haze colour at the horizon */
+    var best=-1,bi=0,step=4;for(var y=0;y<h/2;y+=2)for(var x=0;x<w;x+=step){var i=(y*w+x)*4,l=val(i)+val(i+1)+val(i+2);if(l>best){best=l;bi=y*w+x}}
+    var hr=0,hg=0,hb=0,n=0,row=Math.floor(h*0.49);for(var x2=0;x2<w;x2+=8){var j=(row*w+x2)*4;hr+=val(j);hg+=val(j+1);hb+=val(j+2);n++}
+    var tx=new T.DataTexture(d,w,h,T.RGBAFormat,hd.type);tx.colorSpace=T.LinearSRGBColorSpace;tx.flipY=true;tx.minFilter=T.LinearFilter;tx.magFilter=T.LinearFilter;tx.generateMipmaps=false;tx.needsUpdate=true;
+    var su=((bi%w)+0.5)/w,sth=(Math.floor(bi/w)+0.5)/h*Math.PI,sd=new T.Vector3(-Math.cos(su*2*Math.PI)*Math.sin(sth),Math.cos(sth),Math.sin(su*2*Math.PI)*Math.sin(sth));
+    var want=Math.atan2(0.8,-0.6),have=Math.atan2(sd.z,sd.x),rot=have-want;   /* rotation about y that brings the sun to (-0.6,*,0.8) */
+    var dome=new T.Mesh(new T.SphereGeometry(800,64,32),new T.MeshBasicMaterial({map:tx,side:T.BackSide,fog:false,depthWrite:false,toneMapped:true}));dome.rotation.y=rot;dome.renderOrder=-12;
+    scene.add(dome);G.hdrDome=dome;if(G.sky)G.sky.visible=false;G.dome.visible=false;
+    SUNDIR.copy(sd).applyAxisAngle(new T.Vector3(0,1,0),rot);SUNDIR.y=Math.max(SUNDIR.y,0.35);SUNDIR.normalize();
+    /* image-based light from the same, turned sky */
+    var es=new T.Scene();var d2=dome.clone();d2.material=dome.material;es.add(d2);var pm=new T.PMREMGenerator(R);scene.environment=pm.fromScene(es,0,0.1,1000).texture;pm.dispose();scene.environmentIntensity=0.9;
+    var hz=new T.Color(hr/n,hg/n,hb/n),mx=Math.max(hz.r,hz.g,hz.b)||1;hz.multiplyScalar(0.92/mx);hz.convertLinearToSRGB();
+    scene.fog.color.copy(hz);if(G.ranges)G.ranges.forEach(function(m,k){m.material.color.copy(hz).lerp(new T.Color(0x7a6050),0.25+k*0.2)});
+    sun.color.set(0xfff0dc);sun.intensity=3.2}catch(e){console.warn("hdr",e&&e.message)}
+  /* 2. ground: photo-scanned dry earth, 4 m per tile, scrolls with the run */
+  var GT=4;G.groundTile=GT;G.groundMaps=[];var gm=G.ground.material,rep=[1200/GT,1200/GT];
+  texOf(P.tex.dry_ground_01_diff,rep,true,function(t){gm.map=t;gm.color.set(0xf2e2cc);gm.needsUpdate=true;G.groundMaps.push(t)});
+  texOf(P.tex.dry_ground_01_nor_gl,rep,false,function(t){gm.normalMap=t;gm.normalScale.set(1,1);gm.needsUpdate=true;G.groundMaps.push(t)});
+  texOf(P.tex.dry_ground_01_rough,rep,false,function(t){gm.roughnessMap=t;gm.needsUpdate=true;G.groundMaps.push(t)});
+  /* 3. asphalt: photo asphalt (3 m tiles) with the lane paint drawn over it in one canvas, plus its normal and roughness */
+  imgOf(P.tex.asphalt_02_diff,function(im){var c=document.createElement("canvas");c.width=1024;c.height=2048;var x=c.getContext("2d"),tile=1024/(ROADW*2/3);
+    for(var yy=0;yy<2048;yy+=tile)for(var xx=0;xx<1024;xx+=tile)x.drawImage(im,xx,yy,tile+1,tile+1);
+    x.fillStyle="rgba(40,36,34,.18)";x.fillRect(0,0,1024,2048);
+    function u(px){return (px+ROADW)/(2*ROADW)*1024}
+    [-1,0,1].forEach(function(l){[-0.62,0.62].forEach(function(o){var g=x.createLinearGradient(u(l*LANE+o)-26,0,u(l*LANE+o)+26,0);g.addColorStop(0,"rgba(15,15,16,0)");g.addColorStop(0.5,"rgba(15,15,16,.22)");g.addColorStop(1,"rgba(15,15,16,0)");x.fillStyle=g;x.fillRect(u(l*LANE+o)-26,0,52,2048)})});
+    function paint(px,y0,y1,w){for(var y=y0;y<y1;y+=4){x.globalAlpha=Math.random()<0.1?0.3:rnd(0.7,0.86);x.fillStyle="#e8e4da";x.fillRect(u(px)-w/2+rnd(-0.5,0.5),y,w,4)}x.globalAlpha=1}
+    [-LANE/2,LANE/2].forEach(function(px){for(var y=0;y<2048;y+=512)paint(px,y+80,y+80+260,16)});paint(-ROADW+0.25,0,2048,16);paint(ROADW-0.25,0,2048,16);
+    var t=tex(c);t.wrapT=T.RepeatWrapping;G.segs[0].children[0].material.map=t;G.segs[0].children[0].material.needsUpdate=true});
+  var rm=G.segs[0].children[0].material,rr=[ROADW*2/3,SEG/3];
+  texOf(P.tex.asphalt_02_nor_gl,rr,false,function(t){rm.normalMap=t;rm.normalScale.set(0.8,0.8);rm.needsUpdate=true});
+  texOf(P.tex.asphalt_02_rough,rr,false,function(t){rm.roughnessMap=t;rm.roughness=1;rm.needsUpdate=true});
+  /* gravel shoulders */
+  var gs=G.segs[0].children[1].material,gr=[1,SEG/2];
+  texOf(P.tex.sandy_gravel_02_diff,gr,true,function(t){gs.map=t;gs.color.set(0xe8dccb);gs.needsUpdate=true});
+  texOf(P.tex.sandy_gravel_02_nor_gl,gr,false,function(t){gs.normalMap=t;gs.needsUpdate=true});
+  /* 4. scanned boulders replace the low-poly rocks, and a few stand closer to the road */
+  var gl=new T.GLTFLoader(),rocks=[],left=0;Object.keys(P.models).forEach(function(k){left++;gl.parse(P.models[k],"",function(g){g.scene.traverse(function(m){if(m.isMesh){m.castShadow=true;m.receiveShadow=true;m.material.shared=true}});rocks.push(g.scene);if(--left===0)placeRocks(rocks)},function(){--left})})}
+function placeRocks(rocks){if(!rocks.length)return;G.props.forEach(function(pr,i){if(i%4===3)return;var o=pick(rocks).clone(true);
+  var box=new T.Box3().setFromObject(o),sz=box.getSize(new T.Vector3()),k=rnd(1.4,4.2)/Math.max(sz.x,sz.y,sz.z);o.scale.multiplyScalar(k);box.setFromObject(o);o.position.y-=box.min.y+0.15;o.rotation.y=rnd(0,6);
+  pr.children.slice().forEach(function(c){pr.remove(c)});pr.scale.setScalar(1);pr.add(o);pr.userData.scanned=true;pr.userData.x=Math.sign(pr.userData.x||1)*rnd(8.5,22)})}
+
 function playRig(name,fade){var r=G.rig;if(!r)return;var a=r.acts[name]||r.acts.run;if(!a||r.cur===a)return;
   a.reset();a.setEffectiveWeight(1);a.enabled=true;if(r.cur)a.crossFadeFrom(r.cur,fade||0.15,false);a.play();r.cur=a;r.curName=name}
 
@@ -701,7 +751,7 @@ var tmpV=new T.Vector3();
 function render(dt,now,move){var t=now/1000;
   /* road tiles and props scroll */
   G.segs.forEach(function(s){var u=s.userData;while(u.s+SEG<dist-SEG*2)u.s+=NSEG*SEG;while(u.s>dist+NSEG*SEG)u.s-=NSEG*SEG;s.position.z=-(u.s-dist)-SEG/2});
-  G.ground.material.map.offset.y=dist/15;
+  if(G.groundTile){var gt=dist/G.groundTile;G.groundMaps.forEach(function(m){m.offset.y=gt})}else G.ground.material.map.offset.y=dist/15;
   G.props.forEach(function(p){var u=p.userData;if(u.s-dist<-20){u.s+=VIEW+40;u.x=(Math.random()<0.5?-1:1)*rnd(14,42)}p.position.set(u.x,0,-(u.s-dist))});
   /* items */
   items.forEach(function(it){if(!it.g)return;var z=-(it.s-dist);
@@ -742,7 +792,7 @@ function render(dt,now,move){var t=now/1000;
   tmpV.set(pl.x*0.55,cy+pl.y*0.35,cz);cam.position.lerp(tmpV,1-Math.exp(-8*dt));
   if(shake>0){shake=Math.max(0,shake-dt);cam.position.x+=rnd(-1,1)*shake*0.5;cam.position.y+=rnd(-1,1)*shake*0.4}
   cam.lookAt(pl.x*0.7,1.3+pl.y*0.25,-10);
-  sun.position.set(pl.x-12,11,13);sun.target.position.set(pl.x,0,-8);
+  sun.position.set(pl.x+SUNDIR.x*30,SUNDIR.y*30,SUNDIR.z*30);sun.target.position.set(pl.x,0,-8);
   stepFx(dt,move);
   if(composer)composer.render();else R.render(scene,cam)}
 
@@ -855,7 +905,7 @@ setInterval(function(){var now=perf();
   if(Math.random()<0.3){var bestL=pl.lane,bc=coinsIn(pl.lane);[pl.lane-1,pl.lane+1].forEach(function(l){if(l<-1||l>1||!safe(l))return;var c=coinsIn(l),t=threat(l);if(t&&t.veh&&t.rel<v*1.2)return;if(c>bc+1){bc=c;bestL=l}});
     if(bestL!==pl.lane){act(bestL<pl.lane?"left":"right",true);pilotNext=now+260}}},45);
 
-loadArt();fill();applyQuality();resetRun();paintCard();wake();handNames();if(ok3d)requestAnimationFrame(frame);
+loadArt();loadPhoto();fill();applyQuality();resetRun();paintCard();wake();handNames();if(ok3d)requestAnimationFrame(frame);
 })();
 </script>
 </body>
