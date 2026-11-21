@@ -1,0 +1,60 @@
+plugins {
+    id 'com.android.application'
+}
+
+android {
+    namespace 'com.vidsaver.app'
+    compileSdk 34
+
+    defaultConfig {
+        applicationId 'com.vidsaver.app'
+        minSdk 24
+        targetSdk 34
+        versionCode((System.getenv('GITHUB_RUN_NUMBER') ?: '1') as int)
+        versionName "1.0.${System.getenv('GITHUB_RUN_NUMBER') ?: '0'}"
+    }
+
+    // One APK per processor type keeps each download small (Python + FFmpeg are bundled).
+    splits {
+        abi {
+            enable true
+            reset()
+            include 'arm64-v8a', 'armeabi-v7a'
+            universalApk false
+        }
+    }
+
+    // yt-dlp, Python and FFmpeg run as executables, so their native libraries must be unpacked on install.
+    packagingOptions {
+        jniLibs { useLegacyPackaging true }
+    }
+
+    def ciKey = file(System.getenv('BUS_KEYSTORE') ?: 'none')
+    if (ciKey.exists()) {
+        signingConfigs {
+            ci {
+                storeFile ciKey
+                storePassword System.getenv('BUS_KEYSTORE_PASS')
+                keyAlias 'bus'
+                keyPassword System.getenv('BUS_KEYSTORE_PASS')
+            }
+        }
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            signingConfig ciKey.exists() ? signingConfigs.ci : signingConfigs.debug
+        }
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+}
+
+dependencies {
+    implementation 'io.github.junkfood02.youtubedl-android:library:0.18.1'
+    implementation 'io.github.junkfood02.youtubedl-android:ffmpeg:0.18.1'
+}

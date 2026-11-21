@@ -1,0 +1,570 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Batalla de Naciones</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800&family=Barlow:wght@400;500;600&display=swap">
+<style>
+/* Battle of nations: viewers join their country by writing its name; every interaction adds citizens to their country on a
+   3D globe; "ataco a …" attacks, "me cambio a …" switches. Top five, a duel for the throne, a live goal and a feed. */
+:root{
+  color-scheme:dark;
+  --night:#05020c; --panel:#140d2a; --panel-2:#1f1640; --line:#3b2d6b;
+  --ink:#f7f4ff; --ink-dim:#b4a9d6; --ok:#4ade80; --bad:#ff6b5e; --hot:#ff3d8b; --gold:#ffc93c;
+  --display:"Barlow Condensed","Arial Narrow","Roboto Condensed",system-ui,sans-serif;
+  --body:"Barlow","Segoe UI",Roboto,system-ui,sans-serif;
+}
+html,body{height:100%;margin:0}
+[hidden]{display:none!important}
+body{background:var(--night);color:var(--ink);font-family:var(--body);overflow:hidden}
+#stage{position:relative;height:100%;overflow:hidden;touch-action:manipulation;user-select:none;-webkit-user-select:none}
+#gl{position:absolute;inset:0;width:100%;height:100%;display:block}
+
+#hdr{position:absolute;left:0;right:0;top:calc(env(safe-area-inset-top,0px) + 8.5%);text-align:center;pointer-events:none}
+#hdr h1{margin:0;font:900 italic 34px/1 var(--display);letter-spacing:.06em;background:linear-gradient(180deg,#fff6c9,#ffc93c 55%,#c98a00);-webkit-background-clip:text;background-clip:text;color:transparent;filter:drop-shadow(0 2px 6px rgba(0,0,0,.6))}
+#hdr .st{font:700 12px/1.4 var(--display);letter-spacing:.12em;color:#ffe9a8;text-transform:uppercase}
+#top5{position:absolute;left:6px;right:6px;top:calc(env(safe-area-inset-top,0px) + 8.5% + 54px);display:flex;gap:4px;justify-content:center;pointer-events:none}
+.tc{position:relative;flex:1;max-width:84px;padding:12px 4px 4px;border-radius:10px;background:linear-gradient(180deg,hsla(var(--h),70%,30%,.92),rgba(10,8,30,.92));border:1px solid hsla(var(--h),90%,60%,.7);text-align:center;color:#fff}
+.tc.one{transform:scale(1.12);z-index:1;border:2px solid #ffd76a;box-shadow:0 0 16px rgba(255,215,106,.6)}.tc.e{visibility:hidden}
+.tc .rk{position:absolute;top:-9px;left:50%;transform:translateX(-50%);font:900 11px/1 var(--display);background:#ffd76a;color:#3a2400;border-radius:999px;padding:3px 7px}
+.tc .fl{font:800 14px/1 var(--display)}.tc .fl b{letter-spacing:.04em}.tc .pt{font:900 22px/1.05 var(--display)}.tc .tp{font:700 10px/1.2 var(--display);color:#ffe9a8;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#goal{position:absolute;left:12px;right:12px;top:calc(env(safe-area-inset-top,0px) + 8.5% + 128px);height:20px;border-radius:999px;background:rgba(10,8,30,.75);border:1px solid rgba(255,215,106,.6);overflow:hidden;pointer-events:none}
+#goalF{position:absolute;left:0;top:0;bottom:0;width:0;background:linear-gradient(90deg,#ff8a00,#ffd76a);transition:width .5s ease}
+#goal span{position:absolute;inset:0;display:flex;align-items:center;justify-content:space-between;padding:0 10px;font:800 12px/1 var(--display);color:#fff;text-shadow:0 1px 2px #000;letter-spacing:.06em}
+#comboB{position:absolute;right:10px;top:42%;width:76px;height:76px;border-radius:50%;background:radial-gradient(circle,#ff5e8a,#b5124a);border:3px solid #fff;display:grid;place-items:center;text-align:center;color:#fff;pointer-events:none;box-shadow:0 0 18px rgba(255,60,120,.7)}
+#comboB b{font:900 18px/1 var(--display)}#comboB span{font:800 10px/1 var(--display);letter-spacing:.1em}
+#toasts{position:absolute;left:8px;top:40%;display:flex;flex-direction:column;gap:6px;pointer-events:none;max-width:62%}
+.toast,#arrive{display:flex;align-items:center;gap:8px;padding:5px 12px 5px 5px;border-radius:999px;background:linear-gradient(90deg,hsla(var(--h,260),70%,35%,.95),rgba(10,8,30,.92));border:1px solid rgba(255,255,255,.3);color:#fff;animation:tin .4s cubic-bezier(.2,.9,.3,1.3)}
+.toast.out{opacity:0;transform:translateX(-30px);transition:all .4s}
+.toast .ph,#arrive .ph,.ln2 .ph{width:34px;height:34px;border-radius:50%;overflow:hidden;flex:none;border:2px solid #fff;display:grid;place-items:center;font:800 15px/1 var(--display)}
+.toast .ph img,#arrive .ph img,.ln2 .ph img{width:100%;height:100%;object-fit:cover}
+.toast .tx,#arrive .tx{display:flex;flex-direction:column;font:800 15px/1.1 var(--display)}.toast .tx span,#arrive .tx span{font-size:12px;color:#ffe9a8}
+#arrive{position:absolute;left:50%;top:60%;transform:translateX(-50%);pointer-events:none}#arrive.in{animation:tin .4s cubic-bezier(.2,.9,.3,1.3)}
+@keyframes tin{0%{opacity:0;transform:translateX(-24px) scale(.9)}100%{opacity:1}}
+#duel{position:absolute;left:8px;right:8px;top:66%;pointer-events:none}
+#duel .ttl{text-align:center;font:900 12px/1 var(--display);letter-spacing:.14em;color:#ffd76a;margin-bottom:4px}
+#duel .row{display:flex;align-items:center;gap:6px}#duel .sd{flex:1;padding:7px 10px;border-radius:8px;font:900 15px/1.05 var(--display);color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#dA{background:linear-gradient(90deg,#b1121f,#e8322c)}#dB{background:linear-gradient(90deg,#1d4fd8,#0b2a8a);text-align:right}
+#duel .vs{width:42px;height:42px;border-radius:50%;background:radial-gradient(circle,#ffe9a8,#c98a00);display:grid;place-items:center;font:900 16px/1 var(--display);color:#3a2400;flex:none;box-shadow:0 0 14px rgba(255,215,106,.8)}
+#dBar{margin-top:4px;height:8px;border-radius:999px;background:linear-gradient(90deg,#e8322c 0,#e8322c var(--k,50%),#2f6bff var(--k,50%),#2f6bff 100%)}
+#dTag{display:block;text-align:center;font:800 11px/1.3 var(--display);color:#fff;letter-spacing:.1em}
+#feed{position:absolute;left:8px;right:8px;top:calc(66% + 104px);max-height:19%;overflow:hidden;border-radius:10px;background:rgba(10,8,30,.62);border:1px solid rgba(255,215,106,.35);padding:4px 6px;pointer-events:none}
+.ln2{display:flex;align-items:center;gap:6px;font:700 13px/1.2 var(--display);color:#fff;padding:2px 0;white-space:nowrap;overflow:hidden}.ln2 .ph{width:24px;height:24px;font-size:11px;border-width:1px}
+.ln2 b{color:#ffe9a8}.ln2 .cc{font-size:15px}.ln2 i{font-style:normal;overflow:hidden;text-overflow:ellipsis}.ln2 em{font-style:normal;color:#ff8a8a}
+#rules{position:absolute;left:8px;right:8px;top:calc(66% + 78px);display:flex;flex-direction:column;gap:3px;align-items:center;pointer-events:none}
+#rules div{font:800 12px/1.2 var(--display);color:#fff;background:rgba(150,20,40,.75);border-radius:999px;padding:3px 10px;white-space:nowrap}
+#goalWin{position:absolute;left:0;right:0;top:34%;text-align:center;font:900 54px/1.1 var(--display);color:#ffd76a;text-shadow:0 4px 0 #6a12c9,0 0 30px rgba(255,215,106,.9);pointer-events:none}
+#goalWin.in{animation:tin .6s cubic-bezier(.2,.9,.3,1.4)}
+.gp{position:absolute;bottom:30%;font:900 34px/1 var(--display);color:#ffd76a;text-shadow:0 2px 6px #000;pointer-events:none;animation:gup 1.6s ease-out forwards}
+@keyframes gup{0%{transform:translateY(0) scale(.6);opacity:0}15%{opacity:1;transform:translateY(-20px) scale(1.1)}100%{transform:translateY(-160px) scale(1);opacity:0}}
+#busyBtns{flex-wrap:wrap}
+#host{position:absolute;z-index:6;border-radius:50%;overflow:hidden;background:#111;touch-action:none;box-shadow:0 0 0 3px #fff,0 0 18px 4px rgba(255,45,122,.55);transition:transform .5s ease,opacity .5s ease;animation:hostGlow 2.4s ease-in-out infinite}
+#host.card{border-radius:20px}#host.dim{transform:scale(.78);opacity:.82}
+#host.drag{transition:none;animation:none;box-shadow:0 0 0 3px #ffc93c,0 0 26px 6px rgba(255,201,60,.75)}
+#host.away{box-shadow:0 0 0 3px #ffc93c,0 0 18px 4px rgba(255,201,60,.5)}
+@keyframes hostGlow{0%,100%{box-shadow:0 0 0 3px #fff,0 0 14px 3px rgba(255,45,122,.5)}50%{box-shadow:0 0 0 3px #fff,0 0 22px 6px rgba(24,214,255,.55)}}
+#hostCam{width:100%;height:100%;object-fit:cover;display:block;pointer-events:none}#hostCam.mir{transform:scaleX(-1)}#hostCam.blur{filter:blur(14px)}
+#hostMsg{position:absolute;inset:0;display:grid;place-items:center;font-size:.26em;background:#111;pointer-events:none}
+#hostBusy{position:absolute;inset:0;pointer-events:none}
+#hbBg{position:absolute;inset:0;background:#2a1240 center/cover no-repeat;filter:brightness(.7) saturate(.9)}
+#hbVid,#hvPrevVid{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block}#host.vid #hbIcon{top:12%;left:16%;font-size:.17em;animation:none}
+#hvPrev{position:relative;width:96px;height:154px;border-radius:14px;overflow:hidden;background:#111;touch-action:none;flex:none;box-shadow:0 0 0 2px #fff}
+#hvEdit{display:flex;gap:12px;align-items:center}#hvEdit .sl{flex:1;display:flex;flex-direction:column;gap:8px}#hvEdit input[type=range]{width:100%}#hbBg.sup{filter:none}
+#hbIcon{position:absolute;left:50%;top:42%;transform:translate(-50%,-50%);font-size:.36em;line-height:1;animation:bob 1.6s ease-in-out infinite;filter:drop-shadow(0 2px 6px rgba(0,0,0,.6))}
+#hbTime{position:absolute;left:0;right:0;bottom:9%;text-align:center;font:800 .14em/1 var(--display);color:#fff;text-shadow:0 1px 4px #000}
+#hbHeart{position:absolute;right:12%;top:9%;font-size:.17em;animation:bob 1s ease-in-out infinite}
+@keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-4px)}}#gear{position:absolute;right:10px;bottom:10px;width:40px;height:40px;border-radius:50%;border:1px solid rgba(255,255,255,.12);background:rgba(10,6,24,.45);
+  color:var(--ink);font-size:19px;line-height:1;cursor:pointer;opacity:.3}
+#gear i{position:absolute;top:3px;right:3px;width:8px;height:8px;border-radius:50%;background:var(--bad)}
+#gear i.ok{background:var(--ok)}
+#sheet{position:absolute;left:0;right:0;bottom:0;max-height:78%;overflow:auto;background:var(--panel);border-top:1px solid var(--line);
+  border-radius:18px 18px 0 0;padding:0 16px 22px;box-shadow:0 -12px 40px rgba(0,0,0,.5);z-index:20}
+#tabs{position:sticky;top:0;display:flex;gap:4px;align-items:center;background:var(--panel);padding:12px 0 8px;z-index:1}
+.tab{flex:1;background:none;border:0;border-bottom:3px solid transparent;color:var(--ink-dim);font:800 16px/1 var(--display);letter-spacing:.06em;text-transform:uppercase;padding:8px 2px;cursor:pointer}
+.tab[aria-selected="true"]{color:var(--ink);border-bottom-color:var(--hot)}
+#close{background:var(--panel-2);border:0;color:var(--ink);width:36px;height:36px;border-radius:50%;font-size:16px;cursor:pointer;flex:none}
+.grp{background:var(--panel-2);border-radius:12px;padding:10px 12px;margin:10px 0}
+.grp h3{margin:0 0 6px;font:800 15px/1.2 var(--display);letter-spacing:.06em;text-transform:uppercase;color:var(--ink-dim)}
+.ln{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:7px 0}
+.ln label{flex:1;min-width:150px;font-size:14px}
+.ln .grow{flex:1;min-width:0}
+label.ln{flex-wrap:nowrap}label.ln span{flex:1;min-width:0}label.ln input{flex:none}
+.note{font-size:13px;line-height:1.45;color:var(--ink-dim);margin:8px 0}
+.btn{background:var(--panel-2);color:var(--ink);border:1px solid var(--line);border-radius:10px;padding:10px 14px;font:700 15px/1 var(--display);letter-spacing:.04em;text-transform:uppercase;cursor:pointer}
+.btn.go{background:var(--hot);border-color:var(--hot);color:#fff}
+input[type=text],select{background:#0c0820;color:var(--ink);border:1px solid var(--line);border-radius:8px;padding:9px 10px;font:500 15px var(--body)}
+input[type=checkbox]{width:20px;height:20px;accent-color:var(--hot)}
+#st.ok{color:var(--ok)}#st.bad{color:var(--bad)}
+#apLog{max-height:30vh;overflow:auto;white-space:pre-wrap;font:12px/1.35 monospace;color:var(--ink-dim);background:rgba(0,0,0,.35);border-radius:8px;padding:8px;margin:8px 0 0}
+#perf{font:12px monospace;color:var(--ink-dim)}
+#monC{display:flex;gap:14px;font:800 20px/1 var(--display);margin:6px 0}
+</style>
+</head>
+<body>
+<div id="stage">
+  <canvas id="gl"></canvas>
+  <div id="hdr" aria-hidden="true"><h1>BATALLA DE NACIONES</h1><div class="st"><span id="stC">0</span> países · <span id="stP">0</span> jugadores · <span id="stT">0</span> ciudadanos</div></div>
+  <div id="top5" aria-hidden="true"></div>
+  <div id="goal" aria-hidden="true"><div id="goalF"></div><span><b>🎯 META DEL DIRECTO</b><b id="goalN">0 / 1700</b></span></div>
+  <div id="comboB" aria-hidden="true"><div><b id="combo">0</b><br><span>COMBO</span></div></div>
+  <div id="toasts" aria-hidden="true"></div>
+  <div id="arrive" aria-hidden="true" hidden></div>
+  <div id="duel" aria-hidden="true" hidden><div class="ttl">👑 DUELO POR EL TRONO 👑</div><div class="row"><div class="sd" id="dA"></div><div class="vs">VS</div><div class="sd" id="dB"></div></div><div id="dBar"></div><span id="dTag"></span></div>
+  <div id="feed" aria-hidden="true"></div>
+  <div id="rules" aria-hidden="true"><div>💬 Escribe tu país para unirte · «ataco a …» ⚔️ · «me cambio a …» ⇄</div><div id="rPts" hidden></div></div>
+  <div id="goalWin" aria-hidden="true" hidden>🎯<br>¡META!</div>
+  <div id="host" aria-hidden="true" hidden><video id="hostCam" autoplay playsinline muted></video><div id="hostMsg" hidden></div>
+    <div id="hostBusy" hidden><div id="hbBg"></div><video id="hbVid" loop muted playsinline hidden></video><span id="hbIcon">☕</span><span id="hbHeart">❤️</span></div></div>
+  <button id="gear" aria-label="Ajustes">⚙<i id="dot"></i></button>
+  <div id="sheet" hidden>
+    <div id="tabs" role="tablist">
+      <button class="tab" role="tab" data-p="pCtl" aria-selected="true">Control</button>
+      <button class="tab" role="tab" data-p="pRules" aria-selected="false">Reglas</button>
+      <button class="tab" role="tab" data-p="pLink" aria-selected="false">Conexión</button>
+      <button id="close" aria-label="Cerrar">✕</button>
+    </div>
+    <div class="pane" id="pCtl">
+      <div class="grp"><h3>🌍 Batalla de naciones</h3>
+        <p class="note">Cada espectador escribe el nombre de su país (en español, árabe o inglés, o su bandera 🇪🇸) y se une a él. Todo lo que hace suma ciudadanos a su país: escribir su bandera o su país otra vez, seguirte, compartir, los regalos y los toques. «ataco a Marruecos» lanza un misil y le quita unos ciudadanos; «me cambio a Colombia» cambia de país. Los puntos de cada país se guardan entre directos (una temporada).</p>
+        <label class="ln"><input type="checkbox" id="o_spin"><span>El globo gira solo</span></label>
+        <div class="ln"><button class="btn" id="bReset">Nueva temporada (todo a 0)</button></div>
+      </div>
+      <div class="grp"><h3>🎥 Mi cámara</h3>
+        <label class="ln"><input type="checkbox" id="oHost"><span>Salir yo con la cámara delantera en una burbuja pequeña</span></label>
+        <p class="note">Arrástrala con el dedo a un borde donde no tape a nadie (se queda ahí). Siempre empieza con tu vídeo (o tu foto), nunca con la cámara: la cámara solo se enciende cuando tú pulsas 🎥 o das doble toque en la burbuja; otro doble toque y vuelve el vídeo. Cuando llega un regalo grande, la burbuja se hace pequeña para dejar el protagonismo a quien apoya.</p>
+        <div class="ln"><label for="oHostSize">Tamaño</label><select id="oHostSize"><option value="s">Pequeña</option><option value="m">Mediana</option><option value="l">Grande</option></select><select id="oHostShape"><option value="card">▯ Vertical</option><option value="circle">⚪ Círculo</option></select></div>
+        <label class="ln"><input type="checkbox" id="oHostMirror"><span>Modo espejo</span></label>
+        <div class="ln"><button class="btn" id="bBlur">🌫️ Difuminar</button><button class="btn" id="bHostPic">🖼️ Mi foto para «ocupado»</button><input type="file" id="hostFile" accept="image/*" hidden></div>
+        <div class="ln"><button class="btn" id="bHostVid">🎬 Mi vídeo para «ocupado»</button><button class="btn" id="bHostVidDel" hidden>✖</button><input type="file" id="hostVidFile" accept="video/*" hidden></div>
+        <div id="hvBox" hidden>
+          <p class="note">El vídeo se repite solo. Mueve el dedo sobre la vista previa para elegir la parte que se ve, acerca con 🔍 y elige el volumen con 🔊 (a la izquierda del todo = sin sonido). El sonido del vídeo se mezcla con Spotify: los dos suenan a la vez.</p>
+          <div id="hvEdit"><div id="hvPrev"><video id="hvPrevVid" loop muted playsinline></video></div>
+            <div class="sl"><label>🔍<input type="range" id="hvZ" min="1" max="3" step="0.05"></label><label>↔<input type="range" id="hvX" min="0" max="100" step="1"></label><label>↕<input type="range" id="hvY" min="0" max="100" step="1"></label>
+              <label>🔊<input type="range" id="hvV" min="0" max="100" step="1"></label><span class="note" id="hvVn"></span>
+              <div class="ln"><label for="oHostSnd">Sonido</label><select id="oHostSnd"><option value="mix">🎵 Con Spotify (suena junto a tu música)</option><option value="video">🎬 Sonido del vídeo (siempre sincronizado, pausa Spotify)</option></select></div><span class="note" id="hvOld" hidden>🔊 Vuelve a elegir el vídeo una vez para que suene junto a Spotify.</span></div></div>
+        </div>
+        <div class="ln" id="busyBtns"><button class="btn" data-b="">🎥</button><button class="btn" data-b="☕">☕</button><button class="btn" data-b="🍽️">🍽️</button><button class="btn" data-b="📞">📞</button><button class="btn" data-b="🎮">🎮</button><button class="btn" data-b="🚗">🚗</button><button class="btn" data-b="💤">💤</button></div>
+        <label class="ln"><input type="checkbox" id="oHostSup"><span>Mientras estoy ocupado, mi burbuja enseña la foto del último que envía un regalo ❤️</span></label>
+      </div>
+      <div class="grp"><h3>🫧 Estrellas flotantes (encima de cualquier juego)</h3>
+        <p class="note">Sale encima de cualquier app que abras durante el directo (otro juego, YouTube…): los que tocan suben como burbujas con su foto y su nombre, y cada regalo entra como una tarjeta con la foto, el nombre y el regalo (el de más valor primero). No bloquea el juego de debajo. Muévela arrastrando el pequeño ✥; doble toque en ✥ la esconde un momento. La primera vez Android pide permiso para «mostrar sobre otras apps».</p>
+        <div class="ln"><button class="btn go" id="bFloat">Activar</button><button class="btn" id="bFloatTest">🧪 Probar 20 s</button><span class="note" id="floatSt"></span></div>
+        <p class="note">Para probar sin directo: activa, pulsa 🧪 y abre enseguida tu juego. Durante 20 segundos llegan toques y regalos de prueba.</p>
+        <label class="ln"><input type="checkbox" id="oFlTaps"><span>👆 Burbujas de los que tocan</span></label>
+        <label class="ln"><input type="checkbox" id="oFlGifts"><span>🎁 Tarjetas de los regalos</span></label>
+        <label class="ln"><input type="checkbox" id="oFlWall"><span>⭐ Fila con los 5 últimos que apoyan</span></label>
+        <label class="ln"><input type="checkbox" id="oFlJoin"><span>👋 Los que entran al directo</span></label>
+        <div class="ln"><label for="oFlSize">Tamaño</label><select id="oFlSize"><option value="0.8">Pequeño</option><option value="1">Normal</option><option value="1.25">Grande</option></select></div>
+      </div>
+      <div class="grp"><h3>🎮 Juegos</h3>
+        <div class="ln"><button class="btn" id="bParty">🕺 Sala</button><button class="btn" id="bRace">🏁 Carrera</button><button class="btn" id="bPrint">🖨️ Imprenta</button><button class="btn" id="bWin">🏆 Desafío</button></div>
+      </div>
+      <div class="grp"><h3>Probar</h3>
+        <div class="ln"><button class="btn" id="tJoin">4 se unen</button><button class="btn" id="tAtk">Ataque</button><button class="btn" id="tGift">Regalo</button><button class="btn" id="tLikes">Toques</button></div>
+      </div>
+    </div>
+    <div class="pane" id="pRules" hidden>
+      <div class="grp"><h3>Puntos (ciudadanos)</h3>
+        <div class="ln"><label for="o_pFlag">🏳️ Escribir su país o su bandera</label><select id="o_pFlag"><option value="1">+1</option><option value="2">+2</option><option value="5">+5</option></select></div>
+        <div class="ln"><label for="o_pFollow">➕ Seguirte</label><select id="o_pFollow"><option value="0">0</option><option value="5">+5</option><option value="10">+10</option></select></div>
+        <div class="ln"><label for="o_pShare">🔗 Compartir</label><select id="o_pShare"><option value="0">0</option><option value="2">+2</option><option value="5">+5</option></select></div>
+        <div class="ln"><label for="o_pCoin">🎁 Cada moneda de regalo</label><select id="o_pCoin"><option value="1">+1</option><option value="2">+2</option></select></div>
+        <div class="ln"><label for="o_likes">❤️ Toques para +1</label><select id="o_likes"><option value="50">50</option><option value="100">100</option><option value="300">300</option></select></div>
+        <div class="ln"><label for="o_atkCd">⚔️ Espera entre ataques de la misma persona</label><select id="o_atkCd"><option value="10">10 s</option><option value="20">20 s</option><option value="60">60 s</option></select></div>
+        <div class="ln"><label for="o_goal">🎯 Meta del directo</label><select id="o_goal"><option value="500">500</option><option value="1000">1000</option><option value="1700">1700</option><option value="3000">3000</option><option value="5000">5000</option></select></div>
+        <label class="ln"><input type="checkbox" id="o_showPts"><span>Mostrar abajo cuánto vale cada cosa (🏳️ ➕ 🔗 🎁 ❤️). Ojo: TikTok castiga pedir regalos de forma automática.</span></label>
+      </div>
+    </div>
+    <div class="pane" id="pLink" hidden>
+      <div class="ln"><span>Estado:</span><span id="st" class="bad">Sin conexión</span></div>
+      <p class="note" id="lnNote"></p>
+      <div id="monC"><span>🎁 <i id="mG">0</i></span><span id="mLW">👆 <i id="mL">0</i></span><span>💬 <i id="mC">0</i></span></div>
+      <div class="ln"><label for="apUser" id="apUserL">Tu usuario de TikTok</label><input type="text" id="apUser" class="grow" placeholder="usuario (sin @)" autocapitalize="off" autocomplete="off" spellcheck="false"></div>
+      <div class="ln" id="apKeyRow"><label for="apKey">Clave Euler Stream</label><input type="text" id="apKey" class="grow" placeholder="opcional" autocapitalize="off" autocomplete="off" spellcheck="false"></div>
+      <div class="ln"><button class="btn go" id="apGo">Guardar y conectar</button></div>
+      <pre id="apLog"></pre>
+    </div>
+  </div>
+</div>
+<script src="lib/three-bundle.js"></script>
+<script src="lib/world.js"></script>
+<script>
+(function(){
+"use strict";
+var $=function(id){return document.getElementById(id)};
+var APP=!!window.BusApp;
+var SRC=APP&&BusApp.getSource?String(BusApp.getSource()):"tiktok",YT=SRC==="youtube";
+try{localStorage.setItem("game","nations")}catch(e){}
+var DEF={pFlag:1,pFollow:5,pShare:2,pCoin:1,likes:100,goal:1700,atkCd:20,showPts:false,spin:true,
+  host:false,hostSize:"m",hostShape2:"card",hostMirror:true,hostSup:true,hostX:null,hostY:null,hostIcon:"☕",hostVx:50,hostVy:50,hostVz:1,hostVol:0,hostSnd:"mix",
+  flTaps:true,flGifts:true,flWall:true,flJoin:false,flSize:1};
+var cfg=Object.assign({},DEF);try{var sv=JSON.parse(localStorage.getItem("nations1")||"null");if(sv)cfg=Object.assign(cfg,sv)}catch(e){}
+function save(){try{localStorage.setItem("nations1",JSON.stringify(cfg))}catch(e){}}
+function clamp(v,a,b){return v<a?a:v>b?b:v}
+function rnd(a,b){return a+Math.random()*(b-a)}
+function pick(a){return a[(Math.random()*a.length)|0]}
+function perf(){return performance.now()}
+function esc(s){return String(s).replace(/[&<>"]/g,function(m){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[m]})}
+function hashHue(s){var h=2166136261;s=String(s);for(var i=0;i<s.length;i++){h^=s.charCodeAt(i);h=Math.imul(h,16777619)}return (h>>>0)%360}
+function initial(s){var c=String(s).replace(/[^A-Za-z0-9À-ÿ؀-ۿ]/g,"").charAt(0);return (c||String(s).charAt(0)||"?").toUpperCase()}
+function norm(s){s=String(s==null?"":s).toLowerCase();try{s=s.normalize("NFD").replace(/[̀-ͯ]/g,"")}catch(e){}return s}
+function fmt(n){n=Math.round(n);return n>=1000?n.toLocaleString("es-ES"):String(n)}
+function flagOf(a2){return a2?String.fromCodePoint.apply(null,a2.toUpperCase().split("").map(function(c){return 127397+c.charCodeAt(0)})):"🏳️"}
+
+/* ---------- countries: the map's 177 plus the small ones, every name in Spanish / Arabic / English / flag emoji ---------- */
+/* countries viewers can join: ISO-2 (for the flag), map id, short code, Spanish and Arabic names, extra spellings; lat/lon only for
+   countries too small to be drawn on the map */
+var CTRY=[
+["ES","724","ESP","España","إسبانيا|اسبانيا","spain,espana,espanya"],["MA","504","MAR","Marruecos","المغرب","morocco,maroc,marokko"],
+["DZ","012","DZA","Argelia","الجزائر","algeria,algerie,dz"],["TN","788","TUN","Túnez","تونس","tunisia,tunez,tunisie"],["LY","434","LBY","Libia","ليبيا","libya"],
+["EG","818","EGY","Egipto","مصر","egypt,egypte"],["SA","682","SAU","Arabia Saudí","السعودية","saudi,saudi arabia,arabia saudita,ksa"],
+["AE","784","ARE","Emiratos","الإمارات|الامارات","uae,emirates,emiratos arabes"],["QA","634","QAT","Catar","قطر","qatar"],["KW","414","KWT","Kuwait","الكويت",""],
+["BH","048","BHR","Baréin","البحرين","bahrain,barein",26.0,50.55],["OM","512","OMN","Omán","عمان","oman"],["YE","887","YEM","Yemen","اليمن",""],
+["JO","400","JOR","Jordania","الأردن|الاردن","jordan"],["LB","422","LBN","Líbano","لبنان","lebanon,libano"],["SY","760","SYR","Siria","سوريا","syria"],
+["IQ","368","IRQ","Irak","العراق","iraq"],["PS","275","PSE","Palestina","فلسطين","palestine",31.9,35.2],["SD","729","SDN","Sudán","السودان","sudan"],
+["MR","478","MRT","Mauritania","موريتانيا",""],["SO","706","SOM","Somalia","الصومال",""],["TR","792","TUR","Turquía","تركيا","turkey,turkiye,turquia"],
+["FR","250","FRA","Francia","فرنسا","france"],["IT","380","ITA","Italia","إيطاليا|ايطاليا","italy"],["DE","276","DEU","Alemania","ألمانيا|المانيا","germany,deutschland"],
+["PT","620","PRT","Portugal","البرتغال",""],["GB","826","GBR","Reino Unido","بريطانيا","uk,united kingdom,england,inglaterra"],
+["NL","528","NLD","Países Bajos","هولندا","holanda,netherlands,holland,paises bajos"],["BE","056","BEL","Bélgica","بلجيكا","belgium,belgica"],
+["CH","756","CHE","Suiza","سويسرا","switzerland"],["AT","040","AUT","Austria","النمسا",""],["SE","752","SWE","Suecia","السويد","sweden"],
+["NO","578","NOR","Noruega","النرويج","norway"],["DK","208","DNK","Dinamarca","الدنمارك","denmark"],["FI","246","FIN","Finlandia","فنلندا","finland"],
+["PL","616","POL","Polonia","بولندا","poland"],["RO","642","ROU","Rumanía","رومانيا","romania,rumania"],["BG","100","BGR","Bulgaria","بلغاريا",""],
+["GR","300","GRC","Grecia","اليونان","greece"],["UA","804","UKR","Ucrania","أوكرانيا|اوكرانيا","ukraine"],["RU","643","RUS","Rusia","روسيا","russia"],
+["MD","498","MDA","Moldavia","مولدوفا","moldova"],["RS","688","SRB","Serbia","صربيا",""],["HR","191","HRV","Croacia","كرواتيا","croatia"],
+["AL","008","ALB","Albania","ألبانيا|البانيا",""],["IE","372","IRL","Irlanda","أيرلندا|ايرلندا","ireland"],["AD","020","AND","Andorra","أندورا|اندورا","",42.5,1.5],
+["US","840","USA","Estados Unidos","أمريكا|امريكا","usa,eeuu,united states,america,estados unidos"],["CA","124","CAN","Canadá","كندا","canada"],
+["MX","484","MEX","México","المكسيك","mexico"],["GT","320","GTM","Guatemala","غواتيمالا",""],["HN","340","HND","Honduras","هندوراس",""],
+["SV","222","SLV","El Salvador","السلفادور","salvador"],["NI","558","NIC","Nicaragua","نيكاراغوا",""],["CR","188","CRI","Costa Rica","كوستاريكا",""],
+["PA","591","PAN","Panamá","بنما","panama"],["CU","192","CUB","Cuba","كوبا",""],["DO","214","DOM","Rep. Dominicana","الدومينيكان","dominicana,republica dominicana,rd"],
+["PR","630","PRI","Puerto Rico","بورتوريكو",""],["VE","862","VEN","Venezuela","فنزويلا",""],["CO","170","COL","Colombia","كولومبيا",""],
+["EC","218","ECU","Ecuador","الإكوادور|الاكوادور",""],["PE","604","PER","Perú","البيرو","peru"],["BO","068","BOL","Bolivia","بوليفيا",""],
+["CL","152","CHL","Chile","تشيلي",""],["AR","032","ARG","Argentina","الأرجنتين|الارجنتين",""],["UY","858","URY","Uruguay","الأوروغواي|الاوروغواي",""],
+["PY","600","PRY","Paraguay","باراغواي",""],["BR","076","BRA","Brasil","البرازيل","brazil"],["SR","740","SUR","Surinam","سورينام","suriname"],
+["GQ","226","GNQ","Guinea Ecuatorial","غينيا الاستوائية","equatorial guinea"],["SN","686","SEN","Senegal","السنغال",""],["ML","466","MLI","Malí","مالي","mali"],
+["NG","566","NGA","Nigeria","نيجيريا",""],["GH","288","GHA","Ghana","غانا",""],["CI","384","CIV","Costa de Marfil","ساحل العاج","ivory coast,cote d ivoire"],
+["CM","120","CMR","Camerún","الكاميرون","cameroon,camerun"],["CV","132","CPV","Cabo Verde","الرأس الأخضر","cape verde,cabo verde",15.1,-23.6],
+["GN","324","GIN","Guinea","غينيا",""],["UG","800","UGA","Uganda","أوغندا|اوغندا",""],["KE","404","KEN","Kenia","كينيا","kenya"],["ET","231","ETH","Etiopía","إثيوبيا|اثيوبيا","ethiopia"],
+["ZA","710","ZAF","Sudáfrica","جنوب أفريقيا|جنوب افريقيا","south africa,sudafrica"],["CN","156","CHN","China","الصين",""],["JP","392","JPN","Japón","اليابان","japan"],
+["KR","410","KOR","Corea del Sur","كوريا","korea,south korea"],["IN","356","IND","India","الهند",""],["PK","586","PAK","Pakistán","باكستان","pakistan"],
+["BD","050","BGD","Bangladés","بنغلاديش","bangladesh"],["ID","360","IDN","Indonesia","إندونيسيا|اندونيسيا",""],["MY","458","MYS","Malasia","ماليزيا","malaysia"],
+["PH","608","PHL","Filipinas","الفلبين","philippines"],["TH","764","THA","Tailandia","تايلاند","thailand"],["VN","704","VNM","Vietnam","فيتنام",""],
+["IR","364","IRN","Irán","إيران|ايران","iran"],["AF","004","AFG","Afganistán","أفغانستان|افغانستان","afghanistan"],["AU","036","AUS","Australia","أستراليا|استراليا",""],
+["MT","470","MLT","Malta","مالطا","",35.9,14.4],["SG","702","SGP","Singapur","سنغافورة","singapore",1.35,103.8],["KM","174","COM","Comoras","جزر القمر","comoros",-11.7,43.3],
+["DJ","262","DJI","Yibuti","جيبوتي","djibouti"]];
+
+var C={},CL=[],ALIAS=[],WORLD=[];
+function addC(k,o){if(!C[k]){C[k]=o;CL.push(o)}return C[k]}
+CTRY.forEach(function(r){var o=addC(r[2],{k:r[2],a2:r[0],id:r[1],es:r[3],flag:flagOf(r[0]),hue:hashHue(r[2]),ll:r[6]!=null?[r[6],r[7]]:null,pts:0,players:0,top:null,topSum:{}});
+  [r[3]].concat(r[4].split("|"),r[5]?r[5].split(","):[]).forEach(function(a){if(a)ALIAS.push([norm(a).trim(),o])});ALIAS.push([o.flag,o])});
+function sortAlias(){ALIAS.sort(function(a,b){return b[0].length-a[0].length})}
+function wordHas(t,a){if(/[؀-ۿ]/.test(a)||/\p{Extended_Pictographic}|[\u{1F1E6}-\u{1F1FF}]/u.test(a))return t.indexOf(a)>=0;var i=t.indexOf(a);while(i>=0){var b=i===0||/[^a-z0-9]/.test(t[i-1]),e=i+a.length>=t.length||/[^a-z0-9]/.test(t[i+a.length]);if(b&&e)return true;i=t.indexOf(a,i+1)}return false}
+function findCountry(text){var t=norm(text);for(var i=0;i<ALIAS.length;i++){var a=ALIAS[i][0];if(a.length>=3||/[\u{1F1E6}-\u{1F1FF}]/u.test(a)||/[؀-ۿ]/.test(a)){if(wordHas(t,a))return ALIAS[i][1]}}return null}
+
+/* ---------- state: the season (points per country) survives restarts; players and the duel are per live ---------- */
+var SS={};try{SS=JSON.parse(localStorage.getItem("nations1pts")||"{}")||{}}catch(e){SS={}}
+function saveSS(){var o={};CL.forEach(function(c){if(c.pts)o[c.k]=c.pts});try{localStorage.setItem("nations1pts",JSON.stringify(o))}catch(e){}}
+var saveT=0;function saveSoon(){if(!saveT)saveT=setTimeout(function(){saveT=0;saveSS()},2000)}
+var live={pts:0,players:0,combo:0};
+
+/* ---------- 3D globe ---------- */
+var T=window.THREE,R=null,ok3d=true,composer=null,W=0,H=0,scene,cam,globe,earthC,earthX,earthT,G3={};
+try{if(!T||!T.WebGLRenderer)throw 0;R=new T.WebGLRenderer({canvas:$("gl"),antialias:false,powerPreference:"high-performance",stencil:false,alpha:false})}catch(e){ok3d=false}
+function tex(c){var t=new T.CanvasTexture(c);t.colorSpace=T.SRGBColorSpace;t.anisotropy=R?Math.min(8,R.capabilities.getMaxAnisotropy()):1;return t}
+function cnv(w,h){var c=document.createElement("canvas");c.width=w;c.height=h;return c}
+var GR=5;
+function llToV(lat,lon,r){var th=(90-lat)*Math.PI/180,ph=(lon+180)*Math.PI/180;return new T.Vector3(-r*Math.cos(ph)*Math.sin(th),r*Math.cos(th),r*Math.sin(ph)*Math.sin(th))}
+if(ok3d){R.outputColorSpace=T.SRGBColorSpace;R.toneMapping=T.ACESFilmicToneMapping;R.toneMappingExposure=1.0;
+  scene=new T.Scene();scene.background=new T.Color(0x05030f);
+  cam=new T.PerspectiveCamera(42,1,0.1,500);
+  scene.add(new T.AmbientLight(0xffffff,0.55));var key=new T.DirectionalLight(0xfff4e0,1.6);key.position.set(-6,5,8);scene.add(key);
+  var rim=new T.DirectionalLight(0x6aa8ff,1.2);rim.position.set(8,-2,-6);scene.add(rim);
+  /* stars */
+  var sg=new T.BufferGeometry(),sp=[];for(var i=0;i<1800;i++){var v=new T.Vector3(rnd(-1,1),rnd(-1,1),rnd(-1,1)).normalize().multiplyScalar(rnd(120,240));sp.push(v.x,v.y,v.z)}
+  sg.setAttribute("position",new T.Float32BufferAttribute(sp,3));scene.add(new T.Points(sg,new T.PointsMaterial({color:0xffffff,size:0.6,transparent:true,opacity:0.8})));
+  earthC=cnv(2048,1024);earthX=earthC.getContext("2d");earthT=tex(earthC);
+  globe=new T.Group();scene.add(globe);
+  var em=new T.MeshStandardMaterial({map:earthT,roughness:0.75,metalness:0.05,emissive:0xffffff,emissiveMap:earthT,emissiveIntensity:0.32});
+  globe.add(new T.Mesh(new T.SphereGeometry(GR,96,64),em));
+  /* atmosphere glow */
+  var gc=cnv(256,256),gx=gc.getContext("2d"),gg=gx.createRadialGradient(128,128,70,128,128,128);gg.addColorStop(0,"rgba(90,170,255,0)");gg.addColorStop(0.62,"rgba(90,170,255,.55)");gg.addColorStop(1,"rgba(90,170,255,0)");gx.fillStyle=gg;gx.fillRect(0,0,256,256);
+  G3.atm=new T.Sprite(new T.SpriteMaterial({map:tex(gc),transparent:true,depthWrite:false,blending:T.AdditiveBlending,toneMapped:false}));G3.atm.scale.set(GR*2.75,GR*2.75,1);scene.add(G3.atm);
+  var rt=new T.WebGLRenderTarget(2,2,{type:T.HalfFloatType,samples:4});composer=new T.EffectComposer(R,rt);composer.addPass(new T.RenderPass(scene,cam));composer.addPass(new T.UnrealBloomPass(new T.Vector2(256,256),0.45,0.5,0.85));composer.addPass(new T.OutputPass());
+}
+function resize(){W=innerWidth;H=innerHeight;if(!ok3d)return;var pr=Math.min(window.devicePixelRatio||1,2);R.setPixelRatio(pr);R.setSize(W,H,false);cam.aspect=W/H;cam.fov=W/H<0.75?44:34;cam.updateProjectionMatrix();if(composer){composer.setPixelRatio(pr);composer.setSize(W,H)}}
+window.addEventListener("resize",resize);resize();
+
+/* the map: ocean, every country (neutral grey-blue, or its colour once it has players), borders */
+function px(lon,lat){return [(lon+180)/360*2048,(90-lat)/180*1024]}
+function paintEarth(){if(!ok3d)return;var x=earthX,og=x.createLinearGradient(0,0,0,1024);og.addColorStop(0,"#0b2a5c");og.addColorStop(0.5,"#0e3f86");og.addColorStop(1,"#0b2a5c");x.fillStyle=og;x.fillRect(0,0,2048,1024);
+  x.strokeStyle="rgba(120,180,255,.10)";x.lineWidth=1;for(var lo=-180;lo<=180;lo+=30){var p0=px(lo,0);x.beginPath();x.moveTo(p0[0],0);x.lineTo(p0[0],1024);x.stroke()}for(var la=-60;la<=60;la+=30){var p1=px(0,la);x.beginPath();x.moveTo(0,p1[1]);x.lineTo(2048,p1[1]);x.stroke()}
+  var mx=0;CL.forEach(function(c){if(c.pts>mx)mx=c.pts});
+  WORLD.forEach(function(w){var c=w.c2,col;if(c&&c.pts>0){var k=0.45+0.55*Math.sqrt(c.pts/Math.max(1,mx));col="hsl("+c.hue+",85%,"+Math.round(38+18*k)+"%)"}else col="#3d4f6e";
+    x.fillStyle=col;x.strokeStyle="rgba(10,20,40,.85)";x.lineWidth=1.3;
+    w.p.forEach(function(poly){x.beginPath();poly.forEach(function(ring){for(var i=0;i<ring.length;i+=2){var q=px(ring[i],ring[i+1]);if(i===0)x.moveTo(q[0],q[1]);else x.lineTo(q[0],q[1])}x.closePath()});x.fill("evenodd");x.stroke()})});
+  /* the small countries: a dot */
+  CL.forEach(function(c){if(!c.ll||c.hasPoly)return;var q=px(c.ll[1],c.ll[0]);x.fillStyle=c.pts>0?"hsl("+c.hue+",85%,55%)":"#6b7f9e";x.beginPath();x.arc(q[0],q[1],5,0,7);x.fill()});
+  earthT.needsUpdate=true}
+var paintT=0;function paintSoon(){if(!paintT)paintT=setTimeout(function(){paintT=0;paintEarth()},700)}
+
+/* load the map, link its countries to the table (names in English work as well) */
+var worldReady=false;
+(function(){WORLD=window.WORLD_DATA||[];
+  WORLD.forEach(function(w){var c=null;for(var i=0;i<CL.length;i++)if(CL[i].id===w.id){c=CL[i];break}
+    if(!c){var code=w.n.replace(/[^A-Za-z]/g,"").slice(0,3).toUpperCase()+"_";c=addC(code,{k:code,a2:"",id:w.id,es:w.n,flag:"🏳️",hue:hashHue(code),ll:null,pts:0,players:0,top:null,topSum:{}})}
+    ALIAS.push([norm(w.n),c]);c.ll=[w.c[1],w.c[0]];c.hasPoly=true;w.c2=c});
+  sortAlias();CL.forEach(function(c){c.pts=+SS[c.k]||0});worldReady=true;paintEarth();paintAll()})();
+
+/* ---------- pins: flag + points over the leading countries ---------- */
+var PINS={};
+function pinTex(c){var cv=cnv(320,120),x=cv.getContext("2d");x.fillStyle="rgba(8,6,24,.82)";x.strokeStyle="hsl("+c.hue+",90%,60%)";x.lineWidth=6;var r=24;x.beginPath();x.moveTo(r+4,4);x.arcTo(316,4,316,116,r);x.arcTo(316,116,4,116,r);x.arcTo(4,116,4,4,r);x.arcTo(4,4,316,4,r);x.fill();x.stroke();
+  x.font="64px serif";x.textAlign="left";x.textBaseline="middle";x.fillText(c.flag,16,62);x.font="900 58px 'Barlow Condensed',Arial";x.fillStyle="#fff";x.fillText(c.k.replace("_","")+" "+fmt(c.pts),98,64);return tex(cv)}
+function syncPins(){if(!ok3d)return;var top=CL.filter(function(c){return c.pts>0&&c.ll}).sort(function(a,b){return b.pts-a.pts}).slice(0,8),keep={};
+  top.forEach(function(c){keep[c.k]=1;var p=PINS[c.k];if(!p){p=PINS[c.k]={s:new T.Sprite(new T.SpriteMaterial({transparent:true,depthWrite:false,toneMapped:false})),v:-1};p.s.scale.set(1.9,0.72,1);globe.add(p.s);p.s.position.copy(llToV(c.ll[0],c.ll[1],GR*1.13))}
+    if(p.v!==c.pts){p.v=c.pts;if(p.s.material.map)p.s.material.map.dispose();p.s.material.map=pinTex(c);p.s.material.needsUpdate=true}});
+  for(var k in PINS)if(!keep[k]){globe.remove(PINS[k].s);if(PINS[k].s.material.map)PINS[k].s.material.map.dispose();PINS[k].s.material.dispose();delete PINS[k]}}
+
+/* ---------- effects: pulses on a country, attack arcs with a missile, sparks ---------- */
+var FX=[];
+function ringTex(){if(G3.ring)return G3.ring;var c=cnv(128,128),x=c.getContext("2d");x.strokeStyle="#fff";x.lineWidth=10;x.beginPath();x.arc(64,64,54,0,7);x.stroke();return G3.ring=tex(c)}
+function pulse(c,col){if(!ok3d||!c.ll)return;var m=new T.Mesh(new T.PlaneGeometry(1,1),new T.MeshBasicMaterial({map:ringTex(),color:col||new T.Color().setHSL(c.hue/360,0.9,0.6),transparent:true,depthWrite:false,blending:T.AdditiveBlending,toneMapped:false,side:T.DoubleSide}));
+  var v=llToV(c.ll[0],c.ll[1],GR*1.01);m.position.copy(v);m.lookAt(v.clone().multiplyScalar(2));globe.add(m);FX.push({m:m,t:0,dur:1.2,kind:"ring"})}
+function emo(e,s){var c=cnv(128,128),x=c.getContext("2d");x.font="104px serif";x.textAlign="center";x.textBaseline="middle";x.fillText(e,64,70);var sp=new T.Sprite(new T.SpriteMaterial({map:tex(c),transparent:true,depthWrite:false,toneMapped:false}));sp.scale.set(s,s,1);return sp}
+function attackFx(a,b){if(!ok3d||!a.ll||!b.ll)return;var A=llToV(a.ll[0],a.ll[1],GR*1.01),B=llToV(b.ll[0],b.ll[1],GR*1.01),M=A.clone().add(B).multiplyScalar(0.5),d=A.distanceTo(B);M.normalize().multiplyScalar(GR+0.6+d*0.35);
+  var curve=new T.QuadraticBezierCurve3(A,M,B),tube=new T.Mesh(new T.TubeGeometry(curve,48,0.03,6,false),new T.MeshBasicMaterial({color:0xff4d4d,transparent:true,opacity:0.95,toneMapped:false}));globe.add(tube);
+  var mis=emo("🚀",0.7);globe.add(mis);FX.push({m:tube,mis:mis,curve:curve,t:0,dur:1.6,kind:"arc",target:b})}
+function stepFx(dt){for(var i=FX.length-1;i>=0;i--){var f=FX[i];f.t+=dt/f.dur;
+  if(f.kind==="ring"){var s=0.3+f.t*1.8;f.m.scale.set(s,s,s);f.m.material.opacity=Math.max(0,1-f.t)}
+  else if(f.kind==="arc"){var k=Math.min(1,f.t/0.75);f.mis.position.copy(f.curve.getPoint(k));if(k>=1&&!f.boom){f.boom=1;pulse(f.target,new T.Color(0xff3b3b));pulse(f.target,new T.Color(0xffb020))}f.m.material.opacity=Math.max(0,1-Math.max(0,f.t-0.6)/0.4);f.mis.visible=k<1}
+  if(f.t>=1){globe.remove(f.m);f.m.geometry.dispose();f.m.material.dispose();if(f.mis){globe.remove(f.mis);f.mis.material.map.dispose();f.mis.material.dispose()}FX.splice(i,1)}}}
+
+/* the globe turns slowly; an event brings its country to the front */
+var spinTo=null;
+function face(c){if(!c||!c.ll)return;spinTo=-((c.ll[1]+180)*Math.PI/180)+Math.PI/2;var lat=c.ll[0]*Math.PI/180;G3.tilt=clamp(lat*0.6,-0.5,0.6)}
+
+/* ---------- viewers ---------- */
+var users={},userN=0;
+function userOf(e){var uid=String(e.user||e.nick||"?"),u=users[uid];
+  if(!u){if(++userN>50000){for(var k in users){if(userN<40000)break;if(!users[k].c){delete users[k];userN--}}}u=users[uid]={uid:uid,nick:String(e.nick||e.user||"Fan"),av:"",hue:hashHue(uid),c:null,likeAcc:0,flagAt:0,atkAt:0,sum:0}}
+  if(e.nick)u.nick=String(e.nick);if(e.avatar)u.av=String(e.avatar);return u}
+var imgWait={},imgN=0;window.__busImg=function(id,data){var cb=imgWait[id];delete imgWait[id];if(cb)cb(data)};
+function photo(u,cb){if(u.src){cb(u.src);return}if(!u.av){cb("");return}var done=function(s){u.src=s||"";cb(u.src)};if(APP&&BusApp.image){var id="i"+(++imgN);imgWait[id]=done;try{BusApp.image(u.av,id)}catch(e){cb("")}}else done(u.av)}
+function faceHtml(u,src){return src?'<img alt="" referrerpolicy="no-referrer" src="'+esc(src)+'">':'<span style="display:grid;place-items:center;width:100%;height:100%;background:hsl('+u.hue+',70%,45%)">'+esc(initial(u.nick))+'</span>'}
+
+/* ---------- points ---------- */
+function add(c,n,u){if(!c||!n)return;c.pts=Math.max(0,c.pts+n);if(n>0){live.pts+=n;live.combo+=n;if(u){c.topSum[u.uid]=(c.topSum[u.uid]||0)+n;if(!c.top||c.topSum[u.uid]>(c.topSum[c.top.uid]||0))c.top=u}}
+  saveSoon();paintSoon();paintAll();checkGoal()}
+function join(u,c){if(u.c===c)return;if(u.c)u.c.players=Math.max(0,u.c.players-1);else live.players++;u.c=c;c.players++;
+  if(u.pend){add(c,u.pend,u);u.pend=0}add(c,+cfg.pFlag||1,u);u.flagAt=perf();pulse(c);face(c)}
+
+/* ---------- events ---------- */
+var mon={g:0,l:0,c:0};
+function onEvent(e){if(!e||!e.type)return;
+  if(e.type==="status"){setStatus(e.ok,e.text);return}
+  var u,now=perf();
+  if(e.type==="chat"){mon.c++;u=userOf(e);var t=norm(e.text||"");
+    /* "me cambio a X" / "me paso a X" / "انتقل الى X": switch country */
+    var mv=t.match(/(me cambio|me paso|cambio a|change to|switch to|انتقل)\s*(a |al |الى |إلى )?(.*)$/);
+    if(mv){var c2=findCountry(mv[3]);if(c2&&c2!==u.c){var from=u.c;join(u,c2);feed(u,"⇄ "+c2.flag+" "+c2.es,from?from.flag+" ➜ "+c2.flag:"");toast(u,c2,"⇄")}return}
+    /* "ataco a X" / "ataque a X" / "attack X" / "هجوم على X": an attack */
+    var at=t.match(/(ataco|ataque|atacar|attack|هجوم|اهاجم|أهاجم)\s*(a |al |on |على )?(.*)$/);
+    if(at){var tc=findCountry(at[3]);if(tc&&u.c&&tc!==u.c&&now-u.atkAt>(+cfg.atkCd||20)*1000){u.atkAt=now;attackFx(u.c,tc);face(tc);var st=Math.min(tc.pts,1+Math.floor(Math.random()*3));add(tc,-st);add(u.c,st,u);feed(u,"⚔️ "+u.c.flag+" ➜ "+tc.flag+" "+tc.es,"-"+st);toast(u,tc,"⚔️")}return}
+    var c=findCountry(e.text||"");
+    if(c){if(!u.c){join(u,c);feed(u,"se une a "+c.flag+" "+c.es.toUpperCase());toast(u,c,"🙋")}
+      else if(c===u.c&&now-u.flagAt>3000){u.flagAt=now;add(c,+cfg.pFlag||1,u);pulse(c)}}
+    else if(u.c)feed(u,esc(String(e.text||"").slice(0,40)),"",true);
+    monSoon();return}
+  if(e.type==="gift"){u=userOf(e);var n=Math.max(1,e.count|0),coins=Math.max(1,e.coins|0)*n,p=coins*(+cfg.pCoin||1);mon.g+=n;
+    if(u.c){add(u.c,p,u);pulse(u.c,new T.Color(0xffd76a));face(u.c);feed(u,"🎁 "+u.c.flag+" +"+fmt(p))}else{u.pend=(u.pend||0)+p;feed(u,"🎁 +"+fmt(p)+" · elige tu país")}
+    giftPop(u,p);monSoon();return}
+  if(e.type==="like"){u=userOf(e);var cl=Math.max(1,e.count|0);mon.l+=cl;live.combo+=0;if(!u.c){monSoon();return}
+    u.likeAcc+=cl;var per=Math.max(1,+cfg.likes||100);while(u.likeAcc>=per){u.likeAcc-=per;add(u.c,1,u)}monSoon();return}
+  if(e.type==="follow"){u=userOf(e);if(u.c){add(u.c,+cfg.pFollow||5,u);feed(u,"➕ "+u.c.flag+" +"+(+cfg.pFollow||5))}else feed(u,"➕ sigue · elige tu país");return}
+  if(e.type==="share"){u=userOf(e);if(u.c){add(u.c,+cfg.pShare||2,u);feed(u,"🔗 "+u.c.flag+" +"+(+cfg.pShare||2))}else feed(u,"🔗 comparte · elige tu país");return}
+  if(e.type==="join"){u=userOf(e);arrive(u);return}}
+
+/* ---------- the screen ---------- */
+var R5=["I","II","III","IV","V"];
+function ranked(){return CL.filter(function(c){return c.pts>0}).sort(function(a,b){return b.pts-a.pts})}
+var paintAT=0;function paintAll(){if(paintAT)return;paintAT=setTimeout(function(){paintAT=0;doPaint()},120)}
+function doPaint(){var r=ranked(),tot=0,cn=0;CL.forEach(function(c){tot+=c.pts;if(c.pts>0)cn++});
+  $("stC").textContent=fmt(cn);$("stP").textContent=fmt(live.players);$("stT").textContent=fmt(tot);
+  /* top five: the leader in the middle, bigger */
+  var order=[3,1,0,2,4],h="";order.forEach(function(i){var c=r[i];if(!c){h+='<div class="tc e"></div>';return}
+    h+='<div class="tc'+(i===0?" one":"")+'" style="--h:'+c.hue+'"><span class="rk">'+R5[i]+'</span><div class="fl">'+c.flag+' <b>'+esc(c.k.replace("_",""))+'</b></div><div class="pt">'+fmt(c.pts)+'</div><div class="tp">'+(c.top?"👑 "+esc(c.top.nick.slice(0,10)):"")+'</div></div>'});
+  $("top5").innerHTML=h;
+  /* the live goal */
+  var g=Math.max(1,+cfg.goal||1700);$("goalF").style.width=Math.min(100,live.pts/g*100)+"%";$("goalN").textContent=fmt(live.pts)+" / "+fmt(g);
+  /* the duel for the throne */
+  var a=r[0],b=r[1];$("duel").hidden=!a||!b;if(a&&b){$("dA").innerHTML=a.flag+" "+esc(a.es.toUpperCase());$("dB").innerHTML=esc(b.es.toUpperCase())+" "+b.flag;var k=a.pts/(a.pts+b.pts);$("dBar").style.setProperty("--k",(k*100).toFixed(1)+"%");
+    $("dTag").textContent=a.pts-b.pts<=Math.max(5,a.pts*0.03)?"¡A UN PASO!":"EN CABEZA"}
+  $("combo").textContent=fmt(live.combo);syncPins()}
+function checkGoal(){var g=Math.max(1,+cfg.goal||1700);if(live.pts>=g){cfg.goal=Math.round(g*1.5/100)*100;save();var el=$("goalWin");el.hidden=false;el.classList.remove("in");void el.offsetWidth;el.classList.add("in");setTimeout(function(){el.hidden=true},3500)}}
+/* the feed (like a chat box, newest first) */
+var FEED=[];
+function feed(u,txt,extra,isChat){photo(u,function(src){FEED.unshift('<div class="ln2"><span class="ph">'+faceHtml(u,src)+'</span><b>'+esc(u.nick.slice(0,14))+'</b>'+(u.c&&!isChat?' <span class="cc" style="--h:'+u.c.hue+'">'+u.c.flag+'</span>':(u.c?' <span class="cc" style="--h:'+u.c.hue+'">'+u.c.flag+'</span>':''))+' <i>'+txt+'</i>'+(extra?' <em>'+esc(extra)+'</em>':'')+'</div>');if(FEED.length>5)FEED.length=5;$("feed").innerHTML=FEED.join("")})}
+/* toasts: someone joins / switches / attacks */
+function toast(u,c,ic){photo(u,function(src){var el=document.createElement("div");el.className="toast";el.style.setProperty("--h",c.hue);
+  el.innerHTML='<span class="ph">'+faceHtml(u,src)+'</span><span class="tx"><b>'+esc(u.nick.slice(0,16))+'</b><span>'+ic+' '+c.flag+' '+esc(c.es.toUpperCase())+'</span></span>';$("toasts").prepend(el);
+  while($("toasts").children.length>3)$("toasts").lastChild.remove();setTimeout(function(){el.classList.add("out");setTimeout(function(){el.remove()},400)},3200)})}
+function arrive(u){photo(u,function(src){var el=$("arrive");el.innerHTML='<span class="ph">'+faceHtml(u,src)+'</span><span class="tx"><b>'+esc(u.nick.slice(0,16))+'</b><span>👋 llega al directo</span></span>';el.hidden=false;el.classList.remove("in");void el.offsetWidth;el.classList.add("in");clearTimeout(arrive.t);arrive.t=setTimeout(function(){el.hidden=true},2600)})}
+function giftPop(u,p){var el=document.createElement("div");el.className="gp";el.textContent="+"+fmt(p);el.style.left=rnd(20,70)+"%";$("stage").appendChild(el);setTimeout(function(){el.remove()},1600)}
+
+/* ---------- loop ---------- */
+var last=perf(),rotY=0;
+function frame(){var now=perf(),dt=Math.min(0.05,(now-last)/1000);last=now;
+  if(ok3d){var portrait=W/H<0.75;cam.position.set(0,portrait?0.3:0,portrait?27:21);cam.lookAt(0,portrait?0.3:0,0);
+    var gy=portrait?0.2:0;globe.position.y=gy;G3.atm.position.set(0,gy,-0.2);
+    if(spinTo!=null){var d=((spinTo-rotY)%(Math.PI*2)+Math.PI*3)%(Math.PI*2)-Math.PI;rotY+=d*(1-Math.exp(-3*dt));if(Math.abs(d)<0.01)spinTo=null}else if(cfg.spin)rotY+=dt*0.08;
+    globe.rotation.y=rotY;globe.rotation.x+=((G3.tilt||0.25)-globe.rotation.x)*(1-Math.exp(-2*dt));
+    /* pins only on the visible side */
+    for(var k in PINS){var p=PINS[k],wp=p.s.getWorldPosition(new T.Vector3());p.s.visible=wp.z>1.2}
+    stepFx(dt);composer.render(dt)}
+  requestAnimationFrame(frame)}
+
+/* ---------- settings ---------- */
+function fill(){["pFlag","pFollow","pShare","pCoin","likes","goal","atkCd"].forEach(function(k){$("o_"+k).value=String(cfg[k])});$("o_showPts").checked=cfg.showPts;$("o_spin").checked=cfg.spin;
+  $("oHost").checked=cfg.host;$("oHostSize").value=cfg.hostSize;$("oHostShape").value=cfg.hostShape2;$("oHostMirror").checked=cfg.hostMirror;$("oHostSup").checked=cfg.hostSup;paintRules()}
+["pFlag","pFollow","pShare","pCoin","likes","goal","atkCd"].forEach(function(k){$("o_"+k).onchange=function(){cfg[k]=+this.value;save();paintRules();paintAll()}});
+$("o_showPts").onchange=function(){cfg.showPts=this.checked;save();paintRules()};$("o_spin").onchange=function(){cfg.spin=this.checked;save()};
+function paintRules(){$("rPts").hidden=!cfg.showPts;$("rPts").innerHTML='🏳️ +'+cfg.pFlag+' · ➕ +'+cfg.pFollow+' · 🔗 +'+cfg.pShare+' · 🎁 1🪙 = '+cfg.pCoin+' · ❤️ '+cfg.likes+' = +1'}
+function openSheet(o){$("sheet").hidden=!o;$("gear").hidden=o;if(o){fill();paintMon()}}
+$("gear").onclick=function(){openSheet(true)};$("close").onclick=function(){openSheet(false)};
+Array.prototype.forEach.call(document.querySelectorAll(".tab"),function(b){b.onclick=function(){Array.prototype.forEach.call(document.querySelectorAll(".tab"),function(x){x.setAttribute("aria-selected",x===b);$(x.dataset.p).hidden=x!==b})}});
+$("bReset").onclick=function(){if(!confirm("¿Empezar una temporada nueva? Todos los países vuelven a 0."))return;CL.forEach(function(c){c.pts=0;c.top=null;c.topSum={}});saveSS();paintEarth();paintAll()};
+function go(g,page){try{localStorage.setItem("game",g)}catch(e){}location.href=page}
+$("bParty").onclick=function(){go("party","party.html")};$("bRace").onclick=function(){go("race","race.html")};$("bPrint").onclick=function(){go("print","print.html")};$("bWin").onclick=function(){go("win","win.html")};
+var tn=0,TN=["Irina","Axel","Juan","Mohis","Pablo","Sara","Youssef","Lucia"],TC=["España","Marruecos","Colombia","Cabo Verde","México","Argelia","Argentina","🇪🇸"];
+$("tJoin").onclick=function(){for(var i=0;i<4;i++){tn++;onEvent({type:"chat",user:"t"+tn,nick:TN[tn%TN.length],text:TC[tn%TC.length]})}};
+$("tAtk").onclick=function(){var ks=Object.keys(users).filter(function(k){return users[k].c});if(!ks.length)return;var u=users[pick(ks)],c=pick(ranked().filter(function(x){return x!==u.c}));if(c){u.atkAt=0;onEvent({type:"chat",user:u.uid,nick:u.nick,text:"ataco a "+c.es})}};
+$("tGift").onclick=function(){var ks=Object.keys(users);if(!ks.length)return;var u=users[pick(ks)];onEvent({type:"gift",user:u.uid,nick:u.nick,coins:pick([1,5,99]),count:1})};
+$("tLikes").onclick=function(){Object.keys(users).forEach(function(k){onEvent({type:"like",user:k,nick:users[k].nick,count:60})})};
+function paintMon(){if($("sheet").hidden)return;$("mG").textContent=mon.g;$("mL").textContent=mon.l;$("mC").textContent=mon.c}
+var monT=0;function monSoon(){if(!monT)monT=setTimeout(function(){monT=0;paintMon()},400)}
+/* ---------- connection (same bridge as the other games) ---------- */
+function setStatus(ok,text){var el=$("st");el.className=ok?"ok":"bad";el.textContent=text||(ok?"Conectado":"Sin conexión");$("dot").className=ok?"ok":""}
+function appLog(l){var el=$("apLog");el.textContent+=(el.textContent?"\n":"")+l;var x=el.textContent.split("\n");if(x.length>200)el.textContent=x.slice(-200).join("\n");el.scrollTop=el.scrollHeight}
+if(YT){$("apUserL").textContent="Tu canal o directo de YouTube";$("apUser").placeholder="@tucanal o enlace del directo";$("apKeyRow").hidden=true}
+$("lnNote").textContent=!APP?"Vista previa: abre esta página desde la app para recibir regalos reales.":YT?"Escribe tu canal de YouTube (@usuario) o pega el enlace del directo.":"Escribe tu usuario de TikTok. La app se conecta sola cuando empieza tu directo.";
+if(APP){try{$("apUser").value=BusApp.getUser();$("apKey").value=BusApp.getKey()}catch(e){}
+  $("apGo").onclick=function(){var u=$("apUser").value.trim();if(!YT)u=u.replace(/^@/,"");$("apUser").value=u;$("apLog").textContent="";try{BusApp.connect(u,$("apKey").value.trim())}catch(e){}};
+  window.__bus=function(e){try{onEvent(e)}catch(x){}};window.__busLog=appLog;try{BusApp.ready()}catch(e){}}
+else window.__bus=function(e){try{onEvent(e)}catch(x){}};
+
+
+
+/* the camera bubble: "a big gift's moment" = none here */
+function vipOn(){return false}
+var lastSup=null;
+/* ---------- the host's own camera bubble: small, at the edge, draggable; a "busy" card when the host steps away ---------- */
+var HOST={stream:null,busy:cfg.hostIcon||"☕",busyAt:0,starting:false,frame:null};
+var HOSTSIZE={s:90,m:118,l:156};
+function hostEl(){return $("host")}
+function hostLayout(){var el=hostEl(),sz=HOSTSIZE[cfg.hostSize]||128;el.hidden=!cfg.host;if(!cfg.host){hostStop();return}
+  el.style.fontSize=sz+"px";el.style.width=sz+"px";el.style.height=Math.round(sz*(cfg.hostShape2==="card"?1.6:1))+"px";el.classList.toggle("card",cfg.hostShape2==="card");
+  var st=$("stage").getBoundingClientRect(),w=el.offsetWidth,h=el.offsetHeight;
+  var x=clamp((cfg.hostX==null?1:cfg.hostX)*(st.width-w-16)+8,8,Math.max(8,st.width-w-8)),y=clamp((cfg.hostY==null?0.25:cfg.hostY)*st.height,8,Math.max(8,st.height-h-8));
+  el.style.left=x+"px";el.style.top=y+"px";$("hostCam").classList.toggle("mir",cfg.hostMirror);$("hostCam").classList.toggle("blur",!!HOST.blur);
+  paintBusy();if(!HOST.busy)hostStart()}
+function hostStart(){if(HOST.stream||HOST.starting||!cfg.host||HOST.busy||document.hidden)return;
+  if(!navigator.mediaDevices||!navigator.mediaDevices.getUserMedia){hostMsg("📷✖");return}
+  HOST.starting=true;navigator.mediaDevices.getUserMedia({video:{facingMode:"user",width:{ideal:640},height:{ideal:640},frameRate:{ideal:30,max:30}},audio:false}).then(function(st){HOST.starting=false;
+    if(!cfg.host||HOST.busy||document.hidden){st.getTracks().forEach(function(t){t.stop()});return}
+    HOST.stream=st;var v=$("hostCam");v.srcObject=st;v.play().catch(function(){});hostMsg("");
+    st.getVideoTracks().forEach(function(t){t.onended=function(){HOST.stream=null;setTimeout(hostStart,800)}})}).catch(function(){HOST.starting=false;hostMsg("📷✖")})}
+function hostStop(){if(HOST.stream){HOST.stream.getTracks().forEach(function(t){t.onended=null;t.stop()});HOST.stream=null}var v=$("hostCam");if(v)v.srcObject=null}
+function hostMsg(t){$("hostMsg").textContent=t;$("hostMsg").hidden=!t}
+/* busy: the camera turns off (privacy and battery) and a card shows my photo or a soft still of my last frame, an icon and how long I've been away */
+function setBusy(ic){if(ic&&!HOST.busy){var v=$("hostCam");try{if(v.videoWidth){var c=document.createElement("canvas");c.width=160;c.height=160;var x=c.getContext("2d"),s=Math.min(v.videoWidth,v.videoHeight);
+      x.filter="blur(6px)";x.drawImage(v,(v.videoWidth-s)/2,(v.videoHeight-s)/2,s,s,0,0,160,160);HOST.frame=c.toDataURL("image/jpeg",0.7)}}catch(e){}}
+  HOST.busy=ic||"";HOST.busyAt=perf();if(HOST.busy)hostStop();hostLayout();paintHostBtns()}
+function hostPic(){try{return localStorage.getItem("party_hostpic")||""}catch(e){return ""}}
+function paintBusy(){var b=$("hostBusy"),hv=$("hbVid");b.hidden=!HOST.busy;$("host").classList.toggle("away",!!HOST.busy);
+  var useVid=!!(HOST.busy&&HOST.vidURL);$("host").classList.toggle("vid",useVid);hv.hidden=!useVid;
+  if(useVid){if(hv.dataset.src!==HOST.vidURL){hv.dataset.src=HOST.vidURL;hv.src=HOST.vidURL}frameMedia(hv);busySound(hv);if(hv.paused)hv.play().catch(function(){hv.muted=true;hv.play().catch(function(){})})}
+  else{if(!hv.paused)hv.pause();busySound(null)}
+  if(!HOST.busy)return;
+  var sup=!useVid&&cfg.hostSup&&lastSup&&lastSup.av,bg=useVid?"":sup?lastSup.av:hostPic()||HOST.frame||"";frameMedia($("hbBg"));
+  $("hbBg").style.backgroundImage=bg?'url("'+bg.replace(/"/g,"%22")+'")':"none";$("hbBg").classList.toggle("sup",!!sup);
+  $("hbIcon").textContent=HOST.busy;$("hbHeart").hidden=!sup}
+setInterval(function(){if(!cfg.host)return;var el=hostEl();
+  if(HOST.busy){paintBusy()}
+  /* a big gift's moment belongs to the supporter: the bubble steps back a little */
+  el.classList.toggle("dim",!!vipOn())},1000);
+document.addEventListener("visibilitychange",function(){if(document.hidden)hostStop();else if(cfg.host&&!HOST.busy)hostStart()});
+window.addEventListener("resize",function(){if(cfg.host)hostLayout()});
+/* drag with one finger to move; double tap = busy ☕ on/off */
+(function(){var el=null,sx=0,sy=0,ox=0,oy=0,moved=false,lastTap=0;
+  document.addEventListener("pointerdown",function(e){var h=hostEl();if(!h||h.hidden||!h.contains(e.target))return;el=h;moved=false;sx=e.clientX;sy=e.clientY;ox=h.offsetLeft;oy=h.offsetTop;try{h.setPointerCapture(e.pointerId)}catch(x){}e.preventDefault()});
+  document.addEventListener("pointermove",function(e){if(!el)return;var dx=e.clientX-sx,dy=e.clientY-sy;if(!moved&&Math.hypot(dx,dy)<8)return;moved=true;el.classList.add("drag");
+    var st=$("stage").getBoundingClientRect();el.style.left=clamp(ox+dx,8,st.width-el.offsetWidth-8)+"px";el.style.top=clamp(oy+dy,8,st.height-el.offsetHeight-8)+"px"});
+  document.addEventListener("pointerup",function(e){if(!el)return;var h=el;el=null;h.classList.remove("drag");var st=$("stage").getBoundingClientRect();
+    if(moved){cfg.hostX=clamp((h.offsetLeft-8)/Math.max(1,st.width-h.offsetWidth-16),0,1);cfg.hostY=clamp(h.offsetTop/st.height,0,1);save();return}
+    var now=perf();if(now-lastTap<350){lastTap=0;setBusy(HOST.busy?"":(cfg.hostIcon||"☕"))}else lastTap=now})})();
+function paintHostBtns(){var el=$("busyBtns");if(!el)return;Array.prototype.forEach.call(el.children,function(b){b.classList.toggle("go",b.dataset.b===HOST.busy||(!HOST.busy&&b.dataset.b===""))})}
+
+Array.prototype.forEach.call(document.querySelectorAll("#busyBtns button"),function(b){b.onclick=function(){if(b.dataset.b)cfg.hostIcon=b.dataset.b,save();setBusy(b.dataset.b)}});
+$("bBlur").onclick=function(){HOST.blur=!HOST.blur;$("bBlur").classList.toggle("go",HOST.blur);hostLayout()};
+$("bHostPic").onclick=function(){$("hostFile").click()};
+$("hostFile").onchange=function(){var f=this.files&&this.files[0];if(!f)return;var rd=new FileReader();rd.onload=function(){var im=new Image();im.onload=function(){var c=document.createElement("canvas");c.width=c.height=256;var x=c.getContext("2d"),s=Math.min(im.width,im.height);
+    x.drawImage(im,(im.width-s)/2,(im.height-s)/2,s,s,0,0,256,256);try{localStorage.setItem("party_hostpic",c.toDataURL("image/jpeg",0.85))}catch(e){}paintBusy()};im.src=rd.result};rd.readAsDataURL(f)};
+/* my looping video for "busy": kept in the phone's storage (IndexedDB), framed with pan and zoom */
+/* the video's sound: inside the app it is played by Android itself without taking the audio focus, so Spotify keeps playing
+   (the picture in the bubble stays muted); in a browser preview the video element plays it */
+window.__busySndOff=function(){HOST.snd=false};   /* Android stopped the sound (app left the screen): start it fresh next time */
+/* "mix" (default): Android plays the sound without taking the audio focus, so Spotify keeps playing (the picture may drift a
+   little from the sound); "video": the video plays its own sound, always in sync, but Android pauses Spotify */
+function nativeSound(){return APP&&!!BusApp.busyAudio&&cfg.hostSnd!=="video"}
+function busySound(hv){var vol=clamp((+cfg.hostVol||0)/100,0,1);
+  /* the position is sent only when the sound starts; after that Android loops it on its own (re-syncing made it stutter) */
+  if(nativeSound()){if(hv)hv.muted=true;var on=!!hv&&vol>0&&!document.hidden;try{BusApp.busyAudio(on,vol,on&&!HOST.snd?hv.currentTime:-1)}catch(e){}HOST.snd=on;HOST.nat=on;return}
+  if(HOST.nat){try{BusApp.busyAudio(false,0,-1)}catch(e){}HOST.nat=false;HOST.snd=false}
+  if(hv){hv.volume=vol;hv.muted=vol<=0;if(vol>0&&hv.paused&&!hv.hidden)hv.play().catch(function(){})}}
+function frameMedia(el){var x=+cfg.hostVx,y=+cfg.hostVy,z=Math.max(1,+cfg.hostVz||1);el.style.objectPosition=x+"% "+y+"%";el.style.backgroundPosition=x+"% "+y+"%";el.style.transformOrigin=x+"% "+y+"%";el.style.transform="scale("+z+")"}
+function mediaDB(cb){try{var rq=indexedDB.open("party_media",1);rq.onupgradeneeded=function(){rq.result.createObjectStore("m")};rq.onsuccess=function(){cb(rq.result)};rq.onerror=function(){cb(null)}}catch(e){cb(null)}}
+function setVid(blob){if(HOST.vidURL){URL.revokeObjectURL(HOST.vidURL);HOST.vidURL=""}if(blob)HOST.vidURL=URL.createObjectURL(blob);
+  $("hvBox").hidden=$("bHostVidDel").hidden=!HOST.vidURL;var pv=$("hvPrevVid");if(HOST.vidURL){pv.src=HOST.vidURL;frameMedia(pv);pv.play().catch(function(){})}else{pv.removeAttribute("src");pv.load()}
+  $("hbVid").dataset.src="";paintBusy();paintVidCtl()}
+function paintVidCtl(){var old=HOST.vidURL&&APP&&BusApp.hasBusyAudio&&!BusApp.hasBusyAudio();$("hvOld").hidden=!old;$("hvV").value=String(cfg.hostVol||0);$("hvVn").textContent=(+cfg.hostVol>0?cfg.hostVol+"%":"🔇");$("hvZ").value=String(cfg.hostVz);$("hvX").value=String(cfg.hostVx);$("hvY").value=String(cfg.hostVy)}
+mediaDB(function(db){if(!db)return;try{var g=db.transaction("m").objectStore("m").get("busyVid");g.onsuccess=function(){if(g.result)setVid(g.result)}}catch(e){}});
+$("bHostVid").onclick=function(){$("hostVidFile").click()};
+$("hostVidFile").onchange=function(){var f=this.files&&this.files[0];if(!f)return;cfg.hostVx=50;cfg.hostVy=50;cfg.hostVz=1;save();setVid(f);
+  mediaDB(function(db){if(!db)return;try{db.transaction("m","readwrite").objectStore("m").put(f,"busyVid")}catch(e){}})};
+$("bHostVidDel").onclick=function(){if(APP&&BusApp.busyDelete)try{BusApp.busyDelete()}catch(e){}setVid(null);mediaDB(function(db){if(!db)return;try{db.transaction("m","readwrite").objectStore("m").delete("busyVid")}catch(e){}})};
+function vidFrame(){save();frameMedia($("hvPrevVid"));frameMedia($("hbVid"));frameMedia($("hbBg"))}
+$("oHostSnd").value=cfg.hostSnd||"mix";$("oHostSnd").onchange=function(){cfg.hostSnd=this.value;save();HOST.snd=false;var hv=$("hbVid");busySound(hv.hidden||hv.paused?null:hv)};
+$("hvV").oninput=function(){cfg.hostVol=+this.value;save();paintVidCtl();var hv=$("hbVid");busySound(hv.hidden||hv.paused?null:hv)};
+document.addEventListener("visibilitychange",function(){var hv=$("hbVid");busySound(!document.hidden&&!hv.hidden&&!hv.paused?hv:null)});
+[["hvZ","hostVz"],["hvX","hostVx"],["hvY","hostVy"]].forEach(function(p){$(p[0]).oninput=function(){cfg[p[1]]=+this.value;vidFrame()}});
+/* drag on the preview to choose the part of the video that shows */
+(function(){var on=false,sx=0,sy=0,ox=0,oy=0,pv=$("hvPrev");
+  pv.addEventListener("pointerdown",function(e){on=true;sx=e.clientX;sy=e.clientY;ox=+cfg.hostVx;oy=+cfg.hostVy;try{pv.setPointerCapture(e.pointerId)}catch(x){}e.preventDefault()});
+  pv.addEventListener("pointermove",function(e){if(!on)return;var k=100/(pv.offsetWidth*Math.max(1,+cfg.hostVz));cfg.hostVx=clamp(ox-(e.clientX-sx)*k,0,100);cfg.hostVy=clamp(oy-(e.clientY-sy)*k*pv.offsetWidth/pv.offsetHeight,0,100);paintVidCtl();vidFrame()});
+  pv.addEventListener("pointerup",function(){on=false});pv.addEventListener("pointercancel",function(){on=false})})();
+
+
+[["oHost","host"],["oHostSize","hostSize"],["oHostShape","hostShape2"],["oHostMirror","hostMirror"],["oHostSup","hostSup"]].forEach(function(p){var el=$(p[0]);
+  el.onchange=function(){cfg[p[1]]=el.type==="checkbox"?el.checked:el.value;save();if(p[1]==="host"&&cfg.host)HOST.busy=HOST.busy||cfg.hostIcon||"☕";hostLayout()}});
+/* ---------- floating stars over any app (native window, see FloatOverlay.java) ---------- */
+function flOpts(){return JSON.stringify({taps:cfg.flTaps,gifts:cfg.flGifts,wall:cfg.flWall,join:cfg.flJoin,size:+cfg.flSize||1})}
+function flState(){try{return APP&&BusApp.floatState?String(BusApp.floatState()):"none"}catch(e){return "none"}}
+function paintFloat(){var s=flState();$("bFloat").textContent=s==="on"?"Desactivar":"Activar";$("bFloat").classList.toggle("go",s!=="on");
+  $("floatSt").textContent=s==="on"?"✅":s==="noperm"?"Falta el permiso":s==="none"?"Solo en la app":""}
+$("bFloatTest").onclick=function(){if(!APP||!BusApp.floatTest)return;if(flState()!=="on"){try{BusApp.floatShow(true,flOpts())}catch(e){}}setTimeout(function(){try{BusApp.floatTest()}catch(e){}},500);setTimeout(paintFloat,400)};
+$("bFloat").onclick=function(){if(!APP||!BusApp.floatShow)return;var on=flState()!=="on";try{BusApp.floatShow(on,flOpts())}catch(e){}setTimeout(paintFloat,400)};
+[["oFlTaps","flTaps"],["oFlGifts","flGifts"],["oFlWall","flWall"],["oFlJoin","flJoin"],["oFlSize","flSize"]].forEach(function(p){var el=$(p[0]);
+  el.checked=!!cfg[p[1]];if(el.tagName==="SELECT")el.value=String(cfg[p[1]]);
+  el.onchange=function(){cfg[p[1]]=el.tagName==="SELECT"?+el.value:el.checked;save();
+    if(flState()==="on"){try{if(p[1]==="flSize")BusApp.floatShow(false,flOpts());BusApp.floatShow(true,flOpts())}catch(e){}}}});
+document.addEventListener("visibilitychange",function(){if(!document.hidden)paintFloat()});
+paintFloat();
+
+
+function wake(){try{navigator.wakeLock&&navigator.wakeLock.request("screen").catch(function(){})}catch(e){}}
+document.addEventListener("visibilitychange",function(){if(!document.hidden)wake()});
+window.__nat=function(){return {ready:worldReady,top:ranked().slice(0,5).map(function(c){return c.k+":"+c.pts}),players:live.players,live:live.pts}};
+sortAlias();fill();paintAll();hostLayout();wake();requestAnimationFrame(frame);
+})();
+</script>
+</body>
+</html>

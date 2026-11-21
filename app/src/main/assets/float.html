@@ -1,0 +1,109 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Estrellas flotantes</title>
+<style>
+/* Floating stars drawn over any app: tappers float up as photo bubbles, each gift slides in as a card
+   (photo, name, gift), the most valuable first, and the last five supporters stay in a small row. Transparent everywhere else. */
+:root{--gold:#ffc93c;--display:"Barlow Condensed","Arial Narrow","Roboto Condensed",system-ui,sans-serif}
+html,body{margin:0;height:100%;background:transparent;overflow:hidden;font-family:var(--display);color:#fff;-webkit-user-select:none;user-select:none}
+[hidden]{display:none!important}
+#w{position:absolute;inset:0}
+/* gift cards */
+#cards{position:absolute;left:0;right:30px;top:0;height:96px}
+.card{position:absolute;left:0;right:0;top:6px;display:flex;align-items:center;gap:8px;padding:6px 10px 6px 6px;border-radius:999px;
+  background:linear-gradient(90deg,rgba(40,14,70,.92),rgba(20,8,40,.86));border:2px solid rgba(255,255,255,.45);box-shadow:0 6px 18px rgba(0,0,0,.45);
+  animation:cardIn .45s cubic-bezier(.2,.9,.3,1.25) both}
+.card.out{animation:cardOut .35s ease-in both}
+.card.t1{border-color:#8be9ff;box-shadow:0 0 16px rgba(24,214,255,.6)}
+.card.t2{border-color:var(--gold);background:linear-gradient(90deg,rgba(90,52,0,.95),rgba(40,14,60,.9));box-shadow:0 0 24px rgba(255,201,60,.85)}
+.card .ph{position:relative;width:54px;height:54px;border-radius:50%;flex:none;overflow:hidden;border:3px solid #fff;display:grid;place-items:center;font:800 24px/1 var(--display)}
+.card.t2 .ph{border-color:var(--gold)}
+.card .ph img{width:100%;height:100%;object-fit:cover}
+.card .tx{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}
+.card .nm{font-weight:800;font-size:19px;line-height:1.05;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;text-shadow:0 1px 3px rgba(0,0,0,.7)}
+.card .gf{display:flex;align-items:center;gap:5px;font-weight:800;font-size:17px;color:var(--gold)}
+.card .gf img{width:30px;height:30px;object-fit:contain}
+.card .gf span.e{font-size:24px;line-height:1}
+.card .st{position:absolute;font-size:14px;animation:star 1.2s ease-out both;pointer-events:none}
+@keyframes cardIn{0%{transform:translateX(110%) scale(.8);opacity:0}100%{transform:none;opacity:1}}
+@keyframes cardOut{to{transform:translateX(110%);opacity:0}}
+@keyframes star{0%{transform:translate(0,0) scale(.4);opacity:1}100%{transform:translate(var(--dx),var(--dy)) scale(1.1);opacity:0}}
+/* tap bubbles */
+#bub{position:absolute;left:0;right:0;top:96px;bottom:44px;overflow:hidden}
+.b{position:absolute;bottom:-70px;display:flex;flex-direction:column;align-items:center;gap:2px;animation:rise var(--dur,3.8s) ease-out forwards;will-change:transform,opacity}
+.b .ph{border-radius:50%;overflow:hidden;border:2px solid rgba(255,255,255,.9);box-shadow:0 0 10px rgba(255,61,139,.6);display:grid;place-items:center;font:800 16px/1 var(--display);background:#333}
+.b .ph img{width:100%;height:100%;object-fit:cover}
+.b .nm{font-weight:700;font-size:12px;max-width:80px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;text-shadow:0 1px 3px #000}
+.b .hx{position:absolute;right:-4px;top:-6px;font-size:13px}
+.b.j .ph{border-color:rgba(255,255,255,.5);box-shadow:none;filter:saturate(.7)}
+@keyframes rise{0%{transform:translate(0,0) scale(.5);opacity:0}12%{opacity:1;transform:translate(calc(var(--sx)*.3),-18%) scale(1)}100%{transform:translate(var(--sx),calc(-1*var(--h))) scale(.92);opacity:0}}
+/* the last five supporters */
+#wall{position:absolute;left:0;right:30px;bottom:0;height:40px;display:flex;align-items:center;gap:4px;padding-left:4px}
+#wall .m{width:34px;height:34px;border-radius:50%;overflow:hidden;border:2px solid var(--gold);display:grid;place-items:center;font:800 15px/1 var(--display);flex:none;box-shadow:0 0 8px rgba(255,201,60,.5);animation:pop .4s cubic-bezier(.2,.9,.3,1.4)}
+#wall .m img{width:100%;height:100%;object-fit:cover}
+@keyframes pop{0%{transform:scale(.2)}100%{transform:scale(1)}}
+</style>
+</head>
+<body>
+<div id="w"><div id="cards"></div><div id="bub"></div><div id="wall"></div></div>
+<script>
+(function(){
+"use strict";
+var $=function(id){return document.getElementById(id)};
+var cfg={taps:true,gifts:true,join:false,wall:true,size:1};
+window.__floatCfg=function(o){if(o)for(var k in o)cfg[k]=o[k];$("wall").hidden=!cfg.wall;if(!cfg.gifts)$("cards").innerHTML=""};
+function esc(s){return String(s).replace(/[&<>"]/g,function(m){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[m]})}
+function hue(s){var h=2166136261;s=String(s);for(var i=0;i<s.length;i++){h^=s.charCodeAt(i);h=Math.imul(h,16777619)}return (h>>>0)%360}
+function initial(s){var c=String(s).replace(/[^A-Za-z0-9À-ÿ؀-ۿ]/g,"").charAt(0);return (c||String(s).charAt(0)||"?").toUpperCase()}
+function face(e){var n=e.nick||e.user||"?";return e.avatar?'<img alt="" referrerpolicy="no-referrer" src="'+esc(e.avatar)+'">':'<span style="display:grid;place-items:center;width:100%;height:100%;background:hsl('+hue(e.user||n)+',70%,45%)">'+esc(initial(n))+'</span>'}
+function now(){return performance.now()}
+
+/* ---- gift cards: one at a time, most valuable first; small 2 s, medium 4 s, big 6 s ---- */
+var gq=[],showing=null,seq=0;
+function tier(c){return c>=100?2:c>=10?1:0}
+function addGift(e){var coins=Math.max(1,e.coins|0)*Math.max(1,e.count|0),k=String(e.user||e.nick);
+  /* the same person sending again while waiting: one card with the total */
+  for(var i=0;i<gq.length;i++)if(gq[i].k===k){gq[i].coins+=coins;gq[i].count+=Math.max(1,e.count|0);gq[i].e=e;sortQ();return}
+  gq.push({k:k,e:e,coins:coins,count:Math.max(1,e.count|0),at:seq++});sortQ();if(!showing)next()}
+function sortQ(){gq.sort(function(a,b){return (b.coins-a.coins)||(a.at-b.at)})}
+function next(){var g=gq.shift();if(!g){showing=null;return}showing=g;var e=g.e,t=tier(g.coins);
+  var el=document.createElement("div");el.className="card t"+t;
+  var gift=e.img?'<img alt="" referrerpolicy="no-referrer" src="'+esc(e.img)+'">':'<span class="e">🎁</span>';
+  el.innerHTML='<div class="ph">'+face(e)+'</div><div class="tx"><div class="nm">'+esc(e.nick||e.user||"")+'</div><div class="gf">'+gift+(g.count>1?'<span>×'+g.count+'</span>':'')+'</div></div>';
+  $("cards").appendChild(el);
+  var n=t===2?14:t===1?8:4;for(var i=0;i<n;i++){var s=document.createElement("span");s.className="st";s.textContent=["✨","⭐","💖","🌟"][i%4];
+    s.style.left="30px";s.style.top="30px";var a=Math.random()*6.28,d=40+Math.random()*60;s.style.setProperty("--dx",Math.cos(a)*d+"px");s.style.setProperty("--dy",Math.sin(a)*d+"px");s.style.animationDelay=(i*40)+"ms";el.appendChild(s)}
+  /* a queue waiting makes each card a little shorter, but never under 1.5 s */
+  var dur=Math.max(1500,[2000,4000,6000][t]-gq.length*300);
+  setTimeout(function(){el.classList.add("out");setTimeout(function(){el.remove();next()},340)},dur);
+  addWall(e)}
+
+/* ---- the last five supporters ---- */
+var wall=[];
+function addWall(e){if(!cfg.wall)return;var k=String(e.user||e.nick);wall=wall.filter(function(x){return x.k!==k});wall.unshift({k:k,e:e});if(wall.length>5)wall.length=5;
+  $("wall").innerHTML=wall.map(function(x){return '<div class="m">'+face(x.e)+'</div>'}).join("")}
+
+/* ---- tap bubbles: one per person every ~1.6 s, bigger for more taps; at most 14 at once ---- */
+var lastBub={},bubN=0;
+function bubble(e,join){var k=String(e.user||e.nick),t=now();if(t-(lastBub[k]||0)<1600)return;lastBub[k]=t;
+  var box=$("bub"),list=box.children;if(list.length>=14)list[0].remove();
+  var c=Math.min(15,Math.max(1,e.count|0)),sz=join?32:34+c*1.4,el=document.createElement("div");el.className="b"+(join?" j":"");
+  el.innerHTML='<div class="ph" style="width:'+sz+'px;height:'+sz+'px">'+face(e)+'</div>'+(join?'<span class="hx">👋</span>':(c>=5?'<span class="hx">❤️</span>':''))+'<div class="nm">'+esc(e.nick||e.user||"")+'</div>';
+  var W=box.clientWidth||180,H=box.clientHeight||260;el.style.left=Math.round(8+Math.random()*Math.max(10,W-sz-30))+"px";
+  el.style.setProperty("--sx",Math.round((Math.random()-0.5)*50)+"px");el.style.setProperty("--h",(H+60)+"px");el.style.setProperty("--dur",(3.2+Math.random()*1.2).toFixed(2)+"s");
+  box.appendChild(el);setTimeout(function(){el.remove()},4700);
+  if(++bubN%200===0){var cut=t-60000;for(var kk in lastBub)if(lastBub[kk]<cut)delete lastBub[kk]}}
+
+window.__bus=function(e){try{if(!e||!e.type)return;
+  if(e.type==="gift"){if(cfg.gifts)addGift(e)}
+  else if(e.type==="like"){if(cfg.taps)bubble(e,false)}
+  else if(e.type==="join"){if(cfg.join)bubble(e,true)}}catch(x){}};
+window.__floatTest=function(){var n=["Fatima","Carlos","Sara","Youssef","Lucia","Omar"],i=0;
+  var t=setInterval(function(){window.__bus({type:"like",user:"u"+(i%6),nick:n[i%6],count:1+(i*3)%14});if(i%4===0)window.__bus({type:"gift",user:"g"+(i%3),nick:n[(i+2)%6],coins:[1,30,500][i%3],count:1});if(++i>24)clearInterval(t)},350)};
+})();
+</script>
+</body>
+</html>

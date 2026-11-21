@@ -1,0 +1,830 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Imprenta de Fans</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800&family=Barlow:wght@400;500;600&display=swap">
+<style>
+/* Fan printer: every viewer who taps the screen is printed on a card with their photo and name, line by line;
+   the paper moves forward and the cards drop over the edge of the desk. No sounds, so the host's music keeps playing. */
+:root{
+  color-scheme:dark;
+  --night:#05020c; --panel:#140d2a; --panel-2:#1f1640; --line:#3b2d6b;
+  --ink:#f7f4ff; --ink-dim:#b4a9d6; --ok:#4ade80; --bad:#ff6b5e; --hot:#ff3d8b; --gold:#ffc93c;
+  --display:"Barlow Condensed","Arial Narrow","Roboto Condensed",system-ui,sans-serif;
+  --body:"Barlow","Segoe UI",Roboto,system-ui,sans-serif;
+}
+html,body{height:100%;margin:0}
+[hidden]{display:none!important}
+body{background:var(--night);color:var(--ink);font-family:var(--body);overflow:hidden}
+#stage{position:relative;height:100%;overflow:hidden;touch-action:manipulation;user-select:none;-webkit-user-select:none}
+#gl{position:absolute;inset:0;width:100%;height:100%;display:block}
+#fade{position:absolute;inset:0;background:#000;opacity:0;pointer-events:none;transition:opacity .7s ease}#fade.on{opacity:1}
+#busyBtns{flex-wrap:wrap}
+#host{position:absolute;z-index:6;border-radius:50%;overflow:hidden;background:#111;touch-action:none;box-shadow:0 0 0 3px #fff,0 0 18px 4px rgba(255,45,122,.55);transition:transform .5s ease,opacity .5s ease;animation:hostGlow 2.4s ease-in-out infinite}
+#host.card{border-radius:20px}#host.dim{transform:scale(.78);opacity:.82}
+#host.drag{transition:none;animation:none;box-shadow:0 0 0 3px #ffc93c,0 0 26px 6px rgba(255,201,60,.75)}
+#host.away{box-shadow:0 0 0 3px #ffc93c,0 0 18px 4px rgba(255,201,60,.5)}
+@keyframes hostGlow{0%,100%{box-shadow:0 0 0 3px #fff,0 0 14px 3px rgba(255,45,122,.5)}50%{box-shadow:0 0 0 3px #fff,0 0 22px 6px rgba(24,214,255,.55)}}
+#hostCam{width:100%;height:100%;object-fit:cover;display:block;pointer-events:none}#hostCam.mir{transform:scaleX(-1)}#hostCam.blur{filter:blur(14px)}
+#hostMsg{position:absolute;inset:0;display:grid;place-items:center;font-size:.26em;background:#111;pointer-events:none}
+#hostBusy{position:absolute;inset:0;pointer-events:none}
+#hbBg{position:absolute;inset:0;background:#2a1240 center/cover no-repeat;filter:brightness(.7) saturate(.9)}
+#hbVid,#hvPrevVid{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block}#host.vid #hbIcon{top:12%;left:16%;font-size:.17em;animation:none}
+#hvPrev{position:relative;width:96px;height:154px;border-radius:14px;overflow:hidden;background:#111;touch-action:none;flex:none;box-shadow:0 0 0 2px #fff}
+#hvEdit{display:flex;gap:12px;align-items:center}#hvEdit .sl{flex:1;display:flex;flex-direction:column;gap:8px}#hvEdit input[type=range]{width:100%}#hbBg.sup{filter:none}
+#hbIcon{position:absolute;left:50%;top:42%;transform:translate(-50%,-50%);font-size:.36em;line-height:1;animation:bob 1.6s ease-in-out infinite;filter:drop-shadow(0 2px 6px rgba(0,0,0,.6))}
+#hbTime{position:absolute;left:0;right:0;bottom:9%;text-align:center;font:800 .14em/1 var(--display);color:#fff;text-shadow:0 1px 4px #000}
+#hbHeart{position:absolute;right:12%;top:9%;font-size:.17em;animation:bob 1s ease-in-out infinite}
+@keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-4px)}}#lookBtns{flex-wrap:wrap}
+#nogl{position:absolute;inset:0;display:grid;place-items:center;text-align:center;padding:24px;font:700 20px/1.3 var(--display)}
+
+/* language-free hint: 👆 ➜ 🖨️ with the photo of the card being printed */
+/* the machine's own counters, like a runner game's (not linked to taps or gifts): cards / 150, rows, pages, pages fallen */
+#coins{position:absolute;left:50%;top:calc(env(safe-area-inset-top,0px) + 9%);transform:translateX(-50%);display:flex;align-items:center;pointer-events:none}
+#coins .ci{width:46px;height:46px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#fff3b0,#e8b320 45%,#a87300);border:3px solid #7a5200;display:grid;place-items:center;font:900 22px/1 var(--display);color:#7a5200;z-index:1;box-shadow:0 2px 6px rgba(0,0,0,.4)}
+#coins .bar{margin-left:-14px;padding:6px 16px 6px 22px;border-radius:0 10px 10px 0;background:linear-gradient(180deg,#9b2335,#6a1222);border:2px solid #3a0a12;font:900 22px/1 var(--display);color:#fff;text-shadow:0 2px 0 rgba(0,0,0,.35);min-width:90px;text-align:center}
+#coins.pop .ci{animation:cpop .35s cubic-bezier(.2,.9,.3,1.5)}@keyframes cpop{0%{transform:scale(1.4)}100%{transform:none}}
+#stats{position:absolute;left:50%;top:calc(env(safe-area-inset-top,0px) + 9% + 54px);transform:translateX(-50%);display:flex;gap:22px;pointer-events:none}
+#stats span{display:flex;align-items:center;gap:5px;font:900 20px/1 var(--display);color:#ffe066;text-shadow:0 2px 3px rgba(0,0,0,.7)}#stats i{font-style:normal;font-size:26px}
+#hint{position:absolute;left:50%;top:calc(env(safe-area-inset-top,0px) + 9% + 92px);transform:translateX(-50%);display:flex;align-items:center;gap:10px;padding:7px 14px 7px 12px;
+  border-radius:999px;background:rgba(20,12,6,.6);border:1px solid rgba(255,255,255,.16);pointer-events:none;box-shadow:0 8px 30px rgba(0,0,0,.35)}
+#hint .tap{position:relative;font-size:32px;line-height:1;width:40px;text-align:center;animation:tap .8s ease-in-out infinite}
+#hint .tap i{position:absolute;font-style:normal;font-size:15px;left:24px;top:-6px;animation:heart 1.6s ease-out infinite}
+#hint .tap i+i{left:2px;top:-2px;animation-delay:.8s}
+@keyframes heart{0%{opacity:0;transform:translateY(6px) scale(.6)}25%{opacity:1}100%{opacity:0;transform:translateY(-18px) scale(1.1)}}
+
+#hint svg{width:30px;height:20px}
+#hint .pr{font-size:32px;line-height:1}
+#hint .me{width:46px;height:46px;border-radius:50%;overflow:hidden;border:2px solid #fff;display:grid;place-items:center;font:800 18px/1 var(--display);background:rgba(255,255,255,.12)}
+#hint .me img{width:100%;height:100%;object-fit:cover}
+#hint .q{font:800 18px/1 var(--display);color:var(--ink-dim);min-width:18px}
+@keyframes tap{0%,100%{transform:translateY(0)}50%{transform:translateY(5px) scale(.92)}}
+#gear{position:absolute;right:10px;bottom:10px;width:40px;height:40px;border-radius:50%;border:1px solid rgba(255,255,255,.12);background:rgba(10,6,24,.45);
+  color:var(--ink);font-size:19px;line-height:1;cursor:pointer;opacity:.3}
+#gear i{position:absolute;top:3px;right:3px;width:8px;height:8px;border-radius:50%;background:var(--bad)}
+#gear i.ok{background:var(--ok)}
+#sheet{position:absolute;left:0;right:0;bottom:0;max-height:78%;overflow:auto;background:var(--panel);border-top:1px solid var(--line);
+  border-radius:18px 18px 0 0;padding:0 16px 22px;box-shadow:0 -12px 40px rgba(0,0,0,.5);z-index:20}
+#tabs{position:sticky;top:0;display:flex;gap:4px;align-items:center;background:var(--panel);padding:12px 0 8px;z-index:1}
+.tab{flex:1;background:none;border:0;border-bottom:3px solid transparent;color:var(--ink-dim);font:800 16px/1 var(--display);letter-spacing:.06em;text-transform:uppercase;padding:8px 2px;cursor:pointer}
+.tab[aria-selected="true"]{color:var(--ink);border-bottom-color:var(--hot)}
+#close{background:var(--panel-2);border:0;color:var(--ink);width:36px;height:36px;border-radius:50%;font-size:16px;cursor:pointer;flex:none}
+.grp{background:var(--panel-2);border-radius:12px;padding:10px 12px;margin:10px 0}
+.grp h3{margin:0 0 6px;font:800 15px/1.2 var(--display);letter-spacing:.06em;text-transform:uppercase;color:var(--ink-dim)}
+.ln{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:7px 0}
+.ln label{flex:1;min-width:150px;font-size:14px}
+.ln .grow{flex:1;min-width:0}
+label.ln{flex-wrap:nowrap}label.ln span{flex:1;min-width:0}label.ln input{flex:none}
+.note{font-size:13px;line-height:1.45;color:var(--ink-dim);margin:8px 0}
+.btn{background:var(--panel-2);color:var(--ink);border:1px solid var(--line);border-radius:10px;padding:10px 14px;font:700 15px/1 var(--display);letter-spacing:.04em;text-transform:uppercase;cursor:pointer}
+.btn.go{background:var(--hot);border-color:var(--hot);color:#fff}
+input[type=text],select{background:#0c0820;color:var(--ink);border:1px solid var(--line);border-radius:8px;padding:9px 10px;font:500 15px var(--body)}
+input[type=checkbox]{width:20px;height:20px;accent-color:var(--hot)}
+#st.ok{color:var(--ok)}#st.bad{color:var(--bad)}
+#apLog{max-height:30vh;overflow:auto;white-space:pre-wrap;font:12px/1.35 monospace;color:var(--ink-dim);background:rgba(0,0,0,.35);border-radius:8px;padding:8px;margin:8px 0 0}
+#perf{font:12px monospace;color:var(--ink-dim)}
+#monC{display:flex;gap:14px;font:800 20px/1 var(--display);margin:6px 0}
+</style>
+</head>
+<body>
+<div id="stage">
+  <canvas id="gl"></canvas>
+  <div id="fade"></div>
+  <div id="nogl" hidden>Este teléfono no puede mostrar gráficos 3D.</div>
+  <div id="coins" aria-hidden="true"><span class="ci">S</span><span class="bar" id="cN">0/150</span></div>
+  <div id="stats" aria-hidden="true"><span><i>🏃</i><b id="sR">0</b></span><span><i>🦘</i><b id="sP">0</b></span><span><i>🤕</i><b id="sD">0</b></span></div>
+  <div id="hint" aria-hidden="true"><span class="tap">👆<i>❤️</i><i>❤️</i></span><svg viewBox="0 0 34 22"><path d="M2 11h24M18 3l9 8-9 8" fill="none" stroke="#fff" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"/></svg><span class="pr">🖨️</span><div class="me" id="hintMe">📷</div></div>
+  <div id="host" aria-hidden="true" hidden><video id="hostCam" autoplay playsinline muted></video><div id="hostMsg" hidden></div>
+    <div id="hostBusy" hidden><div id="hbBg"></div><video id="hbVid" loop muted playsinline hidden></video><span id="hbIcon">☕</span><span id="hbHeart">❤️</span></div></div>
+  <button id="gear" aria-label="Ajustes">⚙<i id="dot"></i></button>
+
+  <div id="sheet" hidden>
+    <div id="tabs" role="tablist">
+      <button class="tab" role="tab" data-p="pCtl" aria-selected="true">Control</button>
+      <button class="tab" role="tab" data-p="pRules" aria-selected="false">Reglas</button>
+      <button class="tab" role="tab" data-p="pLink" aria-selected="false">Conexión</button>
+      <button id="close" aria-label="Cerrar">✕</button>
+    </div>
+    <div class="pane" id="pCtl">
+      <div class="grp"><h3>🖨️ Imprenta</h3>
+        <p class="note">Cada espectador que toca la pantalla sale impreso en una tarjeta con su foto y su nombre. Los regalos van siempre primero, del de más valor al de menos, y ninguno se queda sin imprimir: 🌹 menos de 10 monedas = tarjeta con marco rojo y el regalo pegado; ⭐ 10–99 = tarjeta dorada con brillos; 👑 100–999 = póster ancho de toda la fila con confeti; 💎 1000+ = página entera para esa persona. La máquina imprime línea a línea, el papel avanza y las tarjetas caen por el borde. Cuatro tarjetas por página, dos por fila. Reparto justo, sin lista de espera: entra quien ha tocado en los últimos 12 s (si tocó hace mucho, quizá ya se fue); primero los que todavía no han salido, luego los que más tiempo llevan esperando; quien acaba de salir descansa más páginas cuanta más gente toca (1–2 personas: vuelve enseguida · 3–4: en la página siguiente · 5–10: salta una página · 11+: salta dos). Junto al cabezal se ven los dos siguientes 👀.</p>
+              </div>
+      <div class="grp"><h3>🫧 Estrellas flotantes (encima de cualquier juego)</h3>
+        <p class="note">Sale encima de cualquier app que abras durante el directo (otro juego, YouTube…): los que tocan suben como burbujas con su foto y su nombre, y cada regalo entra como una tarjeta con la foto, el nombre y el regalo (el de más valor primero). No bloquea el juego de debajo. Muévela arrastrando el pequeño ✥; doble toque en ✥ la esconde un momento. La primera vez Android pide permiso para «mostrar sobre otras apps».</p>
+        <div class="ln"><button class="btn go" id="bFloat">Activar</button><button class="btn" id="bFloatTest">🧪 Probar 20 s</button><span class="note" id="floatSt"></span></div>
+        <p class="note">Para probar sin directo: activa, pulsa 🧪 y abre enseguida tu juego. Durante 20 segundos llegan toques y regalos de prueba.</p>
+        <label class="ln"><input type="checkbox" id="oFlTaps"><span>👆 Burbujas de los que tocan</span></label>
+        <label class="ln"><input type="checkbox" id="oFlGifts"><span>🎁 Tarjetas de los regalos</span></label>
+        <label class="ln"><input type="checkbox" id="oFlWall"><span>⭐ Fila con los 5 últimos que apoyan</span></label>
+        <label class="ln"><input type="checkbox" id="oFlJoin"><span>👋 Los que entran al directo</span></label>
+        <div class="ln"><label for="oFlSize">Tamaño</label><select id="oFlSize"><option value="0.8">Pequeño</option><option value="1">Normal</option><option value="1.25">Grande</option></select></div>
+      </div>
+      <div class="grp"><h3>🎥 Mi cámara</h3>
+        <label class="ln"><input type="checkbox" id="oHost"><span>Salir yo con la cámara delantera en una burbuja pequeña</span></label>
+        <p class="note">Arrástrala con el dedo a un borde donde no tape a nadie (se queda ahí). Siempre empieza con tu vídeo (o tu foto), nunca con la cámara: la cámara solo se enciende cuando tú pulsas 🎥 o das doble toque en la burbuja; otro doble toque y vuelve el vídeo. Cuando llega un regalo grande, la burbuja se hace pequeña para dejar el protagonismo a quien apoya.</p>
+        <div class="ln"><label for="oHostSize">Tamaño</label><select id="oHostSize"><option value="s">Pequeña</option><option value="m">Mediana</option><option value="l">Grande</option></select><select id="oHostShape"><option value="card">▯ Vertical</option><option value="circle">⚪ Círculo</option></select></div>
+        <label class="ln"><input type="checkbox" id="oHostMirror"><span>Modo espejo</span></label>
+        <div class="ln"><button class="btn" id="bBlur">🌫️ Difuminar</button><button class="btn" id="bHostPic">🖼️ Mi foto para «ocupado»</button><input type="file" id="hostFile" accept="image/*" hidden></div>
+        <div class="ln"><button class="btn" id="bHostVid">🎬 Mi vídeo para «ocupado»</button><button class="btn" id="bHostVidDel" hidden>✖</button><input type="file" id="hostVidFile" accept="video/*" hidden></div>
+        <div id="hvBox" hidden>
+          <p class="note">El vídeo se repite solo. Mueve el dedo sobre la vista previa para elegir la parte que se ve, acerca con 🔍 y elige el volumen con 🔊 (a la izquierda del todo = sin sonido). El sonido del vídeo se mezcla con Spotify: los dos suenan a la vez.</p>
+          <div id="hvEdit"><div id="hvPrev"><video id="hvPrevVid" loop muted playsinline></video></div>
+            <div class="sl"><label>🔍<input type="range" id="hvZ" min="1" max="3" step="0.05"></label><label>↔<input type="range" id="hvX" min="0" max="100" step="1"></label><label>↕<input type="range" id="hvY" min="0" max="100" step="1"></label>
+              <label>🔊<input type="range" id="hvV" min="0" max="100" step="1"></label><span class="note" id="hvVn"></span>
+              <div class="ln"><label for="oHostSnd">Sonido</label><select id="oHostSnd"><option value="mix">🎵 Con Spotify (suena junto a tu música)</option><option value="video">🎬 Sonido del vídeo (siempre sincronizado, pausa Spotify)</option></select></div><span class="note" id="hvOld" hidden>🔊 Vuelve a elegir el vídeo una vez para que suene junto a Spotify.</span></div></div>
+        </div>
+        <div class="ln" id="busyBtns"><button class="btn" data-b="">🎥</button><button class="btn" data-b="☕">☕</button><button class="btn" data-b="🍽️">🍽️</button><button class="btn" data-b="📞">📞</button><button class="btn" data-b="🎮">🎮</button><button class="btn" data-b="🚗">🚗</button><button class="btn" data-b="💤">💤</button></div>
+        <label class="ln"><input type="checkbox" id="oHostSup"><span>Mientras estoy ocupado, mi burbuja enseña la foto del último que envía un regalo ❤️</span></label>
+      </div>
+      <div class="grp"><h3>🎁 Placa de regalos</h3>
+        <p class="note">Una placa de cristal oscuro con marco dorado montada en la máquina, siempre a la vista: 👆 ➜ tarjeta · 🌹 ➜ tarjeta roja · 🪙10 ➜ tarjeta dorada · 🪙100 ➜ póster · 🪙1000 ➜ página entera. Solo dibujos y números. Recuerda que TikTok castiga pedir regalos de forma automática: explícalo también tú con tu voz y quítala si vuelve a haber una restricción.</p>
+        <label class="ln"><input type="checkbox" id="oPlaque"><span>Mostrar la placa</span></label>
+      </div>
+      <div class="grp"><h3>🎨 Aspecto</h3>
+        <p class="note">La mesa, la máquina y la luz cambian solas cada pocos minutos para que el directo no canse (espera a que termine la tarjeta que se está imprimiendo).</p>
+        <div class="ln"><label for="oLookMin">Cambiar cada</label><select id="oLookMin"><option value="0">Nunca</option><option value="5">5 min</option><option value="10">10 min</option><option value="15">15 min</option><option value="20">20 min</option><option value="30">30 min</option></select></div>
+        <div class="ln" id="lookBtns"></div>
+      </div>
+      <div class="grp"><h3>🎮 Juegos</h3>
+        <div class="ln"><button class="btn" id="bParty">🕺 Sala</button><button class="btn" id="bRace">🏁 Carrera</button><button class="btn" id="bWin">🏆 Desafío</button><button class="btn" id="bNat">🌍 Naciones</button><button class="btn" id="bBus">🚌 Buses</button></div>
+      </div>
+      <div class="grp"><h3>Probar</h3>
+        <div class="ln"><button class="btn" data-test="1">Toques</button><button class="btn" data-test="6">6 personas tocando</button><button class="btn" data-gift="1">🌹 Regalo</button><button class="btn" data-gift="30">⭐ 30</button><button class="btn" data-gift="300">👑 300</button><button class="btn" data-gift="1500">💎 1500</button></div>
+      </div>
+      <div class="grp"><h3>Imagen</h3>
+        <div class="ln"><label for="oQ">Calidad</label><select id="oQ"><option value="ultra">Ultra (brillo, 120 Hz)</option><option value="alta">Alta</option><option value="media">Media</option><option value="ahorro">Ahorro de batería</option></select></div>
+        <label class="ln"><input type="checkbox" id="oAuto"><span>Bajar la calidad sola si el teléfono va lento</span></label>
+        <div id="perf"></div>
+      </div>
+    </div>
+    <div class="pane" id="pRules" hidden>
+      <div class="grp"><h3>Impresión</h3>
+        <div class="ln"><label for="oNeed">Toques para salir impreso</label><select id="oNeed"><option value="1">1</option><option value="5">5</option><option value="15">15</option><option value="30">30</option></select></div>
+        <div class="ln"><label for="oSpeed">Velocidad de la máquina</label><select id="oSpeed"><option value="0.7">Lenta</option><option value="1">Normal</option><option value="1.5">Rápida</option></select></div>
+        <p class="note">Imprimir también (además de los toques):</p>
+        <label class="ln"><input type="checkbox" id="oPChat"><span>💬 Los que comentan (su comentario sale en la tarjeta)</span></label>
+        <label class="ln"><input type="checkbox" id="oPFollow"><span>➕ Los que te siguen</span></label>
+        <label class="ln"><input type="checkbox" id="oPShare"><span>🔗 Los que comparten el directo</span></label>
+        <label class="ln"><input type="checkbox" id="oPJoin"><span>👋 Los que entran al directo</span></label>
+        <label class="ln"><input type="checkbox" id="oHint"><span>Mostrar el dibujo 👆 ➜ 🖨️ arriba</span></label>
+      </div>
+    </div>
+    <div class="pane" id="pLink" hidden>
+      <div class="ln"><span>Estado:</span><span id="st" class="bad">Sin conexión</span></div>
+      <p class="note" id="lnNote"></p>
+      <div id="monC"><span id="mLW">👆 <i id="mL">0</i></span><span>🖨️ <i id="mP">0</i></span></div>
+      <div class="ln"><label for="apUser" id="apUserL">Tu usuario de TikTok</label><input type="text" id="apUser" class="grow" placeholder="usuario (sin @)" autocapitalize="off" autocomplete="off" spellcheck="false"></div>
+      <div class="ln" id="apKeyRow"><label for="apKey">Clave Euler Stream</label><input type="text" id="apKey" class="grow" placeholder="opcional" autocapitalize="off" autocomplete="off" spellcheck="false"></div>
+      <div class="ln"><button class="btn go" id="apGo">Guardar y conectar</button></div>
+      <pre id="apLog"></pre>
+    </div>
+  </div>
+</div>
+
+<script src="lib/three-bundle.js"></script>
+<script>
+(function(){
+"use strict";
+var $=function(id){return document.getElementById(id)};
+var APP=!!window.BusApp;
+var SRC=APP&&BusApp.getSource?String(BusApp.getSource()):"tiktok",YT=SRC==="youtube";
+try{localStorage.setItem("game","print")}catch(e){}
+
+var DEF={pChat:true,pFollow:true,pShare:true,pJoin:true,hostSnd:"mix",plaque2:false,hint2:false,host:false,hostSize:"m",hostShape2:"card",hostMirror:true,hostSup:true,hostX:null,hostY:null,hostIcon:"☕",hostVx:50,hostVy:50,hostVz:1,hostVol:0,look:"wood",lookMin:15,need:1,again2:-1,repeat:true,speed:1,hint:true,q:"ultra",auto:true,flTaps:true,flGifts:true,flWall:true,flJoin:false,flSize:1};
+var cfg=Object.assign({},DEF);
+try{var sv=JSON.parse(localStorage.getItem("print1")||"null");if(sv)cfg=Object.assign(cfg,sv)}catch(e){}
+function save(){try{localStorage.setItem("print1",JSON.stringify(cfg))}catch(e){}}
+var QUALITY={ultra:{pr:2.5,samples:4,bloom:true},alta:{pr:1.75,samples:4,bloom:true},media:{pr:1.25,samples:0,bloom:false},ahorro:{pr:1,samples:0,bloom:false}};
+var QORDER=["ultra","alta","media","ahorro"];
+function clamp(v,a,b){return v<a?a:v>b?b:v}
+function rnd(a,b){return a+Math.random()*(b-a)}
+function pick(a){return a[(Math.random()*a.length)|0]}
+function perf(){return performance.now()}
+function damp(c,t,k,dt){return c+(t-c)*(1-Math.exp(-k*dt))}
+function hashHue(s){var h=2166136261;s=String(s);for(var i=0;i<s.length;i++){h^=s.charCodeAt(i);h=Math.imul(h,16777619)}return (h>>>0)%360}
+function initial(s){var c=String(s).replace(/[^A-Za-z0-9À-ÿ؀-ۿ]/g,"").charAt(0);return (c||String(s).charAt(0)||"?").toUpperCase()}
+function esc(s){return String(s).replace(/[&<>"]/g,function(m){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[m]})}
+
+/* ---------- 3D ---------- */
+var T=window.THREE,R=null,ok3d=true,Q=QUALITY[cfg.q]||QUALITY.ultra,composer=null,W=0,H=0;
+try{if(!T||!T.WebGLRenderer)throw 0;R=new T.WebGLRenderer({canvas:$("gl"),antialias:false,powerPreference:"high-performance",stencil:false})}catch(e){ok3d=false;$("nogl").hidden=false}
+var scene,cam,G={};
+function tex(c){var t=new T.CanvasTexture(c);t.colorSpace=T.SRGBColorSpace;t.anisotropy=R?Math.min(8,R.capabilities.getMaxAnisotropy()):1;return t}
+function std(c,r,m){return new T.MeshStandardMaterial({color:c,roughness:r,metalness:m||0})}
+/* layout (metres): the paper is 6 wide; the head prints on a fixed line (z=PL) while the paper is pulled under it,
+   then the paper runs over the desk to the front edge (z=EDGE), bends over it and hangs down. Cards 2.7 × 3.33, two per row, two rows per page. */
+var PW=6,CW=2.7,CH=3.33,ROWGAP=0.35,PGAP=0.9,PL=-4.6,EDGE=4.6,BEND=0.3,HANG=3.4,PPU=96,LT=16,COLX=[-1.5,1.5];
+var tapeC,tapeX,tapeT,tapeGeo,tapeN=140,feedS=0,feedTo=0,cleared=0,DTOT;
+if(ok3d){
+  R.outputColorSpace=T.SRGBColorSpace;R.toneMapping=T.ACESFilmicToneMapping;R.toneMappingExposure=0.9;R.shadowMap.enabled=true;R.shadowMap.type=T.PCFSoftShadowMap;
+  scene=new T.Scene();scene.background=new T.Color(0x1a120c);
+  var pm=new T.PMREMGenerator(R);scene.environment=pm.fromScene(new T.RoomEnvironment(),0.04).texture;pm.dispose();
+  cam=new T.PerspectiveCamera(50,1,0.1,100);
+  G.hemi=new T.HemisphereLight(0xfff1dc,0x3a2414,0.5);scene.add(G.hemi);
+  var key=new T.SpotLight(0xfff0dd,70,40,0.7,0.5,1.4);G.key=key;key.position.set(-3,12,4);key.target.position.set(0,0,-1);key.castShadow=true;key.shadow.mapSize.set(1024,1024);key.shadow.bias=-0.0005;scene.add(key);scene.add(key.target);
+  var warm=new T.PointLight(0xffb070,20,20,1.6);warm.position.set(5,4,3);scene.add(warm);G.warm=warm;
+  buildDesk();buildPrinter();buildPlaque();
+}
+
+function woodTex(){var c=document.createElement("canvas");c.width=1024;c.height=1024;var x=c.getContext("2d");
+  for(var i=0;i<16;i++){var y=i*64,g=x.createLinearGradient(0,y,0,y+64);var b=pick([[122,74,40],[134,82,45],[112,66,35],[140,90,52]]);
+    g.addColorStop(0,"rgb("+b+")");g.addColorStop(1,"rgb("+b.map(function(v){return v-14})+")");x.fillStyle=g;x.fillRect(0,y,1024,64);x.fillStyle="rgba(40,22,10,.6)";x.fillRect(0,y+62,1024,2)}
+  for(var k=0;k<900;k++){x.strokeStyle="rgba(50,28,12,"+rnd(0.05,0.18).toFixed(2)+")";x.lineWidth=rnd(0.5,1.6);var yy=Math.random()*1024;x.beginPath();x.moveTo(0,yy);
+    for(var px=0;px<=1024;px+=64)x.lineTo(px,yy+Math.sin(px*0.01+k)*rnd(1,4));x.stroke()}
+  var t=tex(c);t.wrapS=t.wrapT=T.RepeatWrapping;t.repeat.set(2,2);return t}
+function paperTex(){var c=document.createElement("canvas");c.width=256;c.height=256;var x=c.getContext("2d");x.fillStyle="#e2d6bf";x.fillRect(0,0,256,256);
+  for(var i=0;i<1400;i++){x.fillStyle="rgba(120,100,70,"+rnd(0.02,0.07).toFixed(3)+")";x.fillRect(Math.random()*256,Math.random()*256,rnd(1,3),1)}
+  var t=tex(c);t.wrapS=t.wrapT=T.RepeatWrapping;t.repeat.set(2,4);return t}
+
+function buildDesk(){
+  var desk=G.desk=new T.Mesh(new T.BoxGeometry(16,0.6,14),new T.MeshStandardMaterial({map:woodTex(),roughness:0.6,metalness:0.05}));desk.position.set(0,-0.3,EDGE-7);desk.receiveShadow=true;scene.add(desk);
+  var floor=new T.Mesh(new T.PlaneGeometry(80,80),std(0x120c08,0.9));floor.rotation.x=-Math.PI/2;floor.position.y=-6;scene.add(floor);
+  /* blank paper between the roll and the print line (scrolls as it is pulled), and the printed tape after it */
+  G.paperT=paperTex();G.paperT.repeat.set(2,1);var pmM=new T.MeshStandardMaterial({map:G.paperT,roughness:0.85});
+  var feed=new T.Mesh(new T.PlaneGeometry(PW,PL+6.6),pmM);feed.rotation.x=-Math.PI/2;feed.position.set(0,0.012,(PL-6.6)/2);feed.receiveShadow=true;scene.add(feed);
+  buildTape();
+  /* the roll at the back */
+  var roll=new T.Mesh(new T.CylinderGeometry(0.62,0.62,PW+0.1,40),new T.MeshStandardMaterial({map:G.paperT,roughness:0.8}));roll.rotation.z=Math.PI/2;roll.position.set(0,0.62,-6.6);roll.castShadow=true;scene.add(roll);G.roll=roll;
+  [-1,1].forEach(function(sd){var cap=new T.Mesh(new T.CylinderGeometry(0.3,0.3,0.12,24),std(0x2a2a30,0.3,0.8));cap.rotation.z=Math.PI/2;cap.position.set(sd*(PW/2+0.1),0.62,-6.6);scene.add(cap);
+    var st=new T.Mesh(new T.BoxGeometry(0.25,1.2,0.5),std(0x2a2a30,0.35,0.8));st.position.set(sd*(PW/2+0.3),0.6,-6.6);st.castShadow=true;scene.add(st)});
+  /* a mug and a pencil for scale and warmth */
+  var mug=new T.Mesh(new T.CylinderGeometry(0.55,0.5,1.2,32),G.mMug=std(0xc8462e,0.35,0.05));mug.position.set(5.3,0.6,1.8);mug.castShadow=true;scene.add(mug);
+  var cof=new T.Mesh(new T.CircleGeometry(0.5,32),std(0x3a1d0c,0.2));cof.rotation.x=-Math.PI/2;cof.position.set(5.3,1.12,1.8);scene.add(cof);
+  var pen=new T.Mesh(new T.CylinderGeometry(0.06,0.06,2.6,8),std(0xf2c230,0.5));pen.rotation.set(Math.PI/2,0,0.6);pen.position.set(-5.2,0.07,2.4);pen.castShadow=true;scene.add(pen)}
+
+function buildPrinter(){var met=G.mMetal=std(0xbfc5cf,0.25,0.95),dark=G.mBody=std(0x26272d,0.35,0.7);
+  /* a fixed print bridge across the paper; the head runs side to side on it */
+  var bridge=new T.Group();scene.add(bridge);G.bridge=bridge;
+  var bar=new T.Mesh(new T.BoxGeometry(PW+1.3,0.22,0.5),dark);bar.position.y=0.95;bar.castShadow=true;bridge.add(bar);
+  var bar2=new T.Mesh(new T.CylinderGeometry(0.07,0.07,PW+1.3,16),met);bar2.rotation.z=Math.PI/2;bar2.position.set(0,0.78,0.3);bridge.add(bar2);
+  [-1,1].forEach(function(sd){var sl=new T.Mesh(new T.BoxGeometry(0.5,1.1,0.9),dark);sl.position.set(sd*(PW/2+0.55),0.55,0);sl.castShadow=true;bridge.add(sl)});
+  G.glowBars=[];[0.3,-0.3].forEach(function(z){var gb=new T.Mesh(new T.BoxGeometry(PW+1.2,0.05,0.05),new T.MeshBasicMaterial({color:0xb44dff,toneMapped:false}));gb.position.set(0,1.08,z);gb.visible=false;bridge.add(gb);G.glowBars.push(gb)});
+  /* pinch rollers that pull the paper, just after the print line */
+  G.pinch=[];[-1.6,1.6].forEach(function(x){var pr=new T.Mesh(new T.CylinderGeometry(0.11,0.11,1.4,16),std(0x1d1d22,0.6,0.2));pr.rotation.z=Math.PI/2;pr.position.set(x,0.12,0.55);bridge.add(pr);G.pinch.push(pr)});
+  var head=new T.Group();head.position.y=0.62;bridge.add(head);G.head=head;
+  var hb=new T.Mesh(new T.BoxGeometry(0.8,0.6,0.7),G.mHead=std(0x34363d,0.3,0.6));hb.castShadow=true;head.add(hb);
+  var hf=new T.Mesh(new T.BoxGeometry(0.82,0.12,0.72),std(0xe8e8ee,0.2,0.9));hf.position.y=0.33;head.add(hf);
+  var noz=new T.Mesh(new T.ConeGeometry(0.1,0.25,12),dark);noz.rotation.x=Math.PI;noz.position.y=-0.42;head.add(noz);
+  G.led=new T.MeshBasicMaterial({color:0x33ff88});var led=new T.Mesh(new T.SphereGeometry(0.05,10,8),G.led);led.position.set(0.25,0.15,0.36);head.add(led);
+  /* ink dots falling from the nozzle */
+  var N=120,g=new T.BufferGeometry();g.setAttribute("position",new T.Float32BufferAttribute(new Float32Array(N*3),3));
+  G.ink=new T.Points(g,new T.PointsMaterial({color:0x222222,size:0.05,transparent:true,opacity:0.8,depthWrite:false}));G.ink.frustumCulled=false;scene.add(G.ink);G.inkP=[];for(var i=0;i<N;i++)G.inkP.push({x:0,y:-9,z:0,v:0});G.inkI=0;
+  bridge.position.z=PL}
+
+/* ---------- viewers ---------- */
+var users={},mon={l:0,p:0};
+function userOf(e){var uid=String(e.user||e.nick||"?"),u=users[uid];
+  if(!u){if(++userN>60000)trimUsers();u=users[uid]={uid:uid,nick:String(e.nick||e.user||"Fan"),av:"",img:null,hue:hashHue(uid),taps:0,lastPrint:0,lastTap:0,queued:false}}
+  if(e.nick)u.nick=String(e.nick);if(e.avatar&&e.avatar!==u.av){u.av=String(e.avatar);u.photoAsked=false}return u}
+var imgWait={},imgN=0,userN=0;
+/* over 60 000 viewers remembered: forget the ones idle longest (never someone tapping now or with a gift waiting) */
+function trimUsers(){var now=perf(),keep={};gq.forEach(function(g){keep[g.u.uid]=1});var a=[];for(var k in users){var u=users[k];if(ACTI[k]===undefined&&!keep[k])a.push(u)}
+  a.sort(function(x,y){return x.lastTap-y.lastTap});var drop=Math.max(0,userN-45000);for(var i=0;i<drop&&i<a.length;i++){delete users[a[i].uid];userN--}}
+window.__busImg=function(id,data){var cb=imgWait[id];delete imgWait[id];if(cb)cb(data)};
+/* photos are fetched only for whoever is being printed or comes next, and at most 120 stay in memory */
+var PHOTOS=[];
+function ensurePhoto(u){if(!u.av||u.photoAsked)return;u.photoAsked=true;var url=u.av;
+  var done=function(src){if(!src||u.av!==url)return;u.src=src;var im=new Image();im.onload=function(){if(u.av!==url)return;u.img=im;PHOTOS.push(u);
+      while(PHOTOS.length>120){var o=PHOTOS.shift();if(job&&job.items.some(function(it){return it.u===o})){PHOTOS.push(o);break}o.img=null;o.src=null;o.photoAsked=false}};im.src=src};
+  if(APP&&BusApp.image){var id="i"+(++imgN);imgWait[id]=done;try{BusApp.image(url,id)}catch(e){}}else done(url)}
+
+/* ---------- the taps' card: many looks, mixed at random so two cards in a row never look alike ----------
+   background × photo shape × frame × decoration × name style. The old four looks (classic, polaroid, stamp, film) are among them. */
+var PAL=[{bg:"#fffdf8",ink:"#1b1b1f",acc:"#e0284f"},{bg:"#ffe3ec",ink:"#5a1030",acc:"#ff4f8b"},{bg:"#ddf7ec",ink:"#0f4a36",acc:"#19b37a"},
+  {bg:"#dcefff",ink:"#0f2e57",acc:"#2f80ed"},{bg:"#ece3ff",ink:"#2e1a5c",acc:"#8b5cf6"},{bg:"#fff6c7",ink:"#5a4300",acc:"#f2b705"},
+  {bg:"#1d2340",ink:"#ffffff",acc:"#18d6ff"},{bg:"#ffd9c9",ink:"#5a2410",acc:"#ff6b35"},{bg:"#e9d6b8",ink:"#3a2612",acc:"#8a5a2b"},{bg:"#141414",ink:"#ffe066",acc:"#ffe066"}];
+var SHAPES=["circle","round","heart","hex","arch","star","circle","round"];
+var FRAMES=["line","double","dashed","scallop","stamp","film","polaroid","corners","neon","none"];
+var DECOS=["none","dots","stripes","rays","confetti","emoji","grid","none"];
+var NAMES=["serif","bold","ribbon","bold"];
+var EMO=["⭐","✨","🎵","💫","🌸","🍀","🔥","😎","💖","🎈","🌙","⚡"];
+var lastLooks=[];
+function shapePath(x,k,cx,cy,r){x.beginPath();
+  if(k==="circle"){x.arc(cx,cy,r,0,7)}
+  else if(k==="round"){var s=r*0.92,q=r*0.35;x.moveTo(cx-s+q,cy-s);x.arcTo(cx+s,cy-s,cx+s,cy+s,q);x.arcTo(cx+s,cy+s,cx-s,cy+s,q);x.arcTo(cx-s,cy+s,cx-s,cy-s,q);x.arcTo(cx-s,cy-s,cx+s,cy-s,q)}
+  else if(k==="heart"){var t=cy-r*0.55;x.moveTo(cx,cy+r);x.bezierCurveTo(cx-r*1.35,cy+r*0.15,cx-r*1.1,t-r*0.75,cx,t);x.bezierCurveTo(cx+r*1.1,t-r*0.75,cx+r*1.35,cy+r*0.15,cx,cy+r)}
+  else if(k==="hex"){for(var i=0;i<6;i++){var a=Math.PI/6+i*Math.PI/3;x.lineTo(cx+Math.cos(a)*r,cy+Math.sin(a)*r)}}
+  else if(k==="arch"){x.moveTo(cx-r*0.85,cy+r);x.lineTo(cx-r*0.85,cy-r*0.1);x.arc(cx,cy-r*0.1,r*0.85,Math.PI,0);x.lineTo(cx+r*0.85,cy+r)}
+  else{for(var j=0;j<20;j++){var b=-Math.PI/2+j*Math.PI/10,rr=j%2?r*0.78:r;x.lineTo(cx+Math.cos(b)*rr,cy+Math.sin(b)*rr)}}
+  x.closePath()}
+function pickLook(){for(var n=0;n<12;n++){var L={p:pick(PAL),s:pick(SHAPES),f:pick(FRAMES),d:pick(DECOS),n:pick(NAMES)},key=L.p.bg+L.s+L.f;
+    if(lastLooks.indexOf(key)<0){lastLooks.push(key);if(lastLooks.length>4)lastLooks.shift();return L}}return L}
+function drawCard(u){var L=pickLook(),P=L.p,c=document.createElement("canvas");c.width=512;c.height=632;var x=c.getContext("2d"),W2=512,H2=632,i;
+  x.fillStyle=P.bg;x.fillRect(0,0,W2,H2);
+  /* background decoration */
+  x.save();x.globalAlpha=0.18;x.fillStyle=P.acc;x.strokeStyle=P.acc;
+  if(L.d==="dots")for(var yy=20;yy<H2;yy+=40)for(var xx=(yy/40%2)*20+20;xx<W2;xx+=40){x.beginPath();x.arc(xx,yy,6,0,7);x.fill()}
+  else if(L.d==="stripes"){x.lineWidth=18;for(i=-H2;i<W2;i+=52){x.beginPath();x.moveTo(i,0);x.lineTo(i+H2,H2);x.stroke()}}
+  else if(L.d==="rays"){x.translate(256,250);for(i=0;i<18;i++){x.rotate(Math.PI/9);x.beginPath();x.moveTo(0,0);x.lineTo(600,-45);x.lineTo(600,45);x.fill()}}
+  else if(L.d==="confetti"){x.globalAlpha=0.5;for(i=0;i<60;i++){x.fillStyle=pick(["#ff4f8b","#18d6ff","#ffc93c","#22c55e","#8b5cf6"]);x.save();x.translate(Math.random()*W2,Math.random()*H2);x.rotate(Math.random()*3);x.fillRect(-6,-3,12,6);x.restore()}}
+  else if(L.d==="grid"){x.lineWidth=2;for(i=0;i<W2;i+=32){x.beginPath();x.moveTo(i,0);x.lineTo(i,H2);x.stroke()}for(i=0;i<H2;i+=32){x.beginPath();x.moveTo(0,i);x.lineTo(W2,i);x.stroke()}}
+  x.restore();
+  /* frame */
+  var dark=P.ink;x.lineWidth=5;x.strokeStyle=dark;
+  if(L.f==="line")x.strokeRect(26,26,W2-52,H2-52);
+  else if(L.f==="double"){x.strokeRect(22,22,W2-44,H2-44);x.lineWidth=2;x.strokeRect(36,36,W2-72,H2-72)}
+  else if(L.f==="dashed"){x.setLineDash([18,12]);x.strokeRect(26,26,W2-52,H2-52);x.setLineDash([])}
+  else if(L.f==="scallop"){x.fillStyle="#e2d6bf";for(i=0;i<=W2;i+=40){x.beginPath();x.arc(i,0,20,0,7);x.fill();x.beginPath();x.arc(i,H2,20,0,7);x.fill()}for(i=0;i<=H2;i+=40){x.beginPath();x.arc(0,i,20,0,7);x.fill();x.beginPath();x.arc(W2,i,20,0,7);x.fill()}}
+  else if(L.f==="stamp"){x.fillStyle="#e2d6bf";for(i=0;i<=W2;i+=32){x.beginPath();x.arc(i,0,11,0,7);x.fill();x.beginPath();x.arc(i,H2,11,0,7);x.fill()}for(i=0;i<=H2;i+=32){x.beginPath();x.arc(0,i,11,0,7);x.fill();x.beginPath();x.arc(W2,i,11,0,7);x.fill()}x.strokeRect(30,30,W2-60,H2-60)}
+  else if(L.f==="film"){x.fillStyle="#1b1b1f";x.fillRect(0,0,48,H2);x.fillRect(W2-48,0,48,H2);x.fillStyle=P.bg;for(i=12;i<H2;i+=40){x.fillRect(13,i,22,22);x.fillRect(W2-35,i,22,22)}}
+  else if(L.f==="polaroid"){x.fillStyle="rgba(0,0,0,.06)";x.fillRect(46,40,W2-92,400)}
+  else if(L.f==="corners"){x.lineWidth=8;x.strokeStyle=P.acc;[[30,30,1,1],[W2-30,30,-1,1],[30,H2-30,1,-1],[W2-30,H2-30,-1,-1]].forEach(function(q){x.beginPath();x.moveTo(q[0],q[1]+q[3]*70);x.lineTo(q[0],q[1]);x.lineTo(q[0]+q[2]*70,q[1]);x.stroke()})}
+  else if(L.f==="neon"){x.shadowColor=P.acc;x.shadowBlur=24;x.lineWidth=8;x.strokeStyle=P.acc;x.strokeRect(28,28,W2-56,H2-56);x.shadowBlur=0}
+  /* the photo in its shape, with an outline */
+  var cx=256,cy=L.f==="polaroid"?240:250,r=L.f==="polaroid"?182:168;
+  x.save();shapePath(x,L.s,cx,cy,r);x.clip();
+  if(u.img){var im=u.img,k=Math.max(2.2*r/im.width,2.2*r/im.height);try{x.drawImage(im,cx-im.width*k/2,cy-im.height*k/2,im.width*k,im.height*k)}catch(e){}}
+  else{var gg=x.createLinearGradient(0,cy-r,0,cy+r);gg.addColorStop(0,"hsl("+u.hue+",70%,58%)");gg.addColorStop(1,"hsl("+((u.hue+40)%360)+",70%,36%)");x.fillStyle=gg;x.fillRect(cx-r*1.2,cy-r*1.2,2.4*r,2.4*r);
+    x.fillStyle="#fff";x.textAlign="center";x.textBaseline="middle";x.font="800 170px 'Barlow Condensed',Arial";x.fillText(initial(u.nick),cx,cy+10)}
+  x.restore();x.lineWidth=7;x.strokeStyle=L.f==="neon"?P.acc:P.ink;shapePath(x,L.s,cx,cy,r);x.stroke();
+  /* emoji stickers around the photo */
+  if(L.d==="emoji"||Math.random()<0.4){x.font="46px serif";x.textAlign="center";x.textBaseline="middle";var e1=pick(EMO),e2=pick(EMO);x.fillText(e1,cx-r-8,cy-r+20);x.fillText(e2,cx+r+6,cy+r-30)}
+  /* what they did: 💬 their words in a bubble over the bottom of the photo, or a small round mark */
+  if(u.kind==="chat"&&u.said){var tx=u.said.length>34?u.said.slice(0,33)+"…":u.said;x.font="700 30px 'Barlow',Arial,sans-serif";var bw=Math.min(440,x.measureText(tx).width+50),bx=256-bw/2,by=360;
+    x.fillStyle="rgba(255,255,255,.96)";x.strokeStyle=P.ink;x.lineWidth=4;x.beginPath();x.moveTo(bx+22,by);x.arcTo(bx+bw,by,bx+bw,by+60,22);x.arcTo(bx+bw,by+60,bx,by+60,22);x.arcTo(bx,by+60,bx,by,22);x.arcTo(bx,by,bx+bw,by,22);x.closePath();x.fill();x.stroke();
+    x.beginPath();x.moveTo(236,by);x.lineTo(256,by-22);x.lineTo(276,by);x.closePath();x.fill();x.fillStyle="#1b1b1f";x.textAlign="center";x.textBaseline="middle";x.fillText("💬 "+tx,256,by+31)}
+  else{var mk={follow:"➕",share:"🔗",join:"👋",like:"❤️"}[u.kind||"like"];if(mk){x.fillStyle="#ffffff";x.beginPath();x.arc(410,92,44,0,7);x.fill();x.lineWidth=5;x.strokeStyle=P.acc;x.stroke();
+    x.font="48px serif";x.textAlign="center";x.textBaseline="middle";x.fillText(mk,410,96)}}
+  /* the name */
+  var nm=u.nick.length>16?u.nick.slice(0,15)+"…":u.nick,ty=L.f==="polaroid"?520:510;x.textAlign="center";x.textBaseline="middle";
+  if(L.n==="ribbon"){x.fillStyle=P.acc;x.beginPath();x.moveTo(60,ty-34);x.lineTo(W2-60,ty-34);x.lineTo(W2-90,ty);x.lineTo(W2-60,ty+34);x.lineTo(60,ty+34);x.lineTo(90,ty);x.closePath();x.fill();
+    x.font="800 46px 'Barlow Condensed',Arial";x.fillStyle=P.bg==="#141414"?"#141414":"#ffffff";x.fillText(nm,cx,ty+2)}
+  else if(L.n==="bold"){x.font="800 54px 'Barlow Condensed',Arial";x.fillStyle=P.ink;x.fillText(nm.toUpperCase(),cx,ty)}
+  else{x.font="italic 700 50px 'Barlow Condensed',Georgia,serif";x.fillStyle=P.ink;x.fillText(nm,cx,ty);var tw=x.measureText(nm).width;x.font="34px serif";x.fillStyle=P.acc;x.fillText("❤",cx-tw/2-30,ty+2);x.fillText("❤",cx+tw/2+30,ty+2)}
+  return c}
+
+/* ---------- the printed tape ----------
+   One long canvas is the paper after the print line (a ring buffer LT metres long). Each card is drawn on it once, when its row
+   starts; the paper is then pulled under the head step by step, so the card comes out line by line, runs over the desk, bends over
+   the edge and hangs down, all as one sheet. */
+
+function buildTape(){tapeC=document.createElement("canvas");tapeC.width=PW*PPU;tapeC.height=LT*PPU;tapeX=tapeC.getContext("2d");paperFill(0,tapeC.height);
+  tapeT=tex(tapeC);tapeT.wrapS=T.ClampToEdgeWrapping;tapeT.wrapT=T.RepeatWrapping;
+  DTOT=(EDGE-PL)+BEND*Math.PI/2+HANG;var n=tapeN,pos=new Float32Array((n+1)*2*3),uv=new Float32Array((n+1)*2*2),idx=[];
+  for(var j=0;j<=n;j++){var d=DTOT*j/n;uv[j*4]=0;uv[j*4+1]=d/LT;uv[j*4+2]=1;uv[j*4+3]=d/LT;if(j<n){var a=j*2;idx.push(a,a+2,a+1,a+1,a+2,a+3)}}
+  tapeGeo=new T.BufferGeometry();tapeGeo.setAttribute("position",new T.BufferAttribute(pos,3));tapeGeo.setAttribute("uv",new T.BufferAttribute(uv,2));tapeGeo.setIndex(idx);
+  shapeTape(0,0);var m=new T.Mesh(tapeGeo,new T.MeshStandardMaterial({map:tapeT,roughness:0.85,side:T.DoubleSide,envMapIntensity:0.3}));m.receiveShadow=true;m.castShadow=true;m.frustumCulled=false;scene.add(m)}
+/* the sheet's path: flat on the desk, a soft bend over the edge, then hanging with a slight curl and sway */
+function tapePoint(d,sway){var Lf=EDGE-PL,arc=BEND*Math.PI/2;
+  if(d<=Lf)return [0.012,PL+d];
+  if(d<=Lf+arc){var th=(d-Lf)/BEND;return [0.012-BEND+BEND*Math.cos(th),EDGE+BEND*Math.sin(th)]}
+  var h=d-Lf-arc,k=h/HANG;return [0.012-BEND-h,EDGE+BEND+0.25*k*k+sway*k*k]}
+function shapeTape(sway,t){var p=tapeGeo.attributes.position.array;
+  for(var j=0;j<=tapeN;j++){var d=DTOT*j/tapeN,q=tapePoint(d,sway*Math.sin(t*1.7+d*0.8));p[j*6]=-PW/2;p[j*6+1]=q[0];p[j*6+2]=q[1];p[j*6+3]=PW/2;p[j*6+4]=q[0];p[j*6+5]=q[1]}
+  tapeGeo.attributes.position.needsUpdate=true;tapeGeo.computeVertexNormals()}
+function paperFill(y0,h){tapeX.fillStyle="#e2d6bf";tapeX.fillRect(0,y0,tapeC.width,h);for(var i=0;i<h*4;i++){tapeX.fillStyle="rgba(120,100,70,"+rnd(0.02,0.07).toFixed(3)+")";tapeX.fillRect(Math.random()*tapeC.width,y0+Math.random()*h,rnd(1,3),1)}}
+/* tape coordinate u (metres of paper pulled) → canvas row, wrapping around the ring */
+function onTape(u,hm,fn){var H=tapeC.height,y=((Math.round(u*PPU)%H)+H)%H,h=Math.round(hm*PPU);fn(y);if(y+h>H)fn(y-H)}
+function clearTo(u){if(u<=cleared)return;var from=cleared;cleared=u;onTape(from,u-from,function(y){paperFill(Math.max(0,y),Math.min(tapeC.height,y+Math.round((u-from)*PPU))-Math.max(0,y))});tapeT.needsUpdate=true}
+function drawOnTape(card,cx,u0,cw,ch){cw=cw||CW;ch=ch||CH;clearTo(u0+ch+3);var w=cw*PPU,h=ch*PPU,x=(cx+PW/2-cw/2)*PPU;
+  /* flipped along the paper: the card's bottom comes out of the printer first, so it reads the right way up from the front */
+  onTape(u0,ch,function(y){tapeX.save();tapeX.translate(x,y+h);tapeX.scale(1,-1);tapeX.drawImage(card,0,0,w,h);tapeX.restore()});tapeT.needsUpdate=true}
+/* the counters: cards printed (to 150, then a little party and it starts over), rows, pages finished, pages fallen off the desk */
+var STAT={cards:0,rows:0,pages:0,drops:0},PERF=[];
+function paintStats(pop){$("cN").textContent=STAT.cards+"/150";$("sR").textContent=STAT.rows;$("sP").textContent=STAT.pages;$("sD").textContent=STAT.drops;
+  if(pop){var el=$("coins");el.classList.remove("pop");void el.offsetWidth;el.classList.add("pop")}}
+function countCards(n){STAT.cards+=n;STAT.rows++;if(STAT.cards>=150){STAT.cards-=150;G.burstAt=perf()}paintStats(true)}
+function perforation(u){PERF.push(u);STAT.pages++;paintStats(false);onTape(u,0.05,function(y){tapeX.fillStyle="rgba(80,60,40,.55)";for(var x=0;x<tapeC.width;x+=14)tapeX.fillRect(x,y,7,3)});tapeT.needsUpdate=true}
+
+/* ---------- printing: two cards per row, two rows per page ----------
+   Gifts first, always, the most valuable first (equal values in arrival order), and every gift gets printed: nobody is skipped.
+     🌹 under 10 coins   → its own card with a red frame and the gift as a sticker (× how many)
+     ⭐ 10 – 99          → a gold-foil card with sparkles
+     👑 100 – 999        → a wide poster across the whole row, golden rays, confetti when it comes out
+     💎 1000 +           → a full-page poster (holographic frame, crown), the page is closed first so it has it all to itself
+   A small gift shares its row with the next small gift, or with the latest tapper, so nothing waits for nothing.
+   Taps — "who deserves it most", no waiting list:
+     • only people who tapped in the last 12 s compete (whoever stops tapping simply drops out, nothing piles up);
+     • someone never printed in this live goes first; then whoever has waited longest since their last print;
+       a small bonus for having tapped in the last 3 s keeps the "I tap, something happens" feeling;
+     • whoever was just printed rests for a number of pages that grows with the crowd:
+         1–2 tapping: can come back at once · 3–4: on the next page · 5–10: skips one page · 11+: skips two pages;
+     • the two who come next are shown beside the print head (👀), so nobody feels forgotten. */
+var job=null,page={users:[],rows:0,no:0},pendSince=0,gapLeft=0,gq=[],gSeq=0;
+var ROWW=2*CW+0.3,PAGEH=2*CH+ROWGAP;
+function tierOf(c){return c>=1000?3:c>=100?2:c>=10?1:0}
+/* ---- the active tappers, kept so that every tap costs the same whether 1 or 1 000 000 people are tapping ----
+   an array + index (add, remove and random pick in constant time), pruned through one bucket per second */
+var ACT=[],ACTI={},BK=[];
+function actAdd(u,now){if(ACTI[u.uid]===undefined){ACTI[u.uid]=ACT.length;ACT.push(u)}var sec=Math.floor(now/1000),b=BK[BK.length-1];
+  if(!b||b.s!==sec){b={s:sec,u:[],seen:{}};BK.push(b)}if(!b.seen[u.uid]){b.seen[u.uid]=1;b.u.push(u)}}
+function actDel(u){var i=ACTI[u.uid];if(i===undefined)return;var last=ACT.pop();if(last!==u){ACT[i]=last;ACTI[last.uid]=i}delete ACTI[u.uid]}
+var LIVEMS=12000;   /* only people who tapped in the last 12 s compete: someone who tapped long ago may have left */
+function actPrune(now){var lim=Math.floor((now-LIVEMS)/1000);while(BK.length&&BK[0].s<lim){var b=BK.shift();for(var i=0;i<b.u.length;i++)if(now-b.u[i].lastTap>LIVEMS)actDel(b.u[i])}}
+setInterval(function(){actPrune(perf())},1000);
+function active(){return ACT}
+function restPages(n){return n<=2?-1:n<=4?0:n<=10?1:2}
+function resting(u,n){if(u.printPage==null)return false;var k=restPages(n);return k<0?false:page.no-u.printPage<=k}
+function score(u,now){var base=u.printPage==null?1e6-(u.firstTap||now)/1000:(now-(u.lastPrint||0))/1000*10;return base+(now-u.lastTap<3000?15:0)}
+/* the ranking used for every row; "skip" leaves out people already on this job.
+   Up to 300 active tappers: everyone is scored. Beyond that: 96 picked at random are scored (constant time); since the
+   pick is random, everyone still tapping keeps the same chance, and the never-printed among them still go first. */
+var candMemo={at:0,key:"",v:null};
+function candidates(skip){var now=perf(),n=ACT.length,busy=job?job.items.map(function(it){return it.u}):[];skip=skip||[];
+  var key=n+"|"+skip.map(function(u){return u.uid}).join(",")+"|"+busy.map(function(u){return u.uid}).join(",")+"|"+page.no;
+  if(candMemo.v&&now-candMemo.at<150&&candMemo.key===key)return candMemo.v.slice();
+  var pool;if(n<=300)pool=ACT.slice();else{pool=[];var seen={};for(var i=0;i<96;i++){var u=ACT[(Math.random()*n)|0];if(!seen[u.uid]){seen[u.uid]=1;pool.push(u)}}}
+  var free=function(u){return busy.indexOf(u)<0&&skip.indexOf(u)<0};
+  var ok=pool.filter(function(u){return free(u)&&!resting(u,n)});
+  /* everyone is resting (a small crowd): rather than stop, take whoever has waited longest */
+  if(!ok.length&&n){var best=null;pool.forEach(function(u){if(free(u)&&(!best||(u.lastPrint||0)<(best.lastPrint||0)))best=u});ok=best?[best]:[]}
+  ok.sort(function(a,b){return score(b,now)-score(a,now)});if(ok.length>6)ok.length=6;
+  candMemo={at:now,key:key,v:ok};return ok.slice()}
+function latest(){return gq.length?gq[0].u:candidates()[0]||null}
+function addGift(u,e){var coins=Math.max(1,e.coins|0)*Math.max(1,e.count|0),n=Math.max(1,e.count|0);
+  /* the same person sending again while waiting: one print with the total (it may grow into a bigger print) */
+  for(var i=0;i<gq.length;i++)if(gq[i].u===u){gq[i].coins+=coins;gq[i].count+=n;if(e.img)gq[i].img=e.img;sortG();return}
+  lastSup=u;var g={u:u,coins:coins,count:n,img:e.img||"",name:String(e.gift||e.label||""),at:gSeq++},lo=0,hi=gq.length;
+  while(lo<hi){var mid=(lo+hi)>>1;if(gq[mid].coins>=coins)lo=mid+1;else hi=mid}gq.splice(lo,0,g);if(gq.length<=4)ensurePhoto(u);if(e.img)giftPic(e.img)}
+function sortG(){gq.sort(function(a,b){return (b.coins-a.coins)||(a.at-b.at)})}
+/* gift pictures reach the canvas like photos do (through the app, so the canvas stays drawable) */
+var gpics={};function giftPic(url){if(!url)return null;var g=gpics[url];if(g)return g.img;gpics[url]=g={img:null};
+  var done=function(src){if(!src)return;var im=new Image();im.onload=function(){g.img=im};im.src=src};
+  if(APP&&BusApp.image){var id="g"+(++imgN);imgWait[id]=done;try{BusApp.image(url,id)}catch(e){}}else done(url);return null}
+
+function item(u,g){return {u:u,g:g,tier:g?tierOf(g.coins):-1}}
+/* more people tapping → more, smaller cards per row, so many more people appear per minute (the main cure for "I never show up"):
+   up to 8 tapping: 2 per row · up to 25: 3 per row · more: 4 per row */
+function densityK(){var n=ACT.length;return n<=8?2:n<=25?3:4}
+function slotSize(k){var gap=0.3,cw=k===2?CW:(PW-0.3-gap*(k-1))/k;return {cw:cw,ch:k===2?CH:cw/0.81,gap:gap}}
+function slotX(k,i){var z=slotSize(k),tot=k*z.cw+(k-1)*z.gap;return k===2?COLX[i]:-tot/2+z.cw/2+i*(z.cw+z.gap)}
+function tryStart(now){
+  if(gq.length){var g=gq[0],t=tierOf(g.coins);
+    if(t===3){if(page.rows>0){closePage();return}gq.shift();startJob([item(g.u,g)],"page",now);return}
+    if(t===2){gq.shift();startJob([item(g.u,g)],"row",now);return}
+    gq.shift();var its=[item(g.u,g)],k=densityK(),taken=[g.u];
+    /* the rest of the row: more small gifts first, then the tappers who deserve it most */
+    for(var i=0;i<gq.length&&its.length<k;i++)if(tierOf(gq[i].coins)<=1&&taken.indexOf(gq[i].u)<0){var g2=gq.splice(i,1)[0];i--;its.push(item(g2.u,g2));taken.push(g2.u)}
+    if(its.length<k)candidates(taken).slice(0,k-its.length).forEach(function(u){its.push(item(u,null))});
+    startJob(its,"cards",now,k);return}
+  var c=candidates();
+  if(!c.length){pendSince=0;return}
+  var k=densityK();
+  /* one person waiting in a quiet live: give a second one a moment to tap, so the row is full */
+  if(k===2&&c.length<2){if(!pendSince)pendSince=now;if(now-pendSince<2500)return}
+  pendSince=0;startJob(c.slice(0,k).map(function(u){return item(u,null)}),"cards",now,k)}
+function closePage(){gapLeft=PGAP;perforation(feedS+PGAP/2);page={users:[],rows:0,no:page.no+1}}
+function startJob(its,kind,now,k){k=k||2;its.forEach(function(it){ensurePhoto(it.u);page.users.push(it.u);if(it.g&&it.g.img)giftPic(it.g.img)});
+  var h=kind==="page"?PAGEH:kind==="row"?CH:slotSize(k).ch,top=its.reduce(function(m,it){return Math.max(m,it.tier)},-1);
+  job={items:its,kind:kind,h:h,k:k,tier:top,t0:now,drawn:false,u0:0};paintHint();if(top>=2)flashGift(top)}
+
+function stepPrinter(now,dt){var sp=+cfg.speed||1;
+  if(gapLeft>0){var g=Math.min(gapLeft,dt*Math.max(0.6,gapLeft*3)*sp);gapLeft-=g;feedTo+=g}            /* a smooth pull between rows and pages */
+  else if(!job&&now-(G.tryAt||0)>120){G.tryAt=now;tryStart(now)}
+  if(job){
+    if(!job.drawn){var ready=job.items.every(function(it){return (it.u.img||!it.u.av)&&(!it.g||!it.g.img||giftPic(it.g.img))});if(!ready&&now-job.t0<1500)return;
+      clearTo(feedS+job.h+3);job.u0=feedS;
+      if(job.kind==="cards"){var z=slotSize(job.k);job.items.forEach(function(it,i){drawOnTape(it.g?drawGiftCard(it.u,it.g):drawCard(it.u),slotX(job.k,i),job.u0,z.cw,z.ch)})}
+      else drawOnTape(job.kind==="row"?drawPoster(job.items[0].u,job.items[0].g):drawMega(job.items[0].u,job.items[0].g),0,job.u0,ROWW,job.h);
+      job.drawn=true;job.last=now}
+    /* line feed: the motor pulls the paper in small steps while the head runs across; big prints take a little longer, never much */
+    var dur=(job.kind==="page"?4.4:job.kind==="row"?3.2:2.6*job.h/CH)/sp,step=0.07;if(now-job.last>step/(job.h/dur)*1000){job.last=now;feedTo=Math.min(job.u0+job.h,feedTo+step)}
+    G.head.position.x=Math.sin(now/110)*(PW/2-0.6);
+    var gold=job.tier>=0;G.led.color.setHex(Math.sin(now/80)>0?(gold?0xffc93c:0x33ff88):0x0b3a1f);
+    if(Math.random()<0.8)ink(G.head.position.x,PL+0.05);if(gold&&Math.random()<(job.tier+1)*0.3)sparkle(G.head.position.x,0.3,PL+0.3,job.tier);
+    if(feedS>=job.u0+job.h-0.005){countCards(job.items.length);job.items.forEach(function(it){it.u.lastPrint=now;it.u.printPage=page.no;mon.p++});paintMon();G.rowEnd=now;G.led.color.setHex(0x33ff88);
+      if(job.tier>=2)G.burstAt=now;var k=job.kind;job=null;
+      if(k==="page")closePage();
+      else{page.rows++;if(page.rows>=2)closePage();else gapLeft=ROWGAP}paintHint()}}
+  else G.head.position.x=damp(G.head.position.x,0,3,dt);
+  /* confetti from the printer when a poster comes out */
+  if(G.burstAt&&now-G.burstAt<1600&&Math.random()<0.6)for(var b=0;b<4;b++)sparkle(rnd(-PW/2,PW/2),rnd(0.5,1.5),PL+rnd(0.5,3),3);
+  /* a page whose tear line has gone over the desk edge counts as fallen */
+  while(PERF.length&&feedS-PERF[0]>(EDGE-PL)+BEND*Math.PI/2+1.2){PERF.shift();STAT.drops++;paintStats(false)}
+  var prev=feedS;feedS=damp(feedS,feedTo,22,dt);var v=(feedS-prev)/Math.max(dt,1e-3);clearTo(feedS+2);
+  tapeT.offset.y=-feedS/LT;G.paperT.offset.y=-feedS/(PL+6.6);G.roll.rotation.x=-feedS/0.62;G.pinch.forEach(function(p){p.rotation.x=-feedS/0.11});
+  G.sway=damp(G.sway||0,Math.min(0.35,Math.abs(v)*0.25),2,dt);if((G.fr=(G.fr||0)+1)%2===0)shapeTape(0.06+G.sway,now/1000)}
+
+/* sparkles and confetti (coloured by the gift's level) */
+var FX=null;function sparkle(x,y,z,tier){if(!FX){var N=400,g=new T.BufferGeometry();g.setAttribute("position",new T.Float32BufferAttribute(new Float32Array(N*3),3));g.setAttribute("color",new T.Float32BufferAttribute(new Float32Array(N*3),3));
+    FX={pts:new T.Points(g,new T.PointsMaterial({size:0.14,vertexColors:true,transparent:true,depthWrite:false,toneMapped:false})),p:[],i:0};FX.pts.frustumCulled=false;scene.add(FX.pts);
+    for(var i=0;i<N;i++)FX.p.push({life:0,x:0,y:-9,z:0,vx:0,vy:0,vz:0,c:new T.Color()})}
+  var p=FX.p[FX.i];FX.i=(FX.i+1)%FX.p.length;p.life=rnd(0.7,1.4);p.x=x;p.y=y;p.z=z;p.vx=rnd(-1.2,1.2);p.vy=rnd(1.5,4);p.vz=rnd(-0.6,1.2);
+  p.c.setHSL(tier>=3?Math.random():tier===2?pick([0.12,0.14,0.95]):tier===1?0.13:0.98,1,0.6)}
+function stepFX(dt){if(!FX)return;var a=FX.pts.geometry.attributes.position.array,c=FX.pts.geometry.attributes.color.array;
+  FX.p.forEach(function(p,i){if(p.life>0){p.life-=dt;p.vy-=6*dt;p.x+=p.vx*dt;p.y+=p.vy*dt;p.z+=p.vz*dt;if(p.life<=0||p.y<0.02)p.y=-9}a[i*3]=p.x;a[i*3+1]=p.y;a[i*3+2]=p.z;var k=clamp(p.life,0,1);c[i*3]=p.c.r*k;c[i*3+1]=p.c.g*k;c[i*3+2]=p.c.b*k});
+  FX.pts.geometry.attributes.position.needsUpdate=true;FX.pts.geometry.attributes.color.needsUpdate=true}
+/* a big gift: the room light turns warm for a moment */
+function flashGift(t){G.flashUntil=perf()+(t>=3?3000:1600);G.flashTier=t}
+
+/* ---------- gift prints ---------- */
+function photoCircle(x,u,cx,cy,r){x.save();x.beginPath();x.arc(cx,cy,r,0,7);x.clip();
+  if(u.img){var im=u.img,k=Math.max(2*r/im.width,2*r/im.height);try{x.drawImage(im,cx-im.width*k/2,cy-im.height*k/2,im.width*k,im.height*k)}catch(e){}}
+  else{var gg=x.createLinearGradient(0,cy-r,0,cy+r);gg.addColorStop(0,"hsl("+u.hue+",70%,58%)");gg.addColorStop(1,"hsl("+((u.hue+40)%360)+",70%,36%)");x.fillStyle=gg;x.fillRect(cx-r,cy-r,2*r,2*r);
+    x.fillStyle="#fff";x.textAlign="center";x.textBaseline="middle";x.font="800 "+Math.round(r)+"px 'Barlow Condensed',Arial";x.fillText(initial(u.nick),cx,cy+r*0.06)}
+  x.restore()}
+function giftSticker(x,g,cx,cy,s){var im=g.img?giftPic(g.img):null;
+  x.save();x.fillStyle="rgba(255,255,255,.95)";x.beginPath();x.arc(cx,cy,s*0.62,0,7);x.fill();x.lineWidth=s*0.06;x.strokeStyle="#ffc93c";x.stroke();
+  if(im){try{x.drawImage(im,cx-s/2,cy-s/2,s,s)}catch(e){}}else{x.font=Math.round(s*0.8)+"px serif";x.textAlign="center";x.textBaseline="middle";x.fillText("🎁",cx,cy+s*0.05)}
+  if(g.count>1){x.font="800 "+Math.round(s*0.42)+"px 'Barlow Condensed',Arial";x.textAlign="center";x.textBaseline="middle";var tx="×"+g.count,tw=x.measureText(tx).width+s*0.25;
+    x.fillStyle="#ff2d55";x.beginPath();x.roundRect?x.roundRect(cx+s*0.25,cy+s*0.2,tw,s*0.5,s*0.25):x.rect(cx+s*0.25,cy+s*0.2,tw,s*0.5);x.fill();x.fillStyle="#fff";x.fillText(tx,cx+s*0.25+tw/2,cy+s*0.46)}
+  x.restore()}
+function nameLine(x,nm,cx,y,size,col,max){nm=nm.length>max?nm.slice(0,max-1)+"…":nm;x.textAlign="center";x.textBaseline="middle";x.font="italic 800 "+size+"px 'Barlow Condensed',Georgia,serif";x.fillStyle=col;x.fillText(nm,cx,y)}
+function goldGrad(x,x0,y0,x1,y1){var g=x.createLinearGradient(x0,y0,x1,y1);g.addColorStop(0,"#fff1b8");g.addColorStop(0.3,"#e0a91f");g.addColorStop(0.55,"#fff6cf");g.addColorStop(0.8,"#c88a0f");g.addColorStop(1,"#ffe38a");return g}
+function stars(x,n,w,h,col){for(var i=0;i<n;i++){var sx=Math.random()*w,sy=Math.random()*h,r=rnd(3,9);x.fillStyle=col||"rgba(255,215,90,.9)";x.beginPath();
+  for(var k=0;k<8;k++){var a=k*Math.PI/4,rr=k%2?r*0.4:r;x.lineTo(sx+Math.cos(a)*rr,sy+Math.sin(a)*rr)}x.fill()}}
+/* 🌹 and ⭐: a card like the taps' one, with a red or gold-foil frame and the gift as a sticker */
+function drawGiftCard(u,g){var t=tierOf(g.coins),c=document.createElement("canvas");c.width=512;c.height=632;var x=c.getContext("2d");
+  x.fillStyle=t>=1?"#fff8e6":"#fffdf8";x.fillRect(0,0,512,632);
+  if(t>=1){x.lineWidth=22;x.strokeStyle=goldGrad(x,0,0,512,632);x.strokeRect(14,14,484,604);stars(x,26,512,632)}else{x.lineWidth=10;x.strokeStyle="#e0284f";x.strokeRect(20,20,472,592)}
+  photoCircle(x,u,256,250,165);x.lineWidth=7;x.strokeStyle=t>=1?goldGrad(x,90,85,420,415):"#e0284f";x.beginPath();x.arc(256,250,165,0,7);x.stroke();
+  nameLine(x,u.nick,256,505,52,"#1b1b1f",16);x.font="34px serif";x.textAlign="center";x.fillText(t>=1?"⭐":"🌹",256,565);
+  giftSticker(x,g,410,110,96);return c}
+/* 👑 a wide poster across the row */
+function drawPoster(u,g){var W2=1100,H2=642,c=document.createElement("canvas");c.width=W2;c.height=H2;var x=c.getContext("2d");
+  var bg=x.createRadialGradient(330,320,40,330,320,700);bg.addColorStop(0,"#fff6d6");bg.addColorStop(1,"#f4d27a");x.fillStyle=bg;x.fillRect(0,0,W2,H2);
+  x.save();x.translate(330,320);for(var i=0;i<24;i++){x.rotate(Math.PI/12);x.fillStyle=i%2?"rgba(255,255,255,.35)":"rgba(230,160,20,.18)";x.beginPath();x.moveTo(0,0);x.lineTo(900,-80);x.lineTo(900,80);x.fill()}x.restore();
+  x.lineWidth=26;x.strokeStyle=goldGrad(x,0,0,W2,H2);x.strokeRect(13,13,W2-26,H2-26);stars(x,40,W2,H2);
+  photoCircle(x,u,330,300,210);x.lineWidth=12;x.strokeStyle=goldGrad(x,120,90,540,510);x.beginPath();x.arc(330,300,210,0,7);x.stroke();
+  x.font="96px serif";x.textAlign="center";x.textBaseline="middle";x.fillText("👑",330,80);
+  nameLine(x,u.nick,780,200,86,"#3a2400",13);giftSticker(x,g,780,390,190);return c}
+/* 💎 a full page for one supporter */
+function drawMega(u,g){var W2=1100,H2=1352,c=document.createElement("canvas");c.width=W2;c.height=H2;var x=c.getContext("2d");
+  var bg=x.createLinearGradient(0,0,W2,H2);["#ffd6f5","#d6e9ff","#d6fff1","#fff6c9","#ffd6e0"].forEach(function(col,i,a){bg.addColorStop(i/(a.length-1),col)});x.fillStyle=bg;x.fillRect(0,0,W2,H2);
+  x.save();x.translate(W2/2,560);for(var i=0;i<36;i++){x.rotate(Math.PI/18);x.fillStyle="hsla("+(i*30)+",90%,70%,.25)";x.beginPath();x.moveTo(0,0);x.lineTo(1200,-90);x.lineTo(1200,90);x.fill()}x.restore();
+  var hol=x.createLinearGradient(0,0,W2,0);for(var k=0;k<=6;k++)hol.addColorStop(k/6,"hsl("+(k*60)+",90%,62%)");x.lineWidth=34;x.strokeStyle=hol;x.strokeRect(17,17,W2-34,H2-34);
+  stars(x,80,W2,H2,"rgba(255,255,255,.95)");stars(x,40,W2,H2);
+  x.font="170px serif";x.textAlign="center";x.textBaseline="middle";x.fillText("👑",W2/2,170);
+  photoCircle(x,u,W2/2,560,300);x.lineWidth=18;x.strokeStyle=hol;x.beginPath();x.arc(W2/2,560,300,0,7);x.stroke();
+  nameLine(x,u.nick,W2/2,960,110,"#2a1240",14);giftSticker(x,g,W2/2,1170,220);x.font="80px serif";x.fillText("💎",150,1200);x.fillText("💎",W2-150,1200);return c}
+function ink(x,z){var p=G.inkP[G.inkI];G.inkI=(G.inkI+1)%G.inkP.length;p.x=x+rnd(-0.05,0.05);p.y=0.15;p.z=z+rnd(-0.05,0.05);p.v=0}
+function stepInk(dt){var a=G.ink.geometry.attributes.position.array;G.inkP.forEach(function(p,i){if(p.y>0.03){p.v+=9*dt;p.y-=p.v*dt}else p.y=-9;a[i*3]=p.x;a[i*3+1]=p.y;a[i*3+2]=p.z});G.ink.geometry.attributes.position.needsUpdate=true}
+
+/* ---------- events: only taps print ---------- */
+function onEvent(e){if(!e||!e.type)return;
+  if(e.type==="status"){setStatus(e.ok,e.text);return}
+  /* every interaction can print: comments, follows, shares and people entering count like taps (each can be switched off);
+     the card then carries a small mark of what they did (💬 with their words, ➕ follow, 🔗 share, 👋 entered) */
+  var KIND={chat:"pChat",follow:"pFollow",share:"pShare",join:"pJoin"};
+  if(KIND[e.type]){if(!cfg[KIND[e.type]]&&!(YT&&e.type==="chat"))return;var ui=userOf(e),ni=perf();ui.kind=e.type;ui.kindAt=ni;if(e.type==="chat")ui.said=String(e.text||"").slice(0,60);
+    if(e.type==="chat")mon.c=(mon.c||0)+1;ui.taps=Math.max(ui.taps,Math.max(1,cfg.need|0));ui.lastTap=ni;if(!ui.firstTap)ui.firstTap=ni;actAdd(ui,ni);hintSoon();monSoon();return}
+  if(e.type==="gift"){mon.g=(mon.g||0)+Math.max(1,e.count|0);addGift(userOf(e),e);paintHint();paintMon();return}
+  if(e.type==="like"){var c=Math.max(1,e.count|0);mon.l+=c;var u=userOf(e),now=perf();u.taps+=c;u.lastTap=now;if(!u.firstTap)u.firstTap=now;if(now-(u.kindAt||0)>10000)u.kind="like";
+    if(u.taps>=Math.max(1,cfg.need|0))actAdd(u,now);
+    hintSoon();monSoon()}}
+var hintT=0,monT=0;function hintSoon(){if(!hintT)hintT=setTimeout(function(){hintT=0;paintHint()},300)}function monSoon(){if(!monT)monT=setTimeout(function(){monT=0;paintMon()},400)}
+
+/* ---------- hint ---------- */
+function paintHint(){var el=$("hint");el.hidden=!cfg.hint2||!!cfg.plaque2;if(el.hidden)return;var u=job?job.items[0].u:latest();
+  $("hintMe").innerHTML=u&&u.src?'<img alt="" referrerpolicy="no-referrer" src="'+esc(u.src)+'">':u?'<span style="display:grid;place-items:center;width:100%;height:100%;background:hsl('+u.hue+',70%,45%)">'+esc(initial(u.nick))+'</span>':"📷";
+}
+
+function stepFlash(now){if(!G.warm)return;var on=G.flashUntil&&now<G.flashUntil,k=on?0.5+0.5*Math.sin(now/90):0;G.warm.intensity=20+k*(G.flashTier>=3?90:45);G.warm.color.setHSL(G.flashTier>=3?(now/1500)%1:0.1,1,0.6)}
+/* ---------- looks: the desk, the machine and the light change every few minutes (a short fade hides the change) ---------- */
+function texOf(draw,rep){var c=document.createElement("canvas");c.width=c.height=1024;draw(c.getContext("2d"),1024);var t=tex(c);t.wrapS=t.wrapT=T.RepeatWrapping;t.repeat.set(rep||2,rep||2);return t}
+var DESKS={
+  wood:function(){return woodTex()},
+  marble:function(){return texOf(function(x,S){x.fillStyle="#f2f1ee";x.fillRect(0,0,S,S);for(var i=0;i<26;i++){x.strokeStyle="rgba(120,120,130,"+rnd(0.08,0.28).toFixed(2)+")";x.lineWidth=rnd(0.6,3);x.beginPath();var y=Math.random()*S;x.moveTo(0,y);
+    for(var px=0;px<=S;px+=40){y+=rnd(-22,22);x.lineTo(px,y)}x.stroke()}},1.5)},
+  neon:function(){return texOf(function(x,S){x.fillStyle="#120c24";x.fillRect(0,0,S,S);x.strokeStyle="rgba(139,92,246,.35)";x.lineWidth=2;for(var i=0;i<=S;i+=64){x.beginPath();x.moveTo(i,0);x.lineTo(i,S);x.stroke();x.beginPath();x.moveTo(0,i);x.lineTo(S,i);x.stroke()}},3)},
+  cork:function(){return texOf(function(x,S){x.fillStyle="#b9895a";x.fillRect(0,0,S,S);for(var i=0;i<9000;i++){x.fillStyle=pick(["rgba(120,78,40,.5)","rgba(214,170,120,.5)","rgba(90,55,25,.35)"]);x.fillRect(Math.random()*S,Math.random()*S,rnd(2,6),rnd(2,6))}},2)},
+  candy:function(){return texOf(function(x,S){x.fillStyle="#ffd3e2";x.fillRect(0,0,S,S);for(var y=32;y<S;y+=64)for(var xx=(y/64%2)*32+32;xx<S;xx+=64){x.fillStyle=pick(["#ffffff","#a8e6cf","#ffd166"]);x.beginPath();x.arc(xx,y,9,0,7);x.fill()}},2)},
+  steel:function(){return texOf(function(x,S){x.fillStyle="#7c838d";x.fillRect(0,0,S,S);for(var i=0;i<S;i+=2){x.fillStyle="rgba(255,255,255,"+rnd(0,0.07).toFixed(3)+")";x.fillRect(0,i,S,1)}
+    for(var y=24;y<S;y+=64)for(var xx=(y/64%2)*32+16;xx<S;xx+=64){x.save();x.translate(xx,y);x.rotate(0.6);x.fillStyle="rgba(40,44,50,.35)";x.fillRect(-14,-3,28,6);x.fillStyle="rgba(255,255,255,.25)";x.fillRect(-14,-3,28,2);x.restore()}},2)}};
+var PTH={
+  wood:  {n:"🪵 Madera",desk:"wood",dr:0.6,dm:0.05,bg:0x1a120c,hemi:[0xfff1dc,0x3a2414],key:0xfff0dd,body:0x26272d,metal:0xbfc5cf,head:0x34363d,mug:0xc8462e,glow:0},
+  studio:{n:"🤍 Estudio",desk:"marble",dr:0.25,dm:0.05,bg:0x6f7480,hemi:[0xffffff,0x707a88],key:0xffffff,body:0x111318,metal:0xe6e9ef,head:0xe8ebf0,mug:0x2f80ed,glow:0},
+  neon:  {n:"💜 Neón",desk:"neon",dr:0.3,dm:0.4,bg:0x07031a,hemi:[0x8a6cff,0x0a0420],key:0xc7a6ff,body:0x1b1530,metal:0x8be9ff,head:0x2a1d4a,mug:0x18d6ff,glow:0xb44dff},
+  retro: {n:"🟠 Retro",desk:"cork",dr:0.9,dm:0,bg:0x2a1a0e,hemi:[0xffe2b8,0x4a2a10],key:0xffd8a0,body:0xd98e04,metal:0xf4e6c8,head:0x3b6e4a,mug:0xe85d04,glow:0},
+  candy: {n:"🍬 Dulce",desk:"candy",dr:0.7,dm:0,bg:0x3a1d33,hemi:[0xfff0f7,0x5a2a4a],key:0xffe6f2,body:0x7fd8be,metal:0xffffff,head:0xff8fb1,mug:0xffd166,glow:0},
+  steel: {n:"⚙️ Taller",desk:"steel",dr:0.35,dm:0.85,bg:0x14171c,hemi:[0xcfe3ff,0x1a1a1a],key:0xe6f0ff,body:0xf2c230,metal:0x30343b,head:0x111111,mug:0x6b7280,glow:0}};
+var PORDER=["wood","studio","neon","retro","candy","steel"],pthName="wood",pthAt=perf(),pthBusy=false,deskTex={};
+function applyLook(name){var t=PTH[name]||PTH.wood;pthName=PTH[name]?name:"wood";pthAt=perf();if(!ok3d)return;
+  scene.background.setHex(t.bg);G.hemi.color.setHex(t.hemi[0]);G.hemi.groundColor.setHex(t.hemi[1]);G.key.color.setHex(t.key);
+  var dm=G.desk.material,tx=deskTex[t.desk]||(deskTex[t.desk]=DESKS[t.desk]());if(dm.map!==tx){dm.map=tx;dm.needsUpdate=true}dm.roughness=t.dr;dm.metalness=t.dm;
+  G.mBody.color.setHex(t.body);G.mMetal.color.setHex(t.metal);G.mHead.color.setHex(t.head);G.mMug.color.setHex(t.mug);
+  G.mBody.emissive.setHex(t.glow?t.glow:0);G.mBody.emissiveIntensity=t.glow?0.25:0;G.glowBars.forEach(function(b){b.visible=!!t.glow;if(t.glow)b.material.color.setHex(t.glow)});
+  paintLookBtns()}
+function switchLook(name){if(pthBusy||!ok3d)return;pthBusy=true;cfg.look=name;save();var f=$("fade");f.classList.add("on");
+  setTimeout(function(){applyLook(name);setTimeout(function(){f.classList.remove("on");pthBusy=false},150)},700)}
+function nextLook(){switchLook(PORDER[(PORDER.indexOf(pthName)+1)%PORDER.length])}
+/* the change waits for the machine to be between prints, never in the middle of someone's card */
+setInterval(function(){var m=+cfg.lookMin||0;if(!m||pthBusy||job)return;if(perf()-pthAt>=m*60000)nextLook()},3000);
+function paintLookBtns(){var el=$("lookBtns");if(!el)return;if(!el.children.length){el.innerHTML=PORDER.map(function(n){return '<button class="btn" data-l="'+n+'">'+PTH[n].n+'</button>'}).join("");
+    Array.prototype.forEach.call(el.children,function(b){b.onclick=function(){switchLook(b.dataset.l)}})}
+  Array.prototype.forEach.call(el.children,function(b){b.classList.toggle("go",b.dataset.l===pthName)})}
+/* ---------- the gift plaque: a dark-glass panel with a gold frame mounted on the machine, always there ----------
+   four cells: the gift (🌹, 🪙10, 🪙100, 🪙1000), an arrow, and a small drawing of what it prints. Pictures and numbers only. */
+/* drawn again ~20 times a second so everything on it moves: the finger taps and hearts rise, the rose sways, coins spin,
+   arrows pulse, a glint runs over the gold prints and the crown bobs */
+var PLQ;   /* set by buildPlaque, which runs before this line (no "= null" here: it would wipe it) */
+function drawPlaque(t){var W2=1600,H2=230,c=PLQ.c,x=PLQ.x;x.clearRect(0,0,W2,H2);
+  var bg=x.createLinearGradient(0,0,0,H2);bg.addColorStop(0,"#1d1830");bg.addColorStop(0.5,"#0f0c1c");bg.addColorStop(1,"#191428");x.fillStyle=bg;x.fillRect(0,0,W2,H2);
+  var gl=x.createLinearGradient(0,0,0,H2*0.5);gl.addColorStop(0,"rgba(255,255,255,.16)");gl.addColorStop(1,"rgba(255,255,255,0)");x.fillStyle=gl;x.fillRect(0,0,W2,H2*0.5);
+  x.lineWidth=8;x.strokeStyle=goldGrad(x,0,0,W2,H2);x.strokeRect(6,6,W2-12,H2-12);x.lineWidth=2;x.strokeRect(20,20,W2-40,H2-40);
+  var cw=(W2-40)/5,cy=H2/2+2,L=function(i){return 20+cw*i};
+  var on=Math.floor(t/1.1)%5,pk=(t/1.1)%1,glow=Math.sin(Math.min(1,pk*1.4)*Math.PI);
+  var sg=x.createRadialGradient(L(on)+cw/2,cy,10,L(on)+cw/2,cy,cw*0.62);sg.addColorStop(0,"rgba(255,215,90,"+(0.38*glow).toFixed(3)+")");sg.addColorStop(1,"rgba(255,215,90,0)");x.fillStyle=sg;x.fillRect(L(on),24,cw,H2-48);
+  x.save();x.lineWidth=5;x.strokeStyle="rgba(255,215,90,"+(0.85*glow).toFixed(3)+")";x.strokeRect(L(on)+8,30,cw-16,H2-60);x.restore();
+  function pop(i){return i===on?1+0.12*glow:1}
+  function coin(cx,cy,n,ph,i){var sx=Math.abs(Math.cos(t*3+ph))*0.85+0.15,ps=pop(i);x.save();x.translate(cx,cy-20-Math.abs(Math.sin(t*3+ph))*8);x.scale(sx*ps,ps);
+    var g=x.createRadialGradient(-8,-8,4,0,0,30);g.addColorStop(0,"#fff3b0");g.addColorStop(1,"#d39b12");x.fillStyle=g;x.beginPath();x.arc(0,0,27,0,7);x.fill();x.lineWidth=3;x.strokeStyle="#8a5d00";x.stroke();x.restore();
+    x.font="800 44px 'Barlow Condensed',Arial";x.fillStyle="#ffd76a";x.textAlign="center";x.textBaseline="middle";x.fillText(n,cx,cy+40)}
+  function arrow(cx,cy,ph){var dx=Math.sin(t*5+ph)*10,a=0.55+0.35*(0.5+0.5*Math.sin(t*4+ph));x.save();x.strokeStyle="rgba(255,255,255,"+a.toFixed(2)+")";x.lineWidth=7;x.lineCap="round";x.beginPath();
+    x.moveTo(cx-22+dx,cy);x.lineTo(cx+18+dx,cy);x.moveTo(cx+4+dx,cy-14);x.lineTo(cx+20+dx,cy);x.lineTo(cx+4+dx,cy+14);x.stroke();x.restore()}
+  function miniCard(cx,cy,w,h,gold,rainbow,plain,ph){x.save();x.fillStyle=gold?"#fff4d0":"#fffdf8";x.fillRect(cx-w/2,cy-h/2,w,h);
+    x.lineWidth=gold||rainbow?7:5;if(rainbow){var rb=x.createLinearGradient(cx-w/2,0,cx+w/2,0);for(var k=0;k<=6;k++)rb.addColorStop(k/6,"hsl("+((k*60+t*90)%360)+",90%,60%)");x.strokeStyle=rb}
+    else x.strokeStyle=gold?goldGrad(x,cx-w/2,cy-h/2,cx+w/2,cy+h/2):plain?"#2a2a33":"#e0284f";
+    x.strokeRect(cx-w/2+3,cy-h/2+3,w-6,h-6);var wide=w>h,r=Math.min(w,h)*0.26,px=wide?cx-w*0.22:cx,py=wide?cy:cy-h*0.12;
+    x.fillStyle="#9aa6b8";x.beginPath();x.arc(px,py,r,0,7);x.fill();x.fillStyle="#dfe4ec";x.beginPath();x.arc(px,py-r*0.25,r*0.38,0,7);x.fill();
+    x.fillStyle="#3a3a44";if(wide)x.fillRect(cx+w*0.04,cy-4,w*0.34,8);else x.fillRect(cx-w*0.3,cy+h*0.28,w*0.6,7);
+    if(gold||rainbow){/* a glint sweeping across */var gp=((t*0.45+ph)%1.6)/1.6,gx=cx-w/2-40+(w+80)*gp;x.save();x.beginPath();x.rect(cx-w/2,cy-h/2,w,h);x.clip();
+      var sh=x.createLinearGradient(gx-30,0,gx+30,0);sh.addColorStop(0,"rgba(255,255,255,0)");sh.addColorStop(0.5,"rgba(255,255,255,.75)");sh.addColorStop(1,"rgba(255,255,255,0)");x.fillStyle=sh;
+      x.translate(gx,cy);x.rotate(0.35);x.fillRect(-30,-h,60,2*h);x.restore();
+      var bob=rainbow?Math.sin(t*4)*9:0;x.font=Math.round(Math.min(w,h)*0.26)+"px serif";x.textAlign="center";x.textBaseline="middle";x.fillText(rainbow?"👑":"✨",px,cy-h/2+Math.min(w,h)*0.12+bob)}
+    x.restore()}
+  x.textAlign="center";x.textBaseline="middle";
+  /* 👆 taps with hearts rising */
+  var press=Math.max(0,Math.sin(t*7))*16;x.save();x.translate(L(0)+66,cy+8+press);x.scale(pop(0),pop(0));x.font="80px serif";x.fillText("👆",0,0);x.restore();
+  for(var k=0;k<3;k++){var p=(t*0.9+k/3)%1;x.globalAlpha=1-p;x.font=Math.round(30+p*16)+"px serif";x.fillText("❤️",L(0)+66+(k-1)*34+Math.sin(p*6+k)*10,cy-20-p*80)}x.globalAlpha=1;
+  arrow(L(0)+148,cy,0);miniCard(L(0)+235,cy,92,118,false,false,true,0);
+  /* 🌹 sways */
+  x.save();x.translate(L(1)+66,cy+34);x.rotate(Math.sin(t*2.6)*0.32);x.scale(pop(1),pop(1));x.font="80px serif";x.fillText("🌹",0,-34);x.restore();
+  arrow(L(1)+148,cy,0.8);miniCard(L(1)+235,cy,92,118,false,false,false,0);
+  coin(L(2)+66,cy,"10",0,2);arrow(L(2)+148,cy,1.6);miniCard(L(2)+235,cy,92,118,true,false,false,0);
+  coin(L(3)+66,cy,"100",0.7,3);arrow(L(3)+148,cy,2.4);miniCard(L(3)+232,cy,140,92,true,false,false,0.5);
+  coin(L(4)+66,cy,"1000",1.4,4);arrow(L(4)+148,cy,3.2);miniCard(L(4)+235,cy,104,136,false,true,false,1);
+  x.strokeStyle="rgba(255,201,60,.45)";x.lineWidth=2;for(var i=1;i<5;i++){x.beginPath();x.moveTo(20+cw*i,40);x.lineTo(20+cw*i,H2-40);x.stroke()}
+  PLQ.t.needsUpdate=true}
+/* 👀 the next two, on both sides of the print head */
+var NEXT={s:[],at:0,key:""};
+function nextBadge(u){var c=document.createElement("canvas");c.width=c.height=192;var x=c.getContext("2d");
+  x.fillStyle="rgba(10,8,20,.78)";x.beginPath();x.arc(96,96,92,0,7);x.fill();
+  x.save();x.beginPath();x.arc(96,96,76,0,7);x.clip();if(u.img){var im=u.img,k=Math.max(152/im.width,152/im.height);try{x.drawImage(im,96-im.width*k/2,96-im.height*k/2,im.width*k,im.height*k)}catch(e){}}
+  else{x.fillStyle="hsl("+u.hue+",70%,45%)";x.fillRect(0,0,192,192);x.fillStyle="#fff";x.font="800 80px 'Barlow Condensed',Arial";x.textAlign="center";x.textBaseline="middle";x.fillText(initial(u.nick),96,100)}x.restore();
+  x.lineWidth=8;x.strokeStyle="#ffc93c";x.beginPath();x.arc(96,96,80,0,7);x.stroke();x.font="54px serif";x.textAlign="center";x.textBaseline="middle";x.fillText("👀",150,40);return tex(c)}
+function stepNext(now){if(!ok3d||now-NEXT.at<500)return;NEXT.at=now;
+  if(!NEXT.s.length)[-1,1].forEach(function(sd){var sp=new T.Sprite(new T.SpriteMaterial({transparent:true,depthWrite:false,toneMapped:false}));sp.scale.set(0.85,0.85,1);sp.position.set(sd*3.0,1.0,PL+0.8);sp.renderOrder=8;sp.visible=false;scene.add(sp);NEXT.s.push(sp)});
+  var g=gq.slice(0,2).map(function(x){return x.u}),c=g.length<2?candidates(g).slice(0,2-g.length):[],list=g.concat(c).slice(0,2),key=list.map(function(u){return u.uid+(u.img?"*":"")}).join("|");
+  if(key===NEXT.key)return;NEXT.key=key;
+  NEXT.s.forEach(function(sp,i){var u=list[i];if(sp.material.map){sp.material.map.dispose();sp.material.map=null}sp.visible=!!u;if(u){ensurePhoto(u);sp.material.map=nextBadge(u)}sp.material.needsUpdate=true})}
+function stepPlaque(now){if(!PLQ||!G.plaque.visible||now-PLQ.at<50)return;PLQ.at=now;drawPlaque(now/1000)}
+function buildPlaque(){var pg=new T.Group();G.bridge.add(pg);G.plaque=pg;
+  var bez=new T.Mesh(new T.BoxGeometry(7.2,1.08,0.08),new T.MeshStandardMaterial({color:0x0c0a14,roughness:0.3,metalness:0.8}));pg.add(bez);
+  var pc=document.createElement("canvas");pc.width=1600;pc.height=230;PLQ={c:pc,x:pc.getContext("2d"),t:tex(pc),at:0};drawPlaque(0);
+  var face=new T.Mesh(new T.PlaneGeometry(7.06,1.02),new T.MeshBasicMaterial({map:PLQ.t,toneMapped:false}));face.position.z=0.045;pg.add(face);
+  [-1,1].forEach(function(sd){var post=new T.Mesh(new T.CylinderGeometry(0.04,0.04,0.7,10),G.mMetal);post.position.set(sd*3.2,-0.6,-0.06);pg.add(post)});
+  /* tilted toward the camera so it reads straight on */
+  pg.position.set(0,1.75,-0.25);pg.rotation.x=-0.78;pg.visible=!!cfg.plaque2}
+/* ---------- camera ---------- */
+function stepCamera(now){var t=now/1000,portrait=W/H<0.75;
+  cam.position.set(Math.sin(t*0.15)*0.6,portrait?15.5:11,portrait?8.2:7.4);cam.lookAt(0,-0.4,portrait?-0.4:-0.8)}
+
+/* ---------- loop ---------- */
+var last=perf(),fpsAcc=0,fpsN=0,fpsT=perf(),slow=0;
+function frame(){var now=perf(),dt=Math.min(0.05,(now-last)/1000);last=now;
+  if(ok3d){stepPrinter(now,dt);stepInk(dt);stepFX(dt);stepFlash(now);stepPlaque(now);stepNext(now);stepCamera(now);
+    if(composer)composer.render(dt);else R.render(scene,cam);
+    fpsAcc+=dt;fpsN++;if(now-fpsT>2000){var fps=fpsN/fpsAcc;fpsT=now;fpsAcc=0;fpsN=0;$("perf").textContent=Math.round(fps)+" fps · "+cfg.q+(APP&&BusApp.version?" · versión "+BusApp.version():"");
+      if(cfg.auto&&fps<40){if(++slow>=3){slow=0;var qi=QORDER.indexOf(cfg.q);if(qi<QORDER.length-1){cfg.q=QORDER[qi+1];save();applyQuality();fill()}}}else slow=0}}
+  requestAnimationFrame(frame)}
+function applyQuality(){if(!ok3d)return;Q=QUALITY[cfg.q]||QUALITY.ultra;R.shadowMap.enabled=cfg.q!=="ahorro";
+  if(composer){composer.dispose&&composer.dispose();composer=null}
+  if(Q.bloom||Q.samples){var rt=new T.WebGLRenderTarget(2,2,{type:T.HalfFloatType,samples:Q.samples});composer=new T.EffectComposer(R,rt);composer.addPass(new T.RenderPass(scene,cam));
+    composer.addPass(new T.OutputPass())}   /* no bloom here: white paper would glow and wash the photos out */
+  resize()}
+function resize(){W=innerWidth;H=innerHeight;if(!ok3d)return;var pr=Math.min(window.devicePixelRatio||1,Q.pr);R.setPixelRatio(pr);R.setSize(W,H,false);
+  cam.aspect=W/H;cam.fov=W/H<0.75?52:44;cam.updateProjectionMatrix();if(composer){composer.setPixelRatio(pr);composer.setSize(W,H)}}
+window.addEventListener("resize",resize);
+
+/* ---------- settings ---------- */
+function fill(){$("oPChat").checked=cfg.pChat;$("oPFollow").checked=cfg.pFollow;$("oPShare").checked=cfg.pShare;$("oPJoin").checked=cfg.pJoin;$("oPlaque").checked=cfg.plaque2;$("oHost").checked=cfg.host;$("oHostSize").value=cfg.hostSize;$("oHostShape").value=cfg.hostShape2;$("oHostMirror").checked=cfg.hostMirror;$("oHostSup").checked=cfg.hostSup;$("oLookMin").value=String(cfg.lookMin);$("oQ").value=cfg.q;$("oAuto").checked=cfg.auto;$("oNeed").value=String(cfg.need);$("oSpeed").value=String(cfg.speed);$("oHint").checked=cfg.hint2}
+function bind(id,key,num){var el=$(id);el.onchange=function(){cfg[key]=el.type==="checkbox"?el.checked:num?+el.value:el.value;save();if(key==="plaque2"&&G.plaque){G.plaque.visible=cfg.plaque2;paintHint()}if(key==="q")applyQuality();paintHint()}}
+bind("oQ","q");bind("oPChat","pChat");bind("oPFollow","pFollow");bind("oPShare","pShare");bind("oPJoin","pJoin");bind("oPlaque","plaque2");bind("oLookMin","lookMin",1);bind("oAuto","auto");bind("oNeed","need",1);bind("oSpeed","speed",1);bind("oHint","hint2");
+function openSheet(o){$("sheet").hidden=!o;$("gear").hidden=o;if(o){fill();paintMon()}}
+$("gear").onclick=function(){openSheet(true)};$("close").onclick=function(){openSheet(false)};
+Array.prototype.forEach.call(document.querySelectorAll(".tab"),function(b){b.onclick=function(){
+  Array.prototype.forEach.call(document.querySelectorAll(".tab"),function(x){x.setAttribute("aria-selected",x===b);$(x.dataset.p).hidden=x!==b})}});
+function go(g,page){try{localStorage.setItem("game",g)}catch(e){}location.href=page}
+$("bParty").onclick=function(){go("party","party.html")};$("bRace").onclick=function(){go("race","race.html")};$("bBus").onclick=function(){go("bus","index.html")};$("bWin").onclick=function(){go("win","win.html")};$("bNat").onclick=function(){go("nations","nations.html")};
+var tn=0,TN=["Fatima","Carlos","Sara","Youssef","Lucia","Omar","Maria","Hamza"];
+Array.prototype.forEach.call(document.querySelectorAll("[data-test]"),function(b){b.onclick=function(){var n=+b.dataset.test;for(var i=0;i<n;i++){tn++;onEvent({type:"like",user:"t"+tn,nick:TN[tn%TN.length],count:5})}}});
+Array.prototype.forEach.call(document.querySelectorAll("[data-gift]"),function(b){b.onclick=function(){tn++;onEvent({type:"gift",user:"g"+tn,nick:TN[tn%TN.length],coins:+b.dataset.gift,count:1,gift:"Regalo"})}});
+function paintMon(){if($("sheet").hidden)return;$("mL").textContent=mon.l;$("mP").textContent=mon.p}
+/* ---------- connection (same bridge as the other games) ---------- */
+function setStatus(ok,text){var el=$("st");el.className=ok?"ok":"bad";el.textContent=text||(ok?"Conectado":"Sin conexión");$("dot").className=ok?"ok":""}
+function appLog(l){var el=$("apLog");el.textContent+=(el.textContent?"\n":"")+l;var x=el.textContent.split("\n");if(x.length>200)el.textContent=x.slice(-200).join("\n");el.scrollTop=el.scrollHeight}
+if(YT){$("apUserL").textContent="Tu canal o directo de YouTube";$("apUser").placeholder="@tucanal o enlace del directo";$("apKeyRow").hidden=true;$("mLW").firstChild.nodeValue="💬 "}
+$("lnNote").textContent=!APP?"Vista previa: abre esta página desde la app para recibir regalos reales.":YT?"Escribe tu canal de YouTube (@usuario) o pega el enlace del directo.":"Escribe tu usuario de TikTok. La app se conecta sola cuando empieza tu directo.";
+if(APP){try{$("apUser").value=BusApp.getUser();$("apKey").value=BusApp.getKey()}catch(e){}
+  $("apGo").onclick=function(){var u=$("apUser").value.trim();if(!YT)u=u.replace(/^@/,"");$("apUser").value=u;$("apLog").textContent="";try{BusApp.connect(u,$("apKey").value.trim())}catch(e){}};
+  window.__bus=function(e){try{onEvent(e)}catch(x){}};window.__busLog=appLog;try{BusApp.ready()}catch(e){}}
+else window.__bus=function(e){try{onEvent(e)}catch(x){}};
+
+
+/* the hall's names the camera bubble uses: a big gift's moment = a poster or a full page being printed; the latest gift sender */
+function vipOn(){return !!(job&&job.tier>=2)}
+var lastSup=null;
+/* ---------- the host's own camera bubble: small, at the edge, draggable; a "busy" card when the host steps away ---------- */
+var HOST={stream:null,busy:cfg.hostIcon||"☕",busyAt:0,starting:false,frame:null};
+var HOSTSIZE={s:90,m:118,l:156};
+function hostEl(){return $("host")}
+function hostLayout(){var el=hostEl(),sz=HOSTSIZE[cfg.hostSize]||128;el.hidden=!cfg.host;if(!cfg.host){hostStop();return}
+  el.style.fontSize=sz+"px";el.style.width=sz+"px";el.style.height=Math.round(sz*(cfg.hostShape2==="card"?1.6:1))+"px";el.classList.toggle("card",cfg.hostShape2==="card");
+  var st=$("stage").getBoundingClientRect(),w=el.offsetWidth,h=el.offsetHeight;
+  var x=clamp((cfg.hostX==null?1:cfg.hostX)*(st.width-w-16)+8,8,Math.max(8,st.width-w-8)),y=clamp((cfg.hostY==null?0.25:cfg.hostY)*st.height,8,Math.max(8,st.height-h-8));
+  el.style.left=x+"px";el.style.top=y+"px";$("hostCam").classList.toggle("mir",cfg.hostMirror);$("hostCam").classList.toggle("blur",!!HOST.blur);
+  paintBusy();if(!HOST.busy)hostStart()}
+function hostStart(){if(HOST.stream||HOST.starting||!cfg.host||HOST.busy||document.hidden)return;
+  if(!navigator.mediaDevices||!navigator.mediaDevices.getUserMedia){hostMsg("📷✖");return}
+  HOST.starting=true;navigator.mediaDevices.getUserMedia({video:{facingMode:"user",width:{ideal:640},height:{ideal:640},frameRate:{ideal:30,max:30}},audio:false}).then(function(st){HOST.starting=false;
+    if(!cfg.host||HOST.busy||document.hidden){st.getTracks().forEach(function(t){t.stop()});return}
+    HOST.stream=st;var v=$("hostCam");v.srcObject=st;v.play().catch(function(){});hostMsg("");
+    st.getVideoTracks().forEach(function(t){t.onended=function(){HOST.stream=null;setTimeout(hostStart,800)}})}).catch(function(){HOST.starting=false;hostMsg("📷✖")})}
+function hostStop(){if(HOST.stream){HOST.stream.getTracks().forEach(function(t){t.onended=null;t.stop()});HOST.stream=null}var v=$("hostCam");if(v)v.srcObject=null}
+function hostMsg(t){$("hostMsg").textContent=t;$("hostMsg").hidden=!t}
+/* busy: the camera turns off (privacy and battery) and a card shows my photo or a soft still of my last frame, an icon and how long I've been away */
+function setBusy(ic){if(ic&&!HOST.busy){var v=$("hostCam");try{if(v.videoWidth){var c=document.createElement("canvas");c.width=160;c.height=160;var x=c.getContext("2d"),s=Math.min(v.videoWidth,v.videoHeight);
+      x.filter="blur(6px)";x.drawImage(v,(v.videoWidth-s)/2,(v.videoHeight-s)/2,s,s,0,0,160,160);HOST.frame=c.toDataURL("image/jpeg",0.7)}}catch(e){}}
+  HOST.busy=ic||"";HOST.busyAt=perf();if(HOST.busy)hostStop();hostLayout();paintHostBtns()}
+function hostPic(){try{return localStorage.getItem("party_hostpic")||""}catch(e){return ""}}
+function paintBusy(){var b=$("hostBusy"),hv=$("hbVid");b.hidden=!HOST.busy;$("host").classList.toggle("away",!!HOST.busy);
+  var useVid=!!(HOST.busy&&HOST.vidURL);$("host").classList.toggle("vid",useVid);hv.hidden=!useVid;
+  if(useVid){if(hv.dataset.src!==HOST.vidURL){hv.dataset.src=HOST.vidURL;hv.src=HOST.vidURL}frameMedia(hv);busySound(hv);if(hv.paused)hv.play().catch(function(){hv.muted=true;hv.play().catch(function(){})})}
+  else{if(!hv.paused)hv.pause();busySound(null)}
+  if(!HOST.busy)return;
+  var sup=!useVid&&cfg.hostSup&&lastSup&&lastSup.av,bg=useVid?"":sup?lastSup.av:hostPic()||HOST.frame||"";frameMedia($("hbBg"));
+  $("hbBg").style.backgroundImage=bg?'url("'+bg.replace(/"/g,"%22")+'")':"none";$("hbBg").classList.toggle("sup",!!sup);
+  $("hbIcon").textContent=HOST.busy;$("hbHeart").hidden=!sup}
+setInterval(function(){if(!cfg.host)return;var el=hostEl();
+  if(HOST.busy){paintBusy()}
+  /* a big gift's moment belongs to the supporter: the bubble steps back a little */
+  el.classList.toggle("dim",!!vipOn())},1000);
+document.addEventListener("visibilitychange",function(){if(document.hidden)hostStop();else if(cfg.host&&!HOST.busy)hostStart()});
+window.addEventListener("resize",function(){if(cfg.host)hostLayout()});
+/* drag with one finger to move; double tap = busy ☕ on/off */
+(function(){var el=null,sx=0,sy=0,ox=0,oy=0,moved=false,lastTap=0;
+  document.addEventListener("pointerdown",function(e){var h=hostEl();if(!h||h.hidden||!h.contains(e.target))return;el=h;moved=false;sx=e.clientX;sy=e.clientY;ox=h.offsetLeft;oy=h.offsetTop;try{h.setPointerCapture(e.pointerId)}catch(x){}e.preventDefault()});
+  document.addEventListener("pointermove",function(e){if(!el)return;var dx=e.clientX-sx,dy=e.clientY-sy;if(!moved&&Math.hypot(dx,dy)<8)return;moved=true;el.classList.add("drag");
+    var st=$("stage").getBoundingClientRect();el.style.left=clamp(ox+dx,8,st.width-el.offsetWidth-8)+"px";el.style.top=clamp(oy+dy,8,st.height-el.offsetHeight-8)+"px"});
+  document.addEventListener("pointerup",function(e){if(!el)return;var h=el;el=null;h.classList.remove("drag");var st=$("stage").getBoundingClientRect();
+    if(moved){cfg.hostX=clamp((h.offsetLeft-8)/Math.max(1,st.width-h.offsetWidth-16),0,1);cfg.hostY=clamp(h.offsetTop/st.height,0,1);save();return}
+    var now=perf();if(now-lastTap<350){lastTap=0;setBusy(HOST.busy?"":(cfg.hostIcon||"☕"))}else lastTap=now})})();
+function paintHostBtns(){var el=$("busyBtns");if(!el)return;Array.prototype.forEach.call(el.children,function(b){b.classList.toggle("go",b.dataset.b===HOST.busy||(!HOST.busy&&b.dataset.b===""))})}
+
+Array.prototype.forEach.call(document.querySelectorAll("#busyBtns button"),function(b){b.onclick=function(){if(b.dataset.b)cfg.hostIcon=b.dataset.b,save();setBusy(b.dataset.b)}});
+$("bBlur").onclick=function(){HOST.blur=!HOST.blur;$("bBlur").classList.toggle("go",HOST.blur);hostLayout()};
+$("bHostPic").onclick=function(){$("hostFile").click()};
+$("hostFile").onchange=function(){var f=this.files&&this.files[0];if(!f)return;var rd=new FileReader();rd.onload=function(){var im=new Image();im.onload=function(){var c=document.createElement("canvas");c.width=c.height=256;var x=c.getContext("2d"),s=Math.min(im.width,im.height);
+    x.drawImage(im,(im.width-s)/2,(im.height-s)/2,s,s,0,0,256,256);try{localStorage.setItem("party_hostpic",c.toDataURL("image/jpeg",0.85))}catch(e){}paintBusy()};im.src=rd.result};rd.readAsDataURL(f)};
+/* my looping video for "busy": kept in the phone's storage (IndexedDB), framed with pan and zoom */
+/* the video's sound: inside the app it is played by Android itself without taking the audio focus, so Spotify keeps playing
+   (the picture in the bubble stays muted); in a browser preview the video element plays it */
+window.__busySndOff=function(){HOST.snd=false};   /* Android stopped the sound (app left the screen): start it fresh next time */
+/* "mix" (default): Android plays the sound without taking the audio focus, so Spotify keeps playing (the picture may drift a
+   little from the sound); "video": the video plays its own sound, always in sync, but Android pauses Spotify */
+function nativeSound(){return APP&&!!BusApp.busyAudio&&cfg.hostSnd!=="video"}
+function busySound(hv){var vol=clamp((+cfg.hostVol||0)/100,0,1);
+  /* the position is sent only when the sound starts; after that Android loops it on its own (re-syncing made it stutter) */
+  if(nativeSound()){if(hv)hv.muted=true;var on=!!hv&&vol>0&&!document.hidden;try{BusApp.busyAudio(on,vol,on&&!HOST.snd?hv.currentTime:-1)}catch(e){}HOST.snd=on;HOST.nat=on;return}
+  if(HOST.nat){try{BusApp.busyAudio(false,0,-1)}catch(e){}HOST.nat=false;HOST.snd=false}
+  if(hv){hv.volume=vol;hv.muted=vol<=0;if(vol>0&&hv.paused&&!hv.hidden)hv.play().catch(function(){})}}
+function frameMedia(el){var x=+cfg.hostVx,y=+cfg.hostVy,z=Math.max(1,+cfg.hostVz||1);el.style.objectPosition=x+"% "+y+"%";el.style.backgroundPosition=x+"% "+y+"%";el.style.transformOrigin=x+"% "+y+"%";el.style.transform="scale("+z+")"}
+function mediaDB(cb){try{var rq=indexedDB.open("party_media",1);rq.onupgradeneeded=function(){rq.result.createObjectStore("m")};rq.onsuccess=function(){cb(rq.result)};rq.onerror=function(){cb(null)}}catch(e){cb(null)}}
+function setVid(blob){if(HOST.vidURL){URL.revokeObjectURL(HOST.vidURL);HOST.vidURL=""}if(blob)HOST.vidURL=URL.createObjectURL(blob);
+  $("hvBox").hidden=$("bHostVidDel").hidden=!HOST.vidURL;var pv=$("hvPrevVid");if(HOST.vidURL){pv.src=HOST.vidURL;frameMedia(pv);pv.play().catch(function(){})}else{pv.removeAttribute("src");pv.load()}
+  $("hbVid").dataset.src="";paintBusy();paintVidCtl()}
+function paintVidCtl(){var old=HOST.vidURL&&APP&&BusApp.hasBusyAudio&&!BusApp.hasBusyAudio();$("hvOld").hidden=!old;$("hvV").value=String(cfg.hostVol||0);$("hvVn").textContent=(+cfg.hostVol>0?cfg.hostVol+"%":"🔇");$("hvZ").value=String(cfg.hostVz);$("hvX").value=String(cfg.hostVx);$("hvY").value=String(cfg.hostVy)}
+mediaDB(function(db){if(!db)return;try{var g=db.transaction("m").objectStore("m").get("busyVid");g.onsuccess=function(){if(g.result)setVid(g.result)}}catch(e){}});
+$("bHostVid").onclick=function(){$("hostVidFile").click()};
+$("hostVidFile").onchange=function(){var f=this.files&&this.files[0];if(!f)return;cfg.hostVx=50;cfg.hostVy=50;cfg.hostVz=1;save();setVid(f);
+  mediaDB(function(db){if(!db)return;try{db.transaction("m","readwrite").objectStore("m").put(f,"busyVid")}catch(e){}})};
+$("bHostVidDel").onclick=function(){if(APP&&BusApp.busyDelete)try{BusApp.busyDelete()}catch(e){}setVid(null);mediaDB(function(db){if(!db)return;try{db.transaction("m","readwrite").objectStore("m").delete("busyVid")}catch(e){}})};
+function vidFrame(){save();frameMedia($("hvPrevVid"));frameMedia($("hbVid"));frameMedia($("hbBg"))}
+$("oHostSnd").value=cfg.hostSnd||"mix";$("oHostSnd").onchange=function(){cfg.hostSnd=this.value;save();HOST.snd=false;var hv=$("hbVid");busySound(hv.hidden||hv.paused?null:hv)};
+$("hvV").oninput=function(){cfg.hostVol=+this.value;save();paintVidCtl();var hv=$("hbVid");busySound(hv.hidden||hv.paused?null:hv)};
+document.addEventListener("visibilitychange",function(){var hv=$("hbVid");busySound(!document.hidden&&!hv.hidden&&!hv.paused?hv:null)});
+[["hvZ","hostVz"],["hvX","hostVx"],["hvY","hostVy"]].forEach(function(p){$(p[0]).oninput=function(){cfg[p[1]]=+this.value;vidFrame()}});
+/* drag on the preview to choose the part of the video that shows */
+(function(){var on=false,sx=0,sy=0,ox=0,oy=0,pv=$("hvPrev");
+  pv.addEventListener("pointerdown",function(e){on=true;sx=e.clientX;sy=e.clientY;ox=+cfg.hostVx;oy=+cfg.hostVy;try{pv.setPointerCapture(e.pointerId)}catch(x){}e.preventDefault()});
+  pv.addEventListener("pointermove",function(e){if(!on)return;var k=100/(pv.offsetWidth*Math.max(1,+cfg.hostVz));cfg.hostVx=clamp(ox-(e.clientX-sx)*k,0,100);cfg.hostVy=clamp(oy-(e.clientY-sy)*k*pv.offsetWidth/pv.offsetHeight,0,100);paintVidCtl();vidFrame()});
+  pv.addEventListener("pointerup",function(){on=false});pv.addEventListener("pointercancel",function(){on=false})})();
+
+[["oHost","host"],["oHostSize","hostSize"],["oHostShape","hostShape2"],["oHostMirror","hostMirror"],["oHostSup","hostSup"]].forEach(function(p){var el=$(p[0]);
+  el.onchange=function(){cfg[p[1]]=el.type==="checkbox"?el.checked:el.value;save();if(p[1]==="host"&&cfg.host)HOST.busy=HOST.busy||cfg.hostIcon||"☕";hostLayout()}});
+/* ---------- floating stars over any app (native window, see FloatOverlay.java) ---------- */
+function flOpts(){return JSON.stringify({taps:cfg.flTaps,gifts:cfg.flGifts,wall:cfg.flWall,join:cfg.flJoin,size:+cfg.flSize||1})}
+function flState(){try{return APP&&BusApp.floatState?String(BusApp.floatState()):"none"}catch(e){return "none"}}
+function paintFloat(){var s=flState();$("bFloat").textContent=s==="on"?"Desactivar":"Activar";$("bFloat").classList.toggle("go",s!=="on");
+  $("floatSt").textContent=s==="on"?"✅":s==="noperm"?"Falta el permiso":s==="none"?"Solo en la app":""}
+$("bFloatTest").onclick=function(){if(!APP||!BusApp.floatTest)return;if(flState()!=="on"){try{BusApp.floatShow(true,flOpts())}catch(e){}}setTimeout(function(){try{BusApp.floatTest()}catch(e){}},500);setTimeout(paintFloat,400)};
+$("bFloat").onclick=function(){if(!APP||!BusApp.floatShow)return;var on=flState()!=="on";try{BusApp.floatShow(on,flOpts())}catch(e){}setTimeout(paintFloat,400)};
+[["oFlTaps","flTaps"],["oFlGifts","flGifts"],["oFlWall","flWall"],["oFlJoin","flJoin"],["oFlSize","flSize"]].forEach(function(p){var el=$(p[0]);
+  el.checked=!!cfg[p[1]];if(el.tagName==="SELECT")el.value=String(cfg[p[1]]);
+  el.onchange=function(){cfg[p[1]]=el.tagName==="SELECT"?+el.value:el.checked;save();
+    if(flState()==="on"){try{if(p[1]==="flSize")BusApp.floatShow(false,flOpts());BusApp.floatShow(true,flOpts())}catch(e){}}}});
+document.addEventListener("visibilitychange",function(){if(!document.hidden)paintFloat()});
+paintFloat();
+
+setInterval(function(){var now=perf(),keep={};gq.forEach(function(g){keep[g.u.uid]=1});for(var k in users){var u=users[k];if(now-u.lastTap>1800000&&ACTI[k]===undefined&&!keep[k]){delete users[k];userN--}}},60000);
+function wake(){try{navigator.wakeLock&&navigator.wakeLock.request("screen").catch(function(){})}catch(e){}}
+document.addEventListener("visibilitychange",function(){if(!document.hidden)wake()});
+window.__print=function(){return {act:ACT.length,users:userN,photos:PHOTOS.length,next:(latest()||{}).nick,job:job&&(job.kind+':'+job.items.map(function(it){return it.u.nick+(it.g?'('+it.g.coins+')':'')}).join('+')),gifts:gq.map(function(g){return g.u.nick+':'+g.coins}),feed:+feedS.toFixed(2),printed:mon.p}};
+applyLook(PTH[cfg.look]?cfg.look:"wood");fill();applyQuality();paintHint();paintStats(false);hostLayout();wake();if(ok3d)requestAnimationFrame(frame);
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,200 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/bg"
+    android:fitsSystemWindows="true"
+    android:layoutDirection="rtl"
+    android:orientation="vertical"
+    android:padding="16dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_vertical"
+        android:orientation="horizontal">
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="@string/app_name"
+            android:textColor="@color/ink"
+            android:textSize="24sp"
+            android:textStyle="bold" />
+
+        <Button
+            android:id="@+id/update"
+            style="@style/Btn.Ghost"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="تحديث المحرك" />
+    </LinearLayout>
+
+    <TextView
+        android:id="@+id/version"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="12dp"
+        android:textColor="@color/dim"
+        android:textSize="12sp" />
+
+    <EditText
+        android:id="@+id/url"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@drawable/field"
+        android:hint="الصق رابط تيك توك أو يوتيوب أو شورتس"
+        android:importantForAutofill="no"
+        android:inputType="textUri|textMultiLine"
+        android:maxLines="3"
+        android:minHeight="52dp"
+        android:padding="12dp"
+        android:textColor="@color/ink"
+        android:textColorHint="@color/dim"
+        android:textDirection="ltr"
+        android:textSize="15sp" />
+
+    <TextView
+        android:id="@+id/detected"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="6dp"
+        android:minHeight="20dp"
+        android:textColor="@color/dim"
+        android:textSize="13sp" />
+
+    <RadioGroup
+        android:id="@+id/mode"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:orientation="vertical">
+
+        <RadioButton
+            android:id="@+id/mBest"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:buttonTint="@color/accent"
+            android:checked="true"
+            android:text="فيديو بأعلى جودة (حتى 4K/8K و60 إطاراً)"
+            android:textColor="@color/ink" />
+
+        <RadioButton
+            android:id="@+id/mMp4"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:buttonTint="@color/accent"
+            android:text="فيديو MP4 يعمل على كل الأجهزة (H.264)"
+            android:textColor="@color/ink" />
+
+        <RadioButton
+            android:id="@+id/mMp3"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:buttonTint="@color/accent"
+            android:text="صوت فقط MP3 بأعلى جودة"
+            android:textColor="@color/ink" />
+    </RadioGroup>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:orientation="horizontal">
+
+        <Button
+            android:id="@+id/paste"
+            style="@style/Btn.Ghost"
+            android:layout_width="0dp"
+            android:layout_height="52dp"
+            android:layout_marginEnd="8dp"
+            android:layout_weight="1"
+            android:text="لصق" />
+
+        <Button
+            android:id="@+id/go"
+            style="@style/Btn"
+            android:layout_width="0dp"
+            android:layout_height="52dp"
+            android:layout_weight="2"
+            android:text="تحميل" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/job"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="14dp"
+        android:background="@drawable/card"
+        android:orientation="vertical"
+        android:padding="12dp"
+        android:visibility="gone">
+
+        <TextView
+            android:id="@+id/jobTitle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:ellipsize="middle"
+            android:singleLine="true"
+            android:textColor="@color/ink"
+            android:textStyle="bold" />
+
+        <ProgressBar
+            android:id="@+id/bar"
+            style="@android:style/Widget.Material.ProgressBar.Horizontal"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:max="100"
+            android:progressTint="@color/accent" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+
+            <TextView
+                android:id="@+id/jobDetail"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:textColor="@color/dim"
+                android:textSize="13sp" />
+
+            <Button
+                android:id="@+id/cancel"
+                style="@style/Btn.Ghost"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="إلغاء" />
+        </LinearLayout>
+    </LinearLayout>
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="18dp"
+        android:layout_marginBottom="6dp"
+        android:text="التنزيلات (اضغط للتشغيل، اضغط مطولاً للمشاركة أو الحذف من القائمة)"
+        android:textColor="@color/dim"
+        android:textSize="13sp" />
+
+    <ListView
+        android:id="@+id/list"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:divider="@color/line"
+        android:dividerHeight="1dp" />
+
+    <TextView
+        android:id="@+id/empty"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:padding="24dp"
+        android:text="لا توجد تنزيلات بعد.\nيمكنك أيضاً مشاركة الفيديو من تطبيق تيك توك أو يوتيوب مباشرة إلى VidSaver."
+        android:textColor="@color/dim" />
+</LinearLayout>
