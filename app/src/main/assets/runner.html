@@ -142,6 +142,9 @@ input[type=checkbox]{width:20px;height:20px;accent-color:var(--hot)}
         <label class="ln"><input type="checkbox" id="oAutoTag"><span>Mostrar «Juego automático» abajo mientras juega solo (apagado: no se nota nada en pantalla)</span></label>
         <p class="note">Las carreras automáticas no cambian tu récord personal.</p>
       </div>
+      <div class="grp"><h3>📜 Créditos 3D</h3>
+        <p class="note">Coches y camiones realistas (CC BY 4.0, Sketchfab/Objaverse): alexnazario63, haoliu95, DanielZhabotinsky, aduong278, better_peter, alban, own.guest, vicent091036. Personaje «Vanguard» (Mixamo, ejemplos de three.js). Cielo, texturas, casas y rocas: Poly Haven (CC0). Más arte CC0: Quaternius y Kenney. ¡Gracias!</p>
+      </div>
       <div class="grp"><h3>🎮 Juegos</h3>
         <div class="ln"><button class="btn" data-go="party">🕺 Sala</button><button class="btn" data-go="race">🏁 Carrera</button><button class="btn" data-go="win">🏆 Desafío</button><button class="btn" data-go="nations">🌍 Naciones</button><button class="btn" data-go="print">🖨️ Imprenta</button><button class="btn" data-go="bus">🚌 Buses</button></div>
       </div>
@@ -193,6 +196,7 @@ input[type=checkbox]{width:20px;height:20px;accent-color:var(--hot)}
 </div>
 <script src="lib/three-plus.js"></script>
 <script src="runner/assets.js"></script>
+<script src="runner/vehicles.js"></script>
 <script src="runner/photo.js"></script>
 <script src="runner/town-models.js"></script>
 <script src="runner/town-tex.js"></script>
@@ -204,7 +208,7 @@ var APP=!!window.BusApp;
 var SRC=APP&&BusApp.getSource?String(BusApp.getSource()):"tiktok",YT=SRC==="youtube";
 try{localStorage.setItem("game","runner")}catch(e){}
 
-var DEF={powers:true,rain:100,hero:"adventurer",idle:true,idleSec:20,autoTag:false,q:"ultra",auto:true,sfx:false,shake:true,photo:true,follow:true,share:false,repeat:true,toast:true,min:1,names:""};
+var DEF={powers:true,rain:100,hero:"soldier_real",idle:true,idleSec:20,autoTag:false,q:"ultra",auto:true,sfx:false,shake:true,photo:true,follow:true,share:false,repeat:true,toast:true,min:1,names:""};
 var cfg=Object.assign({},DEF);
 try{var sv=JSON.parse(localStorage.getItem("runner1")||"null");if(sv)cfg=Object.assign(cfg,sv)}catch(e){}
 function save(){try{localStorage.setItem("runner1",JSON.stringify(cfg))}catch(e){}}
@@ -511,7 +515,7 @@ function litMaterials(root){root.traverse(function(m){if(!m.isMesh)return;var ma
   mats.forEach(function(mt,i){if(mt&&mt.isMeshBasicMaterial){var n=new T.MeshStandardMaterial({color:mt.color,map:mt.map,roughness:0.8,metalness:0.05,transparent:mt.transparent,opacity:mt.opacity,side:mt.side});
     if(Array.isArray(m.material))m.material[i]=n;else m.material=n}else if(mt&&mt.isMeshStandardMaterial){mt.roughness=Math.max(mt.roughness,0.35)}})})}
 function b64buf(b){var bin=atob(b),n=bin.length,u=new Uint8Array(n);for(var i=0;i<n;i++)u[i]=bin.charCodeAt(i);return u.buffer}
-function loadArt(){var A=window.RUNNER_ASSETS;if(!ok3d||!A||!T.GLTFLoader)return;var gl=new T.GLTFLoader();if(T.MeshoptDecoder)gl.setMeshoptDecoder(T.MeshoptDecoder);var names=Object.keys(A).filter(function(k){return k!=="sky_exr"}),left=names.length;
+function loadArt(){var A=Object.assign({},window.RUNNER_ASSETS,window.RUNNER_VEH);if(!ok3d||!A||!T.GLTFLoader)return;var gl=new T.GLTFLoader();if(T.MeshoptDecoder)gl.setMeshoptDecoder(T.MeshoptDecoder);var names=Object.keys(A).filter(function(k){return k!=="sky_exr"}),left=names.length;
   var go=function(){names.forEach(function(n){try{gl.parse(b64buf(A[n]),"",function(g){litMaterials(g.scene);ART[n]=g;if(--left===0)artReady()},function(e){console.warn("model "+n,e&&e.message);if(--left===0)artReady()})}catch(e){if(--left===0)artReady()}})};
   if(T.MeshoptDecoder&&T.MeshoptDecoder.ready)T.MeshoptDecoder.ready.then(go,go);else go();
   try{var ex=new T.EXRLoader().parse(b64buf(A.sky_exr));var dt=new T.DataTexture(ex.data,ex.width,ex.height,T.RGBAFormat,ex.type);dt.mapping=T.EquirectangularReflectionMapping;dt.colorSpace=T.LinearSRGBColorSpace;dt.flipY=true;dt.needsUpdate=true;
@@ -525,15 +529,23 @@ function fit(obj,len){var box=new T.Box3().setFromObject(obj),sz=box.getSize(new
   box.setFromObject(piv);sz=box.getSize(new T.Vector3());return {g:piv,w:sz.x,h:sz.y,len:sz.z}}
 function keepShared(o){o.traverse(function(m){if(m.isMesh){m.castShadow=true;m.receiveShadow=true;if(m.material){m.material.shared=true}}})}
 var VEH={car:["sedan","suv","taxi","police_car","van"],truck:["truck","delivery_van"]},VLEN={sedan:4.4,suv:4.6,taxi:4.4,police_car:4.6,van:5,truck:7.6,delivery_van:6.4};
-function vehicleModel(kind){var list=VEH[kind].filter(function(n){return ART[n]});if(!list.length)return null;var n=pick(list),src=ART[n].scene;
-  var o=src.clone(true);keepShared(o);var f=fit(o,VLEN[n]);
-  /* a truck must not be jumpable; a car stays hop-able like before */
-  if(kind==="truck"&&f.h<3.1){var k=3.3/f.h;f.g.children[0].scale.multiplyScalar(k);f.g.children[0].position.y*=k;f.h=3.3;f.w*=k;f.len*=k}
+/* realistic set (CC BY 4.0, see runner/NOTICE.txt); used whenever it is present */
+var VEHR={car:["police_charger","police_crownvic","taxi_old","taxi_new","pickup_blue","pickup_black","pickup_toyota","jeep","hummer","ferrari","ferrari"],truck:["bus","box_truck","ambulance"]};
+Object.assign(VLEN,{police_charger:5.1,police_crownvic:5.4,taxi_old:5.2,taxi_new:5.4,pickup_blue:5.3,pickup_black:5.3,pickup_toyota:4.9,jeep:4.3,hummer:4.9,ferrari:4.6,bus:11.5,box_truck:7.2,ambulance:6.4});
+var VFLIP={box_truck:1,bus:1,ferrari:1,hummer:1,taxi_new:1};   /* models authored facing the other way */
+var FERRARI=[0xc8102e,0xf2c200,0x101010,0xf4f4f4,0x1a4fa0,0x2e7d32,0xff6a00];
+function vehicleModel(kind,prefer){var real=VEHR[kind].filter(function(n){return ART[n]}),list=prefer?prefer.filter(function(n){return ART[n]}):[];
+  if(!list.length)list=real.length?real:VEH[kind].filter(function(n){return ART[n]});if(!list.length)return null;var n=pick(list),src=ART[n].scene;
+  var o=src.clone(true);keepShared(o);
+  if(n==="ferrari"){var col=pick(FERRARI);o.traverse(function(m){if(m.isMesh&&m.material&&/Body_Color|Ferrari_Yellow/.test(m.material.name)){m.material=m.material.clone();m.material.color.setHex(col)}})}
+  var f=fit(o,VLEN[n]);if(VFLIP[n])f.g.children[0].rotation.y+=Math.PI;f.name=n;
+  if(real.length){if(kind==="truck")f.h=Math.max(f.h,2.7)}
+  else if(kind==="truck"&&f.h<3.1){var k=3.3/f.h;f.g.children[0].scale.multiplyScalar(k);f.g.children[0].position.y*=k;f.h=3.3;f.w*=k;f.len*=k}
   if(kind==="car")f.h=Math.min(f.h,1.75);
   return f}
 function artReady(){
   /* hero */
-  var hn=ART[cfg.hero]?cfg.hero:ART.adventurer?"adventurer":ART.soldier?"soldier":null;
+  var hn=ART[cfg.hero]?cfg.hero:ART.soldier_real?"soldier_real":ART.adventurer?"adventurer":ART.soldier?"soldier":null;
   if(hn){var g=ART[hn],o=T.SkeletonUtils.clone(g.scene);o.traverse(function(m){if(m.isMesh){m.castShadow=true;m.receiveShadow=false;m.frustumCulled=false}});
     o.updateMatrixWorld(true);var box=new T.Box3().setFromObject(o,true),h=box.getSize(new T.Vector3()).y;o.scale.multiplyScalar(1.85/h);o.updateMatrixWorld(true);box.setFromObject(o,true);o.position.y-=box.min.y;
     var mixer=new T.AnimationMixer(o),acts={};
@@ -542,7 +554,10 @@ function artReady(){
     if(acts.death){acts.death.setLoop(T.LoopOnce,1);acts.death.clampWhenFinished=true}
     if(acts.jump){acts.jump.setLoop(T.LoopOnce,1);acts.jump.clampWhenFinished=true}
     if(acts.slide){acts.slide.setLoop(T.LoopOnce,1);acts.slide.clampWhenFinished=true}
-    G.body.visible=false;G.P.add(o);G.rig={o:o,mixer:mixer,acts:acts,cur:null}}
+    /* a pivot at hip height lets us tilt the whole body for the moves the model has no clip for (jump, slide, fall) */
+    if(hn==="soldier_real")o.rotation.y=Math.PI;   /* this model is authored facing the other way */
+    var piv=new T.Group();piv.position.y=0.95;o.position.y-=0.95;piv.add(o);
+    G.body.visible=false;G.P.add(piv);G.rig={o:o,piv:piv,mixer:mixer,acts:acts,cur:null}}
   /* desert props */
   var pn=(window.RUNNER_PHOTO?["bush_large"]:["cactus","cactus","rock_large","rock_tall","bush_large","tree_palm"]).filter(function(n){return ART[n]});
   if(pn.length)G.props.forEach(function(pr){if(pr.userData.scanned)return;var n=pick(pn),o=ART[n].scene.clone(true);keepShared(o);
@@ -802,7 +817,7 @@ function stepLife(dt,now,move){if(!ok3d)return;
 /* ---------- ramps: run up the back of a car carrier and along its roof ---------- */
 function groundAt(){var g=0;for(var i=0;i<items.length;i++){var it=items[i];if(it.kind!=="ramp"||it.dead||Math.abs(it.lane*LANE-pl.x)>0.95)continue;
   var r0=it.s-dist-it.len/2-it.rl,r1=r0+it.rl,r2=it.s-dist+it.len/2;if(r0<=0&&0<r1)g=Math.max(g,it.top*(0-r0)/it.rl);else if(r1<=0&&0<=r2)g=Math.max(g,it.top)}return g}
-function buildRamp(o){var mdl=vehicleModel("truck"),g,len,top;if(mdl){g=mdl.g;len=mdl.len;top=Math.min(3.3,mdl.h)}else{g=G.mk.truck();len=8.2;top=3.3}
+function buildRamp(o){var mdl=vehicleModel("truck",["box_truck","bus"]),g,len,top;if(mdl){g=mdl.g;len=mdl.len;top=Math.min(3.3,mdl.h)}else{g=G.mk.truck();len=8.2;top=3.3}
   var rl=4.6,ang=Math.atan2(top,rl),pg=new T.Mesh(new T.BoxGeometry(2.1,0.1,Math.hypot(top,rl)),TM.metal||std(0x8a9096,0.45,0.75));
   /* the vehicle group is turned 180°, so its local +z is the runner's side */
   pg.rotation.x=ang;pg.position.set(0,top/2,len/2+rl/2);g.add(pg);
@@ -1045,14 +1060,18 @@ function render(dt,now,move){var t=now/1000;
     if(pl.air){G.legL.rotation.x=-0.7;G.legR.rotation.x=0.4}}
   else if(state==="ready"){P.position.set(0,0,0);var ip=t*3;G.legL.rotation.x=Math.sin(ip)*0.5;G.legR.rotation.x=-Math.sin(ip)*0.5;G.armL.rotation.x=-Math.sin(ip)*0.4;G.armR.rotation.x=Math.sin(ip)*0.4;G.body.rotation.x=0.05;G.body.position.y=Math.abs(Math.sin(ip))*0.04}
   else if(state==="over"){var k=Math.min(1,(now-stateAt)/500);G.body.rotation.x=damp(G.body.rotation.x,1.45,8,dt);G.body.position.y=damp(G.body.position.y,0.25,8,dt);G.body.position.z=damp(G.body.position.z,-0.9,6,dt)}
-  if(G.rig){var rg=G.rig;G.body.visible=false;
+  if(G.rig){var rg=G.rig;G.body.visible=false;var tx2=0,ty2=0.95,tz2=0,tr=0;
     if(state==="run"){if(pl.air)playRig(rg.acts.jump?"jump":"run",0.08);else if(sl)playRig(rg.acts.slide?"slide":"run",0.08);else playRig("run",0.12);
-      if(rg.curName==="run")rg.acts.run.timeScale=0.75+speed/BASE*0.45;
+      if(rg.curName==="run")rg.acts.run.timeScale=pl.air&&!rg.acts.jump?0.45:sl&&!rg.acts.slide?0.25:0.75+speed/BASE*0.45;
       if(rg.curName==="jump")rg.acts.jump.timeScale=1.5;if(rg.curName==="slide")rg.acts.slide.timeScale=1.6;
-      rg.o.rotation.z=G.body.rotation.z}
+      if(pl.air&&!rg.acts.jump){tx2=-0.22+clamp(pl.vy,-12,12)*0.012;}                 /* jump: knees-up lean */
+      if(sl&&!rg.acts.slide){tx2=-1.15;ty2=0.62;tz2=0.35}                               /* slide: lean back, feet first */
+      if(pups.fly>0){tx2=0.95;ty2=0.95}                                                  /* flight: superhero pose */
+      tr=G.body.rotation.z}
     else if(state==="ready")playRig(rg.acts.idle?"idle":"run",0.3);
-    else if(state==="over")playRig("death",0.1);
-    rg.mixer.update(dt);G.P.position.y=state==="run"?pl.y:0}
+    else if(state==="over"){playRig(rg.acts.death?"death":"idle",0.1);if(!rg.acts.death){var kd=Math.min(1,(now-stateAt)/450);tx2=1.45*kd;ty2=0.95-0.62*kd;tz2=-0.6*kd}}
+    rg.piv.rotation.x=damp(rg.piv.rotation.x,tx2,state==="over"?10:16,dt);rg.piv.position.y=damp(rg.piv.position.y,ty2,16,dt);rg.piv.position.z=damp(rg.piv.position.z,tz2,16,dt);rg.piv.rotation.z=tr;
+    rg.mixer.update(state==="over"&&!rg.acts.death&&now-stateAt>500?0:dt);G.P.position.y=state==="run"?pl.y:0}
   G.shadow.scale.setScalar(1/(1+pl.y*0.35));G.shadow.position.y=0.03-pl.y;
   G.bubble.visible=pups.shield>0;if(G.bubble.visible){G.bubble.scale.setScalar(1+Math.sin(t*6)*0.04);G.bubble.material.opacity=0.14+Math.sin(t*4)*0.04}
   /* camera: behind and above, slightly following the lane; tall phones get a wider view */
@@ -1144,7 +1163,7 @@ document.addEventListener("visibilitychange",function(){if(!document.hidden)wake
 
 /* test hooks (used by the automated checks) */
 window.__runner=function(){return {state:state,dist:Math.round(dist),score:Math.floor(score),level:LV.lv,missions:MIS.map(function(m,i){return m.k+":"+mval(m)+"/"+m.n+(LV.done[i]?"✓":"")}),coins:coins,speed:+speed.toFixed(1),lane:pl.lane,banners:banners.map(function(b){return b.u.nick+":"+TIERS[b.tier].name+"@"+Math.round(b.s-dist)}),queue:banQ.length,items:items.length}};
-window.__runnerAct=act;window.__runnerWarp=function(d){items.forEach(killItem);items=[];dist+=d;nextRowS=dist+40;return zoneAt(dist).type};window.__zone=function(){var z=zoneAt(dist);return z.type+" "+(z.name||"")+" houses:"+houses.length+" pool:"+HPOOL.length+" decos:"+decos.length+" bend:"+BEND.x.toFixed(5)};window.__dbg=function(){var r=G.rig;if(!r)return "norig";var b=new T.Box3().setFromObject(r.o,true);return {acts:Object.keys(r.acts),cur:r.curName,scale:r.o.scale.x,pos:r.o.position.toArray(),box:[b.min.toArray(),b.max.toArray()],vis:r.o.visible,parent:!!r.o.parent}};
+window.__runnerAct=act;window.__dbg2=function(){return {cam:cam.position.toArray().map(function(v){return +v.toFixed(2)}),fov:cam.fov,pl:[pl.x,pl.y,pl.vy,pl.gnd],bend:[BEND.x,BEND.y],piv:G.rig?[G.rig.piv.position.y,G.rig.piv.rotation.x]:0,state:state,turbo:pups.turbo,fly:pups.fly,speed:speed}};window.__runnerWarp=function(d){items.forEach(killItem);items=[];dist+=d;nextRowS=dist+40;return zoneAt(dist).type};window.__zone=function(){var z=zoneAt(dist);return z.type+" "+(z.name||"")+" houses:"+houses.length+" pool:"+HPOOL.length+" decos:"+decos.length+" bend:"+BEND.x.toFixed(5)};window.__dbg=function(){var r=G.rig;if(!r)return "norig";var b=new T.Box3().setFromObject(r.o,true);return {acts:Object.keys(r.acts),cur:r.curName,scale:r.o.scale.x,pos:r.o.position.toArray(),box:[b.min.toArray(),b.max.toArray()],vis:r.o.visible,parent:!!r.o.parent}};
 /* ================================================================ auto-play (for when the host is busy)
    Reads the next obstacle in every lane: jumps fences, slides under gates, changes lane before vehicles (to the lane whose
    next threat is farthest), drifts towards coins when the way is clear. A small reaction jitter keeps it looking human. */

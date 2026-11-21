@@ -8,3 +8,20 @@ rocks (namaqualand_boulder_02, namaqualand_boulder_05): Poly Haven (https://poly
 Town models (barrel_03, street_lamp_01, plastic_monobloc_chair_01, potted_plant_02, quiver_tree_01, shrub_02, wooden_crate_01,
 utility_box_01, exterior_aircon_unit) and wall/door/pavement textures (white_stucco, clay_plaster, beige_wall_001, brick_wall_001,
 concrete_pavement, painted_metal_shutter, rough_pine_door, painted_plaster_wall): Poly Haven, CC0 1.0. In runner/town.js.
+
+Realistic vehicles, CC BY 4.0 (https://creativecommons.org/licenses/by/4.0/), from Sketchfab via the Objaverse dataset;
+optimised (textures resized to 1024 px, WebP, meshopt). Title, author, source:
+- police_charger: "Dodge Charger Police" by alexnazario63, https://sketchfab.com/3d-models/6e9adfb45e3248f6ba3a9ad735b2caab
+- police_crownvic: "2001 Crown Victoria Police Interceptor Game Prop" by haoliu95, https://sketchfab.com/3d-models/9f30d360cee343efb5a441978ddb57bd
+- taxi_old: "Old Taxicab - Low poly model" by DanielZhabotinsky, https://sketchfab.com/3d-models/9e8f92a215784f3d8aaaaeab1bef54c4
+- taxi_new: "2008 Baird Silver Coronet Taxicab" by aduong278, https://sketchfab.com/3d-models/d4c035d5857f4b49baf2ee27f7051a16
+- pickup_blue: "Generic Japan pickup - Low poly model" by DanielZhabotinsky, https://sketchfab.com/3d-models/ca1962844c344c048d5dd90d5750a610
+- pickup_black: "Generic 90s light pickup - Low poly model" by DanielZhabotinsky, https://sketchfab.com/3d-models/6c48c94be8974dc7a5932f697c0ba68f
+- jeep: "Jeep CJ6 Extended - Low poly model" by DanielZhabotinsky, https://sketchfab.com/3d-models/22732575b0644cc9b65cf21857288189
+- hummer: "HUMMER H2" by better_peter, https://sketchfab.com/3d-models/5cd3ea8eb94c4f5597cc086b2df40e58
+- pickup_toyota: "Toyota Pickup truck" by alban, https://sketchfab.com/3d-models/cad83751a295463bbb8b823c11a181ea
+- bus: "Generic Town Bus" by own.guest, https://sketchfab.com/3d-models/14fe03d792914d51b6c6250b393c44fd
+- box_truck: "Light Box Truck - Low poly model" by DanielZhabotinsky, https://sketchfab.com/3d-models/cbc508a5ad424d79b2f2c8a3de7e1cd3
+- ambulance: "Old Ambulance van - Low Poly model" by DanielZhabotinsky, https://sketchfab.com/3d-models/2856dd3c61f940909dced9a5c0379484
+- ferrari: "Ferrari 458 Italia" by vicent091036 (Sketchfab, CC BY 4.0), from the three.js examples (examples/models/gltf/ferrari.glb).
+Runner character: "Vanguard" (Soldier.glb) from the three.js examples, a Mixamo character and animations (Adobe Mixamo licence: royalty-free use in projects).
