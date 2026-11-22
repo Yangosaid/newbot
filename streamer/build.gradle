@@ -1,0 +1,46 @@
+plugins {
+    id 'com.android.application'
+}
+
+android {
+    namespace 'com.screenlive.app'
+    compileSdk 35
+
+    defaultConfig {
+        applicationId 'com.screenlive.app'
+        minSdk 24
+        targetSdk 34
+        versionCode((System.getenv('GITHUB_RUN_NUMBER') ?: '1') as int)
+        versionName "1.0.${System.getenv('GITHUB_RUN_NUMBER') ?: '0'}"
+    }
+
+    // Same CI signing key as the other apps (see app/build.gradle); local builds use the debug key.
+    def ciKey = file(System.getenv('BUS_KEYSTORE') ?: 'none')
+    if (ciKey.exists()) {
+        signingConfigs {
+            ci {
+                storeFile ciKey
+                storePassword System.getenv('BUS_KEYSTORE_PASS')
+                keyAlias 'bus'
+                keyPassword System.getenv('BUS_KEYSTORE_PASS')
+            }
+        }
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            signingConfig ciKey.exists() ? signingConfigs.ci : signingConfigs.debug
+        }
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+}
+
+dependencies {
+    // RootEncoder (Apache-2.0): screen capture + H.264/AAC encoding + RTMP/RTMPS client
+    implementation 'com.github.pedroSG94.RootEncoder:library:2.8.2'
+}
