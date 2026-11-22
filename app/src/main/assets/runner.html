@@ -294,10 +294,11 @@ var APP=!!window.BusApp;
 var SRC=APP&&BusApp.getSource?String(BusApp.getSource()):"tiktok",YT=SRC==="youtube";
 try{localStorage.setItem("game","runner")}catch(e){}
 
-var DEF={emojis:true,dance:true,drone:true,boss:true,zap:true,crowd:true,goal:1000,vib:true,replay:true,predict:true,lite:false,perf3:1,cycle:true,weather:true,chase:true,vote:true,powers:true,rain:100,hero:"soldier_real",idle:true,idleSec:20,autoTag:false,q:"alta",auto:true,sfx:true,music:true,musicVol:0.55,sfxVol:0.85,shake:true,photo:true,follow:true,share:false,repeat:true,toast:true,min:1,names:""};
+var DEF={noQ:1,emojis:true,dance:true,drone:true,boss:true,zap:true,crowd:true,goal:1000,vib:true,replay:true,predict:false,lite:false,perf3:1,cycle:true,weather:true,chase:true,vote:false,powers:true,rain:100,hero:"soldier_real",idle:true,idleSec:20,autoTag:false,q:"alta",auto:true,sfx:true,music:true,musicVol:0.55,sfxVol:0.85,shake:true,photo:true,follow:true,share:false,repeat:true,toast:true,min:1,names:""};
 var cfg=Object.assign({},DEF);
 try{var sv=JSON.parse(localStorage.getItem("runner1")||"null");if(sv)cfg=Object.assign(cfg,sv)}catch(e){}
 if(CRASHED&&!cfg.lite){cfg.lite=true;cfg.q="ahorro";G0LITE=true;save()}
+if(!cfg.noQ){cfg.predict=false;cfg.vote=false;cfg.noQ=1}   /* no on-screen questions to the chat unless turned on again */
 if(!cfg.perf3){if(cfg.q==="ultra")cfg.q="alta";cfg.auto=true;cfg.perf3=1}
 if(!cfg.snd2){cfg.sfx=true;cfg.music=true;cfg.snd2=1}   /* sound is on by default from this version */
 function save(){try{localStorage.setItem("runner1",JSON.stringify(cfg))}catch(e){}}
