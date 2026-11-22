@@ -101,6 +101,17 @@ h2{font-size:17px;margin:18px 2px 8px}
 .ex{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
 .ex button{background:var(--bg);border-radius:10px;padding:5px 10px;font-size:14px}
 .ex button b{font-family:system-ui,sans-serif;direction:ltr;unicode-bidi:isolate}
+.books{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.book-card{background:var(--card);border-radius:16px;padding:12px;box-shadow:var(--shadow);display:flex;flex-direction:column;align-items:center;gap:4px;text-align:center}
+.book-card .cover{font-size:52px;line-height:1.2;width:100%;background:linear-gradient(135deg,rgba(232,100,27,.14),rgba(33,70,139,.12));border-radius:12px;padding:10px 0}
+.book-card b{font-size:15px;text-align:center}
+.book-card span{font-size:12.5px;color:var(--mute)}
+.book-card.done{outline:2px solid rgba(46,157,91,.5)}
+.bookmode .sent{box-shadow:none;background:transparent;border-bottom:1px solid var(--line);border-radius:0;padding:10px 4px;display:grid;grid-template-columns:52px 1fr;column-gap:10px}
+.bookmode .sent .pic{font-size:34px;grid-row:1/5;margin:0;align-self:start}
+.bookmode .sent .who,.bookmode .sent .nl,.bookmode .sent .ar,.bookmode .sent .acts,.bookmode .sent .shadowres{grid-column:2}
+.bookmode .sent .nl{font-size:22px}
+.bookmode .sent.cur{background:rgba(232,100,27,.06)}
 .research p{margin:6px 0}
 .research .src{font-size:12px;color:var(--mute);direction:ltr;text-align:left}
 .toast{position:fixed;bottom:96px;left:50%;transform:translateX(-50%);background:#222;color:#fff;padding:9px 16px;border-radius:12px;font-size:14px;z-index:60;opacity:0;transition:opacity .2s;pointer-events:none;max-width:90%}
@@ -117,6 +128,7 @@ select,textarea{font:inherit;padding:8px;border-radius:10px;border:1px solid var
 <nav class="tabs" id="tabs">
   <button data-tab="home"><b>🏠</b>الرئيسية</button>
   <button data-tab="path"><b>🧭</b>المسار</button>
+  <button data-tab="books"><b>📚</b>حكايات</button>
   <button data-tab="review"><b>🔁</b>المراجعة<span class="badge hidden" id="dueBadge"></span></button>
   <button data-tab="stats"><b>📈</b>تقدّمي</button>
 </nav>
@@ -167,7 +179,7 @@ const lessons = [];
 })();
 function buildPath(){
   const P=[{type:"sounds",id:"sounds"}];
-  const st=D.stories.slice(); let li=0;
+  const st=D.stories.filter(s=>!s.sec); let li=0;
   const startStories=st.filter(s=>s.level==="Start");
   P.push({type:"lesson",id:lessons[li].id,L:lessons[li++]});P.push({type:"lesson",id:lessons[li].id,L:lessons[li++]});
   startStories.forEach(s=>{P.push({type:"story",id:s.id,s});if(li<lessons.length)P.push({type:"lesson",id:lessons[li].id,L:lessons[li++]})});
@@ -254,11 +266,11 @@ function updateBadge(){const n=dueCards().length,b=$("#dueBadge");b.textContent=
 let route={v:"home"};
 function go(v,arg){stopAudio();closeSheet();route={v,arg};view=v;render();scrollTo(0,0)}
 document.addEventListener("backbutton",()=>back());
-function back(){if($("#sheet").classList.contains("open")){closeSheet();return true}if(["reader","lesson","sounds","why","settings"].includes(route.v)){go(route.from||"path");return true}if(route.v!=="home"){go("home");return true}return false}
+function back(){if($("#sheet").classList.contains("open")){closeSheet();return true}if(route.v==="reader"&&R_&&R_.book){go("books");return true}if(["reader","lesson","sounds","why","settings"].includes(route.v)){go(route.from||"path");return true}if(route.v!=="home"){go("home");return true}return false}
 window.__back=back;
 
 function render(){
-  const v=route.v;view=v;setTab(["home","path","review","stats"].includes(v)?v:(v==="reader"||v==="lesson"||v==="sounds"?"path":""));
+  const v=route.v;view=v;setTab(["home","path","review","stats","books"].includes(v)?v:(v==="reader"&&storyById[route.arg]&&storyById[route.arg].sec?"books":v==="reader"||v==="lesson"||v==="sounds"?"path":""));
   $("#tabs").classList.toggle("hidden",v==="reader"||v==="lesson");
   updateBadge();
   const app=$("#app");
@@ -266,6 +278,7 @@ function render(){
   if(v==="home")app.innerHTML=homeHTML(),bindHome();
   else if(v==="path")app.innerHTML=pathHTML(),bindPath();
   else if(v==="review")renderReview();
+  else if(v==="books")app.innerHTML=booksHTML(),bindBooks();
   else if(v==="stats")app.innerHTML=statsHTML(),bindStats();
   else if(v==="reader")renderReader(route.arg);
   else if(v==="lesson")renderLesson(route.arg);
@@ -302,12 +315,13 @@ function homeHTML(){
 <div class="card row"><div class="ring" style="--p:${p}"><i>${min}/${S.set.goal}<br><small class="mute">دقيقة</small></i></div>
 <div><b>${p>=100?"أحسنت! حققت هدف اليوم 🎉":"هدف اليوم: مدخلات مفهومة"}</b><div class="small mute">الاستماع والقراءة يُحسبان تلقائيا</div><div class="small" style="margin-top:6px">🔥 ${streak()} يوم متتالي · ⏳ ${totalH.toFixed(1)} ساعة إجمالا</div></div></div>
 ${n?`<button class="item next" id="hNext"><div class="ic">${lab[0]}</div><div class="tt"><b>تابع: ${esc(lab[1])}</b><span>${esc(lab[2])}</span></div><span>◀</span></button>`:`<div class="card">أنهيت المسار كاملا! أعد الاستماع للقصص لتقوية الطلاقة.</div>`}
+<button class="item" id="hBooks"><div class="ic">📚</div><div class="tt"><b>حكايات للقراءة</b><span>الكتكوت تيتو، الحوت، الأرنب والسلحفاة...</span></div><span>◀</span></button>
 <button class="item" id="hRev"><div class="ic">🔁</div><div class="tt"><b>المراجعة</b><span>${due?due+" بطاقة تنتظرك":"لا توجد بطاقات مستحقة الآن"}</span></div><span>◀</span></button>
 <div class="card stats3"><div><b>${knownCount()}</b><span class="small mute">كلمة أعرفها</span></div><div><b>${learningCount()}</b><span class="small mute">أتعلمها</span></div><div><b>${Object.keys(S.done).length}</b><span class="small mute">قصة أنهيتها</span></div></div>
 <div class="card small mute">💡 ${tip()}</div>`}
 const TIPS=["لا تحاول فهم كل كلمة. إذا فهمت الفكرة العامة فأنت تتقدم.","أعد الاستماع لنفس القصة عدة مرات: التكرار يحوّل الكلمات إلى معرفة دائمة.","جرّب وضع «👂 استماع فقط» بعد قراءة القصة مرة: تدريب ممتاز للأذن.","الكلمات الملوّنة بالأزرق جديدة، والصفراء تتعلمها. هدفك أن تقلّ الألوان.","المراجعة القصيرة اليومية أفضل بكثير من مراجعة طويلة كل أسبوع.","التحدث يأتي بعد الاستماع. لا تقلق إن لم تتكلم بعد.","الكلمة تحتاج أن تراها وتسمعها حوالي 10 مرات في سياقات مختلفة لتثبت."];
 function tip(){return TIPS[new Date().getDate()%TIPS.length]}
-function bindHome(){bindTop();const n=$("#hNext");if(n)n.onclick=()=>openStep(nextStep());$("#hRev").onclick=()=>go("review")}
+function bindHome(){bindTop();const n=$("#hNext");if(n)n.onclick=()=>openStep(nextStep());$("#hRev").onclick=()=>go("review");$("#hBooks").onclick=()=>go("books")}
 function openStep(p){if(!p)return;if(p.type==="sounds")go("sounds");else if(p.type==="lesson")go("lesson",p.L);else go("reader",p.id)}
 
 /* ---------- path ---------- */
@@ -322,6 +336,14 @@ function pathHTML(){
   h+=`<p class="small mute center">النسبة = كم تفهم من كلمات القصة. الأبحاث تشير إلى أن 95–98% هي المنطقة المثالية للتعلم بمتعة.</p>`;
   return h}
 function bindPath(){bindTop();document.querySelectorAll("[data-i]").forEach(b=>b.onclick=()=>openStep(PATH[+b.dataset.i]))}
+
+/* ---------- reading section: tales ---------- */
+function booksHTML(){
+  const ks=D.stories.filter(s=>s.sec==="kids");
+  return topHTML("حكايات للقراءة")+`<p class="mute small">حكايات قصيرة بمستوى A0. اقرأ بنفسك، واضغط على أي كلمة لا تفهمها لتسمع نطقها وترى معناها. اضغط 🇸🇦 تحت الجملة لترى ترجمتها.</p><div class="books">`+
+  ks.map(s=>{const c=Math.round(coverage(s.id)*100),pic=(s.lines.find(l=>l.pic)||{pic:"📖"}).pic;
+    return `<button class="book-card ${S.done[s.id]?"done":""}" data-id="${s.id}"><div class="cover">${pic}</div><b class="nl">${esc(s.title)}</b><span>${esc(s.titleAr)}</span><div class="row" style="justify-content:space-between;width:100%"><span class="cov ${c>=95?"g":c>=85?"y":"r"}">${c}%</span><span class="small">${S.done[s.id]?"✅":s.lines.length+" جملة"}</span></div></button>`}).join("")+`</div>`}
+function bindBooks(){bindTop();document.querySelectorAll(".book-card").forEach(b=>b.onclick=()=>go("reader",b.dataset.id))}
 
 /* ---------- sounds ---------- */
 function soundsHTML(){return topHTML("أصوات الهولندية","path")+`<p class="mute small">اضغط على كل مثال واستمع، ثم ردّده بصوت عال. معظم الأصوات سهلة لمتحدث العربية، خصوصا «g» التي تنطق «خ».</p>`+
@@ -362,20 +384,21 @@ function renderLesson(L){
 let R_ = null;
 function renderReader(id){
   const s=storyById[id];if(!s){go("path");return}
-  R_={s,i:0,playing:false,listen:false};
-  const tr=S.set.tr;
+  R_={s,i:0,playing:false,listen:false,book:!!s.sec};
+  const TK=R_.book?"trBook":"tr";if(!S.set[TK])S.set[TK]=R_.book?"tap":"show";
+  const tr=S.set[TK];
   const unknown={};s.lines.forEach(l=>toks(l.nl).forEach(t=>{const f=norm(t.t);if(status(f)===0)unknown[keyOf(f)]=(unknown[keyOf(f)]||{n:0,f}),unknown[keyOf(f)].n++}));
   const pre=Object.values(unknown).sort((a,b)=>b.n-a.n).slice(0,6);
   let h=`<header class="top"><button class="ib" id="rx">→</button><h1><span class="nl" style="display:inline">${esc(s.title)}</span><div class="small mute" style="font-weight:400">${esc(s.titleAr)} · ${LV[s.level]||s.level}</div></h1></header>
   <div class="rbar"><button class="ib" id="rPlay">▶ استمع</button><button class="ib" id="rRate">${S.set.rate}×</button><button class="ib" id="rTr">${tr==="show"?"🇸🇦 ظاهرة":tr==="tap"?"🇸🇦 بالضغط":"🇸🇦 مخفية"}</button><button class="ib" id="rListen">👂 استماع فقط</button></div>`;
-  if(pre.length&&s.level!=="Start")h+=`<div class="card pre"><b>📌 قبل أن تبدأ: كلمات مهمة في هذه القصة</b><div class="small mute">معرفتها مسبقا تجعل القصة مفهومة أكثر.</div>${pre.map(p=>`<div class="pw"><button class="ib" data-say="${esc(p.f)}" style="width:34px;height:34px;font-size:16px">🔊</button><b class="nl" style="flex:none">${esc(p.f)}</b><span class="mute">${esc((D.dict[p.f]||["؟"])[0])}</span></div>`).join("")}</div>`;
-  h+=`<div id="sents">`+s.lines.map((l,i)=>sentHTML(l,i,tr,s)).join("")+`</div>
+  if(pre.length&&s.level!=="Start"&&!R_.book)h+=`<div class="card pre"><b>📌 قبل أن تبدأ: كلمات مهمة في هذه القصة</b><div class="small mute">معرفتها مسبقا تجعل القصة مفهومة أكثر.</div>${pre.map(p=>`<div class="pw"><button class="ib" data-say="${esc(p.f)}" style="width:34px;height:34px;font-size:16px">🔊</button><b class="nl" style="flex:none">${esc(p.f)}</b><span class="mute">${esc((D.dict[p.f]||["؟"])[0])}</span></div>`).join("")}</div>`;
+  h+=`<div id="sents" class="${R_.book?"bookmode":""}">`+s.lines.map((l,i)=>sentHTML(l,i,tr,s)).join("")+`</div>
   <div class="card center"><button class="btn wide" id="rDone">✅ أنهيت القصة</button><div class="small mute" style="margin-top:6px">${S.done[id]?"قرأتها "+S.done[id]+" مرة. التكرار يقوّي الفهم!":""}</div></div>`;
   $("#app").innerHTML=h;
-  $("#rx").onclick=()=>go("path");
+  $("#rx").onclick=()=>go(R_.book?"books":"path");
   $("#rPlay").onclick=()=>{if(R_.playing){stopAudio();R_.playing=false;updatePlayBtn()}else playFrom(R_.i||0)};
   $("#rRate").onclick=()=>{const r=[0.7,0.8,0.9,1,1.15];S.set.rate=r[(r.indexOf(S.set.rate)+1)%r.length]||0.9;save();$("#rRate").textContent=S.set.rate+"×";audio.playbackRate=S.set.rate};
-  $("#rTr").onclick=()=>{const o=["show","tap","hide"];S.set.tr=o[(o.indexOf(S.set.tr)+1)%3];save();const k=S.set.tr;$("#rTr").textContent=k==="show"?"🇸🇦 ظاهرة":k==="tap"?"🇸🇦 بالضغط":"🇸🇦 مخفية";document.querySelectorAll(".sent .ar").forEach(a=>{a.classList.toggle("blur",k==="tap");a.classList.toggle("hide",k==="hide")})};
+  $("#rTr").onclick=()=>{const o=["show","tap","hide"];S.set[TK]=o[(o.indexOf(S.set[TK])+1)%3];save();const k=S.set[TK];$("#rTr").textContent=k==="show"?"🇸🇦 ظاهرة":k==="tap"?"🇸🇦 بالضغط":"🇸🇦 مخفية";document.querySelectorAll(".sent .ar").forEach(a=>{a.classList.toggle("blur",k==="tap");a.classList.toggle("hide",k==="hide")})};
   $("#rListen").onclick=()=>{R_.listen=!R_.listen;$("#sents").classList.toggle("listen",R_.listen);$("#rListen").classList.toggle("on",R_.listen);if(R_.listen&&!R_.playing)playFrom(0)};
   document.querySelectorAll("[data-say]").forEach(b=>b.onclick=()=>sayWord(b.dataset.say));
   $("#sents").onclick=e=>{
@@ -384,6 +407,7 @@ function renderReader(id){
     const b=e.target.closest("[data-act]");if(!b)return;const i=+b.closest(".sent").dataset.i;
     if(b.dataset.act==="play"){stopAudio();R_.playing=false;playOne(i,false)}
     else if(b.dataset.act==="shadow")shadow(i);
+    else if(b.dataset.act==="tr"){const a=b.closest(".sent").querySelector(".ar");a.classList.remove("hide");a.classList.toggle("blur")}
     else if(b.dataset.act==="slow"){stopAudio();R_.playing=false;playOne(i,false,0.7)}
   };
   $("#rDone").onclick=()=>finishStory(s);
@@ -392,7 +416,7 @@ function sentHTML(l,i,tr,s){
   let html="",last=0;toks(l.nl).forEach((t,k)=>{const f=norm(t.t),st=status(f);html+=esc(l.nl.slice(last,t.i))+`<span class="w ${st===0?"u":st===1?"l":"k"}" data-k="${k}">${esc(t.t)}</span>`;last=t.i+t.t.length});html+=esc(l.nl.slice(last));
   const who=SPK[l.spk];
   return `<div class="sent" data-i="${i}">${who&&l.spk!=="N"?`<div class="who">🗨️ ${who}</div>`:""}${l.pic?`<div class="pic">${l.pic}</div>`:""}<div class="nl">${html}</div><div class="ar ${tr==="tap"?"blur":tr==="hide"?"hide":""}">${esc(l.ar)}</div>
-  <div class="acts"><button data-act="shadow" title="ردّد">🎙️</button><button data-act="slow" title="ببطء">🐢</button><button data-act="play" title="استمع">🔊</button></div><div class="shadowres hidden"></div></div>`}
+  <div class="acts">${tr!=="show"?`<button data-act="tr" title="الترجمة">🇸🇦</button>`:""}<button data-act="shadow" title="ردّد">🎙️</button><button data-act="slow" title="ببطء">🐢</button><button data-act="play" title="استمع">🔊</button></div><div class="shadowres hidden"></div></div>`}
 function refreshWordColors(){document.querySelectorAll("#sents .w").forEach(w=>{const st=status(norm(w.textContent));w.classList.toggle("u",st===0);w.classList.toggle("l",st===1);w.classList.toggle("k",st===2)})}
 function updatePlayBtn(){const b=$("#rPlay");if(b)b.textContent=R_&&R_.playing?"⏸ إيقاف":"▶ استمع"}
 function playOne(i,cont,rate){
@@ -413,10 +437,14 @@ function wordSheet(form,lineIdx){
   const l=R_.s.lines[lineIdx];const cid="c:"+keyOf(form);
   openSheet(`<div class="row"><div style="flex:1"><div class="big nl">${esc(form)}</div>${e[1]?`<div class="small mute nl">الأصل: ${esc(e[1])}</div>`:""}</div><button class="ib" id="wsSay">🔊</button></div>
   <div style="font-size:20px;margin:8px 0">${esc(e[0])}</div>
+  <div class="row" style="gap:6px;margin-bottom:6px"><button class="btn alt" id="wsSent" style="flex:1;padding:8px">🔊 الجملة</button><button class="btn alt" id="wsSentSlow" style="flex:1;padding:8px">🐢 ببطء</button><button class="btn alt" id="wsTr" style="flex:1;padding:8px">🇸🇦 ترجمة الجملة</button></div>
+  <div class="small mute hidden" id="wsTrTxt" style="margin-bottom:6px">${esc(l.ar)}</div>
   ${free?"":`<div class="seg" id="wsSeg"><button data-v="0" class="${st===0?"on":""}">🆕 جديدة</button><button data-v="1" class="${st===1?"on":""}">📒 أتعلمها</button><button data-v="2" class="${st===2?"on":""}">✅ أعرفها</button></div>
   <button class="btn wide ${S.cards[cid]?"alt":""}" id="wsAdd">${S.cards[cid]?"✓ موجودة في المراجعة":"➕ أضف للمراجعة مع هذه الجملة"}</button>`}`);
   $("#wsSay").onclick=()=>{if(!sayWord(form)){const k=toks(l.nl).findIndex(t=>norm(t.t)===form);const t=l.t[k];if(t)playClip(l.a,1,null,t[0],t[1]+80)}};
   $("#wsSay").onclick();
+  $("#wsSent").onclick=()=>{stopAudio();playClip(l.a,S.set.rate)};$("#wsSentSlow").onclick=()=>{stopAudio();playClip(l.a,0.7)};
+  $("#wsTr").onclick=()=>$("#wsTrTxt").classList.toggle("hidden");
   if(free)return;
   document.querySelectorAll("#wsSeg button").forEach(b=>b.onclick=()=>{setStatus(form,+b.dataset.v);document.querySelectorAll("#wsSeg button").forEach(x=>x.classList.toggle("on",x===b));refreshWordColors()});
   $("#wsAdd").onclick=()=>{if(addCard(cid,{type:"c",ref:R_.s.id+":"+lineIdx,form,key:keyOf(form)})){if(!S.known[keyOf(form)])setStatus(form,1);refreshWordColors();logT().words++;toast("أضيفت للمراجعة 🔁");closeSheet()}};
@@ -427,10 +455,10 @@ function finishStory(s){
   const unk=[...new Set(storyStats[s.id].forms.filter(f=>status(f)===0).map(keyOf))];
   openSheet(`<div class="center"><div style="font-size:48px">🎉</div><div class="big" style="font-size:22px">أحسنت!</div><div class="mute">${storyStats[s.id].words} كلمة من المدخلات المفهومة</div></div>
   ${unk.length?`<p class="small">بقيت <b>${unk.length}</b> كلمة زرقاء لم تضغط عليها. إذا كنت تفهمها، علّمها كمعروفة لتتحسن توصيات القصص.</p><button class="btn alt wide" id="fKnown">✅ أفهم الكلمات الزرقاء الباقية</button>`:""}
-  <div style="display:grid;gap:8px;margin-top:10px"><button class="btn blue wide" id="fQuiz">📝 اختبار سريع (3 أسئلة)</button><button class="btn alt wide" id="fAgain">🎧 استمع مرة ثانية بدون نص</button><button class="btn wide" id="fNext">تابع المسار ←</button></div>`);
+  <div style="display:grid;gap:8px;margin-top:10px"><button class="btn blue wide" id="fQuiz">📝 اختبار سريع (3 أسئلة)</button><button class="btn alt wide" id="fAgain">🎧 استمع مرة ثانية بدون نص</button><button class="btn wide" id="fNext">${s.sec?"📚 حكاية أخرى":"تابع المسار ←"}</button></div>`);
   const fk=$("#fKnown");if(fk)fk.onclick=()=>{unk.forEach(k=>S.known[k]=2);save();refreshWordColors();fk.disabled=true;fk.textContent="✓ تم"};
   $("#fAgain").onclick=()=>{closeSheet();R_.listen=true;$("#sents").classList.add("listen");$("#rListen").classList.add("on");scrollTo(0,0);playFrom(0)};
-  $("#fNext").onclick=()=>openStep(nextStep());
+  $("#fNext").onclick=()=>s.sec?go("books"):openStep(nextStep());
   $("#fQuiz").onclick=()=>quiz(s);
 }
 function quiz(s){

@@ -23,9 +23,10 @@ VOICE = {
     'N': 'nl-NL-FennaNeural', 'S': 'nl-NL-ColetteNeural', 'D': 'nl-NL-MaartenNeural',
     'E': 'nl-NL-FennaNeural', 'M': 'nl-NL-MaartenNeural', 'P': 'nl-NL-MaartenNeural',
     'L': 'nl-BE-DenaNeural', 'O': 'nl-NL-ColetteNeural', 'X': 'nl-NL-ColetteNeural',
+    'A': 'nl-NL-ColetteNeural', 'B': 'nl-NL-MaartenNeural', 'C': 'nl-NL-FennaNeural', 'G': 'nl-NL-MaartenNeural',
 }
-PITCH = {'X': '+8Hz', 'E': '+12Hz', 'M': '-8Hz', 'P': '-18Hz', 'O': '-14Hz'}
-RATE = {'O': '-8%'}
+PITCH = {'A': '+28Hz', 'B': '-30Hz', 'C': '+4Hz', 'G': '+6Hz', 'X': '+8Hz', 'E': '+12Hz', 'M': '-8Hz', 'P': '-18Hz', 'O': '-14Hz'}
+RATE = {'O': '-8%', 'B': '-6%'}
 WORD_VOICE = 'nl-NL-ColetteNeural'
 
 
@@ -83,7 +84,8 @@ async def synth(text, voice, path, rate='+0%', pitch='+0Hz', words=False):
             return marks
         except Exception as e:  # network hiccups: back off and retry
             if attempt == 4:
-                raise
+                print('  FAILED:', repr(text), voice, e)
+                return None
             await asyncio.sleep(2 + attempt * 3)
 
 
@@ -115,6 +117,10 @@ def align(text, marks):
 async def main():
     do_audio = '--no-audio' not in sys.argv
     stories = parse(os.path.join(C, 'stories.txt'))
+    kids = parse(os.path.join(C, 'kids.txt'))
+    for s in kids:
+        s['sec'] = 'kids'
+    stories += kids
     dic = read_dict()
     words = read_table('words.txt', ['nl', 'ar', 'pic', 'group'])
     sounds = read_table('sounds.txt', ['sym', 'how', 'ex'])
@@ -155,6 +161,8 @@ async def main():
                 return
             async with sem:
                 marks = await synth(text, v, path, rate, pitch)
+                if marks is None:
+                    return
                 if not key.startswith('w:'):
                     cache[key] = marks
                 done[0] += 1

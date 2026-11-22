@@ -1,0 +1,179 @@
+# Reading section: A0 tales (original stories + public-domain fables). Same format as stories.txt.
+# Extra speakers: A small animal (high voice), B big animal (deep voice), C woman, G man
+
+@ k01 | A0 | Tito het kuikentje | الكتكوت تيتو
+N: Op een boerderij woont een klein geel kuikentje. | في مزرعة يسكن كتكوت أصفر صغير. | 🐤
+N: Hij heet Tito. | اسمه تيتو. | 🐤
+N: Tito is klein, maar hij is heel nieuwsgierig. | تيتو صغير، لكنه فضولي جدا. | 🔍
+N: Op een dag ziet hij een eend in de vijver. | في يوم من الأيام يرى بطة في البركة. | 🦆
+A: Wat doe jij? | ماذا تفعلين؟ | 🐤
+C: Ik zwem! Het is heerlijk. | أنا أسبح! إنه رائع. | 🦆
+A: Ik wil ook zwemmen! | أريد أن أسبح أيضا! | 🐤
+N: Tito springt in het water. Plons! | تيتو يقفز في الماء. بلوف! | 💦
+N: Maar Tito kan niet zwemmen. Hij gaat onder! | لكن تيتو لا يستطيع السباحة. إنه يغرق! | 😱
+A: Help! Help! | النجدة! النجدة! | 🆘
+N: De eend zwemt snel naar Tito en tilt hem uit het water. | البطة تسبح بسرعة نحو تيتو وترفعه من الماء. | 🦆
+N: Tito is nat en koud. | تيتو مبلل وبردان. | 🥶
+N: Mama kip komt aanrennen. | ماما الدجاجة تأتي راكضة. | 🐔
+C: Tito! Kuikens zwemmen niet. Eenden zwemmen. | تيتو! الكتاكيت لا تسبح. البط يسبح. | 🐔
+A: Wat kunnen kuikens dan? | ماذا تستطيع الكتاكيت إذن؟ | 🐤
+C: Kuikens kunnen rennen, pikken en piepen. En lekker warm onder mama zitten. | الكتاكيت تستطيع الركض والنقر والزقزقة. والجلوس في الدفء تحت ماما. | 🐔
+N: Tito kruipt onder de vleugel van mama. | تيتو يزحف تحت جناح ماما. | 🪶
+A: Dat kan ik het allerbeste! | هذا أكثر ما أجيده! | 🥰
+
+@ k02 | A0 | De walvis en het visje | الحوت والسمكة الصغيرة
+N: Diep in de zee woont een grote blauwe walvis. | في عمق البحر يسكن حوت أزرق كبير. | 🐋
+N: Hij is zo groot als een huis. | هو كبير مثل بيت. | 🏠
+N: Alle vissen zijn bang voor hem. | كل الأسماك تخاف منه. | 🐟
+N: Ze zwemmen weg als hij komt. | تسبح بعيدا عندما يأتي. | 💨
+N: De walvis is daarom vaak alleen. | لذلك الحوت وحيد غالبا. | 😢
+N: Op een dag ziet hij een klein oranje visje. | في يوم من الأيام يرى سمكة برتقالية صغيرة. | 🐠
+N: Het visje huilt. | السمكة تبكي. | 😭
+B: Waarom huil je, klein visje? | لماذا تبكين أيتها السمكة الصغيرة؟ | 🐋
+A: Ik ben mijn familie kwijt. Ik kan ze niet vinden. | أضعت عائلتي. لا أستطيع أن أجدهم. | 🐠
+B: Kom maar op mijn rug. Ik help je zoeken. | تعالي على ظهري. سأساعدك في البحث. | 🐋
+N: Het visje zit op de rug van de walvis. | السمكة تجلس على ظهر الحوت. | 🐠
+N: Ze zwemmen langs rotsen, langs koraal en langs een oud schip. | يسبحان بجانب الصخور، وبجانب المرجان، وبجانب سفينة قديمة. | 🪸
+N: Dan ziet het visje heel veel oranje vissen. | ثم ترى السمكة الكثير من الأسماك البرتقالية. | 🐠🐠🐠
+A: Daar is mijn familie! | هناك عائلتي! | 🥳
+N: De oranje vissen zijn eerst bang. | الأسماك البرتقالية تخاف في البداية. | 😨
+A: Niet bang zijn! De walvis is mijn vriend. | لا تخافوا! الحوت صديقي. | 💙
+N: Vanaf die dag is de walvis nooit meer alleen. | منذ ذلك اليوم لم يعد الحوت وحيدا أبدا. | 🐋💙🐠
+
+@ k03 | A0 | De haas en de schildpad | الأرنب والسلحفاة
+N: Een haas is heel snel. | أرنب سريع جدا. | 🐇
+N: Hij lacht altijd om de schildpad. | يضحك دائما على السلحفاة. | 😆
+B: Wat ben jij langzaam! | كم أنت بطيئة! | 🐇
+A: Zullen we een wedstrijd doen? | هل نقوم بسباق؟ | 🐢
+B: Een wedstrijd? Met jou? Haha, goed! | سباق؟ معك؟ هاها، حسنا! | 🐇
+N: Alle dieren komen kijken. | كل الحيوانات تأتي لتتفرج. | 🦊🦉🐿️
+N: Klaar? Af! | جاهزون؟ انطلقوا! | 🏁
+N: De haas rent heel hard weg. | الأرنب يركض بسرعة كبيرة. | 💨
+N: De schildpad loopt langzaam, stap voor stap. | السلحفاة تمشي ببطء، خطوة بخطوة. | 🐢
+N: De haas kijkt achterom. De schildpad is ver weg. | الأرنب ينظر إلى الخلف. السلحفاة بعيدة جدا. | 👀
+B: Ik heb tijd. Ik ga even slapen. | عندي وقت. سأنام قليلا. | 😴
+N: De haas slaapt onder een boom. | الأرنب ينام تحت شجرة. | 🌳
+N: De schildpad loopt door. Stap voor stap. | السلحفاة تواصل المشي. خطوة بخطوة. | 🐢
+N: Ze loopt langs de slapende haas. | تمشي بجانب الأرنب النائم. | 🤫
+N: Dan wordt de haas wakker. Hij rent zo snel als hij kan. | ثم يستيقظ الأرنب. يركض بأسرع ما يستطيع. | 😳
+N: Maar het is te laat. De schildpad is als eerste bij de finish! | لكن الوقت متأخر. السلحفاة تصل أولا إلى خط النهاية! | 🏆
+A: Langzaam maar zeker, beste haas. | ببطء لكن بثبات يا عزيزي الأرنب. | 🐢
+
+@ k04 | A0 | De leeuw en de muis | الأسد والفأر
+N: Een grote leeuw slaapt in het bos. | أسد كبير ينام في الغابة. | 🦁
+N: Een kleine muis loopt over zijn neus. | فأر صغير يمشي فوق أنفه. | 🐭
+N: De leeuw wordt wakker en pakt de muis. | الأسد يستيقظ ويمسك الفأر. | 🐾
+B: Ik heb honger. Ik eet jou op! | أنا جائع. سآكلك! | 🦁
+A: Nee, alsjeblieft! Laat me gaan. Ooit help ik jou! | لا، أرجوك! دعني أذهب. يوما ما سأساعدك! | 🐭
+B: Haha! Jij? Zo klein? Mij helpen? | هاها! أنت؟ بهذا الصغر؟ تساعدني أنا؟ | 🦁
+N: De leeuw lacht, maar hij laat de muis gaan. | الأسد يضحك، لكنه يترك الفأر يذهب. | 😄
+N: Een week later loopt de leeuw in een net. | بعد أسبوع يقع الأسد في شبكة. | 🕸️
+N: Hij kan niet weg. Hij brult heel hard. | لا يستطيع الهروب. يزأر بصوت عال جدا. | 😫
+N: De kleine muis hoort hem. | الفأر الصغير يسمعه. | 🐭
+A: Ik kom eraan! | أنا قادم! | 🐭
+N: De muis bijt in het net. Hij bijt en bijt. | الفأر يقضم الشبكة. يقضم ويقضم. | 🦷
+N: Na een tijdje is er een groot gat. | بعد فترة يصبح هناك ثقب كبير. | 🕳️
+N: De leeuw is vrij! | الأسد حر! | 🦁
+B: Dank je wel, kleine vriend. Jij bent klein, maar je hebt een groot hart. | شكرا جزيلا يا صديقي الصغير. أنت صغير، لكن قلبك كبير. | ❤️
+
+@ k05 | A0 | De mier en de krekel | النملة والجندب
+N: Het is zomer. De zon schijnt. | إنه الصيف. الشمس مشرقة. | ☀️
+N: De krekel zit in het gras en speelt viool. | الجندب يجلس في العشب ويعزف على الكمان. | 🦗🎻
+N: De mier loopt voorbij met een zware graankorrel. | النملة تمر بحبة قمح ثقيلة. | 🐜
+B: Mier, kom toch spelen! | يا نملة، تعالي العبي! | 🦗
+A: Nee, ik werk. Ik verzamel eten voor de winter. | لا، أنا أعمل. أجمع الطعام للشتاء. | 🐜
+B: De winter? Die is nog ver weg! | الشتاء؟ ما زال بعيدا! | 🦗
+N: De hele zomer speelt de krekel. | طوال الصيف يلعب الجندب. | 🎶
+N: De hele zomer werkt de mier. | طوال الصيف تعمل النملة. | 🐜
+N: Dan komt de winter. Het is koud en er ligt sneeuw. | ثم يأتي الشتاء. الجو بارد والثلج يغطي الأرض. | ❄️
+N: De krekel heeft geen eten en geen huis. | الجندب ليس عنده طعام ولا بيت. | 🥶
+N: Hij klopt op de deur van de mier. | يطرق باب النملة. | 🚪
+B: Mier, ik heb zo'n honger en ik heb het koud. | يا نملة، أنا جائع جدا وأشعر بالبرد. | 🦗
+N: De mier denkt even na. | النملة تفكر قليلا. | 🤔
+A: Kom maar binnen. Maar volgend jaar werk je mee! | تفضل بالدخول. لكن في السنة القادمة ستعمل معي! | 🐜
+B: Beloofd! En ik speel elke avond viool voor jou. | أعدك! وسأعزف لك على الكمان كل مساء. | 🎻
+N: Zo hebben ze samen een warme en gezellige winter. | هكذا يقضيان معا شتاء دافئا ولطيفا. | 🏠✨
+
+@ k06 | A0 | De kraai en de vos | الغراب والثعلب
+N: Een kraai zit hoog in een boom. | غراب يجلس عاليا في شجرة. | 🐦‍⬛
+N: In haar snavel heeft ze een groot stuk kaas. | في منقارها قطعة جبن كبيرة. | 🧀
+N: Een vos komt voorbij. Hij ruikt de kaas. | ثعلب يمر. يشم رائحة الجبن. | 🦊
+N: De vos wil die kaas hebben. | الثعلب يريد ذلك الجبن. | 🤤
+G: Goedemorgen, mooie kraai! | صباح الخير أيتها الغرابة الجميلة! | 🦊
+G: Wat heb jij mooie zwarte veren! | كم ريشك الأسود جميل! | 🪶
+G: Ik denk dat jij ook heel mooi kunt zingen. | أظن أنك تستطيعين الغناء بشكل جميل جدا أيضا. | 🎵
+G: Zing eens een liedje voor mij! | غنّي لي أغنية صغيرة! | 🦊
+N: De kraai is heel trots. Ze opent haar snavel. | الغرابة فخورة جدا. تفتح منقارها. | 😊
+C: Kraa! Kraa! | قاق! قاق! | 🐦‍⬛
+N: De kaas valt naar beneden. | الجبن يسقط إلى الأسفل. | ⬇️🧀
+N: De vos pakt de kaas en rent weg. | الثعلب يأخذ الجبن ويهرب. | 🦊💨
+G: Dank je wel! En onthoud: geloof niet iedereen die mooie woorden zegt! | شكرا جزيلا! وتذكري: لا تصدقي كل من يقول كلاما جميلا! | 😏
+N: De kraai is boos, maar ze heeft een les geleerd. | الغرابة غاضبة، لكنها تعلمت درسا. | 😠
+
+@ k07 | A0 | Het kleine wolkje | الغيمة الصغيرة
+N: Hoog in de lucht woont een klein wit wolkje. | عاليا في السماء تسكن غيمة بيضاء صغيرة. | ☁️
+N: De andere wolken zijn groot en grijs. | الغيوم الأخرى كبيرة ورمادية. | 🌥️
+N: Ze geven regen aan de bloemen en de bomen. | تعطي المطر للزهور والأشجار. | 🌧️
+A: Ik ben te klein. Ik kan niets doen. | أنا صغيرة جدا. لا أستطيع أن أفعل شيئا. | ☁️
+N: Het wolkje is verdrietig. | الغيمة حزينة. | 😢
+N: De wind blaast het wolkje ver weg, naar een droog land. | الريح تدفع الغيمة بعيدا، إلى أرض جافة. | 🌬️
+N: Daar zijn geen andere wolken. | هناك لا توجد غيوم أخرى. | 🏜️
+N: Een kleine bloem staat alleen in het zand. | زهرة صغيرة واقفة وحدها في الرمل. | 🌼
+N: Ze is moe en ze heeft dorst. | إنها متعبة وعطشانة. | 🥀
+A: Arme bloem! Ik ben klein, maar misschien is het genoeg. | يا لها من زهرة مسكينة! أنا صغيرة، لكن ربما هذا يكفي. | ☁️
+N: Het wolkje geeft al zijn water. Drup, drup, drup. | الغيمة تعطي كل مائها. قطرة، قطرة، قطرة. | 💧
+N: De bloem drinkt en gaat weer recht staan. | الزهرة تشرب وتقف مستقيمة من جديد. | 🌼
+C: Dank je wel, lief wolkje! Je hebt mijn leven gered. | شكرا جزيلا أيتها الغيمة اللطيفة! لقد أنقذت حياتي. | 🌸
+N: Het wolkje is nu heel klein, maar heel blij. | الغيمة الآن صغيرة جدا، لكنها سعيدة جدا. | 😊
+N: Ook iets kleins kan een groot verschil maken. | حتى الشيء الصغير يمكن أن يُحدث فرقا كبيرا. | ✨
+
+@ k08 | A0 | De slimme kraai | الغراب الذكي
+N: Het is zomer en het is heel warm. | إنه الصيف والجو حار جدا. | 🌞
+N: Een kraai heeft veel dorst. | غراب عطشان جدا. | 🐦‍⬛
+N: Ze vliegt en vliegt, maar ze vindt geen water. | يطير ويطير، لكنه لا يجد ماء. | 🪽
+N: Dan ziet ze een kan in een tuin. | ثم يرى إبريقا في حديقة. | 🏺
+N: In de kan zit een beetje water, helemaal onderin. | في الإبريق قليل من الماء، في الأسفل تماما. | 💧
+N: De kraai steekt haar snavel in de kan. | الغراب يدخل منقاره في الإبريق. | 🐦‍⬛
+N: Maar haar snavel is te kort. Ze kan niet bij het water. | لكن منقاره قصير جدا. لا يستطيع الوصول إلى الماء. | 😞
+N: De kraai denkt na. | الغراب يفكر. | 🤔
+N: Dan ziet ze kleine steentjes op de grond. | ثم يرى حصى صغيرة على الأرض. | 🪨
+N: Ze pakt een steentje en laat het in de kan vallen. Plop! | يأخذ حصاة ويسقطها في الإبريق. بلوب! | 🪨
+N: Nog een steentje. Plop! En nog een. Plop! | حصاة أخرى. بلوب! وأخرى. بلوب! | 🪨🪨
+N: Het water komt steeds hoger. | الماء يرتفع أكثر فأكثر. | ⬆️💧
+N: Eindelijk kan de kraai drinken. | أخيرا يستطيع الغراب أن يشرب. | 😌
+C: Wie slim nadenkt, vindt altijd een oplossing. | من يفكر بذكاء يجد دائما حلا. | 💡
+
+@ k09 | A0 | Waar is de maan? | أين القمر؟
+N: Het is avond. Lina ligt in bed. | إنه المساء. لينا مستلقية في السرير. | 🛏️
+N: Elke avond kijkt ze door het raam naar de maan. | كل مساء تنظر من النافذة إلى القمر. | 🪟
+N: Maar vanavond is de maan weg! | لكن الليلة القمر غير موجود! | ❓🌙
+A: Papa! De maan is weg! | بابا! القمر اختفى! | 😟
+G: Weg? Nee hoor. Hij verstopt zich achter de wolken. | اختفى؟ لا. إنه يختبئ خلف الغيوم. | ☁️
+A: Waarom verstopt hij zich? | لماذا يختبئ؟ | 🤔
+G: Misschien is hij moe. Ook de maan moet soms rusten. | ربما هو متعب. حتى القمر يجب أن يرتاح أحيانا. | 😴
+A: Komt hij morgen terug? | هل سيعود غدا؟ | 🌙
+G: Ja, dat beloof ik. Ga nu maar slapen. | نعم، أعدك بذلك. نامي الآن. | 💤
+N: Lina doet haar ogen dicht. | لينا تغمض عينيها. | 😌
+N: De volgende avond kijkt ze weer door het raam. | في المساء التالي تنظر من النافذة مرة أخرى. | 🪟
+N: Daar is de maan, groot en rond en geel! | ها هو القمر، كبير ومستدير وأصفر! | 🌕
+A: Welkom terug, maan! Heb je goed geslapen? | أهلا بعودتك يا قمر! هل نمت جيدا؟ | 🥰
+N: De maan zegt niets, maar Lina weet zeker dat hij lacht. | القمر لا يقول شيئا، لكن لينا متأكدة أنه يبتسم. | 🌝
+
+@ k10 | A0 | Het olifantje dat niet kon slapen | الفيل الصغير الذي لم يستطع النوم
+N: In de jungle woont een klein olifantje. | في الغابة الاستوائية يسكن فيل صغير. | 🐘
+N: Het is nacht, maar het olifantje kan niet slapen. | إنه الليل، لكن الفيل الصغير لا يستطيع النوم. | 🌙
+A: Ik kan niet slapen. Wat moet ik doen? | لا أستطيع النوم. ماذا أفعل؟ | 🐘
+N: Hij gaat naar de aap. | يذهب إلى القرد. | 🐒
+G: Ik slaap in een boom. Probeer het maar! | أنا أنام في شجرة. جرّب ذلك! | 🐒
+N: Het olifantje klimt in de boom. Krak! De tak breekt. | الفيل الصغير يتسلق الشجرة. طق! الغصن ينكسر. | 💥
+N: Hij gaat naar de vleermuis. | يذهب إلى الخفاش. | 🦇
+C: Ik slaap ondersteboven. Probeer het maar! | أنا أنام مقلوبا. جرّب ذلك! | 🦇
+N: Het olifantje staat op zijn hoofd. Bonk! Hij valt om. | الفيل الصغير يقف على رأسه. بوم! يسقط. | 🙃
+N: Hij gaat naar de flamingo. | يذهب إلى طائر الفلامنغو. | 🦩
+C: Ik slaap op één been. Probeer het maar! | أنا أنام على رجل واحدة. جرّب ذلك! | 🦩
+N: Het olifantje staat op één been. Hij wiebelt en wiebelt. Plof! | الفيل الصغير يقف على رجل واحدة. يتمايل ويتمايل. بوف! | 😵
+N: Moe en verdrietig loopt hij naar huis. | متعبا وحزينا يمشي إلى البيت. | 😔
+N: Mama olifant gaat liggen en het olifantje kruipt tegen haar aan. | ماما الفيلة تستلقي والفيل الصغير يلتصق بها. | 🐘🐘
+C: Slaap lekker, mijn kleintje. | نم جيدا يا صغيري. | 💤
+N: Hij voelt haar warme buik. Hij hoort haar rustige adem. | يشعر ببطنها الدافئة. يسمع تنفسها الهادئ. | 💗
+N: En binnen een minuut slaapt het olifantje. | وخلال دقيقة ينام الفيل الصغير. | 😴

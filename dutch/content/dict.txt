@@ -926,3 +926,157 @@ zoals = مثل
 zoveel = بهذا القدر
 zuid = جنوب
 zwemt = تسبح = zwemmen
+aanrennen = تأتي راكضة (komt aanrennen)
+aap = قرد
+achter = خلف
+achterom = إلى الخلف
+allerbeste = الأفضل على الإطلاق
+arme = مسكين = arm
+bang = خائف
+been = رِجل / ساق
+beloof = أعد (وعدا) = beloven
+beloofd = وعدتُ = beloven
+beneden = إلى الأسفل / تحت
+beste = أفضل / عزيزي
+bijt = يعض / يقضم = bijten
+blaast = تنفخ / تدفع (الريح) = blazen
+blauwe = زرقاء = blauw
+bloem = زهرة
+bloemen = زهور = bloem
+boerderij = مزرعة
+bomen = أشجار = boom
+bonk = بوم! (صوت سقوط)
+boom = شجرة
+boos = غاضب
+bos = غابة
+breekt = ينكسر = breken
+brult = يزأر = brullen
+buik = بطن
+dicht = مغلق (ogen dicht = يغمض العينين)
+dieren = حيوانات = dier
+droog = جاف
+drup = قطرة (صوت)
+eend = بطة
+eenden = بط = eend
+eraan = (ik kom eraan = أنا قادم)
+finish = خط النهاية
+flamingo = فلامنغو
+gat = ثقب
+geleerd = تعلّمت = leren
+geloof = صدّق = geloven
+gered = أنقذتِ = redden
+geven = تعطي
+gezellige = لطيف ودافئ = gezellig
+graankorrel = حبة قمح
+grijs = رمادي
+grond = أرض
+haas = أرنب بري
+hart = قلب
+help = النجدة / أساعد = helpen
+hoger = أعلى = hoog
+hoog = عاليا
+huil = تبكي = huilen
+huilt = تبكي = huilen
+jungle = غابة استوائية
+kijken = ينظر / يتفرج
+kip = دجاجة
+kleins = (شيء) صغير
+kleintje = صغيري
+klimt = يتسلق = klimmen
+koraal = مرجان
+kraa = قاق (صوت الغراب)
+kraai = غراب
+krak = طق! (صوت انكسار)
+krekel = جندب / صرصور الليل
+kruipt = يزحف / يلتصق = kruipen
+kuikens = كتاكيت = kuiken
+kuikentje = كتكوت صغير
+kunnen = يستطيع
+kwijt = ضائع (kwijt zijn = أضاع)
+langs = بجانب / مرورا بـ
+leeuw = أسد
+liedje = أغنية صغيرة
+liggen = يستلقي
+lina = لينا (اسم)
+maan = قمر
+mier = نملة
+minuut = دقيقة
+misschien = ربما
+muis = فأر
+nadenkt = يفكر (nadenken)
+nat = مبلل
+neus = أنف
+nieuwsgierig = فضولي
+olifant = فيل
+olifantje = فيل صغير
+onderin = في الأسفل (من الداخل)
+ondersteboven = مقلوبا
+onthoud = تذكّر = onthouden
+ooit = يوما ما
+opent = تفتح = openen
+oplossing = حل
+piepen = يزقزق
+pikken = ينقر
+plof = بوف! (صوت سقوط)
+plons = بلوف! (صوت الماء)
+plop = بلوب!
+probeer = جرّب = proberen
+recht = مستقيم
+rennen = يركض
+rond = مستدير
+rotsen = صخور = rots
+rug = ظهر
+ruikt = يشم = ruiken
+rusten = يرتاح
+rustige = هادئ = rustig
+schildpad = سلحفاة
+schip = سفينة
+slaap = أنام / نم = slapen
+slapende = النائم = slapen
+snavel = منقار
+sneeuw = ثلج
+speel = أعزف / ألعب = spelen
+steekt = يُدخل = steken
+steentje = حصاة
+steentjes = حصى = steentje
+stuk = قطعة
+tak = غصن
+tijd = وقت
+tijdje = فترة قصيرة
+tilt = ترفع = tillen
+tito = تيتو (اسم الكتكوت)
+toch = (للحث) هيا / مع ذلك
+vallen = يسقط
+valt = يسقط = vallen
+ver = بعيد
+verdrietig = حزين
+veren = ريش = veer
+verschil = فرق
+verstopt = يختبئ (zich verstoppen)
+verzamel = أجمع = verzamelen
+vijver = بركة
+vinden = يجد
+viool = كمان
+visje = سمكة صغيرة
+vissen = أسماك = vis
+vleermuis = خفاش
+vleugel = جناح
+vliegt = يطير = vliegen
+voorbij = مارا / بجانب
+vos = ثعلب
+vrij = حر
+walvis = حوت
+warme = دافئ = warm
+wedstrijd = سباق / مباراة
+wiebelt = يتمايل = wiebelen
+winter = شتاء
+wolken = غيوم = wolk
+wolkje = غيمة صغيرة
+zand = رمل
+zegt = يقول = zeggen
+zeker = بالتأكيد / بثبات
+zing = غنِّ = zingen
+zo'n = مثل هذا / جدا
+zomer = صيف
+zwem = أسبح = zwemmen
+zwemmen = يسبح
