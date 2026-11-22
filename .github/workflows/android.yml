@@ -44,6 +44,7 @@ jobs:
           cp downloader/build/outputs/apk/release/downloader-arm64-v8a-release.apk vidsaver-arm64.apk
           cp downloader/build/outputs/apk/release/downloader-armeabi-v7a-release.apk vidsaver-armv7.apk
           cp streamer/build/outputs/apk/release/streamer-release.apk screen-live.apk
+          cp app/build/outputs/apk/facebook/release/app-facebook-release.apk fiesta-facebook.apk
           ls -la *.apk
       - uses: actions/upload-artifact@v4
         with:
@@ -74,6 +75,8 @@ jobs:
             "Built from ${GITHUB_REF_NAME} @ ${GITHUB_SHA::7}. Download bus-battle.apk on the phone and install it." bus-battle.apk
           publish vidsaver "VidSaver APK (build ${GITHUB_RUN_NUMBER})" \
             "TikTok / YouTube / Shorts downloader. Most phones: vidsaver-arm64.apk. Older 32-bit phones: vidsaver-armv7.apk." vidsaver-arm64.apk vidsaver-armv7.apk
+          publish facebook "Fiesta Facebook (build ${GITHUB_RUN_NUMBER})" \
+            "Dance hall and all the games for Facebook Live (Page lives): comments make people dance, reactions fill the room. Download fiesta-facebook.apk." fiesta-facebook.apk
           publish streamer "Directo de pantalla / بث الشاشة (build ${GITHUB_RUN_NUMBER})" \
             "Stream the phone screen live to YouTube, Facebook, Twitch, Kick or any RTMP server. Download screen-live.apk." screen-live.apk
           publish vox-psoe "VOX vs PSOE - YouTube (build ${GITHUB_RUN_NUMBER})" \

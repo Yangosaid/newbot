@@ -36,6 +36,7 @@ public class MainActivity extends Activity {
     private SharedPreferences prefs;
     private LiveSource live;
     static final boolean YOUTUBE = "youtube".equals(BuildConfig.FLAVOR);
+    static final boolean FACEBOOK = "facebook".equals(BuildConfig.FLAVOR);
     private final Handler ui = new Handler(Looper.getMainLooper());
     private volatile boolean pageReady;
     private String lastStatus = "{\"type\":\"status\",\"ok\":false,\"text\":\"Escribe tu usuario de TikTok en Conexión\"}";
@@ -141,7 +142,7 @@ public class MainActivity extends Activity {
         });
         web.loadUrl("file:///android_asset/index.html");
 
-        if (!prefs.getString("user", "").isEmpty()) startLive();
+        if (!prefs.getString("user", "").isEmpty() || (FACEBOOK && !prefs.getString("key", "").isEmpty())) startLive();
         ui.postDelayed(flusher, 60);
     }
 
@@ -150,7 +151,7 @@ public class MainActivity extends Activity {
     private synchronized void startLive() {
         if (live != null) live.stop();
         String user = prefs.getString("user", ""), key = prefs.getString("key", "");
-        if (user.trim().isEmpty()) { live = null; return; }
+        if (user.trim().isEmpty() && !(FACEBOOK && !key.trim().isEmpty())) { live = null; return; }
         TikTokLive.Listener l = new TikTokLive.Listener() {
             @Override public void onEvent(String json) {
                 if (json.contains("\"type\":\"status\"")) lastStatus = json;
@@ -162,7 +163,10 @@ public class MainActivity extends Activity {
             }
             @Override public void onLog(String line) { log(line); }
         };
-        if (YOUTUBE) {
+        if (FACEBOOK) {
+            log("Facebook: " + (user.trim().isEmpty() ? "la Página del token" : user.trim()));
+            live = new FacebookLive(user, key, l);
+        } else if (YOUTUBE) {
             log("Directo de YouTube: " + user.trim());
             live = new YouTubeChat(user, l);
         } else {
@@ -306,7 +310,7 @@ public class MainActivity extends Activity {
             return FloatOverlay.allowed(MainActivity.this) ? "off" : "noperm";
         }
 
-        @JavascriptInterface public String getSource() { return YOUTUBE ? "youtube" : "tiktok"; }
+        @JavascriptInterface public String getSource() { return FACEBOOK ? "facebook" : YOUTUBE ? "youtube" : "tiktok"; }
 
         /** Default teams and rules for this edition (assets/preset.json), or "". */
         @JavascriptInterface public String getPreset() {
@@ -351,7 +355,7 @@ public class MainActivity extends Activity {
         }
 
         @JavascriptInterface public void connect(String user, String key) {
-            prefs.edit().putString("user", YOUTUBE ? user.trim() : TikTokLive.normalize(user)).putString("key", key == null ? "" : key.trim()).apply();
+            prefs.edit().putString("user", (YOUTUBE || FACEBOOK) ? user.trim() : TikTokLive.normalize(user)).putString("key", key == null ? "" : key.trim()).apply();
             synchronized (logLines) { logLines.clear(); }
             startLive();
         }

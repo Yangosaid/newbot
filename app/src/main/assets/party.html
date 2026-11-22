@@ -39,6 +39,8 @@ body{background:var(--night);color:var(--ink);font-family:var(--body);overflow:h
 #hbTime{position:absolute;left:0;right:0;bottom:9%;text-align:center;font:800 .14em/1 var(--display);color:#fff;text-shadow:0 1px 4px #000}
 #hbHeart{position:absolute;right:12%;top:9%;font-size:.17em;animation:bob 1s ease-in-out infinite}
 #nogl{position:absolute;inset:0;display:grid;place-items:center;text-align:center;padding:24px;font:700 20px/1.3 var(--display)}
+.fbr{position:absolute;bottom:80px;pointer-events:none;z-index:4;animation:fbrUp 3s ease-out forwards;filter:drop-shadow(0 2px 4px rgba(0,0,0,.5))}
+@keyframes fbrUp{0%{transform:translateY(0) scale(.5);opacity:0}15%{opacity:1;transform:translateY(-30px) scale(1.15)}100%{transform:translateY(-60vh) scale(1);opacity:0}}
 #gear{position:absolute;right:10px;bottom:10px;width:40px;height:40px;border-radius:50%;border:1px solid rgba(255,255,255,.12);background:rgba(10,6,24,.45);
   color:var(--ink);font-size:19px;line-height:1;cursor:pointer;opacity:.3}
 #gear i{position:absolute;top:3px;right:3px;width:8px;height:8px;border-radius:50%;background:var(--bad)}
@@ -342,7 +344,7 @@ input[type=checkbox]{width:20px;height:20px;accent-color:var(--hot)}
 "use strict";
 var $=function(id){return document.getElementById(id)};
 var APP=!!window.BusApp;
-var SRC=APP&&BusApp.getSource?String(BusApp.getSource()):"tiktok",YT=SRC==="youtube";
+var SRC=APP&&BusApp.getSource?String(BusApp.getSource()):"tiktok",FB=SRC==="facebook",YT=SRC==="youtube"||FB;   /* Facebook behaves like YouTube (comments), plus anonymous reactions */
 try{localStorage.setItem("game","party")}catch(e){}
 
 /* ---------- settings ---------- */
@@ -891,7 +893,13 @@ function monitor(e){var ic,txt;
 function paintMon(){$("mG").textContent=mon.g;$("mL").textContent=mon.l;$("mC").textContent=mon.c;$("monL").innerHTML=monLines.join("")||'<div>—</div>'}
 
 /* ---------- events from the live ---------- */
-function onEvent(e){if(!e||!e.type)return;monitor(e);
+var FBR={like:"👍",love:"❤️",haha:"😂",wow:"😮",sad:"😢",angry:"😡",care:"🥰"},fbrN=0,fbrT=0;
+function fbReact(by,total){var now=performance.now();if(now-fbrT>1000){fbrT=now;fbrN=0}var keys=Object.keys(by);if(!keys.length)keys=["like"];
+  var n=Math.min(10,total);for(var i=0;i<n&&fbrN<18;i++,fbrN++){var k=keys[i%keys.length],el=document.createElement("div");el.className="fbr";el.textContent=FBR[k]||"👍";
+    el.style.left=(70+Math.random()*26)+"%";el.style.fontSize=(26+Math.random()*18)+"px";el.style.animationDuration=(2.4+Math.random()*1.6)+"s";el.style.animationDelay=(i*0.08)+"s";document.getElementById("stage").appendChild(el);setTimeout(function(x){return function(){x.remove()}}(el),5000)}}
+function onEvent(e){if(!e||!e.type)return;
+  if(e.type==="reactions"){var rc=Math.max(1,e.count|0);addEnergy(rc*(+cfg.tapE||1));fbReact(e.by||{},rc);return}   /* Facebook reactions: anonymous totals */
+  monitor(e);
   if(e.type==="status"){setStatus(e.ok,e.text);return}
   if(e.type==="join"){if(!cfg.joinChar||!ok3d)return;var uj=userOf(e),nj=perf();
     /* one dancer per visitor, once per live, at most ~2 a second so a busy live never floods the floor; no camera (that stays for gifts and taps) */
@@ -1549,8 +1557,10 @@ var tn=0;Array.prototype.forEach.call(document.querySelectorAll("[data-test]"),f
 function setStatus(ok,text){var el=$("st");el.className=ok?"ok":"bad";el.textContent=text||(ok?"Conectado":"Sin conexión");$("dot").className=ok?"ok":""}
 function appLog(l){var el=$("apLog");var at=el.scrollTop+el.clientHeight>=el.scrollHeight-4;el.textContent+=(el.textContent?"\n":"")+l;
   var x=el.textContent.split("\n");if(x.length>200)el.textContent=x.slice(-200).join("\n");if(at)el.scrollTop=el.scrollHeight}
-if(YT){$("gLikes").hidden=true;$("gTapQuick").hidden=true;$("mLW").hidden=true;$("apUserL").textContent="Tu canal o directo de YouTube";$("apUser").placeholder="@tucanal o enlace del directo";$("apKeyRow").hidden=true}
-$("lnNote").textContent=!APP?"Vista previa: abre esta página desde la app para recibir regalos reales.":YT?
+if(YT&&!FB){$("gLikes").hidden=true;$("gTapQuick").hidden=true;$("mLW").hidden=true;$("apUserL").textContent="Tu canal o directo de YouTube";$("apUser").placeholder="@tucanal o enlace del directo";$("apKeyRow").hidden=true}
+if(FB){$("gTapQuick").hidden=true;$("apUserL").textContent="Tu Página (vacío = la del token) o enlace del directo";$("apUser").placeholder="opcional";var kl=document.querySelector('label[for="apKey"]');if(kl)kl.textContent="Token de la Página";$("apKey").placeholder="EAAG…"}
+$("lnNote").textContent=!APP?"Vista previa: abre esta página desde la app para recibir regalos reales.":FB?
+  "Facebook: pega el token de acceso de tu Página (permisos pages_read_engagement y pages_read_user_content). Cada persona que comenta entra a bailar con su nombre y su foto; las reacciones llenan la sala de emojis y dan energía. Solo funcionan los directos de una Página, no los de un perfil personal.":YT?
   "Escribe tu canal de YouTube (@usuario) o pega el enlace del directo. La app lee el chat sola y vuelve a intentarlo si se corta.":
   "Escribe tu usuario de TikTok. La app se conecta sola cuando empieza tu directo.";
 if(APP){try{$("apUser").value=BusApp.getUser();$("apKey").value=BusApp.getKey()}catch(e){}
