@@ -37,6 +37,7 @@ public class MainActivity extends Activity {
     private LiveSource live;
     static final boolean YOUTUBE = "youtube".equals(BuildConfig.FLAVOR);
     static final boolean FACEBOOK = "facebook".equals(BuildConfig.FLAVOR);
+    static final boolean TWITCH = "twitch".equals(BuildConfig.FLAVOR);
     private final Handler ui = new Handler(Looper.getMainLooper());
     private volatile boolean pageReady;
     private String lastStatus = "{\"type\":\"status\",\"ok\":false,\"text\":\"Escribe tu usuario de TikTok en Conexión\"}";
@@ -163,7 +164,10 @@ public class MainActivity extends Activity {
             }
             @Override public void onLog(String line) { log(line); }
         };
-        if (FACEBOOK) {
+        if (TWITCH) {
+            log("Canal de Twitch: " + TwitchChat.normalize(user));
+            live = new TwitchChat(user, l);
+        } else if (FACEBOOK) {
             log("Facebook: " + (user.trim().isEmpty() ? "la Página del token" : user.trim()));
             live = new FacebookLive(user, key, l);
         } else if (YOUTUBE) {
@@ -310,7 +314,7 @@ public class MainActivity extends Activity {
             return FloatOverlay.allowed(MainActivity.this) ? "off" : "noperm";
         }
 
-        @JavascriptInterface public String getSource() { return FACEBOOK ? "facebook" : YOUTUBE ? "youtube" : "tiktok"; }
+        @JavascriptInterface public String getSource() { return TWITCH ? "twitch" : FACEBOOK ? "facebook" : YOUTUBE ? "youtube" : "tiktok"; }
 
         /** Default teams and rules for this edition (assets/preset.json), or "". */
         @JavascriptInterface public String getPreset() {
@@ -355,7 +359,7 @@ public class MainActivity extends Activity {
         }
 
         @JavascriptInterface public void connect(String user, String key) {
-            prefs.edit().putString("user", (YOUTUBE || FACEBOOK) ? user.trim() : TikTokLive.normalize(user)).putString("key", key == null ? "" : key.trim()).apply();
+            prefs.edit().putString("user", TWITCH ? TwitchChat.normalize(user) : (YOUTUBE || FACEBOOK) ? user.trim() : TikTokLive.normalize(user)).putString("key", key == null ? "" : key.trim()).apply();
             synchronized (logLines) { logLines.clear(); }
             startLive();
         }

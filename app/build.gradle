@@ -32,6 +32,11 @@ android {
             applicationIdSuffix '.fb'
             resValue 'string', 'app_name', 'Fiesta Facebook'
         }
+        twitch {
+            dimension 'platform'
+            applicationIdSuffix '.tw'
+            resValue 'string', 'app_name', 'Fiesta Twitch'
+        }
     }
 
     // CI creates a signing key once and keeps it in the build cache (it is never committed), so each new APK

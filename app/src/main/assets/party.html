@@ -41,6 +41,10 @@ body{background:var(--night);color:var(--ink);font-family:var(--body);overflow:h
 #nogl{position:absolute;inset:0;display:grid;place-items:center;text-align:center;padding:24px;font:700 20px/1.3 var(--display)}
 .fbr{position:absolute;bottom:80px;pointer-events:none;z-index:4;animation:fbrUp 3s ease-out forwards;filter:drop-shadow(0 2px 4px rgba(0,0,0,.5))}
 @keyframes fbrUp{0%{transform:translateY(0) scale(.5);opacity:0}15%{opacity:1;transform:translateY(-30px) scale(1.15)}100%{transform:translateY(-60vh) scale(1);opacity:0}}
+#twGuide{position:absolute;left:10px;bottom:calc(env(safe-area-inset-bottom,0px) + 64px);max-width:62%;padding:8px 12px;border-radius:12px;background:rgba(12,6,26,.66);border:1px solid rgba(169,112,255,.55);
+  color:#fff;font:700 15px/1.35 "Barlow Condensed","Arial Narrow",sans-serif;pointer-events:none;z-index:4;box-shadow:0 0 18px rgba(145,70,255,.35)}
+#twGuide b{color:#bf94ff;display:block;font-size:13px;letter-spacing:.08em;margin-bottom:2px}
+#twGuide div{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 #gear{position:absolute;right:10px;bottom:10px;width:40px;height:40px;border-radius:50%;border:1px solid rgba(255,255,255,.12);background:rgba(10,6,24,.45);
   color:var(--ink);font-size:19px;line-height:1;cursor:pointer;opacity:.3}
 #gear i{position:absolute;top:3px;right:3px;width:8px;height:8px;border-radius:50%;background:var(--bad)}
@@ -174,6 +178,7 @@ input[type=checkbox]{width:20px;height:20px;accent-color:var(--hot)}
 </head>
 <body>
 <div id="stage">
+  <div id="twGuide" hidden></div>
   <canvas id="gl"></canvas>
   <div id="fade"></div>
   <div id="nogl" hidden>Este teléfono no puede mostrar gráficos 3D.<br>Vuelve a la batalla de buses desde ⚙.</div>
@@ -329,6 +334,11 @@ input[type=checkbox]{width:20px;height:20px;accent-color:var(--hot)}
     <div class="pane" id="pLink" hidden>
       <div class="ln"><span>Estado:</span><span id="st" class="bad">Sin conexión</span></div>
       <p class="note" id="lnNote"></p>
+      <div class="grp" id="twBox" hidden><h3>📋 Mensajes de apoyo en pantalla (Twitch)</h3>
+        <label class="ln"><input type="checkbox" id="oTwGuide"><span>Mostrar el cartel con los mensajes</span></label>
+        <p class="note">Un mensaje por línea. Salen en un cartel pequeño abajo a la izquierda.</p>
+        <textarea id="oTwLines" rows="5" style="width:100%;box-sizing:border-box;background:#0c0820;color:#fff;border:1px solid #3b2d6b;border-radius:8px;padding:8px;font:500 14px sans-serif"></textarea>
+      </div>
       <div id="mon"><div id="monC"><span>🎁 <i id="mG">0</i></span><span id="mLW">👆 <i id="mL">0</i></span><span>💬 <i id="mC">0</i></span></div><div id="monL"></div></div>
       <div class="ln"><label for="apUser" id="apUserL">Tu usuario de TikTok</label><input type="text" id="apUser" class="grow" placeholder="usuario (sin @)" autocapitalize="off" autocomplete="off" spellcheck="false"></div>
       <div class="ln" id="apKeyRow"><label for="apKey">Clave Euler Stream</label><input type="text" id="apKey" class="grow" placeholder="opcional" autocapitalize="off" autocomplete="off" spellcheck="false"></div>
@@ -344,7 +354,7 @@ input[type=checkbox]{width:20px;height:20px;accent-color:var(--hot)}
 "use strict";
 var $=function(id){return document.getElementById(id)};
 var APP=!!window.BusApp;
-var SRC=APP&&BusApp.getSource?String(BusApp.getSource()):"tiktok",FB=SRC==="facebook",YT=SRC==="youtube"||FB;   /* Facebook behaves like YouTube (comments), plus anonymous reactions */
+var SRC=APP&&BusApp.getSource?String(BusApp.getSource()):"tiktok",FB=SRC==="facebook",TW=SRC==="twitch",YT=SRC==="youtube"||FB||TW;   /* Facebook behaves like YouTube (comments), plus anonymous reactions */
 try{localStorage.setItem("game","party")}catch(e){}
 
 /* ---------- settings ---------- */
@@ -897,6 +907,9 @@ var FBR={like:"👍",love:"❤️",haha:"😂",wow:"😮",sad:"😢",angry:"😡
 function fbReact(by,total){var now=performance.now();if(now-fbrT>1000){fbrT=now;fbrN=0}var keys=Object.keys(by);if(!keys.length)keys=["like"];
   var n=Math.min(10,total);for(var i=0;i<n&&fbrN<18;i++,fbrN++){var k=keys[i%keys.length],el=document.createElement("div");el.className="fbr";el.textContent=FBR[k]||"👍";
     el.style.left=(70+Math.random()*26)+"%";el.style.fontSize=(26+Math.random()*18)+"px";el.style.animationDuration=(2.4+Math.random()*1.6)+"s";el.style.animationDelay=(i*0.08)+"s";document.getElementById("stage").appendChild(el);setTimeout(function(x){return function(){x.remove()}}(el),5000)}}
+var TWDEF="💬 Escribe en el chat y entras a bailar\n💎 Cheer con Bits = más baile y brillo\n⭐ Suscríbete = estrella de la pista\n🎁 Regala subs = fiesta para todos\n🚀 Raid = ¡bienvenida a lo grande!";
+function paintTw(){var g=document.getElementById("twGuide");if(!TW){g.hidden=true;return}var on=cfg.twGuide!==false,lines=String(cfg.twLines==null?TWDEF:cfg.twLines).split(/\n/).map(function(x){return x.trim()}).filter(Boolean);
+  g.hidden=!on||!lines.length;g.innerHTML="<b>APOYA EL DIRECTO · TWITCH</b>"+lines.map(function(l){return "<div>"+String(l).replace(/[&<>]/g,function(m){return {"&":"&amp;","<":"&lt;",">":"&gt;"}[m]})+"</div>"}).join("")}
 function onEvent(e){if(!e||!e.type)return;
   if(e.type==="reactions"){var rc=Math.max(1,e.count|0);addEnergy(rc*(+cfg.tapE||1));fbReact(e.by||{},rc);return}   /* Facebook reactions: anonymous totals */
   monitor(e);
@@ -1557,12 +1570,16 @@ var tn=0;Array.prototype.forEach.call(document.querySelectorAll("[data-test]"),f
 function setStatus(ok,text){var el=$("st");el.className=ok?"ok":"bad";el.textContent=text||(ok?"Conectado":"Sin conexión");$("dot").className=ok?"ok":""}
 function appLog(l){var el=$("apLog");var at=el.scrollTop+el.clientHeight>=el.scrollHeight-4;el.textContent+=(el.textContent?"\n":"")+l;
   var x=el.textContent.split("\n");if(x.length>200)el.textContent=x.slice(-200).join("\n");if(at)el.scrollTop=el.scrollHeight}
-if(YT&&!FB){$("gLikes").hidden=true;$("gTapQuick").hidden=true;$("mLW").hidden=true;$("apUserL").textContent="Tu canal o directo de YouTube";$("apUser").placeholder="@tucanal o enlace del directo";$("apKeyRow").hidden=true}
+if(TW){$("gLikes").hidden=true;$("gTapQuick").hidden=true;$("mLW").hidden=true;$("apUserL").textContent="Tu canal de Twitch";$("apUser").placeholder="nombre del canal";$("apKeyRow").hidden=true}
+if(YT&&!FB&&!TW){$("gLikes").hidden=true;$("gTapQuick").hidden=true;$("mLW").hidden=true;$("apUserL").textContent="Tu canal o directo de YouTube";$("apUser").placeholder="@tucanal o enlace del directo";$("apKeyRow").hidden=true}
 if(FB){$("gTapQuick").hidden=true;$("apUserL").textContent="Tu Página (vacío = la del token) o enlace del directo";$("apUser").placeholder="opcional";var kl=document.querySelector('label[for="apKey"]');if(kl)kl.textContent="Token de la Página";$("apKey").placeholder="EAAG…"}
-$("lnNote").textContent=!APP?"Vista previa: abre esta página desde la app para recibir regalos reales.":FB?
+$("lnNote").textContent=!APP?"Vista previa: abre esta página desde la app para recibir regalos reales.":TW?
+  "Twitch: escribe el nombre de tu canal. Sin cuenta ni token: la app lee el chat, los Bits, las suscripciones y los raids. Quien escribe entra a bailar; Bits y subs cuentan como regalos.":FB?
   "Facebook: pega el token de acceso de tu Página (permisos pages_read_engagement y pages_read_user_content). Cada persona que comenta entra a bailar con su nombre y su foto; las reacciones llenan la sala de emojis y dan energía. Solo funcionan los directos de una Página, no los de un perfil personal.":YT?
   "Escribe tu canal de YouTube (@usuario) o pega el enlace del directo. La app lee el chat sola y vuelve a intentarlo si se corta.":
   "Escribe tu usuario de TikTok. La app se conecta sola cuando empieza tu directo.";
+if(TW){$("twBox").hidden=false;$("oTwGuide").checked=cfg.twGuide!==false;$("oTwLines").value=cfg.twLines==null?TWDEF:cfg.twLines;
+  $("oTwGuide").onchange=function(){cfg.twGuide=$("oTwGuide").checked;save();paintTw()};$("oTwLines").oninput=function(){cfg.twLines=$("oTwLines").value;save();paintTw()};paintTw()}
 if(APP){try{$("apUser").value=BusApp.getUser();$("apKey").value=BusApp.getKey()}catch(e){}
   $("apGo").onclick=function(){var u=$("apUser").value.trim();if(!YT)u=u.replace(/^@/,"");$("apUser").value=u;$("apLog").textContent="";try{BusApp.connect(u,$("apKey").value.trim())}catch(e){}};
   window.__bus=function(e){try{onEvent(e)}catch(x){}};window.__busLog=appLog;try{BusApp.ready()}catch(e){}}
