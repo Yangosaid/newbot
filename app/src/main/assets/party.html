@@ -43,8 +43,8 @@ body{background:var(--night);color:var(--ink);font-family:var(--body);overflow:h
 @keyframes fbrUp{0%{transform:translateY(0) scale(.5);opacity:0}15%{opacity:1;transform:translateY(-30px) scale(1.15)}100%{transform:translateY(-60vh) scale(1);opacity:0}}
 #twGuide{position:absolute;left:10px;bottom:calc(env(safe-area-inset-bottom,0px) + 64px);max-width:62%;padding:8px 12px;border-radius:12px;background:rgba(12,6,26,.66);border:1px solid rgba(169,112,255,.55);
   color:#fff;font:700 15px/1.35 "Barlow Condensed","Arial Narrow",sans-serif;pointer-events:none;z-index:4;box-shadow:0 0 18px rgba(145,70,255,.35)}
-#twGuide b{color:#bf94ff;display:block;font-size:13px;letter-spacing:.08em;margin-bottom:2px}
-#twGuide div{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#twGuide b{color:#bf94ff;display:block;font-size:18px;text-align:center;margin-bottom:2px}
+#twGuide div{font-size:22px;line-height:1.3;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 #gear{position:absolute;right:10px;bottom:10px;width:40px;height:40px;border-radius:50%;border:1px solid rgba(255,255,255,.12);background:rgba(10,6,24,.45);
   color:var(--ink);font-size:19px;line-height:1;cursor:pointer;opacity:.3}
 #gear i{position:absolute;top:3px;right:3px;width:8px;height:8px;border-radius:50%;background:var(--bad)}
@@ -907,9 +907,9 @@ var FBR={like:"👍",love:"❤️",haha:"😂",wow:"😮",sad:"😢",angry:"😡
 function fbReact(by,total){var now=performance.now();if(now-fbrT>1000){fbrT=now;fbrN=0}var keys=Object.keys(by);if(!keys.length)keys=["like"];
   var n=Math.min(10,total);for(var i=0;i<n&&fbrN<18;i++,fbrN++){var k=keys[i%keys.length],el=document.createElement("div");el.className="fbr";el.textContent=FBR[k]||"👍";
     el.style.left=(70+Math.random()*26)+"%";el.style.fontSize=(26+Math.random()*18)+"px";el.style.animationDuration=(2.4+Math.random()*1.6)+"s";el.style.animationDelay=(i*0.08)+"s";document.getElementById("stage").appendChild(el);setTimeout(function(x){return function(){x.remove()}}(el),5000)}}
-var TWDEF="💬 Escribe en el chat y entras a bailar\n💎 Cheer con Bits = más baile y brillo\n⭐ Suscríbete = estrella de la pista\n🎁 Regala subs = fiesta para todos\n🚀 Raid = ¡bienvenida a lo grande!";
+var TWDEF="💬 ➜ 💃🕺\n💎 ➜ ✨💃✨\n⭐ ➜ 👑🌟\n🎁 ➜ 🎉🎉🎉\n🚀 ➜ 🙌🎊";
 function paintTw(){var g=document.getElementById("twGuide");if(!TW){g.hidden=true;return}var on=cfg.twGuide!==false,lines=String(cfg.twLines==null?TWDEF:cfg.twLines).split(/\n/).map(function(x){return x.trim()}).filter(Boolean);
-  g.hidden=!on||!lines.length;g.innerHTML="<b>APOYA EL DIRECTO · TWITCH</b>"+lines.map(function(l){return "<div>"+String(l).replace(/[&<>]/g,function(m){return {"&":"&amp;","<":"&lt;",">":"&gt;"}[m]})+"</div>"}).join("")}
+  g.hidden=!on||!lines.length;g.innerHTML="<b>💜 ⬇️ 💜</b>"+lines.map(function(l){return "<div>"+String(l).replace(/[&<>]/g,function(m){return {"&":"&amp;","<":"&lt;",">":"&gt;"}[m]})+"</div>"}).join("")}
 function onEvent(e){if(!e||!e.type)return;
   if(e.type==="reactions"){var rc=Math.max(1,e.count|0);addEnergy(rc*(+cfg.tapE||1));fbReact(e.by||{},rc);return}   /* Facebook reactions: anonymous totals */
   monitor(e);
