@@ -22,9 +22,9 @@ CACHE = os.path.join(HERE, 'content', 'timings.json')
 VOICE = {
     'N': 'nl-NL-FennaNeural', 'S': 'nl-NL-ColetteNeural', 'D': 'nl-NL-MaartenNeural',
     'E': 'nl-NL-FennaNeural', 'M': 'nl-NL-MaartenNeural', 'P': 'nl-NL-MaartenNeural',
-    'L': 'nl-BE-DenaNeural', 'O': 'nl-NL-ColetteNeural',
+    'L': 'nl-BE-DenaNeural', 'O': 'nl-NL-ColetteNeural', 'X': 'nl-NL-ColetteNeural',
 }
-PITCH = {'E': '+12Hz', 'M': '-8Hz', 'P': '-18Hz', 'O': '-14Hz'}
+PITCH = {'X': '+8Hz', 'E': '+12Hz', 'M': '-8Hz', 'P': '-18Hz', 'O': '-14Hz'}
 RATE = {'O': '-8%'}
 WORD_VOICE = 'nl-NL-ColetteNeural'
 

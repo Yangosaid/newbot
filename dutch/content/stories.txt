@@ -78,6 +78,80 @@ N: Daan is thuis. | دان في البيت. | 🏠
 N: Hij drinkt koffie. | هو يشرب القهوة. | ☕
 N: En de kat? De kat slaapt op de bank. | والقطة؟ القطة تنام على الأريكة. | 🛋️
 
+@ z07 | Start | Mijn lichaam | جسمي
+N: Dit is mijn hoofd. | هذا رأسي. | 🙂
+N: Dit zijn mijn ogen. | هذه عيناي. | 👀
+N: Ik zie met mijn ogen. | أرى بعينيّ. | 👀
+N: Dit is mijn oor. | هذه أذني. | 👂
+N: Ik hoor met mijn oren. | أسمع بأذنيّ. | 👂
+N: Dit is mijn mond. | هذا فمي. | 👄
+N: Ik eet met mijn mond. | آكل بفمي. | 😋
+N: Dit zijn mijn handen. | هاتان يداي. | 🙌
+N: Dit zijn mijn voeten. | هاتان قدماي. | 🦶
+N: Ik loop met mijn voeten. | أمشي بقدميّ. | 🚶
+N: Ik zie, ik hoor, ik eet en ik loop. | أرى، أسمع، آكل وأمشي. | 😊
+
+@ z08 | Start | Wat doe je? | ماذا تفعل؟
+N: Sara leest een boek. | سارة تقرأ كتابا. | 📖
+N: Daan kookt. | دان يطبخ. | 👨‍🍳
+N: Wat kookt Daan? Daan kookt soep. | ماذا يطبخ دان؟ دان يطبخ حساء. | 🍲
+N: Mo speelt voetbal. | مو يلعب كرة القدم. | ⚽
+N: Emma schrijft een brief. | إيما تكتب رسالة. | ✉️
+N: De kat slaapt. | القطة تنام. | 😴
+N: Leest de kat een boek? Nee! | هل تقرأ القطة كتابا؟ لا! | ❌
+N: De kat slaapt altijd. | القطة تنام دائما. | 💤
+N: En jij? Wat doe jij? | وأنت؟ ماذا تفعل؟ | ❓
+N: Ik leer Nederlands! | أنا أتعلم الهولندية! | 🇳🇱
+
+@ z09 | Start | Kleren | الملابس
+N: Het is koud. | الجو بارد. | 🥶
+N: Sara draagt een jas. | سارة ترتدي معطفا. | 🧥
+N: De jas is rood. | المعطف أحمر. | 🧥
+N: Sara draagt ook een muts. | سارة ترتدي أيضا قبعة صوفية. | 🧢
+N: Het is warm. | الجو حار. | ☀️
+N: Daan draagt een T-shirt. | دان يرتدي قميصا قصيرا. | 👕
+N: Het T-shirt is wit. | القميص أبيض. | 👕
+N: Daan draagt ook een korte broek. | دان يرتدي أيضا سروالا قصيرا. | 🩳
+N: Het regent. | إنها تمطر. | 🌧️
+N: Sara en Daan dragen laarzen. | سارة ودان يرتديان أحذية طويلة. | 👢
+N: En een paraplu! | ومظلة! | ☂️
+
+@ z10 | Start | Vandaag, morgen | اليوم وغدا
+N: Vandaag is het maandag. | اليوم هو الاثنين. | 📅
+N: Morgen is het dinsdag. | غدا هو الثلاثاء. | ➡️📅
+N: Gisteren was het zondag. | البارحة كان الأحد. | ⬅️📅
+N: Op maandag werkt Sara. | يوم الاثنين تعمل سارة. | 💼
+N: Op dinsdag leert ze Nederlands. | يوم الثلاثاء تتعلم الهولندية. | 📚
+N: Op woensdag zwemt ze. | يوم الأربعاء تسبح. | 🏊
+N: Op donderdag kookt ze voor Daan. | يوم الخميس تطبخ لدان. | 🍲
+N: Op vrijdag belt ze haar moeder. | يوم الجمعة تتصل بأمها. | 📞
+N: Op zaterdag gaat ze naar de markt. | يوم السبت تذهب إلى السوق. | 🧺
+N: En op zondag? Op zondag slaapt ze lang! | ويوم الأحد؟ يوم الأحد تنام طويلا! | 😴
+
+@ z11 | Start | In de supermarkt | في السوبرماركت
+N: Sara is in de supermarkt. | سارة في السوبرماركت. | 🛒
+N: Ze koopt melk. | تشتري حليبا. | 🥛
+N: Ze koopt brood. | تشتري خبزا. | 🍞
+N: Ze koopt zes eieren. | تشتري ست بيضات. | 🥚
+N: Waar is de rijst? | أين الأرز؟ | 🍚
+N: De rijst is daar. | الأرز هناك. | 👉
+N: Sara pakt de rijst. | سارة تأخذ الأرز. | 🍚
+N: Is het duur? Nee, het is goedkoop. | هل هو غال؟ لا، إنه رخيص. | 💶
+N: Sara betaalt met haar pas. | سارة تدفع ببطاقتها. | 💳
+N: Dank u wel! Tot ziens! | شكرا جزيلا! إلى اللقاء! | 👋
+
+@ z12 | Start | Hoe gaat het? | كيف حالك؟
+D: Hoi Sara! Hoe gaat het? | أهلا سارة! كيف حالك؟ | 👋
+S: Goed, dank je! En met jou? | بخير، شكرا! وأنت؟ | 🙂
+D: Niet zo goed. | لست بخير كثيرا. | 😕
+S: O nee! Ben je ziek? | أوه لا! هل أنت مريض؟ | 🤒
+D: Nee, ik ben niet ziek. Ik ben moe. | لا، لست مريضا. أنا متعب. | 🥱
+S: Ga lekker slapen! | اذهب ونم جيدا! | 😴
+N: De volgende dag. | في اليوم التالي. | 🌅
+S: Hoe gaat het nu, Daan? | كيف حالك الآن يا دان؟ | 🙂
+D: Heel goed! Ik heb tien uur geslapen. | جيد جدا! نمت عشر ساعات. | 😄
+S: Tien uur? Wauw! | عشر ساعات؟ واو! | 😮
+
 @ a01 | A0 | Hallo, ik ben Sara | مرحبا، أنا سارة
 N: Dit is Sara. | هذه سارة.
 S: Hallo! Ik ben Sara. | مرحبا! أنا سارة.
@@ -185,6 +259,94 @@ D: Je hebt een goede jas nodig. | تحتاجين معطفا جيدا.
 D: En een regenjas voor op de fiets! | ومعطف مطر للدراجة!
 N: Morgen schijnt de zon. | غدا تشرق الشمس.
 S: Eindelijk zon! Ik ga naar het park. | أخيرا شمس! سأذهب إلى الحديقة العامة.
+
+@ a09 | A0 | De kat van Daan | قطة دان
+N: Daan heeft een kat. | دان عنده قطة.
+N: De kat heet Pim. | اسم القطة بيم.
+N: Pim is zwart en wit. | بيم أسود وأبيض.
+N: Op een dag is Pim weg. | في يوم من الأيام يختفي بيم.
+D: Sara, heb jij Pim gezien? | سارة، هل رأيت بيم؟
+S: Nee, sorry. Is hij weg? | لا، آسفة. هل اختفى؟
+D: Ja, sinds vanmorgen. | نعم، منذ هذا الصباح.
+N: Ze zoeken in de tuin. Geen Pim. | يبحثان في الحديقة. لا يوجد بيم.
+N: Ze zoeken op straat. Geen Pim. | يبحثان في الشارع. لا يوجد بيم.
+N: Dan hoort Sara iets in haar keuken. | ثم تسمع سارة شيئا في مطبخها.
+S: Miauw? Daan, kom snel! | مياو؟ دان، تعال بسرعة!
+N: Pim zit in de keuken van Sara. Hij eet haar vis! | بيم جالس في مطبخ سارة. إنه يأكل سمكها!
+D: Pim! Jij bent een dief! | بيم! أنت لص!
+S: Haha, een slimme dief. | هاها، لص ذكي.
+
+@ a10 | A0 | Bij de bakker | عند الخباز
+N: Sara werkt in de bakkerij. | سارة تعمل في المخبز.
+N: Een oude man komt binnen. | رجل مسن يدخل.
+S: Goedemorgen, meneer. Wat wilt u? | صباح الخير يا سيدي. ماذا تريد؟
+P: Een bruin brood, alstublieft. | خبزا أسمر، من فضلك.
+S: Heel of half? | كاملا أم نصفا؟
+P: Half, graag. Ik woon alleen. | نصفا، من فضلك. أسكن وحدي.
+S: Wilt u het gesneden? | هل تريده مقطعا؟
+P: Ja, graag. En twee krentenbollen. | نعم، من فضلك. وخبزتين بالزبيب.
+S: Dat is dan vier euro vijftig. | المجموع إذن أربعة يورو وخمسون سنتا.
+P: Alstublieft. U bent nieuw hier, hè? | تفضلي. أنت جديدة هنا، أليس كذلك؟
+S: Ja, ik werk hier sinds een maand. | نعم، أعمل هنا منذ شهر.
+P: Welkom! Tot morgen! | أهلا بك! إلى الغد!
+N: Elke dag komt de man terug. Hij wordt een vriend. | كل يوم يعود الرجل. ويصبح صديقا.
+
+@ a11 | A0 | Een verjaardag | عيد ميلاد
+N: Emma is jarig. Ze wordt vierendertig. | إيما عيد ميلادها اليوم. تبلغ أربعة وثلاثين عاما.
+N: Ze geeft een feestje. | تقيم حفلة صغيرة.
+N: Sara gaat ook. Ze neemt een cadeau mee. | سارة تذهب أيضا. تأخذ معها هدية.
+N: In de kamer zitten alle mensen in een kring. | في الغرفة يجلس كل الناس في دائرة.
+S: Gefeliciteerd, Emma! | عيد ميلاد سعيد يا إيما!
+E: Dank je! Wat lief. | شكرا! كم أنت لطيفة.
+N: Dan geeft Sara iedereen een hand. | ثم تصافح سارة الجميع.
+S: Gefeliciteerd met Emma! | مبروك بعيد ميلاد إيما!
+N: Dat is een Nederlandse traditie. | هذا تقليد هولندي.
+N: Je feliciteert niet alleen Emma, maar ook haar familie. | لا تهنئ إيما فقط، بل عائلتها أيضا.
+N: Dan zingen ze een lied en eten ze taart. | ثم يغنون أغنية ويأكلون الكعكة.
+S: Een heel gezellig feest! | حفلة لطيفة جدا!
+
+@ a12 | A0 | De bus | الحافلة
+N: Het regent heel hard. | تمطر بشدة.
+N: Sara neemt vandaag niet de fiets. Ze neemt de bus. | سارة لا تأخذ الدراجة اليوم. تأخذ الحافلة.
+N: Ze wacht bij de bushalte. | تنتظر عند موقف الحافلة.
+N: Daar komt bus twaalf. | ها هي الحافلة رقم اثني عشر.
+S: Goedemorgen. Gaat deze bus naar het centrum? | صباح الخير. هل تذهب هذه الحافلة إلى المركز؟
+P: Ja, mevrouw. Stap maar in. | نعم يا سيدتي. اصعدي.
+N: Sara checkt in en zoekt een plek. | سارة تسجل دخولها وتبحث عن مكان.
+N: De bus is vol. Ze moet staan. | الحافلة ممتلئة. يجب أن تقف.
+N: Een jongen staat op. | شاب يقف.
+P: Gaat u maar zitten. | تفضلي بالجلوس.
+S: Dank je wel, dat is aardig! | شكرا جزيلا، هذا لطيف!
+N: Na tien minuten is ze in het centrum. | بعد عشر دقائق تكون في المركز.
+N: Ze vergeet niet om uit te checken. | لا تنسى أن تسجل خروجها.
+
+@ a13 | A0 | Een kaart voor mama | بطاقة لماما
+N: Sara mist haar moeder. | سارة تشتاق إلى أمها.
+N: Ze schrijft een kaart. | تكتب بطاقة.
+S: Lieve mama, | ماما العزيزة،
+S: Hoe gaat het met jou en papa? | كيف حالك أنت وبابا؟
+S: Met mij gaat het goed. | أنا بخير.
+S: Ik heb een fijn huis en een aardige buurman. | عندي بيت جميل وجار لطيف.
+S: Hij heet Daan en hij drinkt veel koffie. | اسمه دان ويشرب الكثير من القهوة.
+S: Het weer is niet zo mooi. Het regent veel. | الطقس ليس جميلا جدا. تمطر كثيرا.
+S: Ik leer elke dag Nederlands. | أتعلم الهولندية كل يوم.
+S: Ik mis jullie en jullie eten! | أشتاق إليكم وإلى أكلكم!
+S: Veel liefs, Sara | مع كل الحب، سارة
+N: Ze koopt een postzegel en doet de kaart in de brievenbus. | تشتري طابعا بريديا وتضع البطاقة في صندوق البريد.
+
+@ a14 | A0 | Ziek | مريضة
+N: Sara wordt wakker. Ze voelt zich niet goed. | سارة تستيقظ. لا تشعر أنها بخير.
+N: Haar keel doet pijn en ze is heel warm. | حلقها يؤلمها وحرارتها مرتفعة جدا.
+N: Ze belt haar baas. | تتصل بمديرها.
+S: Goedemorgen, met Sara. Ik ben ziek. | صباح الخير، معك سارة. أنا مريضة.
+P: Oh, wat vervelend. Blijf maar thuis. | أوه، هذا مزعج. ابقي في البيت.
+P: Word snel beter! | أتمنى لك الشفاء العاجل!
+N: Sara blijft de hele dag in bed. | سارة تبقى طوال اليوم في السرير.
+N: 's Middags belt Daan aan. | بعد الظهر يقرع دان الجرس.
+D: Ik hoorde dat je ziek bent. Ik heb soep voor je. | سمعت أنك مريضة. عندي حساء لك.
+S: Wat lief van je, Daan! | كم أنت لطيف يا دان!
+D: Mijn oma maakt deze soep altijd als iemand ziek is. | جدتي تصنع هذا الحساء دائما عندما يمرض أحد.
+N: Twee dagen later is Sara weer beter. | بعد يومين تتحسن سارة من جديد.
 
 @ b01 | A1 | Een nieuwe fiets | دراجة جديدة
 N: De fiets van Sara is oud. | دراجة سارة قديمة.
@@ -296,6 +458,67 @@ N: Sara heeft Marokkaanse koekjes meegenomen. | سارة أحضرت معها ح�
 D: Deze koekjes zijn heerlijk. Mag ik het recept? | هذه الحلويات لذيذة جدا. هل تعطينني الوصفة؟
 S: Het is een geheim recept van mijn moeder. | إنها وصفة سرية من أمي.
 E: Dan moet je ons het een keer leren! | إذن يجب أن تعلمينا إياها مرة!
+
+@ b09 | A1 | Sinterklaas | سينتركلاس
+N: In december is Sinterklaas in Nederland. | في ديسمبر يكون سينتركلاس في هولندا.
+N: Sinterklaas is een oude man met een lange witte baard en een rode mantel. | سينتركلاس رجل مسن بلحية بيضاء طويلة ومعطف أحمر.
+N: Volgens het verhaal komt hij elk jaar met een boot uit Spanje. | حسب القصة يأتي كل عام بقارب من إسبانيا.
+E: Op vijf december krijgen kinderen cadeautjes. | في الخامس من ديسمبر يتلقى الأطفال الهدايا.
+S: Alleen kinderen? | الأطفال فقط؟
+E: Nee, volwassenen ook. Maar dan trekken we lootjes. | لا، الكبار أيضا. لكننا نسحب القرعة.
+E: Iedereen koopt één cadeau voor één persoon en schrijft er een gedicht bij. | كل واحد يشتري هدية واحدة لشخص واحد ويكتب معها قصيدة.
+S: Een gedicht? Dat is moeilijk! | قصيدة؟ هذا صعب!
+E: Het hoeft niet mooi te zijn. Het moet vooral grappig zijn. | ليس ضروريا أن تكون جميلة. المهم أن تكون مضحكة.
+N: Sara trekt een lootje. Ze moet een cadeau kopen voor Daan. | سارة تسحب ورقة. يجب أن تشتري هدية لدان.
+N: Ze koopt een grote mok en schrijft: | تشتري كوبا كبيرا وتكتب:
+S: Daan drinkt koffie, dag en nacht, dus een grote mok, dat had je verwacht! | دان يشرب القهوة ليلا ونهارا، لذلك كوب كبير، كما توقعت!
+N: Iedereen lacht, en Daan het hardst. | الجميع يضحكون، ودان أكثرهم.
+
+@ b10 | A1 | Een dag aan zee | يوم على البحر
+N: Het is eindelijk warm. Daan, Emma en Sara gaan naar Zandvoort. | أخيرا الجو حار. دان وإيما وسارة يذهبون إلى زاندفورت.
+N: De trein zit vol met mensen met handdoeken en tassen. | القطار مليء بأناس معهم مناشف وحقائب.
+N: Op het strand is het druk, maar er is genoeg plek. | على الشاطئ زحمة، لكن هناك مكان كاف.
+S: Het water is zo koud! | الماء بارد جدا!
+D: Dat is de Noordzee. Je went er snel aan. | هذا بحر الشمال. ستتعود عليه بسرعة.
+N: Sara loopt langzaam het water in, tot haar knieën. | سارة تدخل الماء ببطء، حتى ركبتيها.
+S: Nee, dit is genoeg voor vandaag! | لا، هذا يكفي لليوم!
+N: Emma bouwt een zandkasteel en Daan leest een tijdschrift. | إيما تبني قلعة رملية ودان يقرأ مجلة.
+N: Om vijf uur eten ze patat met mayonaise. | في الساعة الخامسة يأكلون بطاطس مقلية مع المايونيز.
+S: Patat met mayonaise? In Marokko eten we dat niet zo. | بطاطس مع مايونيز؟ في المغرب لا نأكلها هكذا.
+E: Proef maar. Het is echt lekker. | ذوقي فقط. إنها لذيذة حقا.
+S: Oké... Hmm, jullie hebben gelijk! | حسنا... همم، معكم حق!
+N: Moe maar blij gaan ze 's avonds met de trein terug naar huis. | متعبين لكن سعداء يعودون مساء بالقطار إلى البيت.
+
+@ b11 | A1 | De eerste les | الدرس الأول
+N: Het is één maart: Sara's eerste dag op de taalschool. | إنه الأول من مارس: يوم سارة الأول في مدرسة اللغات.
+N: Ze is vroeg, want ze wil alles goed voorbereiden. | وصلت مبكرا، لأنها تريد أن تحضّر كل شيء جيدا.
+N: In haar klas zitten twaalf volwassenen. | في صفها يجلس اثنا عشر شخصا بالغا.
+N: Ze komen uit Nederland, België en Duitsland. | هم من هولندا وبلجيكا وألمانيا.
+S: Goedemorgen allemaal. Welkom bij de cursus Arabisch. | صباح الخير جميعا. أهلا بكم في دورة العربية.
+S: Wie kan mij vertellen waarom hij of zij Arabisch wil leren? | من يستطيع أن يقول لي لماذا يريد تعلم العربية؟
+P: Ik ga volgend jaar naar Jordanië voor mijn werk. | سأذهب السنة القادمة إلى الأردن من أجل عملي.
+X: En ik vind de taal gewoon prachtig. | وأنا ببساطة أرى اللغة رائعة.
+N: Sara schrijft een woord op het bord: "marhaban". | سارة تكتب كلمة على السبورة: "مرحبا".
+S: Wij schrijven van rechts naar links. | نحن نكتب من اليمين إلى اليسار.
+N: Iedereen kijkt verbaasd. | الجميع ينظرون مندهشين.
+N: Aan het einde van de les zeggen ze allemaal: "Marhaban!" | في نهاية الدرس يقولون جميعا: "مرحبا!"
+N: Op de fiets naar huis glimlacht Sara. Nu is zij de leraar en zijn zij de leerlingen. | على الدراجة إلى البيت تبتسم سارة. الآن هي المعلمة وهم التلاميذ.
+
+@ b12 | A1 | Het verhuisbusje | شاحنة النقل
+N: Mo gaat verhuizen. Hij heeft een nieuw appartement in Rotterdam-Zuid. | مو سينتقل. عنده شقة جديدة في جنوب روتردام.
+M: Sara, kun je me zaterdag helpen? | سارة، هل يمكنك مساعدتي يوم السبت؟
+S: Natuurlijk! Hoeveel spullen heb je? | طبعا! كم عندك من الأغراض؟
+M: Niet zoveel. Een bed, een kast, een bank en veel dozen. | ليس كثيرا. سرير، خزانة، أريكة والكثير من الصناديق.
+N: Ze huren een busje. Daan rijdt, want hij heeft een rijbewijs. | يستأجرون شاحنة صغيرة. دان يقود، لأن عنده رخصة قيادة.
+N: Het nieuwe appartement is op de vierde verdieping. | الشقة الجديدة في الطابق الرابع.
+D: Is er een lift? | هل يوجد مصعد؟
+M: Eh... nee. | إه... لا.
+N: De trap is smal en steil, zoals in veel Nederlandse huizen. | الدرج ضيق وشديد الانحدار، مثل كثير من البيوت الهولندية.
+N: De bank past niet door de deur. | الأريكة لا تمر من الباب.
+D: Geen probleem. Daarvoor hebben Nederlandse huizen een haak boven het raam. | لا مشكلة. لهذا السبب البيوت الهولندية لها خطاف فوق النافذة.
+N: Met een touw trekken ze de bank omhoog en door het raam naar binnen. | بحبل يسحبون الأريكة إلى الأعلى ويدخلونها من النافذة.
+S: Wat slim! Nu snap ik waarom die haken er zijn. | كم هذا ذكي! الآن أفهم لماذا توجد تلك الخطافات.
+M: Bedankt allebei. Vanavond trakteer ik op pizza! | شكرا لكما. الليلة أدعوكما على البيتزا!
 
 @ c01 | A2 | Koningsdag | يوم الملك
 N: Op zevenentwintig april is het Koningsdag, de verjaardag van de koning. | في السابع والعشرين من أبريل يوم الملك، عيد ميلاد الملك.

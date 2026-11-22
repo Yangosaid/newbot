@@ -757,3 +757,172 @@ zus = أخت
 zware = شديدة = zwaar
 zwart = أسود
 zwarte = سوداء = zwart
+aardig = لطيف
+aardige = لطيف = aardig
+allebei = كلاكما / كلاهما
+allemaal = جميعا
+appartement = شقة
+baard = لحية
+baas = مدير / رئيس العمل
+bedankt = شكرا
+betaalt = تدفع = betalen
+blijf = ابقَ = blijven
+blijft = تبقى = blijven
+boot = قارب
+bord = سبورة / لوحة / صحن
+bouwt = تبني = bouwen
+brievenbus = صندوق البريد
+bruin = أسمر / بني
+bushalte = موقف الحافلة
+busje = شاحنة صغيرة / حافلة صغيرة
+cadeau = هدية
+cadeautjes = هدايا صغيرة = cadeau
+centrum = مركز المدينة
+checken = تسجيل (uitchecken = تسجيل الخروج)
+cursus = دورة دراسية
+daarvoor = لذلك / من أجل ذلك
+december = ديسمبر
+dief = لص
+donderdag = الخميس
+dozen = صناديق = doos
+dragen = يرتديان = dragen
+duitsland = ألمانيا
+eh = إه
+eieren = بيض = ei
+einde = نهاية
+feestje = حفلة صغيرة
+feliciteert = تهنّئ = feliciteren
+gedicht = قصيدة
+gelijk = محق (gelijk hebben) / متساوٍ
+geslapen = نمتُ = slapen
+gesneden = مقطّع = snijden
+gezien = رأيتَ = zien
+glimlacht = تبتسم = glimlachen
+goedkoop = رخيص
+grappig = مضحك
+haak = خطاف
+had = كان عندك / (dat had je verwacht = كما توقعت) = hebben
+haken = خطافات = haak
+hand = يد (een hand geven = يصافح)
+handdoeken = مناشف = handdoek
+handen = يدان = hand
+hard = بشدة / قوي
+hardst = الأشد / أكثرهم = hard
+hmm = همم
+hoorde = سمعتُ = horen
+hoort = تسمع = horen
+huren = يستأجرون = huren
+jarig = عيد ميلاده اليوم
+jongen = ولد / شاب
+jordanië = الأردن
+kaart = بطاقة / خريطة
+kast = خزانة
+keel = حلق
+klas = صف / فصل
+knieën = ركبتان = knie
+kopen = يشتري
+korte = قصير = kort
+krentenbollen = خبز بالزبيب = krentenbol
+krijgen = يحصلون / يتلقون
+kring = دائرة
+kun = تستطيع = kunnen
+laarzen = أحذية طويلة (جزمة) = laars
+lacht = يضحك = lachen
+lang = طويل / طويلا
+lange = طويلة = lang
+langzaam = ببطء
+leraar = معلم
+lied = أغنية
+lief = لطيف / حنون
+liefs = محبة (veel liefs = مع الحب)
+lieve = العزيزة = lief
+lift = مصعد
+links = يسار
+loop = أمشي = lopen
+loopt = تمشي = lopen
+lootje = ورقة قرعة
+lootjes = أوراق القرعة (lootjes trekken = سحب القرعة) = lootje
+mama = ماما
+mantel = معطف / عباءة
+marhaban = مرحبا (بالعربية)
+mayonaise = مايونيز
+meneer = سيد / سيدي
+miauw = مياو
+middags = بعد الظهر ('s middags)
+mok = كوب كبير
+mond = فم
+muts = قبعة صوفية
+nacht = ليل
+noordzee = بحر الشمال
+o = أوه
+ogen = عيون = oog
+oh = أوه
+oké = حسنا
+omhoog = إلى الأعلى
+oor = أذن
+oren = آذان = oor
+papa = بابا
+paraplu = مظلة
+past = يمر / يناسب = passen
+patat = بطاطس مقلية
+persoon = شخص
+pijn = ألم (pijn doen = يؤلم)
+pim = بيم (اسم القطة)
+pizza = بيتزا
+plek = مكان
+postzegel = طابع بريدي
+proef = ذُق = proeven
+rechts = يمين
+rijbewijs = رخصة قيادة
+rijst = أرز
+sara's = (ل) سارة
+shirt = قميص (T-shirt)
+sinterklaas = سينتركلاس (شخصية تقليدية)
+slapen = ينام
+slim = ذكي
+slimme = ذكي = slim
+smal = ضيق
+soep = حساء
+sorry = آسف
+spanje = إسبانيا
+speelt = يلعب = spelen
+stap = اصعد / خطوة = stappen
+steil = شديد الانحدار
+strand = شاطئ
+supermarkt = سوبرماركت
+t = تي (T-shirt)
+tassen = حقائب = tas
+tijdschrift = مجلة
+touw = حبل
+trakteer = أدعو (على حسابي) = trakteren
+trap = درج
+trekt = تسحب = trekken
+vanmorgen = هذا الصباح
+verbaasd = مندهش
+verdieping = طابق
+verhaal = قصة
+verhuizen = ينتقل (من سكن)
+vertellen = يحكي / يقول
+vervelend = مزعج
+verwacht = توقّعتَ = verwachten
+vierde = الرابع
+vierendertig = أربعة وثلاثون
+vijftig = خمسون
+voetbal = كرة القدم
+volgend = القادم
+volwassenen = بالغون / كبار = volwassene
+voorbereiden = يحضّر
+vriend = صديق
+wacht = تنتظر = wachten
+wauw = واو
+went = تتعود (wennen aan) = wennen
+wij = نحن
+zandkasteel = قلعة رملية
+zandvoort = زاندفورت (مدينة شاطئية)
+ziek = مريض
+ziens = (tot ziens = إلى اللقاء)
+zingen = يغنّون = zingen
+zoals = مثل
+zoveel = بهذا القدر
+zuid = جنوب
+zwemt = تسبح = zwemmen
