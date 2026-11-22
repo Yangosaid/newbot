@@ -1,0 +1,559 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Leer Nederlands</title>
+<style>
+:root{--bg:#f6f3ee;--card:#fff;--ink:#1d1b24;--mute:#6f6a78;--line:#e7e1d8;--brand:#e8641b;--brand2:#21468b;--ok:#2e9d5b;--warn:#e3a21a;--bad:#d64545;
+  --new:rgba(33,70,139,.13);--learn:rgba(227,162,26,.28);--shadow:0 2px 10px rgba(30,20,10,.07);--r:16px}
+@media (prefers-color-scheme:dark){:root:not([data-theme=light]){--bg:#15141a;--card:#211f28;--ink:#f1eef6;--mute:#a7a1b3;--line:#34313d;--new:rgba(120,160,255,.2);--learn:rgba(227,162,26,.3);--shadow:none}}
+:root[data-theme=dark]{--bg:#15141a;--card:#211f28;--ink:#f1eef6;--mute:#a7a1b3;--line:#34313d;--new:rgba(120,160,255,.2);--learn:rgba(227,162,26,.3);--shadow:none}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;height:100%;background:var(--bg);color:var(--ink);font:16px/1.6 "Noto Naskh Arabic","Noto Sans Arabic",system-ui,sans-serif}
+button{font:inherit;color:inherit;border:0;background:none;cursor:pointer}
+.nl{direction:ltr;text-align:left;font-family:system-ui,"Segoe UI",Roboto,sans-serif;unicode-bidi:isolate}
+#app{max-width:680px;margin:0 auto;min-height:100%;padding:12px 16px calc(84px + env(safe-area-inset-bottom))}
+header.top{display:flex;align-items:center;gap:10px;padding:6px 0 12px}
+header.top h1{font-size:20px;margin:0;flex:1}
+.ib{width:40px;height:40px;border-radius:12px;display:grid;place-items:center;font-size:20px;background:var(--card);box-shadow:var(--shadow)}
+nav.tabs{position:fixed;bottom:0;left:0;right:0;background:var(--card);border-top:1px solid var(--line);display:flex;justify-content:center;padding-bottom:env(safe-area-inset-bottom);z-index:20}
+nav.tabs button{flex:1;max-width:170px;padding:8px 0 10px;font-size:12px;color:var(--mute);display:flex;flex-direction:column;align-items:center;gap:2px;position:relative}
+nav.tabs button b{font-size:22px;line-height:1}
+nav.tabs button.on{color:var(--brand)}
+nav.tabs .badge{position:absolute;top:4px;left:calc(50% - 22px);background:var(--bad);color:#fff;font-size:10px;border-radius:9px;padding:0 5px;min-width:16px}
+.card{background:var(--card);border-radius:var(--r);padding:16px;box-shadow:var(--shadow);margin-bottom:12px}
+.row{display:flex;align-items:center;gap:12px}
+.mute{color:var(--mute)}.small{font-size:13px}
+.btn{background:var(--brand);color:#fff;border-radius:14px;padding:12px 18px;font-weight:700;display:inline-flex;align-items:center;gap:8px;justify-content:center}
+.btn.alt{background:var(--card);color:var(--ink);border:1px solid var(--line)}
+.btn.blue{background:var(--brand2)}
+.btn.wide{width:100%}
+.btn:disabled{opacity:.45}
+.pill{display:inline-block;font-size:12px;padding:2px 9px;border-radius:99px;background:var(--line);color:var(--ink)}
+.ring{--p:0;width:96px;height:96px;border-radius:50%;background:conic-gradient(var(--brand) calc(var(--p)*1%),var(--line) 0);display:grid;place-items:center;flex:none}
+.ring i{width:76px;height:76px;border-radius:50%;background:var(--card);display:grid;place-items:center;font-style:normal;font-weight:700;font-size:15px;text-align:center;line-height:1.2}
+.stats3{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;text-align:center}
+.stats3 b{display:block;font-size:22px}
+h2{font-size:17px;margin:18px 2px 8px}
+.item{display:flex;align-items:center;gap:12px;padding:12px 14px;background:var(--card);border-radius:14px;margin-bottom:8px;box-shadow:var(--shadow);width:100%;text-align:right}
+.item .ic{width:44px;height:44px;border-radius:12px;display:grid;place-items:center;font-size:22px;background:var(--bg);flex:none}
+.item .tt{flex:1;min-width:0}
+.item .tt b{display:block;font-size:15px}
+.item .tt span{font-size:12.5px;color:var(--mute)}
+.item.done .ic{background:rgba(46,157,91,.15)}
+.item.next{outline:2px solid var(--brand)}
+.cov{font-size:12px;font-weight:700;padding:2px 8px;border-radius:99px;direction:ltr}
+.cov.g{background:rgba(46,157,91,.15);color:var(--ok)}.cov.y{background:rgba(227,162,26,.2);color:#a36f00}.cov.r{background:rgba(214,69,69,.13);color:var(--bad)}
+/* reader */
+.rbar{position:sticky;top:0;z-index:5;background:var(--bg);padding:8px 0;display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+.rbar .ib{width:auto;min-width:40px;padding:0 10px;font-size:15px;height:38px}
+.rbar .ib.on{background:var(--brand2);color:#fff}
+.sent{background:var(--card);border-radius:14px;padding:12px 14px;margin-bottom:10px;box-shadow:var(--shadow);border-inline-start:4px solid transparent;transition:border-color .2s}
+.sent.cur{border-inline-start-color:var(--brand)}
+.sent .who{font-size:12px;color:var(--mute);display:flex;align-items:center;gap:6px;margin-bottom:2px}
+.sent .pic{font-size:44px;line-height:1.1;text-align:center;margin:4px 0}
+.sent .nl{font-size:21px;line-height:1.75}
+.sent .ar{color:var(--mute);font-size:15px;margin-top:4px;transition:filter .2s}
+.sent .ar.blur{filter:blur(6px);cursor:pointer}
+.sent .ar.hide{display:none}
+.sent .acts{display:flex;gap:4px;margin-top:6px;justify-content:flex-end}
+.sent .acts button{font-size:18px;padding:4px 8px;border-radius:10px;background:var(--bg)}
+.listen .sent .nl,.listen .sent .ar{display:none}
+.w{border-radius:5px;padding:0 1px;cursor:pointer}
+.w.u{background:var(--new)}
+.w.l{background:var(--learn)}
+.w.k{}
+.w.hl{background:var(--brand)!important;color:#fff}
+.w.ok{color:var(--ok);font-weight:700}.w.no{color:var(--bad);text-decoration:line-through}
+.sheet{position:fixed;left:0;right:0;bottom:0;background:var(--card);border-radius:20px 20px 0 0;box-shadow:0 -6px 30px rgba(0,0,0,.18);padding:16px 18px calc(18px + env(safe-area-inset-bottom));z-index:40;transform:translateY(105%);transition:transform .22s;max-width:680px;margin:0 auto}
+.sheet.open{transform:none}
+.scrim{position:fixed;inset:0;background:rgba(0,0,0,.25);z-index:39;display:none}
+.scrim.open{display:block}
+.sheet .big{font-size:30px;font-weight:700}
+.seg{display:flex;gap:6px;margin:10px 0}
+.seg button{flex:1;padding:9px 4px;border-radius:12px;border:1px solid var(--line);font-size:14px}
+.seg button.on{background:var(--brand2);color:#fff;border-color:var(--brand2)}
+.pre{border:1px dashed var(--line)}
+.pre .pw{display:flex;align-items:center;gap:10px;padding:6px 0;border-bottom:1px solid var(--line)}
+.pre .pw:last-child{border:0}
+/* flash cards */
+.flash{text-align:center;padding:26px 16px;min-height:300px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px}
+.flash .emo{font-size:84px;line-height:1}
+.flash .word{font-size:34px;font-weight:700}
+.opts{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px}
+.opts button{background:var(--card);border-radius:16px;padding:16px 8px;font-size:44px;box-shadow:var(--shadow);border:2px solid transparent}
+.opts.txt button{font-size:18px;font-weight:600}
+.opts button.right{border-color:var(--ok);background:rgba(46,157,91,.12)}
+.opts button.wrong{border-color:var(--bad);background:rgba(214,69,69,.1)}
+.grade{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-top:12px}
+.grade button{border-radius:12px;padding:10px 2px;color:#fff;font-weight:700;font-size:14px;line-height:1.3}
+.grade button small{display:block;font-weight:400;font-size:11px;opacity:.9}
+.g1{background:var(--bad)}.g2{background:#c27a12}.g3{background:var(--ok)}.g4{background:var(--brand2)}
+.prog{height:6px;background:var(--line);border-radius:6px;overflow:hidden;margin:6px 0 12px}
+.prog i{display:block;height:100%;background:var(--brand);transition:width .3s}
+.bars{display:flex;align-items:flex-end;gap:4px;height:120px;direction:ltr;padding-top:6px}
+.bars div{flex:1;background:var(--brand);border-radius:4px 4px 0 0;min-height:2px;position:relative}
+.bars div.today{background:var(--brand2)}
+.bars span{position:absolute;bottom:-18px;left:0;right:0;text-align:center;font-size:9px;color:var(--mute)}
+.sound{display:flex;gap:14px;align-items:flex-start}
+.sound .sym{font-size:26px;font-weight:800;min-width:72px;text-align:center;background:var(--bg);border-radius:12px;padding:8px 4px;direction:ltr}
+.ex{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.ex button{background:var(--bg);border-radius:10px;padding:5px 10px;font-size:14px}
+.ex button b{font-family:system-ui,sans-serif;direction:ltr;unicode-bidi:isolate}
+.research p{margin:6px 0}
+.research .src{font-size:12px;color:var(--mute);direction:ltr;text-align:left}
+.toast{position:fixed;bottom:96px;left:50%;transform:translateX(-50%);background:#222;color:#fff;padding:9px 16px;border-radius:12px;font-size:14px;z-index:60;opacity:0;transition:opacity .2s;pointer-events:none;max-width:90%}
+.toast.on{opacity:1}
+.hidden{display:none!important}
+input[type=range]{width:100%}
+select,textarea{font:inherit;padding:8px;border-radius:10px;border:1px solid var(--line);background:var(--card);color:var(--ink)}
+.center{text-align:center}
+.shadowres{margin-top:8px;padding:8px 10px;border-radius:10px;background:var(--bg);font-size:14px}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<nav class="tabs" id="tabs">
+  <button data-tab="home"><b>🏠</b>الرئيسية</button>
+  <button data-tab="path"><b>🧭</b>المسار</button>
+  <button data-tab="review"><b>🔁</b>المراجعة<span class="badge hidden" id="dueBadge"></span></button>
+  <button data-tab="stats"><b>📈</b>تقدّمي</button>
+</nav>
+<div class="scrim" id="scrim"></div>
+<div class="sheet" id="sheet"></div>
+<div class="toast" id="toast"></div>
+<script src="data.js"></script>
+<script>
+"use strict";
+const D = window.DATA;
+const $ = (s, el) => (el || document).querySelector(s);
+const esc = s => String(s).replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const DAY = 864e5, MIN = 6e4;
+const TOK = /'s|[A-Za-zÀ-ÿ]+(?:'[a-z]+)?/g;
+const NAMEX = /\(اسم|\(مدينة|\(مقاطعة|اسم عائلة|^هاها|^آه/;
+const SPK = {N:"الراوية",S:"سارة",D:"دان",E:"إيما",M:"مو",L:"لوته",P:"",O:"الجدة يوكه"};
+const LV = {Start:"البداية (صفر)",A0:"A0 · أول الطريق",A1:"A1 · مبتدئ",A2:"A2 · ما قبل المتوسط",B1:"B1 · متوسط"};
+
+/* ---------- state ---------- */
+function defState(){return {v:1,known:{},cards:{},log:{},done:{},lessons:{},set:{goal:15,rate:0.9,tr:"show",newPerDay:20},nd:{d:"",n:0},onboard:false,first:Date.now()}}
+let S;
+try { S = Object.assign(defState(), JSON.parse(localStorage.getItem("nl1") || "{}")); } catch (e) { S = defState(); }
+S.set = Object.assign(defState().set, S.set || {});
+let saveT = 0;
+function save(){clearTimeout(saveT);saveT=setTimeout(()=>{try{localStorage.setItem("nl1",JSON.stringify(S))}catch(e){}},300)}
+function today(d){d=d||new Date();return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0")}
+function logT(){const k=today();return S.log[k]||(S.log[k]={sec:0,rev:0,words:0})}
+
+/* ---------- words ---------- */
+const norm = w => w.toLowerCase().replace("eén","één");
+function keyOf(form){const e=D.dict[form];return e&&e[1]?norm(e[1]):form}
+function isFree(form){const e=D.dict[form];return !e||NAMEX.test(e[0])}
+function status(form){return isFree(form)?2:(S.known[keyOf(form)]||0)}
+function setStatus(form,v){const k=keyOf(form);if(v)S.known[k]=v;else delete S.known[k];save()}
+function toks(text){const out=[];let m;TOK.lastIndex=0;while((m=TOK.exec(text)))out.push({t:m[0],i:m.index});return out}
+function coreKey(nl){return norm(nl.replace(/^(de|het) /,""))}
+const storyById = {}; D.stories.forEach(s => storyById[s.id] = s);
+const storyStats = {};
+D.stories.forEach(s=>{const forms=[];s.lines.forEach(l=>toks(l.nl).forEach(t=>forms.push(norm(t.t))));storyStats[s.id]={forms,words:forms.length}});
+function coverage(id){const f=storyStats[id].forms;let k=0;f.forEach(x=>{const st=status(x);k+=st===2?1:st===1?0.6:0});return f.length?k/f.length:1}
+function knownCount(){let n=0;for(const k in S.known)if(S.known[k]===2)n++;return n}
+function learningCount(){let n=0;for(const k in S.known)if(S.known[k]===1)n++;return n}
+
+/* ---------- path ---------- */
+const lessons = [];
+(function(){const groups={};D.words.forEach(w=>(groups[w.group]=groups[w.group]||[]).push(w));
+  Object.keys(groups).forEach(g=>{const a=groups[g];for(let i=0;i<a.length;i+=8){const part=a.slice(i,i+8);if(part.length<4&&lessons.length&&lessons[lessons.length-1].group===g){lessons[lessons.length-1].words.push(...part);continue}lessons.push({id:"L"+lessons.length,group:g,words:part})}});
+})();
+function buildPath(){
+  const P=[{type:"sounds",id:"sounds"}];
+  const st=D.stories.slice(); let li=0;
+  const startStories=st.filter(s=>s.level==="Start");
+  P.push({type:"lesson",id:lessons[li].id,L:lessons[li++]});P.push({type:"lesson",id:lessons[li].id,L:lessons[li++]});
+  startStories.forEach(s=>{P.push({type:"story",id:s.id,s});if(li<lessons.length)P.push({type:"lesson",id:lessons[li].id,L:lessons[li++]})});
+  st.filter(s=>s.level!=="Start").forEach((s,i)=>{P.push({type:"story",id:s.id,s});if(li<lessons.length&&i%1===0)P.push({type:"lesson",id:lessons[li].id,L:lessons[li++]})});
+  while(li<lessons.length)P.push({type:"lesson",id:lessons[li].id,L:lessons[li++]});
+  return P;
+}
+const PATH = buildPath();
+function isDone(p){return p.type==="sounds"?!!S.lessons.sounds:p.type==="lesson"?!!S.lessons[p.id]:!!S.done[p.id]}
+function nextStep(){return PATH.find(p=>!isDone(p))||null}
+
+/* ---------- audio ---------- */
+const audio = new Audio(); audio.preload = "auto";
+let playToken = 0, rafId = 0, karaoke = null;
+function stopAudio(){playToken++;audio.pause();cancelAnimationFrame(rafId);if(karaoke){karaoke.spans.forEach(s=>s.classList.remove("hl"));karaoke=null}document.querySelectorAll(".sent.cur").forEach(e=>e.classList.remove("cur"));updatePlayBtn()}
+function playClip(src,rate,onEnd,from,to){
+  const tok=++playToken;rate=rate||1;audio.onended=null;
+  audio.src=src;audio.defaultPlaybackRate=rate;audio.playbackRate=rate;try{audio.preservesPitch=true}catch(e){}
+  const start=()=>{if(tok!==playToken)return;if(from)audio.currentTime=from/1000;audio.playbackRate=rate;audio.play().catch(()=>{})};
+  if(from){audio.addEventListener("loadedmetadata",start,{once:true});audio.load()}else start();
+  audio.onended=()=>{if(tok===playToken&&onEnd)onEnd()};
+  if(to){const chk=()=>{if(tok!==playToken)return;if(!audio.paused&&audio.currentTime*1000>=to){audio.pause();if(onEnd)onEnd();return}requestAnimationFrame(chk)};requestAnimationFrame(chk)}
+  return tok;
+}
+function sayWord(form){const p=D.wav[form]||D.wav[keyOf(form)];if(p){stopAudio();playClip(p,1);return true}return false}
+function sayText(nl){const p=D.wav[nl];if(p){stopAudio();playClip(p,1)}}
+
+/* ---------- input time tracking (comprehensible input minutes) ---------- */
+let lastTouch = 0, view = "home";
+["pointerdown","scroll","keydown"].forEach(e=>addEventListener(e,()=>lastTouch=Date.now(),{passive:true,capture:true}));
+setInterval(()=>{
+  if(document.visibilityState!=="visible")return;
+  const playing=!audio.paused&&!audio.ended;
+  const active=["reader","lesson","sounds"].includes(view)&&Date.now()-lastTouch<45000;
+  if(playing||active){logT().sec++;if(logT().sec%10===0)save();if(view==="home"&&logT().sec%5===0)render()}
+},1000);
+
+/* ---------- FSRS-4.5 scheduler ---------- */
+const W=[0.4872,1.4003,3.7145,13.8206,5.1618,1.2298,0.8975,0.031,1.6474,0.1367,1.0461,2.1072,0.0793,0.3246,1.587,0.2272,2.8755];
+const DECAY=-0.5, FACTOR=19/81;
+const clamp=(x,a,b)=>Math.max(a,Math.min(b,x));
+const R=(t,s)=>Math.pow(1+FACTOR*t/s,DECAY);
+const D0=g=>clamp(W[4]-(g-3)*W[5],1,10);
+const nextD=(d,g)=>clamp(W[7]*D0(4)+(1-W[7])*(d-W[6]*(g-3)),1,10);
+const sRecall=(d,s,r,g)=>s*(1+Math.exp(W[8])*(11-d)*Math.pow(s,-W[9])*(Math.exp((1-r)*W[10])-1)*(g===2?W[15]:1)*(g===4?W[16]:1));
+const sForget=(d,s,r)=>W[11]*Math.pow(d,-W[12])*(Math.pow(s+1,W[13])-1)*Math.exp((1-r)*W[14]);
+function schedule(c,g,now){
+  c=Object.assign({},c);now=now||Date.now();
+  if(c.state==="new"||c.state==="learn"){
+    if(c.state==="new"){c.s=W[g-1];c.d=D0(g)}else{c.d=nextD(c.d,g);if(g>=3)c.s=Math.max(c.s,W[g-1])}
+    if(g===1){c.state="learn";c.step=0;c.due=now+MIN}
+    else if(g===2){c.state="learn";c.step=c.step||0;c.due=now+6*MIN}
+    else if(g===3&&!(c.step>=1)){c.state="learn";c.step=1;c.due=now+10*MIN}
+    else{c.state="review";const iv=Math.max(g===4?2:1,Math.round(c.s));c.ivl=iv;c.due=now+iv*DAY}
+  }else{
+    const t=Math.max(0,(now-c.last)/DAY),r=R(t,c.s);
+    if(g===1){c.s=sForget(c.d,c.s,r);c.d=nextD(c.d,1);c.lapses=(c.lapses||0)+1;c.state="learn";c.step=0;c.due=now+10*MIN}
+    else{c.s=sRecall(c.d,c.s,r,g);c.d=nextD(c.d,g);let iv=Math.max(1,Math.round(c.s));if(g===2)iv=Math.max(1,Math.min(iv,Math.round((c.ivl||1)*1.2)));c.ivl=iv;c.due=now+iv*DAY}
+  }
+  c.last=now;c.reps=(c.reps||0)+1;return c;
+}
+function fmtIvl(ms){const m=ms/MIN;if(m<60)return Math.max(1,Math.round(m))+" د";const h=m/60;if(h<24)return Math.round(h)+" س";const d=h/24;if(d<30)return Math.round(d)+" يوم";if(d<365)return (d/30).toFixed(1).replace(".0","")+" شهر";return (d/365).toFixed(1)+" سنة"}
+function addCard(id,obj){if(S.cards[id])return false;S.cards[id]=Object.assign({id,state:"new",due:Date.now(),reps:0,added:Date.now()},obj);save();return true}
+function dueCards(){
+  const now=Date.now(),t=today();if(S.nd.d!==t)S.nd={d:t,n:0};
+  const all=Object.values(S.cards);
+  const due=all.filter(c=>c.state!=="new"&&c.due<=now).sort((a,b)=>a.due-b.due);
+  const left=Math.max(0,S.set.newPerDay-S.nd.n);
+  const fresh=all.filter(c=>c.state==="new").sort((a,b)=>a.added-b.added).slice(0,left);
+  return due.concat(fresh);
+}
+function promoteFromCard(c){ // FSRS stability ≥ 21 days => the word counts as known
+  const k=c.key; if(!k)return; if(c.state==="review"&&c.s>=21)S.known[k]=2; else if(!S.known[k])S.known[k]=1;
+}
+
+/* ---------- UI helpers ---------- */
+function toast(m){const t=$("#toast");t.textContent=m;t.classList.add("on");clearTimeout(t._t);t._t=setTimeout(()=>t.classList.remove("on"),1800)}
+function openSheet(html){$("#sheet").innerHTML=html;$("#sheet").classList.add("open");$("#scrim").classList.add("open")}
+function closeSheet(){$("#sheet").classList.remove("open");$("#scrim").classList.remove("open")}
+$("#scrim").onclick=closeSheet;
+function setTab(t){document.querySelectorAll("#tabs button").forEach(b=>b.classList.toggle("on",b.dataset.tab===t))}
+document.querySelectorAll("#tabs button").forEach(b=>b.onclick=()=>go(b.dataset.tab));
+function updateBadge(){const n=dueCards().length,b=$("#dueBadge");b.textContent=n;b.classList.toggle("hidden",!n)}
+let route={v:"home"};
+function go(v,arg){stopAudio();closeSheet();route={v,arg};view=v;render();scrollTo(0,0)}
+document.addEventListener("backbutton",()=>back());
+function back(){if($("#sheet").classList.contains("open")){closeSheet();return true}if(["reader","lesson","sounds","why","settings"].includes(route.v)){go(route.from||"path");return true}if(route.v!=="home"){go("home");return true}return false}
+window.__back=back;
+
+function render(){
+  const v=route.v;view=v;setTab(["home","path","review","stats"].includes(v)?v:(v==="reader"||v==="lesson"||v==="sounds"?"path":""));
+  $("#tabs").classList.toggle("hidden",v==="reader"||v==="lesson");
+  updateBadge();
+  const app=$("#app");
+  if(!S.onboard&&v==="home"){app.innerHTML=onboardHTML();bindOnboard();return}
+  if(v==="home")app.innerHTML=homeHTML(),bindHome();
+  else if(v==="path")app.innerHTML=pathHTML(),bindPath();
+  else if(v==="review")renderReview();
+  else if(v==="stats")app.innerHTML=statsHTML(),bindStats();
+  else if(v==="reader")renderReader(route.arg);
+  else if(v==="lesson")renderLesson(route.arg);
+  else if(v==="sounds")app.innerHTML=soundsHTML(),bindSounds();
+  else if(v==="why")app.innerHTML=whyHTML(),bindTop();
+  else if(v==="settings")app.innerHTML=settingsHTML(),bindSettings();
+}
+function topHTML(title,backTo){return `<header class="top">${backTo?`<button class="ib" data-back="${backTo}">→</button>`:""}<h1>${title}</h1>${backTo?"":`<button class="ib" data-go="why" title="لماذا هذه الطريقة">🔬</button><button class="ib" data-go="settings">⚙️</button>`}</header>`}
+function bindTop(){document.querySelectorAll("[data-back]").forEach(b=>b.onclick=()=>go(b.dataset.back));document.querySelectorAll("[data-go]").forEach(b=>b.onclick=()=>{const f=route.v;go(b.dataset.go);route.from=f})}
+
+/* ---------- onboarding ---------- */
+function onboardHTML(){return `
+<div class="card center" style="margin-top:20px"><div style="font-size:64px">🇳🇱</div><h1 style="margin:6px 0">Leer Nederlands</h1>
+<p class="mute">تعلّم الهولندية من الصفر بطريقة مبنية على أبحاث اكتساب اللغة</p></div>
+<div class="card"><b>كيف يعمل التطبيق؟</b>
+<p>🎧 <b>مدخلات مفهومة أولا:</b> تستمع وتقرأ قصصا صوتية تفهم معظمها، مع ترجمة عربية وصور. هكذا يكتسب الدماغ اللغة.</p>
+<p>👆 <b>اضغط أي كلمة</b> لترى معناها وتسمع نطقها.</p>
+<p>🔁 <b>مراجعة ذكية</b> (خوارزمية FSRS) تعيد لك الكلمة قبل أن تنساها بالضبط.</p>
+<p>🎙️ <b>التحدث يأتي لاحقا وبشكل طبيعي</b>، ويمكنك التدرب على الترديد (Shadowing).</p></div>
+<div class="card"><b>كم دقيقة يوميا؟</b><div class="seg" id="obGoal">${[10,15,30,45].map(m=>`<button data-m="${m}" class="${m===15?"on":""}">${m} د</button>`).join("")}</div>
+<p class="small mute">الاستمرارية أهم من المدة: 15 دقيقة كل يوم أفضل من ساعتين مرة في الأسبوع.</p></div>
+<button class="btn wide" id="obGo">لنبدأ من الصفر ←</button>`}
+function bindOnboard(){let g=15;document.querySelectorAll("#obGoal button").forEach(b=>b.onclick=()=>{g=+b.dataset.m;document.querySelectorAll("#obGoal button").forEach(x=>x.classList.toggle("on",x===b))});
+  $("#obGo").onclick=()=>{S.set.goal=g;S.onboard=true;save();const n=nextStep();if(n)openStep(n);else go("home")}}
+
+/* ---------- home ---------- */
+function streak(){let n=0,d=new Date();const ok=k=>S.log[k]&&S.log[k].sec>=60;if(!ok(today(d)))d=new Date(d-DAY);while(ok(today(d))){n++;d=new Date(d-DAY)}return n}
+function stepLabel(p){if(p.type==="sounds")return ["🔤","أصوات الهولندية","تعرّف على الحروف التي تختلف عن العربية"];if(p.type==="lesson")return [p.L.words[0].pic,"كلمات: "+p.L.group,p.L.words.map(w=>w.nl.replace(/^(de|het) /,"")).slice(0,5).join(" · ")];return [(p.s.lines.find(l=>l.pic)||{pic:"📖"}).pic,p.s.title,p.s.titleAr+" · "+(LV[p.s.level]||p.s.level)]}
+function homeHTML(){
+  const L=logT(),min=Math.floor(L.sec/60),p=Math.min(100,Math.round(L.sec/60/S.set.goal*100)),due=dueCards().length,n=nextStep();
+  const totalH=Object.values(S.log).reduce((a,b)=>a+b.sec,0)/3600;
+  const lab=n?stepLabel(n):null;
+  return topHTML("مرحبا 👋")+`
+<div class="card row"><div class="ring" style="--p:${p}"><i>${min}/${S.set.goal}<br><small class="mute">دقيقة</small></i></div>
+<div><b>${p>=100?"أحسنت! حققت هدف اليوم 🎉":"هدف اليوم: مدخلات مفهومة"}</b><div class="small mute">الاستماع والقراءة يُحسبان تلقائيا</div><div class="small" style="margin-top:6px">🔥 ${streak()} يوم متتالي · ⏳ ${totalH.toFixed(1)} ساعة إجمالا</div></div></div>
+${n?`<button class="item next" id="hNext"><div class="ic">${lab[0]}</div><div class="tt"><b>تابع: ${esc(lab[1])}</b><span>${esc(lab[2])}</span></div><span>◀</span></button>`:`<div class="card">أنهيت المسار كاملا! أعد الاستماع للقصص لتقوية الطلاقة.</div>`}
+<button class="item" id="hRev"><div class="ic">🔁</div><div class="tt"><b>المراجعة</b><span>${due?due+" بطاقة تنتظرك":"لا توجد بطاقات مستحقة الآن"}</span></div><span>◀</span></button>
+<div class="card stats3"><div><b>${knownCount()}</b><span class="small mute">كلمة أعرفها</span></div><div><b>${learningCount()}</b><span class="small mute">أتعلمها</span></div><div><b>${Object.keys(S.done).length}</b><span class="small mute">قصة أنهيتها</span></div></div>
+<div class="card small mute">💡 ${tip()}</div>`}
+const TIPS=["لا تحاول فهم كل كلمة. إذا فهمت الفكرة العامة فأنت تتقدم.","أعد الاستماع لنفس القصة عدة مرات: التكرار يحوّل الكلمات إلى معرفة دائمة.","جرّب وضع «👂 استماع فقط» بعد قراءة القصة مرة: تدريب ممتاز للأذن.","الكلمات الملوّنة بالأزرق جديدة، والصفراء تتعلمها. هدفك أن تقلّ الألوان.","المراجعة القصيرة اليومية أفضل بكثير من مراجعة طويلة كل أسبوع.","التحدث يأتي بعد الاستماع. لا تقلق إن لم تتكلم بعد.","الكلمة تحتاج أن تراها وتسمعها حوالي 10 مرات في سياقات مختلفة لتثبت."];
+function tip(){return TIPS[new Date().getDate()%TIPS.length]}
+function bindHome(){bindTop();const n=$("#hNext");if(n)n.onclick=()=>openStep(nextStep());$("#hRev").onclick=()=>go("review")}
+function openStep(p){if(!p)return;if(p.type==="sounds")go("sounds");else if(p.type==="lesson")go("lesson",p.L);else go("reader",p.id)}
+
+/* ---------- path ---------- */
+function pathHTML(){
+  const n=nextStep();let h=topHTML("المسار");let lastLv=null;
+  PATH.forEach((p,i)=>{
+    if(p.type==="story"&&p.s.level!==lastLv){lastLv=p.s.level;h+=`<h2>${LV[lastLv]||lastLv}</h2>`}
+    else if(i===0)h+=`<h2>الأساس</h2>`;
+    const lab=stepLabel(p),done=isDone(p);let side="";
+    if(p.type==="story"){const c=Math.round(coverage(p.id)*100);side=`<span class="cov ${c>=95?"g":c>=85?"y":"r"}">${c}%</span>`}
+    h+=`<button class="item ${done?"done":""} ${p===n?"next":""}" data-i="${i}"><div class="ic">${done?"✅":lab[0]}</div><div class="tt"><b>${esc(lab[1])}</b><span>${esc(lab[2])}</span></div>${side}</button>`});
+  h+=`<p class="small mute center">النسبة = كم تفهم من كلمات القصة. الأبحاث تشير إلى أن 95–98% هي المنطقة المثالية للتعلم بمتعة.</p>`;
+  return h}
+function bindPath(){bindTop();document.querySelectorAll("[data-i]").forEach(b=>b.onclick=()=>openStep(PATH[+b.dataset.i]))}
+
+/* ---------- sounds ---------- */
+function soundsHTML(){return topHTML("أصوات الهولندية","path")+`<p class="mute small">اضغط على كل مثال واستمع، ثم ردّده بصوت عال. معظم الأصوات سهلة لمتحدث العربية، خصوصا «g» التي تنطق «خ».</p>`+
+  D.sounds.map(s=>`<div class="card sound"><div class="sym">${esc(s.sym)}</div><div style="flex:1"><div>${esc(s.how)}</div><div class="ex">${s.ex.map(e=>`<button data-w="${esc(e[0])}">🔊 <b>${esc(e[0])}</b> <span class="mute small">${esc(e[1])}</span></button>`).join("")}</div></div></div>`).join("")+
+  `<button class="btn wide" id="sDone">${S.lessons.sounds?"✅ تمت":"أنهيت الأصوات ✓"}</button>`}
+function bindSounds(){bindTop();document.querySelectorAll("[data-w]").forEach(b=>b.onclick=()=>sayText(b.dataset.w));$("#sDone").onclick=()=>{S.lessons.sounds=1;save();toast("ممتاز! 🎉");openStep(nextStep())}}
+
+/* ---------- word lessons: picture + sound (dual coding), then listening quiz ---------- */
+function renderLesson(L){
+  const ws=L.words;let i=0,phase="intro",queue=[],qi=0,wrong=0;
+  const app=$("#app");
+  function shuffle(a){a=a.slice();for(let k=a.length-1;k>0;k--){const j=Math.floor(Math.random()*(k+1));[a[k],a[j]]=[a[j],a[k]]}return a}
+  function draw(){
+    const total=ws.length*2,doneN=phase==="intro"?i:ws.length+qi;
+    let h=`<header class="top"><button class="ib" id="lx">✕</button><h1>كلمات: ${esc(L.group)}</h1></header><div class="prog"><i style="width:${Math.min(100,doneN/total*100)}%"></i></div>`;
+    if(phase==="intro"){const w=ws[i];
+      h+=`<div class="card flash"><div class="emo">${w.pic}</div><div class="word nl">${esc(w.nl)}</div><div class="mute" style="font-size:20px">${esc(w.ar)}</div><button class="btn alt" id="lp">🔊 استمع مرة أخرى</button></div>
+      <p class="small mute center">استمع، انظر إلى الصورة، وردّد الكلمة بصوت عال.</p><button class="btn wide" id="ln">${i<ws.length-1?"التالي ←":"لنختبر أذنك 👂"}</button>`;
+      app.innerHTML=h;sayText(w.nl);$("#lp").onclick=()=>sayText(w.nl);$("#ln").onclick=()=>{i++;if(i>=ws.length){phase="quiz";queue=shuffle(ws);qi=0}draw()};
+    }else if(qi<queue.length){const w=queue[qi];const pool=ws.filter(x=>x!==w&&x.pic!==w.pic);const opts=shuffle([w].concat(shuffle(pool).slice(0,3)));
+      h+=`<div class="card flash"><div style="font-size:15px" class="mute">ماذا سمعت؟</div><button class="btn blue" id="lp">🔊 استمع</button></div><div class="opts" id="lo">${opts.map((o,k)=>`<button data-k="${k}">${o.pic}</button>`).join("")}</div>`;
+      app.innerHTML=h;sayText(w.nl);$("#lp").onclick=()=>sayText(w.nl);
+      document.querySelectorAll("#lo button").forEach(b=>b.onclick=()=>{const o=opts[+b.dataset.k];
+        if(o===w){b.classList.add("right");toast("✓ "+w.nl+" = "+w.ar);setTimeout(()=>{qi++;draw()},700)}
+        else{b.classList.add("wrong");wrong++;queue.push(w);document.querySelectorAll("#lo button").forEach(x=>{if(opts[+x.dataset.k]===w)x.classList.add("right")});setTimeout(()=>{qi++;draw()},1200)}});
+    }else{
+      ws.forEach(w=>{const k=coreKey(w.nl);if(!S.known[k])S.known[k]=1;addCard("w:"+w.nl,{type:"w",ref:w.nl,key:k,state:"learn",step:1,s:W[2],d:D0(3),due:Date.now()+10*MIN,last:Date.now()})});
+      S.lessons[L.id]=1;logT().words+=ws.length;save();
+      h+=`<div class="card flash"><div class="emo">🎉</div><div class="word">أحسنت!</div><div class="mute">تعلمت ${ws.length} كلمات جديدة${wrong?` (${wrong} أخطاء صغيرة، وهذا طبيعي)`:""}.<br>ستظهر لك في المراجعة في الوقت المناسب.</div></div><button class="btn wide" id="lnext">تابع المسار ←</button>`;
+      app.innerHTML=h;$("#lnext").onclick=()=>openStep(nextStep());
+    }
+    $("#lx").onclick=()=>go("path");
+  }
+  draw();
+}
+
+/* ---------- reader ---------- */
+let R_ = null;
+function renderReader(id){
+  const s=storyById[id];if(!s){go("path");return}
+  R_={s,i:0,playing:false,listen:false};
+  const tr=S.set.tr;
+  const unknown={};s.lines.forEach(l=>toks(l.nl).forEach(t=>{const f=norm(t.t);if(status(f)===0)unknown[keyOf(f)]=(unknown[keyOf(f)]||{n:0,f}),unknown[keyOf(f)].n++}));
+  const pre=Object.values(unknown).sort((a,b)=>b.n-a.n).slice(0,6);
+  let h=`<header class="top"><button class="ib" id="rx">→</button><h1><span class="nl" style="display:inline">${esc(s.title)}</span><div class="small mute" style="font-weight:400">${esc(s.titleAr)} · ${LV[s.level]||s.level}</div></h1></header>
+  <div class="rbar"><button class="ib" id="rPlay">▶ استمع</button><button class="ib" id="rRate">${S.set.rate}×</button><button class="ib" id="rTr">${tr==="show"?"🇸🇦 ظاهرة":tr==="tap"?"🇸🇦 بالضغط":"🇸🇦 مخفية"}</button><button class="ib" id="rListen">👂 استماع فقط</button></div>`;
+  if(pre.length&&s.level!=="Start")h+=`<div class="card pre"><b>📌 قبل أن تبدأ: كلمات مهمة في هذه القصة</b><div class="small mute">معرفتها مسبقا تجعل القصة مفهومة أكثر.</div>${pre.map(p=>`<div class="pw"><button class="ib" data-say="${esc(p.f)}" style="width:34px;height:34px;font-size:16px">🔊</button><b class="nl" style="flex:none">${esc(p.f)}</b><span class="mute">${esc((D.dict[p.f]||["؟"])[0])}</span></div>`).join("")}</div>`;
+  h+=`<div id="sents">`+s.lines.map((l,i)=>sentHTML(l,i,tr,s)).join("")+`</div>
+  <div class="card center"><button class="btn wide" id="rDone">✅ أنهيت القصة</button><div class="small mute" style="margin-top:6px">${S.done[id]?"قرأتها "+S.done[id]+" مرة. التكرار يقوّي الفهم!":""}</div></div>`;
+  $("#app").innerHTML=h;
+  $("#rx").onclick=()=>go("path");
+  $("#rPlay").onclick=()=>{if(R_.playing){stopAudio();R_.playing=false;updatePlayBtn()}else playFrom(R_.i||0)};
+  $("#rRate").onclick=()=>{const r=[0.7,0.8,0.9,1,1.15];S.set.rate=r[(r.indexOf(S.set.rate)+1)%r.length]||0.9;save();$("#rRate").textContent=S.set.rate+"×";audio.playbackRate=S.set.rate};
+  $("#rTr").onclick=()=>{const o=["show","tap","hide"];S.set.tr=o[(o.indexOf(S.set.tr)+1)%3];save();const k=S.set.tr;$("#rTr").textContent=k==="show"?"🇸🇦 ظاهرة":k==="tap"?"🇸🇦 بالضغط":"🇸🇦 مخفية";document.querySelectorAll(".sent .ar").forEach(a=>{a.classList.toggle("blur",k==="tap");a.classList.toggle("hide",k==="hide")})};
+  $("#rListen").onclick=()=>{R_.listen=!R_.listen;$("#sents").classList.toggle("listen",R_.listen);$("#rListen").classList.toggle("on",R_.listen);if(R_.listen&&!R_.playing)playFrom(0)};
+  document.querySelectorAll("[data-say]").forEach(b=>b.onclick=()=>sayWord(b.dataset.say));
+  $("#sents").onclick=e=>{
+    const w=e.target.closest(".w");if(w){wordSheet(norm(w.textContent),+w.closest(".sent").dataset.i);return}
+    const a=e.target.closest(".ar");if(a&&a.classList.contains("blur")){a.classList.remove("blur");return}
+    const b=e.target.closest("[data-act]");if(!b)return;const i=+b.closest(".sent").dataset.i;
+    if(b.dataset.act==="play"){stopAudio();R_.playing=false;playOne(i,false)}
+    else if(b.dataset.act==="shadow")shadow(i);
+    else if(b.dataset.act==="slow"){stopAudio();R_.playing=false;playOne(i,false,0.7)}
+  };
+  $("#rDone").onclick=()=>finishStory(s);
+}
+function sentHTML(l,i,tr,s){
+  let html="",last=0;toks(l.nl).forEach((t,k)=>{const f=norm(t.t),st=status(f);html+=esc(l.nl.slice(last,t.i))+`<span class="w ${st===0?"u":st===1?"l":"k"}" data-k="${k}">${esc(t.t)}</span>`;last=t.i+t.t.length});html+=esc(l.nl.slice(last));
+  const who=SPK[l.spk];
+  return `<div class="sent" data-i="${i}">${who&&l.spk!=="N"?`<div class="who">🗨️ ${who}</div>`:""}${l.pic?`<div class="pic">${l.pic}</div>`:""}<div class="nl">${html}</div><div class="ar ${tr==="tap"?"blur":tr==="hide"?"hide":""}">${esc(l.ar)}</div>
+  <div class="acts"><button data-act="shadow" title="ردّد">🎙️</button><button data-act="slow" title="ببطء">🐢</button><button data-act="play" title="استمع">🔊</button></div><div class="shadowres hidden"></div></div>`}
+function refreshWordColors(){document.querySelectorAll("#sents .w").forEach(w=>{const st=status(norm(w.textContent));w.classList.toggle("u",st===0);w.classList.toggle("l",st===1);w.classList.toggle("k",st===2)})}
+function updatePlayBtn(){const b=$("#rPlay");if(b)b.textContent=R_&&R_.playing?"⏸ إيقاف":"▶ استمع"}
+function playOne(i,cont,rate){
+  const s=R_.s,l=s.lines[i];if(!l)return;
+  document.querySelectorAll(".sent.cur").forEach(e=>e.classList.remove("cur"));
+  const el=document.querySelector(`.sent[data-i="${i}"]`);if(el){el.classList.add("cur");const r=el.getBoundingClientRect();if(r.top<60||r.bottom>innerHeight-40)el.scrollIntoView({behavior:"smooth",block:"center"})}
+  R_.i=i;
+  const tok=playClip(l.a,rate||S.set.rate,()=>{clearHL();if(cont&&R_.playing){if(i+1<s.lines.length)setTimeout(()=>{if(tok===playToken&&R_.playing)playOne(i+1,true)},450);else{R_.playing=false;R_.i=0;updatePlayBtn();if(R_.listen)toast("انتهت القصة 🎧")}}});
+  const spans=el?[...el.querySelectorAll(".w")]:[];karaoke={spans};
+  const step=()=>{if(tok!==playToken)return;const ms=audio.currentTime*1000;spans.forEach((sp,k)=>{const t=l.t[k];sp.classList.toggle("hl",!!t&&ms>=t[0]-30&&ms<t[1]+60)});rafId=requestAnimationFrame(step)};
+  cancelAnimationFrame(rafId);rafId=requestAnimationFrame(step);
+  function clearHL(){spans.forEach(sp=>sp.classList.remove("hl"))}
+}
+function playFrom(i){R_.playing=true;updatePlayBtn();playOne(i,true)}
+function wordSheet(form,lineIdx){
+  stopAudio();if(R_)R_.playing=false;updatePlayBtn();
+  const e=D.dict[form]||["(لا توجد ترجمة)"],st=status(form),free=isFree(form);
+  const l=R_.s.lines[lineIdx];const cid="c:"+keyOf(form);
+  openSheet(`<div class="row"><div style="flex:1"><div class="big nl">${esc(form)}</div>${e[1]?`<div class="small mute nl">الأصل: ${esc(e[1])}</div>`:""}</div><button class="ib" id="wsSay">🔊</button></div>
+  <div style="font-size:20px;margin:8px 0">${esc(e[0])}</div>
+  ${free?"":`<div class="seg" id="wsSeg"><button data-v="0" class="${st===0?"on":""}">🆕 جديدة</button><button data-v="1" class="${st===1?"on":""}">📒 أتعلمها</button><button data-v="2" class="${st===2?"on":""}">✅ أعرفها</button></div>
+  <button class="btn wide ${S.cards[cid]?"alt":""}" id="wsAdd">${S.cards[cid]?"✓ موجودة في المراجعة":"➕ أضف للمراجعة مع هذه الجملة"}</button>`}`);
+  $("#wsSay").onclick=()=>{if(!sayWord(form)){const k=toks(l.nl).findIndex(t=>norm(t.t)===form);const t=l.t[k];if(t)playClip(l.a,1,null,t[0],t[1]+80)}};
+  $("#wsSay").onclick();
+  if(free)return;
+  document.querySelectorAll("#wsSeg button").forEach(b=>b.onclick=()=>{setStatus(form,+b.dataset.v);document.querySelectorAll("#wsSeg button").forEach(x=>x.classList.toggle("on",x===b));refreshWordColors()});
+  $("#wsAdd").onclick=()=>{if(addCard(cid,{type:"c",ref:R_.s.id+":"+lineIdx,form,key:keyOf(form)})){if(!S.known[keyOf(form)])setStatus(form,1);refreshWordColors();logT().words++;toast("أضيفت للمراجعة 🔁");closeSheet()}};
+}
+function finishStory(s){
+  stopAudio();R_.playing=false;
+  S.done[s.id]=(S.done[s.id]||0)+1;save();
+  const unk=[...new Set(storyStats[s.id].forms.filter(f=>status(f)===0).map(keyOf))];
+  openSheet(`<div class="center"><div style="font-size:48px">🎉</div><div class="big" style="font-size:22px">أحسنت!</div><div class="mute">${storyStats[s.id].words} كلمة من المدخلات المفهومة</div></div>
+  ${unk.length?`<p class="small">بقيت <b>${unk.length}</b> كلمة زرقاء لم تضغط عليها. إذا كنت تفهمها، علّمها كمعروفة لتتحسن توصيات القصص.</p><button class="btn alt wide" id="fKnown">✅ أفهم الكلمات الزرقاء الباقية</button>`:""}
+  <div style="display:grid;gap:8px;margin-top:10px"><button class="btn blue wide" id="fQuiz">📝 اختبار سريع (3 أسئلة)</button><button class="btn alt wide" id="fAgain">🎧 استمع مرة ثانية بدون نص</button><button class="btn wide" id="fNext">تابع المسار ←</button></div>`);
+  const fk=$("#fKnown");if(fk)fk.onclick=()=>{unk.forEach(k=>S.known[k]=2);save();refreshWordColors();fk.disabled=true;fk.textContent="✓ تم"};
+  $("#fAgain").onclick=()=>{closeSheet();R_.listen=true;$("#sents").classList.add("listen");$("#rListen").classList.add("on");scrollTo(0,0);playFrom(0)};
+  $("#fNext").onclick=()=>openStep(nextStep());
+  $("#fQuiz").onclick=()=>quiz(s);
+}
+function quiz(s){
+  // cloze from the story: hear the sentence, pick the missing word (meaning-focused, uses the same input)
+  const cands=[];s.lines.forEach((l,i)=>{const t=toks(l.nl).filter(x=>!isFree(norm(x.t))&&x.t.length>2);if(t.length>=2)cands.push({l,i,t})});
+  const pick=cands.sort(()=>Math.random()-.5).slice(0,3);let qi=0,score=0;
+  const allForms=[...new Set(storyStats[s.id].forms.filter(f=>!isFree(f)&&f.length>2))];
+  function q(){
+    if(qi>=pick.length){openSheet(`<div class="center"><div style="font-size:48px">${score===pick.length?"🏆":score?"👍":"💪"}</div><div class="big" style="font-size:22px">${score} / ${pick.length}</div><p class="mute">${score===pick.length?"فهمت القصة جيدا!":"لا بأس، أعد الاستماع للقصة غدا وسترى الفرق."}</p><button class="btn wide" id="qNext">تابع ←</button></div>`);$("#qNext").onclick=()=>openStep(nextStep());return}
+    const c=pick[qi],target=c.t[Math.floor(Math.random()*c.t.length)],tf=norm(target.t);
+    const wrong=allForms.filter(f=>f!==tf).sort(()=>Math.random()-.5).slice(0,3);
+    const opts=[tf].concat(wrong).sort(()=>Math.random()-.5);
+    const shown=esc(c.l.nl.slice(0,target.i))+"<b>_____</b>"+esc(c.l.nl.slice(target.i+target.t.length));
+    openSheet(`<div class="small mute">سؤال ${qi+1} من ${pick.length} · اختر الكلمة الناقصة</div><div class="nl" style="font-size:20px;margin:8px 0">${shown}</div><div class="small mute">${esc(c.l.ar)}</div><button class="btn alt" id="qPlay" style="margin:8px 0">🔊 استمع</button><div class="opts txt" id="qo">${opts.map(o=>`<button class="nl" data-o="${esc(o)}">${esc(o)}</button>`).join("")}</div>`);
+    $("#qPlay").onclick=()=>playClip(c.l.a,S.set.rate);playClip(c.l.a,S.set.rate);
+    document.querySelectorAll("#qo button").forEach(b=>b.onclick=()=>{const ok=b.dataset.o===tf;if(ok)score++;b.classList.add(ok?"right":"wrong");document.querySelectorAll("#qo button").forEach(x=>{if(x.dataset.o===tf)x.classList.add("right");x.disabled=true});setTimeout(()=>{qi++;q()},ok?700:1400)});
+  }
+  q();
+}
+
+/* ---------- shadowing (speech recognition: Android bridge or Web Speech API) ---------- */
+let speechCb=null;
+window.__speech=function(r){if(typeof r==="string")try{r=JSON.parse(r)}catch(e){r={error:r}}if(speechCb){const f=speechCb;speechCb=null;f(r)}};
+function listen(cb){
+  speechCb=cb;
+  if(window.Android&&Android.listen){Android.listen("nl-NL");return}
+  const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+  if(!SR){window.__speech({error:"unsupported"});return}
+  const rec=new SR();rec.lang="nl-NL";rec.interimResults=false;rec.maxAlternatives=3;
+  rec.onresult=e=>window.__speech({text:e.results[0][0].transcript});rec.onerror=e=>window.__speech({error:e.error});rec.start();
+}
+function shadow(i){
+  const l=R_.s.lines[i],el=document.querySelector(`.sent[data-i="${i}"]`),box=$(".shadowres",el);
+  stopAudio();R_.playing=false;updatePlayBtn();box.classList.remove("hidden");box.innerHTML="🔊 استمع أولا...";
+  playOne(i,false);
+  audio.onended=()=>{clearHLs(el);box.innerHTML="🎙️ الآن ردّد الجملة...";listen(r=>{
+    if(r.error){box.innerHTML=r.error==="unsupported"?"التعرف على الصوت غير متاح على هذا الجهاز. ردّد بصوت عال على أي حال: الترديد نفسه هو التمرين.":"لم أسمعك جيدا، حاول مرة أخرى 🎙️";return}
+    const target=toks(l.nl).map(t=>norm(t.t)),said=toks(r.text||"").map(t=>norm(t.t));
+    const lcs=lcsMark(target,said),pct=Math.round(lcs.filter(Boolean).length/target.length*100);
+    const spans=[...el.querySelectorAll(".w")];spans.forEach((s,k)=>{s.classList.toggle("ok",lcs[k]);s.classList.toggle("no",!lcs[k])});
+    setTimeout(()=>spans.forEach(s=>s.classList.remove("ok","no")),4000);
+    box.innerHTML=`${pct>=90?"🌟 ممتاز!":pct>=60?"👍 جيد جدا":"💪 حاول مرة أخرى"} <b>${pct}%</b><div class="nl small mute">${esc(r.text||"")}</div>`;
+  })};
+}
+function clearHLs(el){el.querySelectorAll(".hl").forEach(x=>x.classList.remove("hl"))}
+function lcsMark(a,b){const n=a.length,m=b.length,T=[...Array(n+1)].map(()=>new Array(m+1).fill(0));for(let i=n-1;i>=0;i--)for(let j=m-1;j>=0;j--)T[i][j]=a[i]===b[j]?T[i+1][j+1]+1:Math.max(T[i+1][j],T[i][j+1]);const mark=new Array(n).fill(false);let i=0,j=0;while(i<n&&j<m){if(a[i]===b[j]){mark[i]=true;i++;j++}else if(T[i+1][j]>=T[i][j+1])i++;else j++}return mark}
+
+/* ---------- review ---------- */
+function renderReview(){
+  const q=dueCards(),app=$("#app");
+  if(!q.length){const next=Object.values(S.cards).filter(c=>c.state!=="new").sort((a,b)=>a.due-b.due)[0];
+    app.innerHTML=topHTML("المراجعة")+`<div class="card flash"><div class="emo">🌿</div><div class="word" style="font-size:24px">لا توجد مراجعات الآن</div><div class="mute">${next?"المراجعة القادمة بعد "+fmtIvl(next.due-Date.now()):"تعلّم كلمات من المسار أو أضف كلمات من القصص."}</div></div>
+    <div class="card small mute">🧠 المراجعة تعتمد على «الاسترجاع المتباعد»: تتذكر الكلمة بنفسك قبل أن تنساها مباشرة. هذا من أقوى ما أثبتته أبحاث الذاكرة.</div>`;bindTop();return}
+  const c=q[0];let shown=false;
+  function front(){
+    let h=topHTML("المراجعة")+`<div class="small mute center">${q.length} متبقية اليوم</div>`;
+    if(c.type==="w"){const w=D.words.find(x=>x.nl===c.ref)||{nl:c.ref,ar:"",pic:""};
+      h+=`<div class="card flash"><div class="word nl">${esc(w.nl)}</div><button class="btn alt" id="rvSay">🔊</button>${shown?`<div class="emo">${w.pic}</div><div style="font-size:22px">${esc(w.ar)}</div>`:`<div class="mute">ماذا تعني؟ تذكّر ثم اكشف</div>`}</div>`;
+      app.innerHTML=h+controls();$("#rvSay").onclick=()=>sayText(w.nl);if(!shown)sayText(w.nl);
+    }else{const [sid,li]=c.ref.split(":"),l=storyById[sid].lines[+li];
+      let html="",last=0;toks(l.nl).forEach(t=>{html+=esc(l.nl.slice(last,t.i))+(norm(t.t)===c.form?`<b style="color:var(--brand)">${esc(t.t)}</b>`:esc(t.t));last=t.i+t.t.length});html+=esc(l.nl.slice(last));
+      const e=D.dict[c.form]||["?"];
+      h+=`<div class="card flash"><div class="nl" style="font-size:21px">${html}</div><button class="btn alt" id="rvSay">🔊</button>${shown?`<div class="big nl" style="font-size:26px">${esc(c.form)}</div><div style="font-size:20px">${esc(e[0])}</div><div class="small mute">${esc(l.ar)}</div>`:`<div class="mute">ماذا تعني الكلمة الملوّنة؟</div>`}</div>`;
+      app.innerHTML=h+controls();$("#rvSay").onclick=()=>playClip(l.a,S.set.rate);if(!shown)playClip(l.a,S.set.rate);
+    }
+    bindTop();
+    if(!shown)$("#rvShow").onclick=()=>{shown=true;front()};
+    else document.querySelectorAll(".grade button").forEach(b=>b.onclick=()=>grade(+b.dataset.g));
+  }
+  function controls(){if(!shown)return `<button class="btn wide" id="rvShow">اكشف الجواب</button>`;
+    const now=Date.now();return `<div class="grade">${[[1,"لم أتذكر"],[2,"صعب"],[3,"جيد"],[4,"سهل"]].map(([g,t])=>`<button class="g${g}" data-g="${g}">${t}<small>${fmtIvl(schedule(c,g,now).due-now)}</small></button>`).join("")}</div>`}
+  function grade(g){const wasNew=c.state==="new";const n=schedule(c,g);S.cards[c.id]=n;if(wasNew)S.nd.n++;logT().rev++;promoteFromCard(n);save();renderReview()}
+  front();
+}
+
+/* ---------- stats ---------- */
+function statsHTML(){
+  const days=[];for(let k=13;k>=0;k--){const d=new Date(Date.now()-k*DAY);days.push({k:today(d),l:d.getDate()})}
+  const mins=days.map(d=>(S.log[d.k]?S.log[d.k].sec:0)/60),mx=Math.max(S.set.goal,...mins);
+  const totalS=Object.values(S.log).reduce((a,b)=>a+b.sec,0),rev=Object.values(S.log).reduce((a,b)=>a+(b.rev||0),0);
+  const H=totalS/3600,ms=[1,5,10,25,50,100,200,400],nx=ms.find(m=>m>H)||1000;
+  const cards=Object.values(S.cards),mature=cards.filter(c=>c.state==="review"&&c.s>=21).length;
+  return topHTML("تقدّمي")+`
+<div class="card"><b>دقائق المدخلات (آخر 14 يوما)</b><div class="bars">${mins.map((m,i)=>`<div class="${i===13?"today":""}" style="height:${Math.max(2,m/mx*100)}%"><span>${days[i].l}</span></div>`).join("")}</div><div style="height:20px"></div></div>
+<div class="card stats3"><div><b>${H.toFixed(1)}</b><span class="small mute">ساعة استماع وقراءة</span></div><div><b>${streak()}</b><span class="small mute">يوم متتالي</span></div><div><b>${rev}</b><span class="small mute">مراجعة</span></div></div>
+<div class="card"><b>الهدف القادم: ${nx} ساعة</b><div class="prog"><i style="width:${Math.min(100,H/nx*100)}%"></i></div><div class="small mute">بعد حوالي 50 ساعة من المدخلات المفهومة يلاحظ معظم المتعلمين أنهم يفهمون جملا كاملة دون ترجمة.</div></div>
+<div class="card stats3"><div><b>${knownCount()}</b><span class="small mute">أعرفها</span></div><div><b>${learningCount()}</b><span class="small mute">أتعلمها</span></div><div><b>${mature}</b><span class="small mute">بطاقة راسخة (+21 يوم)</span></div></div>
+<div class="card stats3"><div><b>${Object.keys(S.done).length}/${D.stories.length}</b><span class="small mute">قصص</span></div><div><b>${Object.keys(S.lessons).filter(k=>k!=="sounds").length}/${lessons.length}</b><span class="small mute">دروس كلمات</span></div><div><b>${cards.length}</b><span class="small mute">بطاقة</span></div></div>`}
+function bindStats(){bindTop()}
+
+/* ---------- research ---------- */
+function whyHTML(){const R=[
+ ["🎧","المدخلات المفهومة هي المحرك","نكتسب اللغة عندما نفهم رسائل فيها. لذلك أساس التطبيق قصص صوتية متدرجة تفهم معظمها، وليس قواعد للحفظ.","Krashen (1982); Nation (2007) “The four strands”"],
+ ["🎯","95–98% من الكلمات معروفة","الفهم المريح يحتاج معرفة 95–98% من الكلمات في النص، ونحو 95% في الاستماع. لهذا يحسب التطبيق نسبة فهمك لكل قصة ويقترح الأنسب.","Hu & Nation (2000); Laufer & Ravenhorst-Kalovski (2010); van Zeeland & Schmitt (2013)"],
+ ["📖🎧","القراءة والاستماع معا","تحليل جامع حديث وجد أن القراءة والاستماع والقراءة مع الاستماع كلها تعلّم الكلمات بشكل عرضي بنسب متقاربة، بينما الاستماع وحده أضعف قليلا للمبتدئ. لذلك نبدأ بالنص مع الصوت ثم نضيف «استماع فقط» للتكرار.","Webb, Uchihara & Yanagisawa (2023) Language Teaching; Uchihara et al. (2025) Language Testing in Asia"],
+ ["🔄","التكرار في سياقات مختلفة","كلما صادفت الكلمة أكثر زاد احتمال تعلمها. القصص سلسلة واحدة بنفس الشخصيات والمواضيع (قراءة ضيقة) فتتكرر الكلمات طبيعيا.","Uchihara, Webb & Yanagisawa (2019) Language Learning; Krashen (2004) narrow reading"],
+ ["👆","الشرح بلغتك الأم","التحاليل الجامعة تظهر أن الشروحات (glosses) تحسّن تعلم الكلمات، وأن الشرح باللغة الأم فعّال جدا للمبتدئين. لذلك كل كلمة قابلة للضغط مع ترجمتها ونطقها.","Yanagisawa, Webb & Uchihara (2020) Studies in Second Language Acquisition"],
+ ["🖼️","صورة + صوت","ربط الكلمة بصورة وصوت معا (الترميز المزدوج) يقوّي التذكر، خاصة في البداية من الصفر.","Paivio (1986) Dual Coding; Mayer (2009) Multimedia learning"],
+ ["🧠","الاسترجاع المتباعد","محاولة التذكر أقوى من إعادة القراءة، والمراجعة على فترات متزايدة أقوى من الحفظ المكثف. نستخدم خوارزمية FSRS الحديثة التي تتفوق في الاختبارات المفتوحة على الخوارزمية الكلاسيكية SM-2.","Karpicke & Roediger (2008) Science; Cepeda et al. (2006, 2008); Ye et al. (2022) KDD; open-spaced-repetition benchmark"],
+ ["🎙️","الترديد (Shadowing)","الاستماع ثم الترديد الفوري يحسّن النطق والفهم السمعي. تجده بجانب كل جملة 🎙️.","Hamada (2016) Language Teaching Research"],
+ ["⏱️","الوقت مع اللغة","ما يتنبأ بالتقدم هو كمية المدخلات المفهومة المتراكمة، لذلك نقيس دقائق الاستماع والقراءة يوميا بدل النقاط.","Nation & Waring (2019) Teaching Extensive Reading"],
+];return topHTML("لماذا هذه الطريقة؟","home")+`<p class="mute small">ملخصات مبسطة لأبحاث في اكتساب اللغة الثانية، ومنها التحاليل الجامعة الأحدث، وكيف طبقناها في التطبيق.</p>`+
+ R.map(r=>`<div class="card research"><div class="row"><div style="font-size:28px">${r[0]}</div><b>${r[1]}</b></div><p>${r[2]}</p><div class="src">${r[3]}</div></div>`).join("")}
+
+/* ---------- settings ---------- */
+function settingsHTML(){return topHTML("الإعدادات","home")+`
+<div class="card"><b>هدف الدقائق اليومي</b><div class="seg" id="stGoal">${[10,15,30,45,60].map(m=>`<button data-m="${m}" class="${S.set.goal===m?"on":""}">${m}</button>`).join("")}</div></div>
+<div class="card"><b>بطاقات جديدة في اليوم</b><div class="seg" id="stNew">${[10,20,30,50].map(m=>`<button data-m="${m}" class="${S.set.newPerDay===m?"on":""}">${m}</button>`).join("")}</div></div>
+<div class="card"><b>الترجمة العربية في القصص</b><div class="seg" id="stTr">${[["show","ظاهرة"],["tap","بالضغط"],["hide","مخفية"]].map(([k,t])=>`<button data-k="${k}" class="${S.set.tr===k?"on":""}">${t}</button>`).join("")}</div><div class="small mute">ابدأ بـ«ظاهرة»، ثم انتقل إلى «بالضغط» عندما تفهم أكثر من نصف الجمل وحدك.</div></div>
+<div class="card"><b>النسخ الاحتياطي</b><p class="small mute">انسخ هذا النص واحفظه، أو الصق نسخة سابقة لاستعادتها.</p><textarea id="stBk" rows="3" style="width:100%" class="nl"></textarea><div class="row" style="margin-top:8px"><button class="btn alt" id="stExp">📋 إنشاء نسخة</button><button class="btn alt" id="stImp">📥 استعادة</button></div></div>
+<div class="card"><button class="btn alt wide" id="stReset" style="color:var(--bad)">🗑️ مسح كل التقدم</button></div>
+<p class="small mute center">الأصوات: أصوات عصبية هولندية (هولندا وبلجيكا). كل المحتوى يعمل بدون إنترنت.</p>`}
+function bindSettings(){bindTop();
+  const seg=(id,fn)=>document.querySelectorAll(id+" button").forEach(b=>b.onclick=()=>{fn(b);document.querySelectorAll(id+" button").forEach(x=>x.classList.toggle("on",x===b));save()});
+  seg("#stGoal",b=>S.set.goal=+b.dataset.m);seg("#stNew",b=>S.set.newPerDay=+b.dataset.m);seg("#stTr",b=>S.set.tr=b.dataset.k);
+  $("#stExp").onclick=()=>{$("#stBk").value=JSON.stringify(S);$("#stBk").select();try{navigator.clipboard.writeText($("#stBk").value);toast("تم النسخ 📋")}catch(e){}};
+  $("#stImp").onclick=()=>{try{const o=JSON.parse($("#stBk").value);if(!o.known)throw 0;S=Object.assign(defState(),o);save();toast("تمت الاستعادة ✓")}catch(e){toast("النص غير صالح")}};
+  $("#stReset").onclick=()=>{if(confirm("هل أنت متأكد؟ سيُحذف كل التقدم.")){S=defState();save();go("home")}};
+}
+
+render();
+setInterval(updateBadge,60000);
+document.addEventListener("visibilitychange",()=>{if(document.visibilityState==="hidden"){stopAudio();try{localStorage.setItem("nl1",JSON.stringify(S))}catch(e){}}});
+</script>
+</body>
+</html>

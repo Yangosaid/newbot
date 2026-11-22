@@ -4,3 +4,4 @@ local.properties
 *.iml
 .idea/
 .signing/
+__pycache__/

@@ -1,0 +1,759 @@
+# form = Arabic gloss [= base form]
+'s = (اختصار لـ des) في الـ...
+aan = على / إلى / بـ
+aangenaam = تشرفت / لطيف
+aankomt = تصل = aankomen
+aankwam = وصلتُ = aankomen
+acht = ثمانية
+achttien = ثمانية عشر
+achttienhonderd = ألف وثمانمئة
+adem = نَفَس / تنفّسْ = ademen
+af = (جزء من فعل: رنّ / انطلق)
+afspraak = موعد
+afstanden = مسافات = afstand
+ah = آه
+ahmed = أحمد (اسم)
+al = بالفعل / من قبل / كل
+alle = كل
+alleen = فقط / وحده
+alles = كل شيء
+als = إذا / عندما / مثل
+alsjeblieft = من فضلك / تفضّل (غير رسمي)
+alsof = كأنّ
+alstublieft = من فضلك / تفضّل (رسمي)
+altijd = دائما
+alweer = مرة أخرى
+amrani = العمراني (اسم عائلة)
+andere = آخر / مختلف
+anderen = الآخرون
+anders = مختلف / بشكل آخر
+antwerpen = أنتويرب (مدينة)
+appel = تفاحة
+appels = تفاحات = appel
+april = أبريل
+arabisch = العربية / عربي
+auto = سيارة
+avond = مساء / سهرة
+avonds = في المساء ('s avonds)
+baan = وظيفة
+bakkerij = مخبز
+bakt = تخبز = bakken
+banaan = موزة
+bank = أريكة / بنك
+bankpas = بطاقة بنكية
+bed = سرير
+beetje = قليلا (een beetje)
+begin = بداية
+begint = تبدأ = beginnen
+begreep = فهمتُ = begrijpen
+begrijp = أفهم = begrijpen
+bel = جرس
+belgië = بلجيكا
+bellen = نتصل = bellen
+belt = يتصل / يقرع الجرس = bellen
+ben = أكون (أنا) = zijn
+bent = تكون (أنت) = zijn
+beschrijf = صِفْ = beschrijven
+besluit = قرار
+betekent = يعني = betekenen
+beter = أفضل
+bezoek = زيارة / أزور = bezoeken
+bezoeken = يزور
+bij = عند / لدى
+bijna = تقريبا
+bijvoorbeeld = مثلا
+binnen = داخل / إلى الداخل
+blauw = أزرق
+blij = سعيد
+blijven = يبقى
+blouse = بلوزة / قميص نسائي
+boek = كتاب
+bouwde = بنى = bouwen
+boven = في الأعلى
+braken = انكسرت = breken
+brief = رسالة
+broek = سروال / بنطال
+broer = أخ
+brood = خبز
+broodje = شطيرة / خبزة صغيرة
+buiten = في الخارج
+buitje = زخة مطر صغيرة
+bus = حافلة
+buurman = جار
+cappuccino = كابتشينو
+centraal = مركزي
+checkt = تسجّل (الدخول) = inchecken
+computer = حاسوب
+cv = سيرة ذاتية
+d'orange = (عصير) البرتقال
+daan = دان (اسم)
+daar = هناك
+daarna = بعد ذلك
+daarom = لذلك
+dacht = فكّرتُ = denken
+dag = يوم / مع السلامة
+dagen = أيام = dag
+dame = سيدة
+dan = ثم / إذن / من (في المقارنة)
+dank = شكر (dank je = شكرا)
+dat = ذلك / أنّ / الذي
+de = الـ (أداة تعريف)
+deel = جزء
+deltawerken = مشاريع الدلتا
+denk = أظن / أفكر = denken
+denken = يفكر / تفكير
+denkt = تفكر = denken
+dertig = ثلاثون
+deur = باب
+deze = هذا / هذه
+dichtbij = قريب
+die = ذلك / تلك / الذي
+diep = عميق / بعمق
+dijken = سدود = dijk
+dingen = أشياء = ding
+dinsdag = الثلاثاء
+direct = مباشرة
+dit = هذا / هذه
+docent = مدرّس
+doe = أفعل = doen
+doen = يفعل
+doet = يفعل / يعمل (الجهاز) = doen
+dokter = طبيب
+door = عبر / بواسطة
+dorst = عطش
+draagt = ترتدي / تحمل = dragen
+drie = ثلاثة
+driehonderd = ثلاثمئة
+drieëntwintig = ثلاثة وعشرون
+drink = أشرب = drinken
+drinken = يشرب / مشروبات
+drinkt = يشرب = drinken
+droge = جافة = droog
+dromen = يحلم
+druk = مزدحم / مشغول
+duinen = كثبان رملية = duin
+durfde = تجرّأتُ = durven
+dus = إذن
+duur = غالٍ
+echt = حقا / حقيقي
+echte = حقيقي = echt
+een = أداة نكرة / واحد
+eens = مرة / (للتلطيف: احكِ لي)
+eerst = أولا
+eerste = الأول
+eet = يأكل = eten
+eeuwenlang = لقرون طويلة
+egypte = مصر
+eigenlijk = في الحقيقة
+eindelijk = أخيرا
+el = الـ (في اسم عائلة)
+elektrische = كهربائية = elektrisch
+elf = أحد عشر
+elk = كل
+elke = كل
+emma = إيما (اسم)
+en = و
+engels = الإنجليزية
+er = هناك / يوجد
+erg = جدا
+ernstigs = (شيء) خطير
+erover = عن ذلك
+eten = يأكل / طعام
+euro = يورو
+even = قليلا / لحظة
+examen = امتحان
+examens = امتحانات = examen
+excuus = ذريعة / عذر
+eén = واحد = één
+één = واحد
+familie = عائلة
+fantastisch = رائع
+fatima = فاطمة (اسم)
+feest = حفلة / عيد
+fiets = دراجة هوائية
+fietsen = دراجات / ركوب الدراجة
+fietsenrek = موقف الدراجات
+fietsenwinkel = محل دراجات
+fietspaden = مسارات الدراجات = fietspad
+fietst = تقود الدراجة = fietsen
+fietsten = كنا نقود الدراجة = fietsen
+fijn = لطيف / رائع
+fijne = سعيد / لطيف = fijn
+file = زحمة سير
+flinke = قوي / كبير = flink
+foto = صورة
+frans = الفرنسية
+ga = أذهب = gaan
+gaan = يذهب
+gaat = يذهب / يسير = gaan
+gebouwd = مبني = bouwen
+gebouwen = مبانٍ = gebouw
+gebruikt = استعملتُ = gebruiken
+geef = أعطي / أدرّس (les geven) = geven
+geeft = يعطي / يدرّس = geven
+geel = أصفر
+geen = لا / ليس (لا أحد)
+gefeliciteerd = مبروك
+geheim = سري / سر
+gekocht = اشترت = kopen
+gekomen = جاء = komen
+gele = صفراء = geel
+geleden = مضى (منذ)
+gelezen = قرأت = lezen
+geluisterd = استمعت = luisteren
+gemalen = محطات ضخ = gemaal
+genoeg = يكفي / كافٍ
+geschiedenis = تاريخ
+geslaagd = نجحت = slagen
+gestolen = مسروقة = stelen
+gestreden = كافحوا = strijden
+gevoel = شعور
+gevormd = شكّل = vormen
+geweest = كنتُ / زرتُ = zijn
+geweldig = رائع جدا
+gewerkt = عملتُ = werken
+gewone = عادي = gewoon
+gewoon = ببساطة / عادي
+geworden = أصبحنا = worden
+gezellig = لطيف ودافئ (اجتماعيا)
+gezelligheid = الأجواء اللطيفة الدافئة
+gezet = ضبطت = zetten
+ging = ذهب / سار = gaan
+gisteren = البارحة
+goed = جيد / بخير
+goede = جيد = goed
+goedemiddag = مساء الخير (بعد الظهر)
+goedemorgen = صباح الخير
+goesting = رغبة (فلامانية)
+graag = بكل سرور / من فضلك
+gras = عشب
+groen = أخضر
+groene = خضراء = groen
+groenten = خضار = groente
+groot = كبير
+grootste = الأكبر = groot
+grote = كبيرة = groot
+haal = أستقبل / ألحق = halen
+haalt = تأخذ (نفسا) / تلحق = halen
+haar = ها (ملكية) / شعر
+haha = هاها
+half = نصف
+hallo = مرحبا
+heb = عندي = hebben
+hebben = يملك / عندهم
+hebt = عندك = hebben
+heeft = عنده / عندها = hebben
+heel = جدا / كامل
+heerlijk = لذيذ جدا / رائع
+heet = اسمه / حار = heten
+heg = سياج نباتي
+hele = كامل = heel
+helemaal = تماما
+helpen = يساعد
+helpt = تساعد = helpen
+hem = هو (مفعول به)
+het = الـ (للمحايد) / هو
+hier = هنا
+hij = هو
+hoe = كيف
+hoeft = مضطر = hoeven
+hoest = يسعل = hoesten
+hoeveel = كم
+hoge = عالية = hoog
+hoi = أهلا
+hond = كلب
+honger = جوع
+hoofd = رأس
+hoofdpijn = صداع
+hooguit = على أبعد تقدير
+hoor = (للتأكيد) / أسمع = horen
+hopelijk = آمل أن
+houden = يحافظ / يحتفظ
+huis = بيت
+huisarts = طبيب العائلة
+huizen = بيوت = huis
+hun = هم (ملكية)
+hè = أليس كذلك / (تعجب)
+iedereen = الجميع
+iemand = شخص ما
+iets = شيء ما
+ik = أنا
+in = في
+inburgeren = الاندماج المدني
+inmiddels = الآن / في الأثناء
+intercity = قطار بين المدن
+internet = إنترنت
+inwoners = سكان = inwoner
+is = يكون / هو
+ja = نعم
+jaar = سنة
+jaren = سنوات = jaar
+jas = معطف
+je = أنت / ك
+jij = أنت
+joke = يوكه (اسم)
+jong = صغير السن / شاب
+jou = أنت (مفعول به)
+jullie = أنتم
+jus = عصير (jus d'orange)
+kaas = جبن
+kamer = غرفة
+kan = يستطيع / ممكن = kunnen
+kapot = معطّل / مكسور
+kapotgegaan = تدمّر = kapotgaan
+kat = قطة
+katten = قطط = kat
+keer = مرة
+kent = تعرف = kennen
+ketting = سلسلة
+keuken = مطبخ
+keuze = اختيار
+kijk = انظر = kijken
+kijkt = ينظر = kijken
+kilo = كيلو
+kinderen = أطفال = kind
+klaar = منتهٍ / جاهز
+kleedt = تلبس (zich aankleden)
+klein = صغير
+kleine = صغيرة = klein
+klinkt = يبدو (صوتا) = klinken
+klopt = يطرق / صحيح = kloppen
+koeien = أبقار = koe
+koekje = بسكويتة
+koekjes = بسكويت / حلويات = koekje
+koffie = قهوة
+kom = تعال / آتي = komen
+komen = يأتي
+komkommer = خيارة
+komt = يأتي = komen
+koning = ملك
+koningsdag = يوم الملك
+kook = أطبخ = koken
+kookt = يطبخ = koken
+koopt = تشتري = kopen
+koorts = حمى / حرارة
+kop = فنجان / كوب
+koptelefoon = سماعات رأس
+kort = قصير
+kost = يكلّف = kosten
+kostte = كلّف = kosten
+koud = بارد
+krijg = تحصل = krijgen
+krijgt = تحصل = krijgen
+kubuswoningen = البيوت المكعبة
+kunt = تستطيع = kunnen
+kwam = جاءت = komen
+kwamen = جاؤوا (om het leven = ماتوا) = komen
+kwart = ربع
+kwestie = مسألة
+laat = يُري / يترك / متأخر = laten
+laatste = الأخير
+lamp = مصباح
+land = بلد
+lastig = صعب / مزعج
+later = لاحقا / بعد
+leeg = فارغ
+leer = أتعلم = leren
+leerlingen = تلاميذ = leerling
+leert = يتعلم = leren
+lees = أقرأ = lezen
+leest = تقرأ = lezen
+lekker = لذيذ
+lerares = معلمة
+leren = يتعلم / يعلّم
+les = درس
+lesgeven = التدريس
+leuk = ممتع / لطيف
+leven = حياة
+lezen = يقرأ / القراءة
+liefde = حب
+ligt = يقع = liggen
+lijkt = يبدو = lijken
+longen = رئتان = long
+lopen = يمشون = lopen
+lotte = لوته (اسم)
+lucht = سماء / هواء
+luister = أستمع = luisteren
+luisteren = يستمع / الاستماع
+maakt = تصنع / تأخذ (موعدا) = maken
+maand = شهر
+maandag = الاثنين
+maanden = أشهر = maand
+maar = لكن / فقط
+maart = مارس
+maatschappij = مجتمع
+mag = يُسمح / هل يمكنني = mogen
+maken = يصنع / يقوم بـ
+man = رجل
+markt = سوق
+markthal = سوق مغطى (ماركتهال)
+marokkaanse = مغربية = Marokkaans
+marokko = المغرب
+marrakesh = مراكش
+me = لي / ني
+mee = مع (معه)
+meegenomen = أحضرت معها = meenemen
+meen = أعني (dat meen je niet = غير معقول) = menen
+meer = أكثر
+meestal = غالبا / عادة
+melk = حليب
+mensen = ناس = mens
+merk = ألاحظ = merken
+merkt = تلاحظ = merken
+met = مع / بـ
+meubels = أثاث
+mevrouw = سيدة / سيدتي
+middelbare = ثانوية (school) = middelbaar
+mij = لي / أنا (مفعول به)
+mijn = ـي (ملكية)
+miljoen = مليون
+ministers = وزراء = minister
+minuten = دقائق = minuut
+mis = أشتاق إلى = missen
+mist = تشتاق إلى = missen
+mo = مو (اسم)
+moderner = أكثر حداثة = modern
+moe = متعب
+moeder = أم
+moedertaal = اللغة الأم
+moeilijk = صعب
+moeilijker = أصعب = moeilijk
+moest = كان يجب = moeten
+moet = يجب = moeten
+moeten = يجب
+mogen = يُسمح لها
+mooi = جميل
+mooie = جميلة = mooi
+mooiste = الأجمل = mooi
+morgen = غدا / صباح
+munt = نعناع / عملة معدنية
+muziek = موسيقى
+na = بعد
+naar = إلى
+naast = بجانب
+nadia = نادية (اسم)
+natuurlijk = طبعا
+nederland = هولندا
+nederlander = هولندي (شخص)
+nederlanders = هولنديون = Nederlander
+nederlands = الهولندية / هولندي
+nederlandse = الهولندي = Nederlands
+nee = لا
+neem = آخذ / خذ = nemen
+neemt = تأخذ = nemen
+negen = تسعة
+negentienhonderddrieënvijftig = ألف وتسعمئة وثلاثة وخمسون
+net = للتوّ / تماما
+nette = أنيق = net
+niemand = لا أحد
+niet = لا / ليس
+niets = لا شيء
+nieuw = جديد
+nieuwe = جديدة = nieuw
+nieuws = خبر / أخبار
+nodig = ضروري (nodig hebben = يحتاج)
+noemen = نسمّي = noemen
+nog = بعدُ / ما زال / أيضا
+nooit = أبدا / قط
+normaal = عادي
+nu = الآن
+oefen = أتدرب = oefenen
+of = أو / هل
+om = في (الساعة) / لكي / حول
+oma = جدة
+omdat = لأنّ
+onder = تحت
+onderdelen = أجزاء = onderdeel
+ongeveer = تقريبا
+ons = نا / لنا
+ook = أيضا
+oorlog = حرب
+op = على / في
+opeens = فجأة
+opgelucht = مرتاحة (بعد قلق)
+opnieuw = من جديد
+oranje = برتقالي (لون)
+oranjes = (شيء) برتقالي
+oud = قديم / كبير السن
+oude = القديمة = oud
+oudere = مسنّة / أكبر = oud
+ouders = والدان
+over = عن / بعد (مدة) / فوق
+overal = في كل مكان
+overleg = تشاور
+overstappen = تبديل القطار
+paar = بضعة / زوج
+pakt = تأخذ = pakken
+paracetamol = باراسيتامول
+pardon = عفوا
+park = حديقة عامة
+parkeerplek = مكان ركن السيارة
+pas = فقط (متأخرا) / بطاقة
+pasta = معكرونة
+per = في (كل) / لكل
+perfect = مثالي
+perron = رصيف المحطة
+peter = بيتر (اسم)
+pinnen = الدفع بالبطاقة
+plaats = مكان (in plaats van = بدلا من)
+plat = مسطّح
+plekje = مكان صغير
+poldermodel = نموذج البولدر (التوافق)
+pompten = كانت تضخ = pompen
+prachtig = رائع جدا
+prachtige = رائعة = prachtig
+praktisch = عملي
+praten = يتحدثون = praten
+precies = بالضبط
+prettig = لطيف / مريح
+proberen = يجرّب
+probleem = مشكلة
+proefrit = جولة تجريبية
+proost = في صحتك!
+raam = نافذة
+rare = غريبة = raar
+recept = وصفة
+regelmatig = بانتظام
+regen = مطر
+regenbroek = سروال مطر
+regenjas = معطف مطر
+regent = تمطر = regenen
+reisden = كنا نسافر = reizen
+reizen = السفر / رحلات
+rent = تركض = rennen
+rijdt = يسير / يقود = rijden
+rode = حمراء = rood
+rondje = دورة صغيرة
+rood = أحمر
+rotterdam = روتردام
+rust = استرح / راحة = rusten
+samen = معا
+sara = سارة (اسم)
+schaal = صحن / وعاء
+schenkt = تصبّ = schenken
+scherm = شاشة
+schijnt = تشرق = schijnen
+school = مدرسة
+schrijft = تكتب = schrijven
+schrijven = الكتابة / يكتب
+sfeer = أجواء
+sinds = منذ
+sjaal = وشاح
+slaapkamer = غرفة النوم
+slaapt = ينام = slapen
+slot = قفل
+snap = أفهم = snappen
+snel = بسرعة / سريع
+sollicitatiegesprek = مقابلة عمل
+sommige = بعض
+soms = أحيانا
+speelgoed = ألعاب أطفال
+spelen = يلعبون / يعزفون
+spoor = رصيف (سكة) القطار
+sport = رياضة
+spreek = أتكلم = spreken
+spreekexamen = امتحان التحدث
+spreekt = تتكلم = spreken
+spreken = التحدث / يتكلم
+springt = تقفز = springen
+spullen = أغراض
+sta = تقف = staan
+staan = يقف
+staat = يقف / يوجد = staan
+stad = مدينة
+stapt = تصعد / تخطو = stappen
+station = محطة
+steeds = باستمرار
+storm = عاصفة
+straat = شارع
+student = طالب
+stuurt = ترسل = sturen
+suiker = سكر
+taal = لغة
+taalschool = مدرسة لغات
+taart = كعكة
+tafel = طاولة
+tas = حقيبة
+te = جدا / لـ (قبل الفعل)
+tegen = ضد / لـ (قال لـ)
+tegenhouden = يوقف / يمنع
+tegenwind = ريح معاكسة
+tegenwoordig = في الوقت الحاضر
+telefoon = هاتف
+ter = في الـ (ter wereld = في العالم)
+terug = عائدا / إلى الوراء
+thee = شاي
+thuis = في البيت
+tien = عشرة
+tijdens = أثناء
+toen = عندما (في الماضي) / آنذاك
+toetje = تحلية
+toevallig = بالصدفة
+tomaten = طماطم = tomaat
+tot = حتى / إلى
+traditie = تقليد
+trein = قطار
+trekken = يرتدي (aantrekken)
+trots = فخر / فخور
+trouwens = بالمناسبة
+trucjes = حيل صغيرة = trucje
+tuin = حديقة (البيت)
+twaalf = اثنا عشر
+twee = اثنان
+u = حضرتك (رسمي)
+uit = من / خارج
+uitbundig = بحماس وصخب
+uitdrukkingen = تعابير = uitdrukking
+uiteindelijk = في النهاية
+uitnodigen = يدعو
+uitspraak = نطق
+utrecht = أوتريخت (مدينة)
+uur = ساعة
+uurtje = ساعة صغيرة
+uw = ـكَ (رسمي)
+uzelf = نفسك (رسمي)
+vaak = كثيرا / غالبا
+vacature = وظيفة شاغرة
+vacatures = وظائف شاغرة = vacature
+vader = أب
+van = من / لـ
+vanaf = ابتداء من
+vanavond = الليلة / هذا المساء
+vandaag = اليوم
+vandaan = من (waar ... vandaan = من أين)
+vanzelf = من تلقاء نفسه
+vast = بالتأكيد / لا بد
+veel = كثير
+veertig = أربعون
+veranderd = تغيّر = veranderen
+verandering = تغيير
+verder = أيضا / إضافة / أبعد
+vergaderen = الاجتماع
+vergeet = تنسى = vergeten
+verhalen = قصص = verhaal
+verjaardag = عيد ميلاد
+verkopen = يبيع
+verkoudheid = زكام
+verschijnt = يظهر = verschijnen
+verse = طازج = vers
+versta = أفهم (سماعا) = verstaan
+verstond = كنت أفهم = verstaan
+vertalen = يترجم
+vertel = احكِ = vertellen
+vertelt = يحكي = vertellen
+vertrekt = ينطلق = vertrekken
+vier = أربعة
+vieren = يحتفل
+vijand = عدو
+vijf = خمسة
+vind = أجد / أرى (رأيي) = vinden
+vindt = تجد = vinden
+vis = سمك
+vlaams = الفلامانية
+voelt = تشعر = voelen
+voeten = أقدام = voet
+vol = ممتلئ
+volgende = التالي / القادم
+volgens = حسب
+vond = رأيتَ / وجدتَ = vinden
+voor = أمام / لـ / قبل
+vooral = خصوصا / في الغالب
+voorbereiding = تحضير
+voordeel = ميزة
+vooruitkom = أتقدم = vooruitkomen
+vorig = الماضي (vorig jaar)
+vraag = سؤال
+vragen = يسأل
+vries = فريس (في اسم دي فريس)
+vrijdag = الجمعة
+vrijmarkt = السوق الحرة
+vroeg = مبكرا (vroeg of laat = عاجلا أم آجلا)
+vroeger = في الماضي
+vrouw = امرأة
+waait = تهب الرياح = waaien
+waar = أين / صحيح
+waarom = لماذا
+wakker = مستيقظ
+wanneer = متى
+want = لأنّ
+warm = حار / دافئ
+was = كان / كانت = zijn
+wat = ماذا / ما / بعض
+water = ماء
+waterbouwprojecten = مشاريع الهندسة المائية
+we = نحن
+week = أسبوع
+weekend = عطلة نهاية الأسبوع
+weer = مرة أخرى / طقس
+weet = أعرف = weten
+weg = طريق / بعيدا
+wegrijden = ينطلق مبتعدا
+weilanden = مراعٍ = weiland
+wekker = منبّه
+wekkers = منبّهات = wekker
+wel = (للتأكيد) / نعم
+welk = أي
+welkom = أهلا وسهلا
+wereld = عالم
+werk = عمل
+werken = يعمل
+werkt = يعمل = werken
+wie = من
+wil = أريد = willen
+willen = نريد
+wilt = تريد = willen
+wind = ريح
+windmolens = طواحين الهواء = windmolen
+wist = كنت أعرف = weten
+wit = أبيض
+witte = بيضاء = wit
+woensdag = الأربعاء
+wonen = يسكن
+woon = أسكن = wonen
+woonkamer = غرفة الجلوس
+woont = يسكن = wonen
+woord = كلمة
+woorden = كلمات = woord
+word = أصبح = worden
+worden = يصبح / (للمبني للمجهول)
+wordt = تصبح = worden
+zaterdag = السبت
+ze = هي / هم
+zee = بحر
+zeeland = زيلاند (مقاطعة)
+zeespiegel = مستوى سطح البحر
+zeg = أقول / قُل = zeggen
+zeggen = نقول
+zei = قالت = zeggen
+zelfs = حتى / بل
+zenuwachtig = متوتر
+zes = ستة
+zet = أضبط / أضع = zetten
+zeven = سبعة
+zevenentachtig = سبعة وثمانون
+zevenentwintig = سبعة وعشرون
+zich = نفسه / نفسها
+zie = أرى = zien
+zien = يرى
+ziet = ترى = zien
+zij = هي / هم
+zijn = يكون / ـه (ملكية)
+zin = جملة / رغبة
+zinnen = جمل = zin
+zit = يجلس = zitten
+zitten = يجلس
+zo = هكذا / جدا
+zoek = أبحث = zoeken
+zoeken = يبحث
+zoekt = تبحث = zoeken
+zon = شمس
+zondag = الأحد
+zonder = بدون
+zonnig = مشمس
+zou = سيكون / لكان = zullen
+zover = حان الوقت (het is zover)
+zullen = هل نـ... / سوف
+zus = أخت
+zware = شديدة = zwaar
+zwart = أسود
+zwarte = سوداء = zwart

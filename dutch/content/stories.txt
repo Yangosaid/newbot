@@ -1,0 +1,424 @@
+# Graded stories for Leer Nederlands.
+# @ id | level | Dutch title | Arabic title
+# SPEAKER: Dutch sentence | Arabic translation
+# Speakers: N narrator, S Sara, D Daan, E Emma, M Mo (Sara's brother), L Lotte (from Antwerp), P Peter (boss / shop), O Oma Joke
+
+# ---- Start (absolute beginner): picture-supported, heavy repetition. Optional 3rd field = picture emoji.
+
+@ z01 | Start | Ik en jij | أنا وأنت
+N: Ik. | أنا. | 👉🙂
+N: Jij. | أنت. | 👈🙂
+N: Ik ben Sara. | أنا سارة. | 👩
+N: Jij bent Daan. | أنت دان. | 👨
+N: Sara is een vrouw. | سارة امرأة. | 👩
+N: Daan is een man. | دان رجل. | 👨
+N: Is Daan een vrouw? Nee. | هل دان امرأة؟ لا. | ❌
+N: Daan is een man. Ja! | دان رجل. نعم! | ✅
+N: Is Sara een man? Nee! | هل سارة رجل؟ لا! | ❌
+N: Sara is een vrouw. | سارة امرأة. | 👩
+
+@ z02 | Start | Een kat en een hond | قطة وكلب
+N: Dit is een kat. | هذه قطة. | 🐱
+N: Dit is een hond. | هذا كلب. | 🐶
+N: De kat is klein. | القطة صغيرة. | 🐱
+N: De hond is groot. | الكلب كبير. | 🐕
+N: Is de kat groot? Nee, de kat is klein. | هل القطة كبيرة؟ لا، القطة صغيرة. | 🐱
+N: Is de hond klein? Nee, de hond is groot. | هل الكلب صغير؟ لا، الكلب كبير. | 🐕
+N: De kat drinkt melk. | القطة تشرب الحليب. | 🥛
+N: De hond drinkt water. | الكلب يشرب الماء. | 💧
+N: De kat slaapt. | القطة تنام. | 😴
+N: De hond slaapt ook. | الكلب ينام أيضا. | 💤
+
+@ z03 | Start | Eten en drinken | الأكل والشرب
+N: Ik heb honger. | أنا جائعة. | 😋
+N: Ik eet brood. | آكل خبزا. | 🍞
+N: Ik eet een appel. | آكل تفاحة. | 🍎
+N: Ik heb dorst. | أنا عطشانة. | 🥵
+N: Ik drink water. | أشرب الماء. | 💧
+N: Ik drink thee. | أشرب الشاي. | 🍵
+N: Drink jij koffie? | هل تشرب القهوة؟ | ☕
+N: Ja, ik drink koffie. | نعم، أشرب القهوة. | ☕
+N: Eet jij een appel? | هل تأكل تفاحة؟ | 🍎
+N: Nee, ik eet een banaan. | لا، آكل موزة. | 🍌
+N: Lekker! | لذيذ! | 😋
+
+@ z04 | Start | Kleuren | الألوان
+N: De appel is rood. | التفاحة حمراء. | 🍎
+N: De banaan is geel. | الموزة صفراء. | 🍌
+N: Het gras is groen. | العشب أخضر. | 🌿
+N: De lucht is blauw. | السماء زرقاء. | 🌤️
+N: De melk is wit. | الحليب أبيض. | 🥛
+N: De kat is zwart. | القطة سوداء. | 🐈‍⬛
+N: Is de banaan rood? Nee, de banaan is geel. | هل الموزة حمراء؟ لا، الموزة صفراء. | 🍌
+N: Is het gras blauw? Nee, het gras is groen. | هل العشب أزرق؟ لا، العشب أخضر. | 🌿
+N: Mijn fiets is blauw. | دراجتي زرقاء. | 🚲
+
+@ z05 | Start | Tellen | العد
+N: Een. | واحد. | 1️⃣
+N: Twee. | اثنان. | 2️⃣
+N: Drie. | ثلاثة. | 3️⃣
+N: Vier. | أربعة. | 4️⃣
+N: Vijf. | خمسة. | 5️⃣
+N: Ik heb een fiets. | عندي دراجة واحدة. | 🚲
+N: Ik heb twee katten. | عندي قطتان. | 🐱🐱
+N: Ik heb drie appels. | عندي ثلاث تفاحات. | 🍎🍎🍎
+N: Hoeveel appels heb jij? | كم تفاحة عندك؟ | ❓
+N: Ik heb vier appels. | عندي أربع تفاحات. | 🍎🍎🍎🍎
+N: Zes, zeven, acht, negen, tien! | ستة، سبعة، ثمانية، تسعة، عشرة! | 🔟
+
+@ z06 | Start | Waar is de kat? | أين القطة؟
+N: Waar is de kat? | أين القطة؟ | ❓🐱
+N: De kat is in het huis. | القطة في البيت. | 🏠
+N: Waar is de hond? | أين الكلب؟ | ❓🐶
+N: De hond is in de tuin. | الكلب في الحديقة. | 🌳
+N: Waar is Sara? | أين سارة؟ | ❓👩
+N: Sara is op de fiets. | سارة على الدراجة. | 🚲
+N: Waar is Daan? | أين دان؟ | ❓👨
+N: Daan is thuis. | دان في البيت. | 🏠
+N: Hij drinkt koffie. | هو يشرب القهوة. | ☕
+N: En de kat? De kat slaapt op de bank. | والقطة؟ القطة تنام على الأريكة. | 🛋️
+
+@ a01 | A0 | Hallo, ik ben Sara | مرحبا، أنا سارة
+N: Dit is Sara. | هذه سارة.
+S: Hallo! Ik ben Sara. | مرحبا! أنا سارة.
+S: Ik kom uit Marokko. | أنا من المغرب.
+S: Nu woon ik in Nederland. | الآن أسكن في هولندا.
+S: Ik woon in Utrecht. | أسكن في أوتريخت.
+S: Utrecht is een mooie stad. | أوتريخت مدينة جميلة.
+S: Ik ben dertig jaar. | عمري ثلاثون سنة.
+S: Ik leer Nederlands. | أتعلم الهولندية.
+S: Nederlands is moeilijk. | الهولندية صعبة.
+S: Maar het is ook leuk! | لكنها ممتعة أيضا!
+
+@ a02 | A0 | Mijn huis | بيتي
+N: Sara heeft een klein huis. | سارة عندها بيت صغير.
+S: Dit is mijn huis. | هذا بيتي.
+S: Het huis is klein, maar mooi. | البيت صغير، لكنه جميل.
+S: Hier is de keuken. | هنا المطبخ.
+S: De keuken is wit. | المطبخ أبيض.
+S: En hier is de woonkamer. | وهنا غرفة الجلوس.
+S: In de woonkamer staat een bank. | في غرفة الجلوس توجد أريكة.
+S: De bank is blauw. | الأريكة زرقاء.
+S: Boven is de slaapkamer. | في الأعلى غرفة النوم.
+S: Ik heb ook een kleine tuin. | عندي أيضا حديقة صغيرة.
+S: In de tuin staat een fiets. | في الحديقة توجد دراجة.
+S: Ik ben blij met mijn huis. | أنا سعيدة ببيتي.
+
+@ a03 | A0 | De buurman | الجار
+N: Sara staat voor haar huis. | سارة واقفة أمام بيتها.
+N: Daar is een man. | هناك رجل.
+D: Hallo! Ik ben Daan. | مرحبا! أنا دان.
+S: Hallo Daan. Ik ben Sara. | مرحبا دان. أنا سارة.
+D: Ben je nieuw hier? | هل أنت جديدة هنا؟
+S: Ja, ik woon hier sinds maandag. | نعم، أسكن هنا منذ يوم الاثنين.
+D: Welkom! Ik woon naast je. | أهلا بك! أسكن بجانبك.
+D: Dat is mijn huis, met de rode deur. | ذلك بيتي، صاحب الباب الأحمر.
+S: Wat een mooie deur! | يا له من باب جميل!
+D: Dank je. Waar kom je vandaan? | شكرا. من أين أنت؟
+S: Ik kom uit Marokko. | أنا من المغرب.
+D: Leuk! Je spreekt al goed Nederlands. | رائع! تتكلمين الهولندية جيدا من الآن.
+S: Een beetje. Ik leer elke dag. | قليلا. أتعلم كل يوم.
+
+@ a04 | A0 | Koffie | قهوة
+N: Het is zaterdag. | إنه يوم السبت.
+N: Daan klopt op de deur. | دان يطرق الباب.
+D: Goedemorgen, Sara! | صباح الخير يا سارة!
+S: Goedemorgen, Daan! Kom binnen. | صباح الخير يا دان! تفضل بالدخول.
+S: Wil je koffie of thee? | هل تريد قهوة أم شايا؟
+D: Koffie, graag. | قهوة، من فضلك.
+S: Met melk en suiker? | بالحليب والسكر؟
+D: Alleen met melk, alsjeblieft. | بالحليب فقط، من فضلك.
+S: Alsjeblieft, je koffie. | تفضل، قهوتك.
+D: Dank je wel. Hij is lekker! | شكرا جزيلا. إنها لذيذة!
+S: Ik drink thee met munt. | أنا أشرب الشاي بالنعناع.
+D: Thee met munt? Dat wil ik ook proberen! | شاي بالنعناع؟ أريد أن أجربه أيضا!
+
+@ a05 | A0 | Mijn familie | عائلتي
+N: Sara laat een foto zien. | سارة تُري صورة.
+S: Kijk, dit is mijn familie. | انظر، هذه عائلتي.
+S: Dit is mijn vader. Hij heet Ahmed. | هذا أبي. اسمه أحمد.
+S: En dit is mijn moeder. Zij heet Fatima. | وهذه أمي. اسمها فاطمة.
+S: Mijn ouders wonen in Marokko. | والداي يسكنان في المغرب.
+S: Dit is mijn broer Mo. | هذا أخي مو.
+S: Mo woont ook in Nederland. | مو يسكن أيضا في هولندا.
+S: Hij woont in Rotterdam. | هو يسكن في روتردام.
+S: En dit is mijn zus Nadia. | وهذه أختي نادية.
+S: Nadia is student. | نادية طالبة.
+D: Wat een grote familie! | يا لها من عائلة كبيرة!
+S: Ja, en ik mis ze soms. | نعم، وأشتاق إليهم أحيانا.
+
+@ a06 | A0 | Naar de markt | إلى السوق
+N: Het is zaterdag. Sara gaat naar de markt. | إنه يوم السبت. سارة تذهب إلى السوق.
+N: Ze gaat met de fiets. | تذهب بالدراجة.
+N: Op de markt is het druk. | في السوق زحمة.
+P: Goedemorgen! Wat mag het zijn? | صباح الخير! ماذا تريدين؟
+S: Een kilo appels, alstublieft. | كيلو تفاح، من فضلك.
+P: Rode of groene appels? | تفاح أحمر أم أخضر؟
+S: Groene, graag. | أخضر، من فضلك.
+P: Verder nog iets? | شيء آخر؟
+S: Ja, ook vier tomaten en een komkommer. | نعم، وأيضا أربع حبات طماطم وخيارة.
+P: Dat is dan vijf euro. | المجموع إذن خمسة يورو.
+S: Kan ik pinnen? | هل يمكنني الدفع بالبطاقة؟
+P: Natuurlijk. Dank u wel en een fijne dag! | طبعا. شكرا جزيلا ويوما سعيدا!
+S: U ook! | ولك أيضا!
+
+@ a07 | A0 | Een gewone dag | يوم عادي
+N: Sara staat om zeven uur op. | سارة تستيقظ في الساعة السابعة.
+N: Eerst drinkt ze thee. | أولا تشرب الشاي.
+N: Dan eet ze brood met kaas. | ثم تأكل خبزا بالجبن.
+N: Om acht uur fietst ze naar haar werk. | في الساعة الثامنة تذهب بالدراجة إلى عملها.
+N: Sara werkt in een bakkerij. | سارة تعمل في مخبز.
+N: Ze bakt brood en taart. | تخبز الخبز والكعك.
+N: Om twaalf uur eet ze een broodje. | في الساعة الثانية عشرة تأكل شطيرة.
+N: Om vier uur is ze klaar. | في الساعة الرابعة تنتهي.
+N: 's Avonds kookt ze en leest ze een boek. | في المساء تطبخ وتقرأ كتابا.
+N: Om elf uur gaat ze naar bed. | في الساعة الحادية عشرة تذهب إلى السرير.
+
+@ a08 | A0 | Het weer | الطقس
+N: In Nederland regent het vaak. | في هولندا تمطر كثيرا.
+S: Het regent alweer! | إنها تمطر مرة أخرى!
+D: Ja, dat is normaal in Nederland. | نعم، هذا عادي في هولندا.
+S: In Marokko is het vaak warm en zonnig. | في المغرب الجو غالبا حار ومشمس.
+D: Dat klinkt fijn. | يبدو ذلك رائعا.
+S: Hier is het koud en het waait veel. | هنا الجو بارد والرياح كثيرة.
+D: Je hebt een goede jas nodig. | تحتاجين معطفا جيدا.
+D: En een regenjas voor op de fiets! | ومعطف مطر للدراجة!
+N: Morgen schijnt de zon. | غدا تشرق الشمس.
+S: Eindelijk zon! Ik ga naar het park. | أخيرا شمس! سأذهب إلى الحديقة العامة.
+
+@ b01 | A1 | Een nieuwe fiets | دراجة جديدة
+N: De fiets van Sara is oud. | دراجة سارة قديمة.
+N: De ketting is kapot en de bel doet het niet. | السلسلة معطلة والجرس لا يعمل.
+N: Daarom gaat ze naar een fietsenwinkel. | لذلك تذهب إلى محل دراجات.
+P: Goedemiddag. Kan ik u helpen? | مساء الخير. هل يمكنني مساعدتك؟
+S: Ja, ik zoek een nieuwe fiets. | نعم، أبحث عن دراجة جديدة.
+P: Wat voor fiets zoekt u? | أي نوع من الدراجات تبحثين عنه؟
+S: Een gewone fiets voor de stad. Niet te duur. | دراجة عادية للمدينة. ليست غالية جدا.
+P: Deze zwarte fiets is mooi. Hij kost driehonderd euro. | هذه الدراجة السوداء جميلة. ثمنها ثلاثمئة يورو.
+S: Mag ik even een proefrit maken? | هل يمكنني تجربتها قليلا؟
+P: Natuurlijk. Hier is het slot. | طبعا. هذا هو القفل.
+N: Sara fietst een rondje. De fiets rijdt heel goed. | سارة تقود دورة صغيرة. الدراجة تسير جيدا جدا.
+S: Ik neem hem! | سآخذها!
+P: Goede keuze. Vergeet uw slot niet, want in Utrecht worden veel fietsen gestolen. | اختيار جيد. لا تنسي قفلك، لأن الكثير من الدراجات تُسرق في أوتريخت.
+
+@ b02 | A1 | Bij de huisarts | عند طبيب العائلة
+N: Sara voelt zich niet goed. | سارة لا تشعر أنها بخير.
+N: Ze heeft hoofdpijn en ze hoest al een week. | عندها صداع وتسعل منذ أسبوع.
+N: Ze belt de huisarts en maakt een afspraak. | تتصل بطبيب العائلة وتأخذ موعدا.
+P: Goedemorgen, mevrouw. Wat is het probleem? | صباح الخير يا سيدتي. ما المشكلة؟
+S: Ik hoest veel en ik ben altijd moe. | أسعل كثيرا وأنا متعبة دائما.
+P: Heeft u ook koorts? | هل عندك حرارة أيضا؟
+S: Gisteren wel, maar vandaag niet. | البارحة نعم، لكن اليوم لا.
+P: Ik luister even naar uw longen. Adem diep in. | سأستمع قليلا إلى رئتيك. تنفسي بعمق.
+P: Het is een flinke verkoudheid. Niets ernstigs. | إنه زكام قوي. لا شيء خطير.
+P: Drink veel water, rust goed uit en neem paracetamol als u hoofdpijn heeft. | اشربي الكثير من الماء، استريحي جيدا وخذي باراسيتامول إذا كان عندك صداع.
+P: Gaat het over een week niet beter, dan komt u terug. | إذا لم تتحسني بعد أسبوع، فارجعي.
+S: Dank u wel, dokter. | شكرا جزيلا يا دكتور.
+
+@ b03 | A1 | De trein naar Rotterdam | القطار إلى روتردام
+N: Sara gaat op bezoek bij haar broer Mo in Rotterdam. | سارة تذهب لزيارة أخيها مو في روتردام.
+N: Ze neemt de trein vanaf Utrecht Centraal. | تأخذ القطار من محطة أوتريخت المركزية.
+N: Het station is groot en er lopen veel mensen. | المحطة كبيرة ويمشي فيها الكثير من الناس.
+S: Pardon, van welk spoor vertrekt de trein naar Rotterdam? | عفوا، من أي رصيف ينطلق القطار إلى روتردام؟
+P: Van spoor elf. Hij vertrekt over vijf minuten. | من الرصيف الحادي عشر. ينطلق بعد خمس دقائق.
+S: Dank u! Moet ik overstappen? | شكرا! هل يجب أن أبدل القطار؟
+P: Nee, het is een intercity. Hij rijdt direct. | لا، إنه قطار سريع. يسير مباشرة.
+N: Sara checkt in met haar bankpas en stapt in. | سارة تسجل دخولها ببطاقتها البنكية وتصعد.
+N: Ze zit bij het raam en kijkt naar de weilanden en de koeien. | تجلس بجانب النافذة وتنظر إلى المراعي والأبقار.
+N: Na veertig minuten is ze in Rotterdam. | بعد أربعين دقيقة تكون في روتردام.
+M: Sara! Hier ben ik! | سارة! أنا هنا!
+S: Mo! Wat fijn om je te zien! | مو! كم أنا سعيدة برؤيتك!
+
+@ b04 | A1 | Mo in Rotterdam | مو في روتردام
+M: Welkom in Rotterdam, zus! | أهلا بك في روتردام يا أختي!
+S: Wat is het hier anders dan in Utrecht. | كم هو مختلف هنا عن أوتريخت.
+M: Ja, Rotterdam is moderner. Er zijn veel hoge gebouwen. | نعم، روتردام أكثر حداثة. توجد فيها الكثير من المباني العالية.
+M: In de oorlog is de stad bijna helemaal kapotgegaan. | في الحرب دُمرت المدينة بالكامل تقريبا.
+M: Daarna hebben ze alles opnieuw gebouwd. | بعد ذلك أعادوا بناء كل شيء.
+S: Kijk, die rare gele huizen! | انظر، تلك البيوت الصفراء الغريبة!
+M: Dat zijn de kubuswoningen. Mensen wonen daar echt. | تلك هي البيوت المكعبة. الناس يسكنون فيها فعلا.
+S: Echt? Dat lijkt me lastig met de meubels. | حقا؟ يبدو لي ذلك صعبا مع الأثاث.
+M: Haha, dat denk ik ook. Kom, we gaan naar de Markthal. | هاها، أنا أيضا أظن ذلك. تعالي، لنذهب إلى سوق ماركتهال.
+N: In de Markthal eten ze verse vis en drinken ze verse jus d'orange. | في الماركتهال يأكلان سمكا طازجا ويشربان عصير برتقال طازجا.
+S: Ik snap waarom je hier graag woont. | أفهم لماذا تحب السكن هنا.
+
+@ b05 | A1 | Werk zoeken | البحث عن عمل
+N: Sara werkt in een bakkerij, maar ze wil iets nieuws. | سارة تعمل في مخبز، لكنها تريد شيئا جديدا.
+N: In Marokko was ze lerares. | في المغرب كانت معلمة.
+N: Ze zoekt op internet naar vacatures. | تبحث على الإنترنت عن وظائف شاغرة.
+N: Ze vindt een vacature bij een taalschool. | تجد وظيفة شاغرة في مدرسة لغات.
+N: De school zoekt iemand die Arabisch en Frans geeft. | المدرسة تبحث عن شخص يدرّس العربية والفرنسية.
+S: Dat is perfect voor mij! | هذا مثالي بالنسبة لي!
+N: Ze schrijft een brief en stuurt haar cv. | تكتب رسالة وترسل سيرتها الذاتية.
+N: Drie dagen later gaat de telefoon. | بعد ثلاثة أيام يرن الهاتف.
+P: Goedemiddag, u spreekt met Peter de Vries van de taalschool. | مساء الخير، معك بيتر دي فريس من مدرسة اللغات.
+P: We willen u graag uitnodigen voor een sollicitatiegesprek. | نود أن ندعوك لمقابلة عمل.
+S: Wat leuk! Wanneer? | يا للروعة! متى؟
+P: Kunt u volgende week dinsdag om tien uur? | هل يناسبك يوم الثلاثاء القادم في الساعة العاشرة؟
+S: Ja, dat kan. Tot dinsdag! | نعم، يناسبني. إلى يوم الثلاثاء!
+
+@ b06 | A1 | Het sollicitatiegesprek | مقابلة العمل
+N: Het is dinsdag. Sara is een beetje zenuwachtig. | إنه يوم الثلاثاء. سارة متوترة قليلا.
+N: Ze draagt een nette broek en een witte blouse. | ترتدي سروالا أنيقا وقميصا أبيض.
+P: Welkom, mevrouw El Amrani. Gaat u zitten. | أهلا يا سيدة العمراني. تفضلي بالجلوس.
+P: Vertel eens iets over uzelf. | حدثيني قليلا عن نفسك.
+S: Ik heb vijf jaar als lerares Frans gewerkt in Marrakesh. | عملت خمس سنوات معلمة للفرنسية في مراكش.
+S: Arabisch is mijn moedertaal en ik spreek ook Engels. | العربية لغتي الأم وأتكلم الإنجليزية أيضا.
+P: En waarom wilt u bij ons werken? | ولماذا تريدين العمل عندنا؟
+S: Ik vind lesgeven het mooiste werk dat er is. | أرى أن التدريس أجمل عمل موجود.
+S: Ik weet ook hoe het is om een nieuwe taal te leren. | وأعرف أيضا كيف هو تعلم لغة جديدة.
+P: Dat is een groot voordeel. Uw Nederlands is trouwens erg goed. | هذه ميزة كبيرة. لغتك الهولندية بالمناسبة جيدة جدا.
+S: Dank u. Ik oefen elke dag met luisteren en lezen. | شكرا. أتدرب كل يوم بالاستماع والقراءة.
+P: Mooi. We bellen u vrijdag met ons besluit. | جميل. سنتصل بك يوم الجمعة بقرارنا.
+
+@ b07 | A1 | Het goede nieuws | الخبر السار
+N: Het is vrijdag. Sara kijkt steeds naar haar telefoon. | إنه يوم الجمعة. سارة تنظر باستمرار إلى هاتفها.
+N: Om drie uur belt Peter. | في الساعة الثالثة يتصل بيتر.
+P: Ik heb goed nieuws. U krijgt de baan! | عندي خبر سار. حصلت على الوظيفة!
+S: Echt waar? Wat geweldig! | حقا؟ هذا رائع!
+P: U begint op één maart. U werkt drie dagen per week. | تبدئين في الأول من مارس. تعملين ثلاثة أيام في الأسبوع.
+N: Sara rent naar buiten en belt aan bij Daan. | سارة تركض إلى الخارج وتقرع جرس دان.
+S: Daan! Ik heb de baan! | دان! حصلت على الوظيفة!
+D: Gefeliciteerd! Dat moeten we vieren. | مبروك! يجب أن نحتفل بذلك.
+D: Zullen we vanavond samen eten? Ik kook. | هل نتعشى معا الليلة؟ أنا سأطبخ.
+S: Graag! Dan neem ik het toetje mee. | بكل سرور! إذن سأحضر التحلية.
+
+@ b08 | A1 | Een avond bij Daan | سهرة عند دان
+N: Daan kookt pasta met groenten. | دان يطبخ معكرونة بالخضار.
+N: Zijn zus Emma is er ook. | أخته إيما هنا أيضا.
+E: Hoi Sara, ik ben Emma. Daan vertelt veel over je. | مرحبا سارة، أنا إيما. دان يحكي الكثير عنك.
+S: Hopelijk alleen goede dingen! | آمل أن تكون أشياء جيدة فقط!
+E: Haha, ja hoor. Wat doe je voor werk? | هاها، نعم بالتأكيد. ماذا تعملين؟
+S: Vanaf maart geef ik les op een taalschool. | ابتداء من مارس سأدرّس في مدرسة لغات.
+E: Wat toevallig! Ik ben ook docent. Ik geef geschiedenis op een middelbare school. | يا لها من صدفة! أنا أيضا مدرّسة. أدرّس التاريخ في مدرسة ثانوية.
+N: Ze praten de hele avond over school, reizen en eten. | يتحدثون طوال السهرة عن المدرسة والسفر والطعام.
+N: Sara heeft Marokkaanse koekjes meegenomen. | سارة أحضرت معها حلويات مغربية.
+D: Deze koekjes zijn heerlijk. Mag ik het recept? | هذه الحلويات لذيذة جدا. هل تعطينني الوصفة؟
+S: Het is een geheim recept van mijn moeder. | إنها وصفة سرية من أمي.
+E: Dan moet je ons het een keer leren! | إذن يجب أن تعلمينا إياها مرة!
+
+@ c01 | A2 | Koningsdag | يوم الملك
+N: Op zevenentwintig april is het Koningsdag, de verjaardag van de koning. | في السابع والعشرين من أبريل يوم الملك، عيد ميلاد الملك.
+N: Op die dag is bijna heel Nederland oranje. | في ذلك اليوم تكون هولندا كلها تقريبا برتقالية.
+D: Heb je iets oranjes om aan te trekken? | هل عندك شيء برتقالي لترتديه؟
+S: Alleen een oranje sjaal. Is dat genoeg? | فقط وشاح برتقالي. هل هذا يكفي؟
+D: Perfect. Kom, we gaan naar de vrijmarkt. | ممتاز. تعالي، لنذهب إلى السوق الحرة.
+N: Op de vrijmarkt mag iedereen spullen verkopen op straat. | في السوق الحرة يُسمح للجميع ببيع الأغراض في الشارع.
+N: Kinderen verkopen hun oude speelgoed en spelen muziek. | الأطفال يبيعون ألعابهم القديمة ويعزفون الموسيقى.
+N: Sara koopt een oude lamp voor twee euro. | سارة تشتري مصباحا قديما بيورويين.
+S: Waarom vieren jullie de verjaardag van de koning eigenlijk zo uitbundig? | لماذا تحتفلون في الحقيقة بعيد ميلاد الملك بهذا الشكل الصاخب؟
+D: Goede vraag. Het is vooral een excuus voor een groot feest. | سؤال جيد. إنه في الغالب ذريعة لحفلة كبيرة.
+D: Iedereen is buiten, de sfeer is gezellig en niemand hoeft te werken. | الجميع في الخارج، الجو لطيف ولا أحد مضطر للعمل.
+S: Gezellig... dat woord hoor ik steeds. Wat betekent het precies? | "خيزيليخ"... أسمع هذه الكلمة باستمرار. ماذا تعني بالضبط؟
+D: Dat is moeilijk te vertalen. Het is een warm, prettig gevoel samen met anderen. | من الصعب ترجمتها. إنه شعور دافئ ولطيف مع الآخرين.
+S: Dan was vandaag heel gezellig! | إذن كان اليوم لطيفا جدا!
+
+@ c02 | A2 | Lotte uit Antwerpen | لوته من أنتويرب
+N: Op de taalschool werkt ook Lotte. | في مدرسة اللغات تعمل أيضا لوته.
+N: Lotte komt uit Antwerpen, in België. | لوته من أنتويرب، في بلجيكا.
+L: Hoe gaat het met je eerste week? | كيف حال أسبوعك الأول؟
+S: Goed, maar ik versta jou soms moeilijker dan de anderen. | جيد، لكنني أحيانا أفهمك بصعوبة أكبر من الآخرين.
+L: Dat klopt, ik spreek Vlaams. Dat klinkt een beetje anders. | هذا صحيح، أنا أتكلم الفلامانية. إنها تبدو مختلفة قليلا.
+L: In België zeggen we bijvoorbeeld vaak "goesting" in plaats van "zin". | في بلجيكا نقول مثلا كثيرا "خوستينغ" بدل "زِن" (رغبة).
+S: Is het een andere taal? | هل هي لغة أخرى؟
+L: Nee, het is gewoon Nederlands, maar met een andere uitspraak en wat andere woorden. | لا، إنها الهولندية ببساطة، لكن بنطق مختلف وبعض الكلمات المختلفة.
+L: Net als het Arabisch in Marokko en in Egypte, denk ik. | مثل العربية في المغرب وفي مصر، على ما أظن.
+S: Ah, dan begrijp ik het helemaal! | آه، إذن أفهم ذلك تماما!
+L: Kom een keer naar Antwerpen. Dan laat ik je de stad zien. | تعالي مرة إلى أنتويرب. وسأريك المدينة.
+S: Daar heb ik veel goesting in! | عندي رغبة كبيرة في ذلك!
+L: Haha, je leert snel! | هاها، أنت تتعلمين بسرعة!
+
+@ c03 | A2 | Oma Joke | الجدة يوكه
+N: Daan en Emma hebben een oma. Ze heet Joke en ze is zevenentachtig. | دان وإيما عندهما جدة. اسمها يوكه وعمرها سبعة وثمانون عاما.
+N: Op zondag gaan ze altijd bij haar op bezoek, en deze keer gaat Sara mee. | يوم الأحد يزورانها دائما، وهذه المرة تذهب سارة معهما.
+O: Kom binnen, kom binnen! Jij bent vast Sara. | ادخلوا، ادخلوا! لا بد أنك سارة.
+S: Ja, aangenaam, mevrouw. | نعم، تشرفت يا سيدتي.
+O: Zeg maar Joke, hoor. Mevrouw voelt zo oud. | قولي يوكه فقط. "سيدتي" تُشعرني بأنني عجوز جدا.
+N: Oma Joke schenkt koffie en zet een schaal met koekjes op tafel. | الجدة يوكه تصب القهوة وتضع صحنا من البسكويت على الطاولة.
+O: Neem maar één koekje, dat is hier de traditie. | خذي بسكويتة واحدة فقط، هذا هو التقليد هنا.
+S: Eén maar? In Marokko krijg je een hele tafel vol! | واحدة فقط؟ في المغرب تحصل على طاولة كاملة مليئة!
+O: Haha, dat lijkt me heerlijk. Ik ben nooit in Marokko geweest. | هاها، يبدو لي ذلك رائعا. لم أزر المغرب قط.
+O: Toen ik jong was, reisden we bijna niet. We fietsten hooguit naar de zee. | عندما كنت صغيرة، لم نكن نسافر تقريبا. كنا نذهب بالدراجة إلى البحر على أبعد تقدير.
+O: Maar ik heb in mijn leven wel veel veranderd zien. | لكنني رأيت في حياتي الكثير من التغيير.
+S: Wat vond u de grootste verandering? | ما الذي رأيتِه أكبر تغيير؟
+O: Dat de wereld zo dichtbij is gekomen. Nu zit er een Marokkaanse vrouw aan mijn tafel! | أن العالم أصبح قريبا جدا. الآن تجلس امرأة مغربية على طاولتي!
+O: En dat vind ik prachtig. | وأنا أرى ذلك رائعا.
+
+@ c04 | A2 | Een gemiste trein | قطار فائت
+N: Sara wil op zaterdag naar Antwerpen om Lotte te bezoeken. | سارة تريد الذهاب يوم السبت إلى أنتويرب لزيارة لوته.
+N: Ze heeft haar wekker gezet, maar hij gaat niet af. | ضبطت منبهها، لكنه لم يرن.
+N: Ze wordt pas om half negen wakker. Haar trein vertrekt om negen uur! | تستيقظ فقط في الساعة الثامنة والنصف. قطارها ينطلق في الساعة التاسعة!
+N: Ze kleedt zich snel aan, pakt haar tas en springt op de fiets. | تلبس بسرعة، تأخذ حقيبتها وتقفز على الدراجة.
+N: Bij het station is het fietsenrek vol. Ze zoekt vijf minuten naar een plekje. | عند المحطة يكون موقف الدراجات ممتلئا. تبحث خمس دقائق عن مكان صغير.
+N: Als ze op het perron aankomt, ziet ze de trein net wegrijden. | عندما تصل إلى الرصيف، ترى القطار ينطلق للتو.
+S: Nee, hè! Dat meen je niet! | لا! هذا غير معقول!
+N: Ze belt Lotte. | تتصل بلوته.
+L: Geen probleem, er rijdt elk half uur een trein. | لا مشكلة، هناك قطار كل نصف ساعة.
+L: Neem gewoon de volgende, dan haal ik je op het station op. | خذي القطار التالي فقط، وسأستقبلك في المحطة.
+N: Sara haalt opgelucht adem en koopt een cappuccino. | سارة تتنفس بارتياح وتشتري كابتشينو.
+S: Van nu af aan zet ik twee wekkers. | من الآن فصاعدا سأضبط منبهين.
+
+@ c05 | A2 | De inburgering | الاندماج المدني
+N: Om in Nederland te mogen blijven, moet Sara inburgeren. | لكي يُسمح لها بالبقاء في هولندا، يجب على سارة أن تجتاز الاندماج المدني.
+N: Dat betekent dat ze examens doet in lezen, luisteren, schrijven en spreken. | هذا يعني أنها تؤدي امتحانات في القراءة والاستماع والكتابة والتحدث.
+N: Er is ook een examen over de Nederlandse maatschappij. | هناك أيضا امتحان عن المجتمع الهولندي.
+E: Hoe gaat het met de voorbereiding? | كيف تسير التحضيرات؟
+S: Lezen en luisteren gaan goed, want ik lees en luister elke dag. | القراءة والاستماع يسيران جيدا، لأنني أقرأ وأستمع كل يوم.
+S: Maar bij spreken word ik nog steeds zenuwachtig. | لكن في التحدث ما زلت أتوتر.
+E: Dat is heel normaal. Spreken komt meestal als laatste. | هذا عادي جدا. التحدث يأتي عادة في الأخير.
+E: Eerst moet je hoofd vol zitten met de taal, dan komen de woorden vanzelf. | أولا يجب أن يمتلئ رأسك باللغة، ثم تأتي الكلمات من تلقاء نفسها.
+S: Dat merk ik ook. Soms zeg ik opeens een zin zonder erover na te denken. | ألاحظ ذلك أيضا. أحيانا أقول فجأة جملة دون أن أفكر فيها.
+E: Zie je wel! Zullen we elke woensdag een uurtje samen praten? | أرأيت! هل نتحدث معا ساعة كل يوم أربعاء؟
+S: Dat zou fantastisch zijn. Dank je wel, Emma. | سيكون ذلك رائعا. شكرا جزيلا يا إيما.
+
+@ d01 | B1 | Het examen | الامتحان
+N: Twee maanden later is het zover: Sara doet haar spreekexamen. | بعد شهرين يحين الوقت: سارة تؤدي امتحان التحدث.
+N: Ze zit in een kleine kamer met een koptelefoon op en een computer voor zich. | تجلس في غرفة صغيرة وعلى رأسها سماعات وأمامها حاسوب.
+N: Op het scherm verschijnt een vraag: "Beschrijf wat je in het weekend meestal doet." | على الشاشة يظهر سؤال: "صِف ما تفعله عادة في عطلة نهاية الأسبوع."
+N: Even is haar hoofd helemaal leeg, maar dan denkt ze aan de verhalen die ze heeft gelezen. | للحظة يصبح رأسها فارغا تماما، لكنها بعد ذلك تفكر في القصص التي قرأتها.
+S: In het weekend ga ik vaak naar de markt en daarna drink ik koffie met mijn buurman. | في عطلة نهاية الأسبوع أذهب غالبا إلى السوق وبعد ذلك أشرب القهوة مع جاري.
+S: Op zondag bezoek ik soms een oudere dame, oma Joke, die prachtige verhalen vertelt over vroeger. | يوم الأحد أزور أحيانا سيدة مسنة، الجدة يوكه، التي تحكي قصصا رائعة عن الماضي.
+N: De woorden komen bijna vanzelf, alsof ze ze al jaren kent. | الكلمات تأتي تقريبا من تلقاء نفسها، كأنها تعرفها منذ سنوات.
+N: Na het examen fietst ze naar huis met een gevoel van trots. | بعد الامتحان تعود بالدراجة إلى البيت بشعور بالفخر.
+N: Een maand later krijgt ze een brief: ze is voor alle onderdelen geslaagd. | بعد شهر تتلقى رسالة: لقد نجحت في كل الأجزاء.
+D: Ik wist het wel. Jij spreekt inmiddels beter Nederlands dan sommige Nederlanders! | كنت أعرف ذلك. أنت تتكلمين الآن الهولندية أفضل من بعض الهولنديين!
+
+@ d02 | B1 | Fietsen in de regen | ركوب الدراجة تحت المطر
+N: Wie in Nederland woont, leert vroeg of laat fietsen in de regen. | من يسكن في هولندا، يتعلم عاجلا أم آجلا ركوب الدراجة تحت المطر.
+N: Er zijn meer fietsen dan inwoners: ongeveer drieëntwintig miljoen fietsen voor achttien miljoen mensen. | توجد دراجات أكثر من السكان: حوالي ثلاثة وعشرين مليون دراجة لثمانية عشر مليون شخص.
+N: Kinderen fietsen naar school, ouders fietsen naar hun werk, en zelfs ministers komen soms op de fiets. | الأطفال يذهبون بالدراجة إلى المدرسة، والآباء إلى عملهم، وحتى الوزراء يأتون أحيانا بالدراجة.
+N: Volgens Daan is dat geen kwestie van liefde voor sport, maar van praktisch denken. | حسب دان فهذه ليست مسألة حب للرياضة، بل مسألة تفكير عملي.
+D: Het land is plat, de afstanden zijn kort en er zijn overal fietspaden. | البلد مسطح، والمسافات قصيرة وتوجد في كل مكان مسارات للدراجات.
+D: Met de auto sta je in de file en moet je een parkeerplek zoeken. Met de fiets ben je er gewoon. | بالسيارة تقف في الزحام ويجب أن تبحث عن مكان للركن. بالدراجة تصل ببساطة.
+S: Maar de wind! Soms heb ik het gevoel dat ik niet vooruitkom. | لكن الريح! أحيانا أشعر أنني لا أتقدم.
+D: Ja, tegenwind is de echte vijand van elke Nederlander. | نعم، الريح المعاكسة هي العدو الحقيقي لكل هولندي.
+N: Sara heeft inmiddels een goede regenbroek gekocht en laat zich door een buitje niet meer tegenhouden. | سارة اشترت الآن سروال مطر جيدا ولم تعد زخة مطر صغيرة توقفها.
+N: Ze merkt zelfs dat ze het fietsen mist als ze een keer de bus neemt. | بل إنها تلاحظ أنها تشتاق إلى ركوب الدراجة عندما تأخذ الحافلة مرة.
+
+@ d03 | B1 | Water | الماء
+N: Een groot deel van Nederland ligt onder de zeespiegel. | جزء كبير من هولندا يقع تحت مستوى سطح البحر.
+N: Zonder dijken, duinen en gemalen zou ongeveer een kwart van het land regelmatig onder water staan. | بدون السدود والكثبان ومحطات الضخ لكان حوالي ربع البلد مغمورا بالماء بانتظام.
+N: Eeuwenlang hebben Nederlanders gestreden tegen het water. | لقرون طويلة كافح الهولنديون ضد الماء.
+N: Vroeger pompten windmolens het water weg; tegenwoordig doen grote elektrische gemalen dat werk. | في الماضي كانت طواحين الهواء تضخ الماء بعيدا؛ واليوم تقوم محطات ضخ كهربائية كبيرة بهذا العمل.
+N: In negentienhonderddrieënvijftig ging het helemaal mis. | في عام ألف وتسعمئة وثلاثة وخمسين ساءت الأمور تماما.
+N: Tijdens een zware storm braken de dijken in Zeeland en kwamen meer dan achttienhonderd mensen om het leven. | أثناء عاصفة شديدة انكسرت السدود في زيلاند وفقد أكثر من ألف وثمانمئة شخص حياتهم.
+N: Daarna bouwde het land de Deltawerken, een van de grootste waterbouwprojecten ter wereld. | بعد ذلك بنى البلد مشاريع الدلتا، أحد أكبر مشاريع الهندسة المائية في العالم.
+E: Op school leer ik mijn leerlingen dat het water ons heeft gevormd. | في المدرسة أعلّم تلاميذي أن الماء هو الذي شكّلنا.
+E: Omdat iedereen samen moest werken om droge voeten te houden, zijn we een land van overleg geworden. | لأن الجميع اضطروا إلى العمل معا ليحافظوا على أقدامهم جافة، أصبحنا بلد التشاور.
+S: Dus daarom vergaderen jullie zo graag! | إذن لهذا السبب تحبون الاجتماعات كثيرا!
+E: Precies. Dat noemen we het poldermodel. | بالضبط. هذا ما نسميه نموذج البولدر.
+
+@ d04 | B1 | Een jaar later | بعد سنة
+N: Het is precies een jaar geleden dat Sara in Utrecht kwam wonen. | مرت سنة بالضبط منذ أن جاءت سارة لتسكن في أوتريخت.
+N: Ze zit in haar tuin met een kop thee met munt en denkt terug aan het begin. | تجلس في حديقتها مع كوب شاي بالنعناع وتتذكر البداية.
+S: Toen ik hier aankwam, verstond ik bijna niets. | عندما وصلت إلى هنا، لم أكن أفهم شيئا تقريبا.
+S: Ik weet nog dat ik op de markt niet eens durfde te vragen hoeveel iets kostte. | ما زلت أتذكر أنني في السوق لم أكن أجرؤ حتى على السؤال عن ثمن شيء.
+S: Ik heb geen trucjes gebruikt. Ik heb gewoon elke dag geluisterd en gelezen, ook als ik moe was. | لم أستخدم حيلا. ببساطة استمعت وقرأت كل يوم، حتى عندما كنت متعبة.
+S: Eerst begreep ik maar een paar woorden, daarna hele zinnen en uiteindelijk hele verhalen. | في البداية كنت أفهم بضع كلمات فقط، ثم جملا كاملة وفي النهاية قصصا كاملة.
+N: Daan kijkt over de heg. | دان ينظر من فوق السياج.
+D: Zo, zit je weer te dromen? | ها، هل تجلسين تحلمين مرة أخرى؟
+S: Ik dacht aan vorig jaar. Weet je nog, die eerste kop koffie? | كنت أفكر في السنة الماضية. هل تتذكر، فنجان القهوة الأول ذاك؟
+D: Natuurlijk. Toen zei je nog "alsjeblieft" tegen iedereen, zelfs tegen de kat. | طبعا. وقتها كنت ما زلت تقولين "من فضلك" للجميع، حتى للقطة.
+S: Haha! En nu ben ik het die Lotte helpt met Nederlandse uitdrukkingen. | هاها! والآن أنا التي تساعد لوته في التعابير الهولندية.
+D: Op het volgende jaar dan. Proost! | نخب السنة القادمة إذن. في صحتك!
+S: Proost! Op nog veel meer gezelligheid. | في صحتك! نخب المزيد من اللحظات اللطيفة.

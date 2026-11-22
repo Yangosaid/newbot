@@ -6,4 +6,4 @@ dependencyResolutionManagement {
     repositories { google(); mavenCentral(); maven { url 'https://jitpack.io' } }
 }
 rootProject.name = "BusBattle"
-include ":app", ":downloader", ":streamer"
+include ":app", ":downloader", ":streamer", ":dutch"
