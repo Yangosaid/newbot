@@ -13,4 +13,7 @@ dependencyResolutionManagement {
     }
 }
 include ':app'
-rootProject.name = "twoyi"
+include ':Bcore'
+include ':black-reflection'
+include ':compiler'
+rootProject.name = "VirtualPhone"

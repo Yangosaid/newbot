@@ -4,5 +4,12 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  */
 plugins {
-    id 'com.android.application' version '8.7.3' apply false
+    id 'com.android.application' version '8.13.2' apply false
+    id 'com.android.library' version '8.13.2' apply false
+}
+
+// Used by the BlackBox app-virtualization engine (Bcore), which powers the "modern apps" mode.
+ext {
+    compileSdkVersion = 35
+    minSdk = 27
 }

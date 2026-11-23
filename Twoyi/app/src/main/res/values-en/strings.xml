@@ -5,7 +5,7 @@
   -->
 
 <resources>
-    <string name="app_name">twoyi</string>
+    <string name="app_name">Virtual Phone</string>
     <string name="booting_tips">Booting twoyi…</string>
     <string name="extracting_tips">twoyi is initializing…</string>
     <string name="first_boot_tips">The first boot is a little slow, please wait…</string>
@@ -128,4 +128,27 @@ Switching later keeps your apps and data inside the container where possible.</s
     <string name="render_scale_100">100% — sharpest (heavy)</string>
     <string name="keepalive_channel">Virtual system</string>
     <string name="keepalive_text">The virtual system is running at full performance</string>
+    <string name="home_subtitle">Choose how to run apps</string>
+    <string name="mode_modern_title">⚡ Modern apps</string>
+    <string name="mode_modern_desc">Run apps in an isolated space on your phone’s own Android %1$s: all modern apps work (TikTok, browsers, 3D) at full speed. Root hiding available, no real root.</string>
+    <string name="mode_root_title">🔓 Root system</string>
+    <string name="mode_root_desc">A full Android 8.1 system with real root. Very recent apps may not work.</string>
+    <string name="home_settings_desc">Root system settings, logs, switch system</string>
+    <string name="modern_info">Apps here run on your phone’s Android %1$s, isolated from your normal apps. Long-press an app for more options.</string>
+    <string name="modern_add_from_phone">Add from my phone</string>
+    <string name="modern_add_from_apk">Install APK file</string>
+    <string name="modern_hide_root">Hide root from apps</string>
+    <string name="modern_allow_screenshots">Allow screenshots in all apps</string>
+    <string name="modern_applies_next_launch">Applies the next time the app is opened</string>
+    <string name="modern_empty">No apps yet. Add one from your phone or from an APK file.</string>
+    <string name="modern_engine_failed">The modern apps engine could not start on this phone. Send the log to the developer.</string>
+    <string name="modern_launching">Opening %1$s…</string>
+    <string name="modern_launch_failed">Could not open the app</string>
+    <string name="modern_open">Open</string>
+    <string name="modern_stop">Stop</string>
+    <string name="modern_clear">Clear data</string>
+    <string name="modern_remove">Remove from space</string>
+    <string name="modern_clear_confirm">Clear all data of %1$s inside the space?</string>
+    <string name="modern_remove_confirm">Remove %1$s from the space? (It stays on your phone)</string>
+    <string name="modern_installing">Installing…</string>
 </resources>

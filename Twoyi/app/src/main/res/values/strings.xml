@@ -129,4 +129,27 @@
     <string name="render_scale_100">100% — الأوضح (ثقيل)</string>
     <string name="keepalive_channel">النظام الافتراضي</string>
     <string name="keepalive_text">النظام الافتراضي يعمل بكامل الأداء</string>
+    <string name="home_subtitle">اختر طريقة التشغيل</string>
+    <string name="mode_modern_title">⚡ التطبيقات الحديثة</string>
+    <string name="mode_modern_desc">تشغيل التطبيقات في مساحة معزولة على Android %1$s نفسه: كل التطبيقات الحديثة تعمل (TikTok، المتصفحات، 3D) بسرعة كاملة. إخفاء الروت متاح، بدون روت حقيقي.</string>
+    <string name="mode_root_title">🔓 نظام الروت</string>
+    <string name="mode_root_desc">نظام Android 8.1 كامل مع روت حقيقي. التطبيقات الحديثة جداً قد لا تعمل.</string>
+    <string name="home_settings_desc">إعدادات نظام الروت، السجل، تبديل النظام</string>
+    <string name="modern_info">التطبيقات هنا تعمل على Android %1$s الخاص بهاتفك، معزولة عن تطبيقاتك الأصلية. اضغط مطولاً على أي تطبيق لخيارات أكثر.</string>
+    <string name="modern_add_from_phone">إضافة من هاتفي</string>
+    <string name="modern_add_from_apk">تثبيت ملف APK</string>
+    <string name="modern_hide_root">إخفاء الروت عن التطبيقات</string>
+    <string name="modern_allow_screenshots">السماح بلقطات الشاشة في كل التطبيقات</string>
+    <string name="modern_applies_next_launch">يُطبَّق عند فتح التطبيق في المرة القادمة</string>
+    <string name="modern_empty">لا توجد تطبيقات بعد. أضف تطبيقاً من هاتفك أو من ملف APK.</string>
+    <string name="modern_engine_failed">تعذّر تشغيل محرك التطبيقات الحديثة على هذا الهاتف. أرسل السجل للمطوّر.</string>
+    <string name="modern_launching">جارٍ فتح %1$s…</string>
+    <string name="modern_launch_failed">تعذّر فتح التطبيق</string>
+    <string name="modern_open">فتح</string>
+    <string name="modern_stop">إيقاف</string>
+    <string name="modern_clear">مسح البيانات</string>
+    <string name="modern_remove">حذف من المساحة</string>
+    <string name="modern_clear_confirm">مسح كل بيانات %1$s داخل المساحة؟</string>
+    <string name="modern_remove_confirm">حذف %1$s من المساحة؟ (لن يُحذف من هاتفك)</string>
+    <string name="modern_installing">جارٍ التثبيت…</string>
 </resources>

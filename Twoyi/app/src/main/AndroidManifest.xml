@@ -29,10 +29,9 @@
             android:label="@string/app_name"
             android:theme="@style/Theme.Twoyi" />
 
-        <activity android:name=".Render2Activity"
-            android:theme="@style/Theme.Twoyi.FullScreen"
-            android:label="@string/app_name"
-            android:configChanges="orientation|keyboardHidden">
+        <activity android:name=".HomeActivity"
+            android:theme="@style/Theme.Twoyi"
+            android:label="@string/app_name">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
@@ -42,6 +41,18 @@
                 android:name="android.app.shortcuts"
                 android:resource="@xml/shortcuts"/>
         </activity>
+
+        <activity android:name=".modern.ModernAppsActivity"
+            android:theme="@style/Theme.Twoyi"
+            android:label="@string/mode_modern_title" />
+
+        <!-- Root system (Twoyi container) in its own task: switch modes from Recents. -->
+        <activity android:name=".Render2Activity"
+            android:theme="@style/Theme.Twoyi.FullScreen"
+            android:label="@string/mode_root_title"
+            android:launchMode="singleTask"
+            android:taskAffinity="io.twoyi.rootsystem"
+            android:configChanges="orientation|keyboardHidden" />
 
 
         <activity

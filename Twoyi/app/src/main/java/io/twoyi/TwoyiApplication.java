@@ -34,20 +34,40 @@ import io.twoyi.utils.RomManager;
 
 public class TwoyiApplication extends Application {
 
+    private boolean mMainProcess;
+
     @Override
     protected void attachBaseContext(Context base) {
         super.attachBaseContext(base);
 
-        RomManager.ensureBootFiles(base);
+        // "Modern apps" engine (BlackBox app virtualization). It runs virtual apps in this
+        // app's own extra processes, so it must be initialised in every process.
+        io.twoyi.modern.ModernEngine.attach(this, base);
 
-        TwoyiSocketServer.getInstance(base).start();
+        mMainProcess = base.getPackageName().equals(currentProcessName());
+        if (mMainProcess) {
+            // "Root system" engine (Twoyi container): main UI process only.
+            RomManager.ensureBootFiles(base);
+            TwoyiSocketServer.getInstance(base).start();
+        }
     }
 
     @Override
     public void onCreate() {
         super.onCreate();
+        io.twoyi.modern.ModernEngine.create();
+    }
 
-        // Analytics/crash upload to the original author's App Center project is disabled.
+    private static String currentProcessName() {
+        try (java.io.FileInputStream in = new java.io.FileInputStream("/proc/self/cmdline")) {
+            byte[] buf = new byte[256];
+            int n = in.read(buf);
+            int end = 0;
+            while (end < n && buf[end] != 0) end++;
+            return new String(buf, 0, end);
+        } catch (Throwable e) {
+            return "";
+        }
     }
 
     static int statusBarHeight = -1;

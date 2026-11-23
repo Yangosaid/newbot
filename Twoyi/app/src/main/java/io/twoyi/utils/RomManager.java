@@ -269,7 +269,8 @@ public final class RomManager {
     }
 
     public static void reboot(Context context) {
-        Intent intent = context.getPackageManager().getLaunchIntentForPackage(context.getPackageName());
+        // The launcher entry is now the mode chooser; restart straight into the root system.
+        Intent intent = new Intent(context, io.twoyi.Render2Activity.class).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         context.getApplicationContext().startActivity(intent);
 
         shutdown(context);
