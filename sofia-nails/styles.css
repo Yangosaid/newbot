@@ -297,3 +297,6 @@ img.brand__mark { width: 32px; height: 43px; border-radius: 0; background: none;
 .footer .langs { display: inline-flex; background: transparent; border-color: rgba(243, 220, 210, .25); margin-bottom: 14px; }
 .footer .langs a { color: #d9c3bc; }
 .footer .langs a[aria-current] { background: var(--blush); color: var(--plum); }
+.info .addr { color: var(--cream); font-size: 1.08rem; }
+.info .addr-note { display: inline-block; margin: 4px 0 6px; font-size: .92rem; }
+.footer .addr { white-space: nowrap; }

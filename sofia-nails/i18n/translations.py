@@ -14,10 +14,10 @@ T = {
         'Sofia Nails · Nagels, manicure en harsen in Brussel',
         'Sofia Nails · Nails, manicure and waxing in Brussels',
         'Sofia Nails · Uñas, manicura y depilación con cera en Bruselas'),
-    'Épilation à la cire, manucure, semi-permanent, gel, acrylique et pédicure médicale à Bruxelles. Uniquement sur rendez-vous, chez moi, dans un espace privé. Tarifs dès 10 €.': (
-        'Harsen, manicure, semi-permanente lak, gel, acryl en medische pedicure in Brussel. Enkel op afspraak, bij mij thuis, in een privéruimte. Prijzen vanaf 10 €.',
-        'Waxing, manicure, semi-permanent polish, gel, acrylic and medical pedicure in Brussels. By appointment only, at my home, in a private space. Prices from 10 €.',
-        'Depilación con cera, manicura, semipermanente, gel, acrílico y pedicura médica en Bruselas. Solo con cita previa, en mi casa, en un espacio privado. Precios desde 10 €.'),
+    'Épilation à la cire, manucure, semi-permanent, gel, acrylique et pédicure médicale à Uccle, Bruxelles. Uniquement sur rendez-vous, chez moi, dans un espace privé. Tarifs dès 10 €.': (
+        'Harsen, manicure, semi-permanente lak, gel, acryl en medische pedicure in Ukkel, Brussel. Enkel op afspraak, bij mij thuis, in een privéruimte. Prijzen vanaf 10 €.',
+        'Waxing, manicure, semi-permanent polish, gel, acrylic and medical pedicure in Uccle, Brussels. By appointment only, at my home, in a private space. Prices from 10 €.',
+        'Depilación con cera, manicura, semipermanente, gel, acrílico y pedicura médica en Uccle, Bruselas. Solo con cita previa, en mi casa, en un espacio privado. Precios desde 10 €.'),
     'Sofia Nails · Beauté à Bruxelles': (
         'Sofia Nails · Schoonheid in Brussel', 'Sofia Nails · Beauty in Brussels', 'Sofia Nails · Belleza en Bruselas'),
     'Épilation à la cire et beauté des mains et des pieds, sur rendez-vous à Bruxelles.': (
@@ -158,10 +158,10 @@ T = {
         'Select your treatments in the form and tell me which day and time suit you.',
         'Selecciona los servicios en el formulario e indica el día y el momento que te vienen bien.'),
     'Je confirme le rendez-vous': ('Ik bevestig de afspraak', 'I confirm your appointment', 'Confirmo tu cita'),
-    'Je vous réponds avec la date, l’heure et l’adresse exacte à Bruxelles.': (
-        'Ik antwoord u met de datum, het uur en het exacte adres in Brussel.',
-        'I reply with the date, time and exact address in Brussels.',
-        'Te respondo con la fecha, la hora y la dirección exacta en Bruselas.'),
+    'Je vous réponds rapidement pour confirmer la date et l’heure.': (
+        'Ik antwoord u snel om de datum en het uur te bevestigen.',
+        'I reply quickly to confirm the date and time.',
+        'Te respondo enseguida para confirmar la fecha y la hora.'),
     'Profitez du soin': ('Geniet van uw behandeling', 'Enjoy your treatment', 'Disfruta de tu cita'),
     'Vous êtes reçue dans un espace privé et tranquille, sans salle d’attente ni foule.': (
         'U wordt ontvangen in een rustige privéruimte, zonder wachtzaal of drukte.',
@@ -176,11 +176,11 @@ T = {
         'De ruimte van Sofia Nails: witte manicuretafel, lamp, rek met nagellak en bloemen',
         'The Sofia Nails studio: white manicure table, lamp, polish shelf and flowers',
         'El espacio de Sofia Nails: mesa de manicura blanca, lámpara, estantería de esmaltes y flores'),
-    'Lieu': ('Locatie', 'Location', 'Lugar'),
-    'Uniquement à mon domicile à Bruxelles. L’adresse exacte est communiquée lors de la confirmation.': (
-        'Enkel bij mij thuis in Brussel. Het exacte adres krijgt u bij de bevestiging.',
-        'At my home in Brussels only. The exact address is shared when your booking is confirmed.',
-        'Solo en mi casa en Bruselas. La dirección exacta se envía al confirmar la cita.'),
+    'Adresse': ('Adres', 'Address', 'Dirección'),
+    'Avenue Coghen 169': ('Coghenlaan 169', 'Avenue Coghen 169', 'Avenue Coghen 169'),
+    '1180 Uccle, Bruxelles': ('1180 Ukkel, Brussel', '1180 Uccle, Brussels', '1180 Uccle, Bruselas'),
+    'Chez moi, uniquement sur rendez-vous.': ('Bij mij thuis, enkel op afspraak.', 'At my home, by appointment only.', 'En mi casa, solo con cita previa.'),
+    'Itinéraire sur Google Maps': ('Route via Google Maps', 'Directions on Google Maps', 'Cómo llegar en Google Maps'),
     'Rendez-vous': ('Afspraken', 'Appointments', 'Citas'),
     'Uniquement sur réservation, pour vous accorder tout le temps nécessaire.': (
         'Enkel op reservatie, zodat ik alle tijd voor u heb.',
@@ -194,10 +194,10 @@ T = {
     'Bon à savoir': ('Goed om te weten', 'Good to know', 'Conviene saber'),
     'avant de venir.': ('voor uw bezoek.', 'before you come.', 'antes de venir.'),
     'Où se déroulent les soins ?': ('Waar vinden de behandelingen plaats?', 'Where do treatments take place?', '¿Dónde se realizan los servicios?'),
-    'Uniquement à mon domicile, à Bruxelles, dans un espace dédié et privé. Je ne me déplace pas : l’adresse exacte vous est envoyée avec la confirmation du rendez-vous.': (
-        'Enkel bij mij thuis in Brussel, in een aparte privéruimte. Ik kom niet aan huis: het exacte adres krijgt u samen met de bevestiging van uw afspraak.',
-        'Only at my home in Brussels, in a dedicated private space. I don’t do home visits: the exact address is sent with your booking confirmation.',
-        'Solo en mi casa en Bruselas, en un espacio privado y dedicado. No me desplazo: la dirección exacta se envía con la confirmación de la cita.'),
+    'Chez moi, Avenue Coghen 169 à Uccle (Bruxelles), dans un espace dédié et privé. Je ne me déplace pas à domicile.': (
+        'Bij mij thuis, Coghenlaan 169 in Ukkel (Brussel), in een aparte privéruimte. Ik kom niet aan huis.',
+        'At my home, Avenue Coghen 169 in Uccle (Brussels), in a dedicated private space. I don’t do home visits.',
+        'En mi casa, Avenue Coghen 169 en Uccle (Bruselas), en un espacio privado y dedicado. No hago servicios a domicilio.'),
     'Comment réserver ?': ('Hoe reserveer ik?', 'How do I book?', '¿Cómo reservo?'),
     'Remplissez le formulaire de rendez-vous : il prépare un message WhatsApp ou un e-mail avec vos soins, le total indicatif et vos disponibilités. Vous pouvez aussi m’appeler ou m’écrire sur WhatsApp au +32 470 70 17 05.': (
         'Vul het afsprakenformulier in: het maakt een WhatsApp-bericht of e-mail klaar met uw behandelingen, het indicatieve totaal en uw beschikbaarheid. U kunt me ook bellen of een WhatsApp sturen op +32 470 70 17 05.',
