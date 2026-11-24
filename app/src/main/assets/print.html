@@ -148,7 +148,7 @@ input[type=checkbox]{width:20px;height:20px;accent-color:var(--hot)}
         <div class="ln" id="lookBtns"></div>
       </div>
       <div class="grp"><h3>🎮 Juegos</h3>
-        <div class="ln"><button class="btn" id="bParty">🕺 Sala</button><button class="btn" id="bRace">🏁 Carrera</button><button class="btn" id="bWin">🏆 Desafío</button><button class="btn" id="bNat">🌍 Naciones</button><button class="btn" id="bBus">🚌 Buses</button></div>
+        <div class="ln"><button class="btn" id="bParty">🕺 Sala</button><button class="btn" id="bRace">🏁 Carrera</button><button class="btn" id="bWin">🏆 Desafío</button><button class="btn" id="bNat">🌍 Naciones</button><button class="btn" id="bPaint">🎨 Pintor</button><button class="btn" id="bBus">🚌 Buses</button></div>
       </div>
       <div class="grp"><h3>Probar</h3>
         <div class="ln"><button class="btn" data-test="1">Toques</button><button class="btn" data-test="6">6 personas tocando</button><button class="btn" data-gift="1">🌹 Regalo</button><button class="btn" data-gift="30">⭐ 30</button><button class="btn" data-gift="300">👑 300</button><button class="btn" data-gift="1500">💎 1500</button></div>
@@ -825,6 +825,8 @@ document.addEventListener("visibilitychange",function(){if(!document.hidden)wake
 window.__print=function(){return {act:ACT.length,users:userN,photos:PHOTOS.length,next:(latest()||{}).nick,job:job&&(job.kind+':'+job.items.map(function(it){return it.u.nick+(it.g?'('+it.g.coins+')':'')}).join('+')),gifts:gq.map(function(g){return g.u.nick+':'+g.coins}),feed:+feedS.toFixed(2),printed:mon.p}};
 applyLook(PTH[cfg.look]?cfg.look:"wood");fill();applyQuality();paintHint();paintStats(false);hostLayout();wake();if(ok3d)requestAnimationFrame(frame);
 })();
+
+try{document.getElementById("bPaint").onclick=function(){try{localStorage.setItem("game","paint")}catch(e){}location.href="paint.html"}}catch(e){}
 </script>
 </body>
 </html>

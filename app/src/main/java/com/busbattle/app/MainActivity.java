@@ -56,6 +56,8 @@ public class MainActivity extends Activity {
     private boolean pickingVideo;
     /* the sound of the host's "busy" video, played natively WITHOUT asking for audio focus, so Spotify keeps playing alongside */
     private android.media.MediaPlayer busyPlayer;
+    private Sfx sfx;
+    private Sfx sfx() { if (sfx == null) sfx = new Sfx(this); return sfx; }
 
     @SuppressLint({"SetJavaScriptEnabled", "AddJavascriptInterface"})
     @Override
@@ -284,6 +286,10 @@ public class MainActivity extends Activity {
         @JavascriptInterface public void busyAudio(final boolean on, final double vol, final double atSec) { ui.post(() -> MainActivity.this.busyAudio(on, (float) vol, (float) atSec)); }   // the outer method: a bare call would pick this bridge method itself
         @JavascriptInterface public void busyDelete() { ui.post(() -> { stopBusyAudio(); //noinspection ResultOfMethodCallIgnored
             busyFile().delete(); }); }
+        /** Painter game: a short sound effect from assets/sfx (never pauses Spotify), and the painter's spoken line. */
+        @JavascriptInterface public void sfx(final String name, final double vol, final double rate) { MainActivity.this.sfx().play(String.valueOf(name), (float) vol, (float) rate); }
+        @JavascriptInterface public void sfxLoad(final String names) { MainActivity.this.sfx().preload(String.valueOf(names)); }
+        @JavascriptInterface public void say(final String text, final String lang) { ui.post(() -> MainActivity.this.sfx().say(text, lang)); }
         @JavascriptInterface public void floatTest() { ui.post(() -> FloatOverlay.get(MainActivity.this).test()); }
         @JavascriptInterface public String floatState() {
             if (FloatOverlay.get(MainActivity.this).isShown()) return "on";
@@ -456,6 +462,7 @@ public class MainActivity extends Activity {
         ui.removeCallbacks(flusher);
         FloatOverlay.get(this).hide();
         stopBusyAudio();
+        if (sfx != null) sfx.release();
         if (music != null) music.stop();
         if (live != null) live.stop();
         live = null;

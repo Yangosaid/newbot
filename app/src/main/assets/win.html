@@ -139,7 +139,7 @@ input[type=checkbox]{width:20px;height:20px;accent-color:var(--hot)}
         <div class="ln"><label for="oFlSize">Tamaño</label><select id="oFlSize"><option value="0.8">Pequeño</option><option value="1">Normal</option><option value="1.25">Grande</option></select></div>
       </div>
       <div class="grp"><h3>🎮 Juegos</h3>
-        <div class="ln"><button class="btn" id="bParty">🕺 Sala</button><button class="btn" id="bRace">🏁 Carrera</button><button class="btn" id="bPrint">🖨️ Imprenta</button><button class="btn" id="bNat">🌍 Naciones</button></div>
+        <div class="ln"><button class="btn" id="bParty">🕺 Sala</button><button class="btn" id="bRace">🏁 Carrera</button><button class="btn" id="bPrint">🖨️ Imprenta</button><button class="btn" id="bNat">🌍 Naciones</button><button class="btn" id="bPaint">🎨 Pintor</button></div>
       </div>
       <div class="grp"><h3>Probar</h3>
         <div class="ln"><button class="btn" data-g="Rose:1">💚 Rose</button><button class="btn" data-g="Lion:29999">💚 Lion</button><button class="btn" data-g="GG:1">❤️ GG</button><button class="btn" data-g="Jet:4888">❤️ Jet</button><button class="btn" id="bTaps">Toques</button></div>
@@ -566,6 +566,8 @@ document.addEventListener("visibilitychange",function(){if(!document.hidden)wake
 window.__win=function(){return {wins:ST.wins,level:HERO.lv,mode:HERO.mode,flyers:flyers.length}};
 fill();paintWin(false);paintCols();paintHint();hostLayout();wake();requestAnimationFrame(frame);
 })();
+
+try{document.getElementById("bPaint").onclick=function(){try{localStorage.setItem("game","paint")}catch(e){}location.href="paint.html"}}catch(e){}
 </script>
 </body>
 </html>

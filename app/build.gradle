@@ -16,6 +16,9 @@ android {
 
     buildFeatures { buildConfig true }
 
+    // the painter's sound effects are opened straight from the APK by SoundPool, so they must stay uncompressed
+    androidResources { noCompress 'wav' }
+
     // Same game, two editions: TikTok gifts, or YouTube live chat (preset VOX vs PSOE).
     flavorDimensions 'platform'
     productFlavors {
