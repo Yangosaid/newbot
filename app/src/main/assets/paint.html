@@ -448,7 +448,7 @@ var TIP={u:0.3,v:0.4};function setTip(u,v){TIP.u=u;TIP.v=v;PNT.tgt={x:CV.x+u*CV.
 var PNT={x:150,lean:0,tip:{x:200,y:280},tgt:{x:200,y:280},blink:0,pose:0};
 function ik(sx,sy,tx,ty,l1,l2,bendDown){var dx=tx-sx,dy=ty-sy,d=Math.min(Math.hypot(dx,dy),l1+l2-0.01),a=Math.atan2(dy,dx),c=Math.acos(clamp((l1*l1+d*d-l2*l2)/(2*l1*d),-1,1)),e=a+(bendDown?c:-c);
   var ex=sx+Math.cos(e)*l1,ey=sy+Math.sin(e)*l1;return {ex:ex,ey:ey,hx:ex+Math.cos(Math.atan2(sy+Math.sin(a)*d-ey,sx+Math.cos(a)*d-ex))*l2,hy:ey+Math.sin(Math.atan2(sy+Math.sin(a)*d-ey,sx+Math.cos(a)*d-ex))*l2}}
-function drawPainter(now,dt){var x=cx,p=PNT,talk=now<SAY.talkUntil,show=JOB&&(JOB.phase==="show"),painting=JOB&&(JOB.phase==="sketch"||JOB.phase==="paint"||JOB.phase==="sign");
+function drawPainter(now,dt){var x=cx,p=PNT,talk=now<SAY.talkUntil,show=JOB&&(JOB.phase==="show"&&!JOB.kept),painting=JOB&&(JOB.phase==="sketch"||JOB.phase==="paint"||JOB.phase==="sign");
   var want=clamp(p.tgt.x-98,112,170);p.x+=(want-p.x)*(1-Math.exp(-3*dt));p.tip.x+=(p.tgt.x-p.tip.x)*(1-Math.exp(-18*dt));p.tip.y+=(p.tgt.y-p.tip.y)*(1-Math.exp(-18*dt));
   var bob=Math.sin(now/520)*1.5,fx=p.x,hipY=FEET-70+bob*0.3,neckY=FEET-132+bob,lean=painting?clamp((p.tip.x-fx-90)*0.05,-3,6):show?-4:0,hx=fx+4+lean,hy=neckY-22;
   x.lineJoin="round";x.lineCap="round";x.strokeStyle=INK;x.lineWidth=2.4;
@@ -512,7 +512,8 @@ function stepJob(now,dt){if(!JOB){nextJob();return}var j=JOB,el=(now-j.t0)/1000,
       else{sfx("tada",0.8);burst(mx,my,j.tier>=2?28:j.kind==="tap"?6:14,j.tier>=2?["✨","⭐","💛","🎉","🌟"]:["✨","💖","⭐"]);if(j.tier>=2){sfx("clap",0.7);sfx("sparkle",0.6)}crowdCheer(true);
         say(line(j.kind==="tap"?"tap":j.tier>=2?"big":"fin"),j.u.nick,j.kind==="gift"||(j.kind==="tap"&&false),j.tier>=2?4600:3800)}}
     return}
-  if(j.phase==="show"){var hold=dur("show");if(j.kind==="idle")hold=Q.length?0.5:Math.max(2.5,14-(perf()-j.t0)/1000*0);if(j.tier===3&&Math.random()<dt*6)burst(cvx+rnd(0,CV.w),cvy+rnd(0,CV.h),1,["✨","🌟"],14);
+  if(j.phase==="show"){var hold=dur("show");if(j.kind==="idle")hold=Q.length?0.5:Math.max(2.5,14-(perf()-j.t0)/1000*0);if(j.tier===3&&!j.kept&&Math.random()<dt*6)burst(cvx+rnd(0,CV.w),cvy+rnd(0,CV.h),1,["✨","🌟"],14);
+    if(j.kind==="gift"&&el>=hold&&!Q.length){if(!j.kept){j.kept=true;setTip(0.08,1.02)}return}
     if(el>=hold&&(j.kind!=="idle"||Q.length||el>=16)){j.phase="hang";j.t0=now;j.thumb=thumb(j);if(j.kind!=="gift")sfx("flip",0.5)}return}
   if(j.phase==="hang"){var D4=0.9;if(el>=D4){if(j.kind==="gift"){GAL.unshift({c:j.thumb,nm:j.u.nick,tier:j.tier,at:now,kick:1});if(GAL.length>GSLOT.length)GAL.length=GSLOT.length;sfx("hang",0.8);paintedN++}JOB=null}}}
 function thumb(j){var c=cnv(112,112),x=c.getContext("2d"),f=j.tier===0||j.kind!=="gift"?6:j.tier===1?10:13;x.save();x.translate(56,56);x.scale(112/(PS+f*2*PS/CV.w),112/(PS+f*2*PS/CV.w));x.translate(-PS/2,-PS/2);
@@ -635,7 +636,7 @@ function setupPainterModel(){var o=personClone();scene.add(o);var b=bones(o),mx=
   P3.g.visible=false;P3.arm.forEach(function(a){[a.up,a.lo,a.hand,a.j1,a.j2].forEach(function(m){m.visible=false})});
   /* the crowd is rebuilt with real people */
   CR3.forEach(function(f){if(f){scene.remove(f.g);dropSprite(f.label);dropSprite(f.bub)}});CR3.length=0}
-function updatePainterModel(now,dt){var j=JOB,show=j&&j.phase==="show"&&j.kind!=="idle",painting=j&&(j.phase==="sketch"||j.phase==="paint"||j.phase==="sign"),talk=now<SAY.talkUntil,o=PM.o,b=PM.b;
+function updatePainterModel(now,dt){var j=JOB,show=j&&j.phase==="show"&&j.kind!=="idle"&&!j.kept,painting=j&&(j.phase==="sketch"||j.phase==="paint"||j.phase==="sign"),talk=now<SAY.talkUntil,o=PM.o,b=PM.b;
   var target=canvasPoint(TIP.u,TIP.v,tmpA);var wantX=clamp(target.x-0.92,-0.45,0.02);P3.x+=(wantX-P3.x)*(1-Math.exp(-2.5*dt));
   o.position.set(P3.x,0,0.34);o.rotation.y=show?0.1:0.42;PM.rest.forEach(function(r){r[0].quaternion.copy(r[1])});PM.mx.update(dt);o.updateMatrixWorld(true);
   /* head: towards the brush while painting, to us when talking */
@@ -656,8 +657,8 @@ function makePerson(){var o=personClone(),b=bones(o),mx=new T.AnimationMixer(o);
   var acts={};["SambaDance"].forEach(function(n){if(MDL.clips[n]){acts[n]=mx.clipAction(MDL.clips[n]);acts[n].play();acts[n].setEffectiveWeight(0);acts[n].time=Math.random()*8}});
   var g=new T.Group();g.add(o);scene.add(g);
   var shadow=new T.Mesh(new T.CircleGeometry(0.28,24),SHM());shadow.rotation.x=-Math.PI/2;shadow.position.y=0.01;g.add(shadow);
-  var disc=new T.Group();scene.add(disc);var ph=new T.Mesh(new T.CircleGeometry(0.16,32),new T.MeshBasicMaterial({color:0xffffff}));ph.position.z=0.003;disc.add(ph);
-  var ring=new T.Mesh(new T.RingGeometry(0.16,0.18,40),new T.MeshBasicMaterial({color:0xffffff,toneMapped:false}));disc.add(ring);
+  var disc=new T.Group();scene.add(disc);var ph=new T.Mesh(new T.CircleGeometry(0.13,32),new T.MeshBasicMaterial({color:0xffffff}));ph.position.z=0.003;disc.add(ph);
+  var ring=new T.Mesh(new T.RingGeometry(0.13,0.15,40),new T.MeshBasicMaterial({color:0xffffff,toneMapped:false}));disc.add(ring);var tip=new T.Mesh(new T.ConeGeometry(0.03,0.06,3),ring.material);tip.rotation.z=Math.PI;tip.position.y=-0.17;disc.add(tip);
   return {g:g,o:o,b:b,mx:mx,acts:acts,disc:disc,ph:ph,label:null,bub:null,real:true,w:{SambaDance:0},l1:0,l2:0}}
 /* standing naturally out of the model's T-pose: arms down beside the body, a little breathing and swaying;
    w = how much of it (0 while dancing); talk = a small nod */
@@ -667,19 +668,36 @@ function standPose(f,w,t,talk){var o=f.o,b=f.b;o.updateMatrixWorld(true);if(!f.l
     var e=sp.clone().add(V(0,-f.l1,0)).addScaledVector(side,s[1]*0.06).addScaledVector(fwd,0.02+sw),h=e.clone().add(V(0,-f.l2*0.97,0)).addScaledVector(side,s[1]*0.03).addScaledVector(fwd,0.07+sw);
     aim(A,F,e,w);aim(F,Hd,h,w)});
   b.Spine1.rotation.x+=Math.sin(t/1400)*0.02*w;b.Spine.rotation.z+=Math.sin(t/2100)*0.03*w;if(talk)b.Head.rotation.x+=Math.sin(t/140)*0.12*w;o.updateMatrixWorld(true)}
+/* different looks for the crowd from the one model: the trousers, the top and the headphones change colour, the skin tone varies */
+var LOOKS={},LOOKSRC=null;
+function lookOf(hue){if(!MDL.base)return null;var k=(hue/30|0)%12;if(LOOKS[k])return LOOKS[k];
+  if(!LOOKSRC){var mt=null;MDL.base.traverse(function(o){if(o.isSkinnedMesh&&!mt)mt=o.material});var im=mt&&mt.map&&mt.map.image;if(!im)return null;
+    var c=cnv(im.width,im.height),x=c.getContext("2d");x.drawImage(im,0,0);try{LOOKSRC={w:c.width,h:c.height,d:x.getImageData(0,0,c.width,c.height),flipY:mt.map.flipY}}catch(e){return null}}
+  var S0=LOOKSRC,out=cnv(S0.w,S0.h),ox=out.getContext("2d"),img=ox.createImageData(S0.w,S0.h),a=S0.d.data,b=img.data,r=seeded(k*977+5);
+  var pantH=(k*30+200)%360,topH=(k*47+120)%360,topS=0.25+r()*0.4,phH=(k*61)%360,skin=[0.78,1,1.25,1.5,0.9,1.15][k%6];
+  for(var i=0;i<a.length;i+=4){var R_=a[i]/255,G=a[i+1]/255,B=a[i+2]/255,mx=Math.max(R_,G,B),mn=Math.min(R_,G,B),d=mx-mn,h=0,sat=mx?d/mx:0;
+    if(d){h=mx===R_?((G-B)/d)%6:mx===G?(B-R_)/d+2:(R_-G)/d+4;h*=60;if(h<0)h+=360}
+    var o=null;
+    if(h>38&&h<68&&sat>0.45&&mx>0.55)o=hsv(pantH,Math.min(1,sat*0.75),mx*(k%3===2?0.45:0.9));          /* trousers */
+    else if(sat<0.13&&mx>0.38&&mx<0.82)o=hsv(topH,topS,Math.min(1,mx*1.05));                             /* top */
+    else if((h<12||h>345)&&sat>0.6&&mx>0.45)o=hsv(phH,sat,mx);                                         /* headphones */
+    else if(h>=8&&h<=38&&sat>0.3&&sat<0.8&&mx>0.18&&mx<0.8){var f2=skin;o=[Math.min(1,R_*f2),Math.min(1,G*f2*(f2>1?1.04:1)),Math.min(1,B*f2*(f2>1?1.08:1))]} /* skin */
+    if(o){b[i]=o[0]*255;b[i+1]=o[1]*255;b[i+2]=o[2]*255}else{b[i]=a[i];b[i+1]=a[i+1];b[i+2]=a[i+2]}b[i+3]=255}
+  ox.putImageData(img,0,0);var t=new T.CanvasTexture(out);t.flipY=S0.flipY;t.colorSpace=T.SRGBColorSpace;return LOOKS[k]=t}
+function hsv(h,s,v){var c=v*s,x=c*(1-Math.abs((h/60)%2-1)),m=v-c,r=0,g=0,b=0;if(h<60){r=c;g=x}else if(h<120){r=x;g=c}else if(h<180){g=c;b=x}else if(h<240){g=x;b=c}else if(h<300){r=x;b=c}else{r=c;b=x}return [r+m,g+m,b+m]}
 var shm=null;function SHM(){if(shm)return shm;var c=cnv(64,64),x=c.getContext("2d"),g=x.createRadialGradient(32,32,0,32,32,32);g.addColorStop(0,"rgba(0,0,0,.45)");g.addColorStop(1,"rgba(0,0,0,0)");x.fillStyle=g;x.fillRect(0,0,64,64);return shm=new T.MeshBasicMaterial({map:new T.CanvasTexture(c),transparent:true,depthWrite:false})}
 function updatePerson(f,m,i,now,dt){var p=SL3[i],ent=clamp((now-m.at)/400,0,1),out=m.out?clamp((now-m.out)/450,0,1):0;
-  f.g.visible=true;f.disc.visible=true;f.g.position.set(p[0]-out*0.5,0,p[1]);var sc=0.5+0.5*ease(ent);f.g.scale.setScalar(sc);f.g.rotation.y=0.35+Math.sin(m.ph)*0.25;
-  if(f.u!==m.u||f.m!==m){f.u=m.u;f.m=m;var col=new T.Color().setHSL(m.u.hue/360,0.55,0.72);f.o.traverse(function(o){if(o.isSkinnedMesh)o.material.color.copy(col)});
+  f.g.visible=true;f.disc.visible=true;f.g.position.set(p[0]-out*0.5,0,p[1]);var sc=(0.5+0.5*ease(ent))*(0.94+(i%5)*0.03);f.g.scale.setScalar(sc);f.g.rotation.y=0.35+Math.sin(m.ph)*0.25;
+  if(f.u!==m.u||f.m!==m){f.u=m.u;f.m=m;var vt=lookOf(m.u.hue);f.o.traverse(function(o){if(o.isSkinnedMesh&&vt){o.material.map=vt;o.material.color.setHex(0xffffff);o.material.needsUpdate=true}});
     if(!m.u.faceT)m.u.faceT=tex3(faceOf(m.u));f.ph.material.map=m.u.faceT;f.ph.material.needsUpdate=true;dropSprite(f.label);f.label=null;dropSprite(f.bub);f.bub=null}
   /* dance while tapping (the last 4 s), nod when they comment, otherwise stand */
-  var dance=now-m.u.last<4000&&m.taps>0;f.w.SambaDance+=((dance?1:0)-f.w.SambaDance)*(1-Math.exp(-4*dt));if(f.acts.SambaDance)f.acts.SambaDance.setEffectiveWeight(f.w.SambaDance);
+  var dance=now-m.u.last<4000;f.w.SambaDance+=((dance?1:0)-f.w.SambaDance)*(1-Math.exp(-4*dt));if(f.acts.SambaDance)f.acts.SambaDance.setEffectiveWeight(f.w.SambaDance);
   f.mx.update(dt*(0.9+(i%4)*0.06));standPose(f,1-f.w.SambaDance,now+m.ph*1000,m.talk&&now<m.talk.until);
   /* the photo sits on the head, facing us */
-  f.g.updateMatrixWorld(true);f.b.Head.getWorldPosition(vb);f.disc.position.copy(vb).add(V(0,0.09*sc,0));f.disc.quaternion.copy(cam.quaternion);f.disc.position.addScaledVector(V(0,0,1).applyQuaternion(cam.quaternion),0.12);f.disc.scale.setScalar(sc*(1-out));
-  var showName=now-m.at<2400&&!m.out;if(showName&&!f.label){f.label=spriteText(m.u.nick.slice(0,14),"rgba(20,14,40,.85)","#fff","700 54px Barlow Condensed,Arial",0.1);f.label.position.y=0.27;f.disc.add(f.label)}
+  f.g.updateMatrixWorld(true);f.b.Head.getWorldPosition(vb);f.disc.position.copy(vb).add(V(0,0.42*sc+Math.sin(now/500+m.ph)*0.015,0));f.disc.quaternion.copy(cam.quaternion);f.disc.scale.setScalar(sc*(1-out));
+  var showName=now-m.at<2400&&!m.out;if(showName&&!f.label){f.label=spriteText(m.u.nick.slice(0,14),"rgba(20,14,40,.85)","#fff","700 54px Barlow Condensed,Arial",0.1);f.label.position.y=0.22;f.disc.add(f.label)}
   if(!showName&&f.label){dropSprite(f.label);f.label=null}
-  var tk=m.talk&&now<m.talk.until&&!m.out;if(tk&&(!f.bub||f.bubT!==m.talk)){dropSprite(f.bub);f.bubT=m.talk;f.bub=spriteText(m.talk.t.slice(0,22),"#fffdf6","#2b2440","700 56px "+getComputedStyle(document.body).getPropertyValue("--hand"),0.12);f.bub.position.y=0.42;f.disc.add(f.bub)}
+  var tk=m.talk&&now<m.talk.until&&!m.out;if(tk&&(!f.bub||f.bubT!==m.talk)){dropSprite(f.bub);f.bubT=m.talk;f.bub=spriteText(m.talk.t.slice(0,22),"#fffdf6","#2b2440","700 56px "+getComputedStyle(document.body).getPropertyValue("--hand"),0.12);f.bub.position.y=0.36;f.disc.add(f.bub)}
   if(!tk&&f.bub){dropSprite(f.bub);f.bub=null}}
 
 /* ---------- the easel and its canvas ---------- */
@@ -766,7 +784,7 @@ function buildPainter(){var g=new T.Group();scene.add(g);P3.g=g;
   g.traverse(function(o){if(o.isMesh)o.castShadow=true});face.castShadow=false;drawFace(0,false,false);
   P3.x=0.0;P3.tip=V(0.6,1.35,0)}
 var tmpA=V(0,0,0),tmpB=V(0,0,0);
-function updatePainter(now,dt){var j=JOB,show=j&&j.phase==="show"&&j.kind!=="idle",painting=j&&(j.phase==="sketch"||j.phase==="paint"||j.phase==="sign"),talk=now<SAY.talkUntil;
+function updatePainter(now,dt){var j=JOB,show=j&&j.phase==="show"&&j.kind!=="idle"&&!j.kept,painting=j&&(j.phase==="sketch"||j.phase==="paint"||j.phase==="sign"),talk=now<SAY.talkUntil;
   var target=canvasPoint(TIP.u,TIP.v,tmpA);
   /* stand back from the canvas, step sideways with the brush */
   var wantX=clamp(target.x-0.9,-0.45,0.02);P3.x+=(wantX-P3.x)*(1-Math.exp(-2.5*dt));var g=P3.g,bob=Math.sin(now/600)*0.006;
@@ -927,7 +945,7 @@ $("tChat").onclick=function(){var on=SLOTS.filter(function(s){return s.m&&!s.m.o
 function paintMon(){if($("sheet").hidden)return;$("mG").textContent=mon.g;$("mL").textContent=mon.l;$("mC").textContent=mon.c}
 var monT=0;function monSoon(){if(!monT)monT=setTimeout(function(){monT=0;paintMon()},400)}
 /* the camera bubble steps back while a big painting is shown */
-function vipOn(){return !!(JOB&&JOB.kind==="gift"&&JOB.tier>=2&&(JOB.phase==="show"||JOB.phase==="sign"))}
+function vipOn(){return !!(JOB&&JOB.kind==="gift"&&JOB.tier>=2&&(JOB.phase==="show"&&!JOB.kept||JOB.phase==="sign"))}
 /* ---------- connection (same bridge as the other games) ---------- */
 function setStatus(ok,text){var el=$("st");el.className=ok?"ok":"bad";el.textContent=text||(ok?"Conectado":"Sin conexión");$("dot").className=ok?"ok":""}
 function appLog(l){var el=$("apLog");el.textContent+=(el.textContent?"\n":"")+l;var x=el.textContent.split("\n");if(x.length>200)el.textContent=x.slice(-200).join("\n");el.scrollTop=el.scrollHeight}
@@ -1041,6 +1059,7 @@ document.addEventListener("visibilitychange",function(){if(!document.hidden)pain
 paintFloat();
 function wake(){try{navigator.wakeLock&&navigator.wakeLock.request("screen").catch(function(){})}catch(e){}}
 document.addEventListener("visibilitychange",function(){if(!document.hidden)wake()});
+window.__crowd=function(){return JSON.stringify(CR3.filter(Boolean).map(function(f){if(!f.real)return 'prim';var v=f.b.Hips.getWorldPosition(V(0,0,0));return [f.g.visible,v.x.toFixed(1),v.y.toFixed(1),v.z.toFixed(1),f.w.SambaDance.toFixed(2)]}))};
 window.__dbg=function(){if(!PM)return 'nopm';var o={};['Hips','Head','RightHand','LeftHand','RightArm','LeftFoot'].forEach(function(n){var v=PM.b[n].getWorldPosition(V(0,0,0));o[n]=[v.x.toFixed(2),v.y.toFixed(2),v.z.toFixed(2)]});o.l=[PM.l1,PM.l2,MDL.scale];return JSON.stringify(o)};
 window.__paint=function(){return {job:JOB&&{kind:JOB.kind,phase:JOB.phase,tier:JOB.tier,nick:JOB.u&&JOB.u.nick},q:Q.length,gal:GAL.length,crowd:SLOTS.filter(function(s){return s.m}).length,act:ACT.size,scene:SCENES[sceneI]}};
 resize();fill();hostLayout();wake();requestAnimationFrame(loop);
