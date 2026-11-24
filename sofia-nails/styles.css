@@ -176,3 +176,7 @@ p { margin: 0 0 1em; }
 .sticky.is-hidden { transform: translateY(140%); opacity: 0; }
 @media (min-width: 900px) { .sticky { display: none; } }
 @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } * { transition: none !important; } }
+.btn--wa { background: #25d366; color: #0b3d22; }
+.btn--wa:hover { background: #1fbe5b; }
+.hero__contact { display: flex; flex-wrap: wrap; gap: 8px 22px; margin: -18px 0 34px; font-weight: 500; }
+.hero__contact a { color: var(--plum); text-decoration: none; border-bottom: 1.5px solid var(--rose-soft); }

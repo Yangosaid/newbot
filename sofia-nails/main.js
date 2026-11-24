@@ -109,6 +109,10 @@
     const subject = `Rendez-vous Sofia Nails — ${form.elements.nom.value.trim()}`;
     location.href = `mailto:${EMAIL}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(message())}`;
   });
+  $('[data-wa]').addEventListener('click', () => {
+    const m = check(); err.textContent = m; if (m) return;
+    window.open(`https://wa.me/32470701705?text=${encodeURIComponent(message())}`, '_blank', 'noopener');
+  });
   $('[data-copy]').addEventListener('click', async () => {
     const m = check(); err.textContent = m; if (m) return;
     try { await navigator.clipboard.writeText(message()); status.textContent = 'Message copié.'; }
