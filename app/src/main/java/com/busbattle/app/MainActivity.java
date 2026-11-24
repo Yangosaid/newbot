@@ -94,6 +94,22 @@ public class MainActivity extends Activity {
                 try { startActivity(new Intent(Intent.ACTION_VIEW, u)); } catch (ActivityNotFoundException ignored) {}
                 return true;
             }
+            /* big game files (3D models, street panoramas) are read with fetch(), which file:// pages can't do:
+               they're served from https://assets.busbattle/<path inside assets> straight out of the APK */
+            @Override
+            public android.webkit.WebResourceResponse shouldInterceptRequest(WebView v, WebResourceRequest r) {
+                Uri u = r.getUrl();
+                if (!"assets.busbattle".equals(u.getHost())) return null;
+                String path = u.getPath() == null ? "" : u.getPath().replaceFirst("^/+", "");
+                if (path.isEmpty() || path.contains("..")) return null;
+                String mime = path.endsWith(".glb") ? "model/gltf-binary" : path.endsWith(".jpg") ? "image/jpeg" : path.endsWith(".png") ? "image/png"
+                        : path.endsWith(".wav") ? "audio/wav" : path.endsWith(".js") ? "text/javascript" : "application/octet-stream";
+                java.util.Map<String, String> h = new java.util.HashMap<>();
+                h.put("Access-Control-Allow-Origin", "*");
+                h.put("Cache-Control", "max-age=86400");
+                try { return new android.webkit.WebResourceResponse(mime, null, 200, "OK", h, getAssets().open(path)); }
+                catch (java.io.IOException e) { return new android.webkit.WebResourceResponse(mime, null, 404, "Not found", h, new java.io.ByteArrayInputStream(new byte[0])); }
+            }
         });
         web.setWebChromeClient(new WebChromeClient() {
             /* the host's own camera bubble in the hall: the page asks for the front camera (video only) */
