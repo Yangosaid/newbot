@@ -105,6 +105,7 @@ T = {
         'Vierkante nude nagels met witte French in V-vorm', 'Square nude nails with a white V-shaped French tip', 'Uñas cuadradas nude con francesa blanca en V'),
     'Photo agrandie': ('Vergrote foto', 'Enlarged photo', 'Foto ampliada'),
     'Fermer': ('Sluiten', 'Close', 'Cerrar'),
+    'Plus de créations sur TikTok': ('Meer creaties op TikTok', 'More creations on TikTok', 'Más creaciones en TikTok'),
 
     # Tarifs
     'Des prix clairs,': ('Duidelijke prijzen,', 'Clear prices,', 'Precios claros,'),
@@ -262,7 +263,7 @@ T = {
 }
 
 # Textes identiques dans toutes les langues
-SAME = {'Sofia Nails', 'Sofia', 'Nails', 'WhatsApp', 'adrianatorres679@gmail.com', 'Sofia Nails ·'}
+SAME = {'Sofia Nails', 'Sofia', 'Nails', 'WhatsApp', 'TikTok', '@adriana.torres886', 'adrianatorres679@gmail.com', 'Sofia Nails ·'}
 
 # Textes du script (formulaire de réservation)
 JS = {
