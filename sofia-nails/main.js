@@ -3,6 +3,15 @@
   const $ = (s, r = document) => r.querySelector(s);
   const $$ = (s, r = document) => [...r.querySelectorAll(s)];
   const EMAIL = 'adrianatorres679@gmail.com';
+  // Textes : français par défaut, remplacés par le bloc #i18n des autres langues
+  const T = Object.assign({
+    from: 'dès ', fromLong: 'à partir de ', later: 'à convenir', hello: 'Bonjour Sofia,',
+    want: 'Je souhaite prendre rendez-vous pour :', total: 'Total indicatif', date: 'Date souhaitée',
+    moment: 'Moment', any: 'indifférent', name: 'Nom', phone: 'Téléphone', message: 'Message', thanks: 'Merci !',
+    errSoin: 'Choisissez au moins un soin.', errNom: 'Indiquez votre prénom et votre nom.',
+    copied: 'Message copié.', copyFail: 'Copie impossible sur cet appareil.', subject: 'Rendez-vous Sofia Nails',
+    add: 'Ajouter {s} au rendez-vous', remove: 'Retirer {s} du rendez-vous', lang: '', locale: 'fr-BE',
+  }, (() => { try { return JSON.parse($('#i18n')?.textContent || '{}'); } catch { return {}; } })());
   const euro = (n) => `${n} €`;
 
   // En-tête
@@ -32,6 +41,7 @@
   const services = $$('.prices li').map((li, i) => ({
     id: 's' + i,
     name: li.dataset.service,
+    fr: li.dataset.fr || li.dataset.service,
     price: Number(li.dataset.price),
     from: li.hasAttribute('data-from'),
     group: li.closest('.group').querySelector('h3').textContent,
@@ -42,14 +52,14 @@
   const picker = $('[data-picker]');
   const groups = [...new Set(services.map((s) => s.group))];
   picker.innerHTML = groups.map((g) => `<div><h4>${g}</h4><div class="chips">${services.filter((s) => s.group === g).map((s) =>
-    `<span class="chip"><input type="checkbox" id="${s.id}" value="${s.id}"><label for="${s.id}">${s.name} <b>${s.from ? 'dès ' : ''}${euro(s.price)}</b></label></span>`).join('')}</div></div>`).join('');
+    `<span class="chip"><input type="checkbox" id="${s.id}" value="${s.id}"><label for="${s.id}">${s.name} <b>${s.from ? T.from : ''}${euro(s.price)}</b></label></span>`).join('')}</div></div>`).join('');
 
   // Boutons « + » dans la grille des tarifs
   services.forEach((s) => {
     const b = document.createElement('button');
     b.type = 'button'; b.className = 'add'; b.textContent = '+';
     b.setAttribute('aria-pressed', 'false');
-    b.setAttribute('aria-label', `Ajouter ${s.name} au rendez-vous`);
+    b.setAttribute('aria-label', T.add.replace('{s}', s.name));
     b.addEventListener('click', () => { const c = $('#' + s.id); c.checked = !c.checked; update(); });
     s.li.append(b);
     s.btn = b;
@@ -62,12 +72,12 @@
     const list = chosen();
     const sum = list.reduce((a, s) => a + s.price, 0);
     const from = list.some((s) => s.from);
-    totalEl.textContent = (from ? 'dès ' : '') + euro(sum);
+    totalEl.textContent = (from ? T.from : '') + euro(sum);
     stickyTotal.textContent = list.length ? `${list.length} · ${euro(sum)}` : '';
     services.forEach((s) => {
       const on = $('#' + s.id).checked;
       s.btn.setAttribute('aria-pressed', on); s.btn.textContent = on ? '✓' : '+';
-      s.btn.setAttribute('aria-label', `${on ? 'Retirer' : 'Ajouter'} ${s.name} ${on ? 'du' : 'au'} rendez-vous`);
+      s.btn.setAttribute('aria-label', (on ? T.remove : T.add).replace('{s}', s.name));
     });
   }
   picker.addEventListener('change', update);
@@ -85,28 +95,34 @@
     const f = form.elements;
     const list = chosen();
     const sum = list.reduce((a, s) => a + s.price, 0);
-    const when = f.date.value ? new Date(f.date.value + 'T12:00').toLocaleDateString('fr-BE', { weekday: 'long', day: 'numeric', month: 'long' }) : 'à convenir';
+    const sep = T.locale.startsWith('fr') ? ' :' : ':';
+    const when = f.date.value ? new Date(f.date.value + 'T12:00').toLocaleDateString(T.locale, { weekday: 'long', day: 'numeric', month: 'long' }) : T.later;
+    // Pour Sofia, le nom français du soin est ajouté entre parenthèses dans les autres langues
+    const label = (s) => (s.fr !== s.name ? `${s.name} (${s.fr})` : s.name);
+    const opt = f.moment.options[f.moment.selectedIndex];
+    const mom = f.moment.selectedIndex > 0 ? (opt.text !== opt.value ? `${opt.text} (${opt.value})` : opt.text) : T.any;
     return [
-      'Bonjour Sofia,', '', 'Je souhaite prendre rendez-vous pour :',
-      ...list.map((s) => `• ${s.name} — ${s.from ? 'à partir de ' : ''}${euro(s.price)}`),
-      `Total indicatif : ${list.some((s) => s.from) ? 'à partir de ' : ''}${euro(sum)}`, '',
-      `Date souhaitée : ${when}`,
-      `Moment : ${f.moment.value || 'indifférent'}`, '',
-      `Nom : ${f.nom.value.trim()}`,
-      f.tel.value.trim() ? `Téléphone : ${f.tel.value.trim()}` : null,
-      f.message.value.trim() ? `\nMessage : ${f.message.value.trim()}` : null,
-      '', 'Merci !',
+      T.hello, '', T.want,
+      ...list.map((s) => `• ${label(s)} — ${s.from ? T.fromLong : ''}${euro(s.price)}`),
+      `${T.total}${sep} ${list.some((s) => s.from) ? T.fromLong : ''}${euro(sum)}`, '',
+      `${T.date}${sep} ${when}`,
+      `${T.moment}${sep} ${mom}`, '',
+      `${T.name}${sep} ${f.nom.value.trim()}`,
+      f.tel.value.trim() ? `${T.phone}${sep} ${f.tel.value.trim()}` : null,
+      f.message.value.trim() ? `\n${T.message}${sep} ${f.message.value.trim()}` : null,
+      T.lang ? `\n(${T.lang})` : null,
+      '', T.thanks,
     ].filter((l) => l !== null).join('\n');
   }
   function check() {
-    if (!chosen().length) return 'Choisissez au moins un soin.';
-    if (!form.elements.nom.value.trim()) return 'Indiquez votre prénom et votre nom.';
+    if (!chosen().length) return T.errSoin;
+    if (!form.elements.nom.value.trim()) return T.errNom;
     return '';
   }
   form.addEventListener('submit', (e) => {
     e.preventDefault();
     const m = check(); err.textContent = m; if (m) return;
-    const subject = `Rendez-vous Sofia Nails — ${form.elements.nom.value.trim()}`;
+    const subject = `${T.subject} — ${form.elements.nom.value.trim()}`;
     location.href = `mailto:${EMAIL}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(message())}`;
   });
   $('[data-wa]').addEventListener('click', () => {
@@ -115,8 +131,8 @@
   });
   $('[data-copy]').addEventListener('click', async () => {
     const m = check(); err.textContent = m; if (m) return;
-    try { await navigator.clipboard.writeText(message()); status.textContent = 'Message copié.'; }
-    catch { status.textContent = 'Copie impossible sur cet appareil.'; }
+    try { await navigator.clipboard.writeText(message()); status.textContent = T.copied; }
+    catch { status.textContent = T.copyFail; }
     setTimeout(() => (status.textContent = ''), 3000);
   });
   form.addEventListener('input', () => (err.textContent = ''));

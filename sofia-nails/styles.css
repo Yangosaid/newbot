@@ -285,3 +285,15 @@ p { margin: 0 0 1em; }
 }
 img.brand__mark { width: 32px; height: 43px; border-radius: 0; background: none; }
 .footer img.brand__mark { filter: brightness(0) invert(.92) sepia(.2); background: none; }
+
+/* Sélecteur de langue */
+.langs { display: flex; gap: 2px; padding: 3px; border: 1px solid var(--line); border-radius: 99px; background: #fff; font-size: .78rem; font-weight: 600; letter-spacing: .06em; }
+.langs a { padding: 5px 9px; border-radius: 99px; text-decoration: none; color: var(--muted); }
+.langs a:hover { color: var(--plum); }
+.langs a[aria-current] { background: var(--plum); color: var(--cream); }
+.header__in .langs { margin-inline-start: auto; }
+@media (min-width: 900px) { .header__in .langs { margin-inline-start: 0; } }
+@media (max-width: 420px) { .brand__txt small { display: none; } .langs a { padding: 5px 7px; } }
+.footer .langs { display: inline-flex; background: transparent; border-color: rgba(243, 220, 210, .25); margin-bottom: 14px; }
+.footer .langs a { color: #d9c3bc; }
+.footer .langs a[aria-current] { background: var(--blush); color: var(--plum); }
