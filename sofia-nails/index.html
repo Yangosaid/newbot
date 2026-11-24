@@ -10,7 +10,11 @@
   <meta property="og:title" content="Sofia Nails · Beauté à Bruxelles">
   <meta property="og:description" content="Épilation à la cire et beauté des mains et des pieds, sur rendez-vous à Bruxelles.">
   <meta property="og:locale" content="fr_BE">
+  <meta property="og:image" content="img/og-image.jpg">
+  <meta name="twitter:card" content="summary_large_image">
+  <link rel="preload" as="image" type="image/webp" imagesrcset="img/hero-700.webp 700w, img/hero-1100.webp 1100w, img/hero-1920.webp 1920w" imagesizes="100vw">
   <link rel="icon" href="favicon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="apple-touch-icon.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Jost:wght@400;500;600&display=swap">
@@ -40,11 +44,12 @@
 <header class="header" data-header>
   <div class="wrap header__in">
     <a class="brand" href="#haut" aria-label="Sofia Nails, accueil">
-      <span class="brand__mark" aria-hidden="true">SN</span>
-      <span class="brand__txt"><strong>Sofia Nails</strong><small>Beauté · Bruxelles</small></span>
+      <img class="brand__mark" src="logo/symbole.svg" alt="" width="30" height="40">
+      <span class="brand__txt"><strong>Sofia Nails<svg class="flag flag--sm" viewBox="0 0 40 40" role="img" aria-label="Drapeau de la Colombie"><defs><clipPath id="co2"><circle cx="20" cy="20" r="20"/></clipPath><linearGradient id="co2s" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#fff" stop-opacity=".35"/><stop offset=".5" stop-color="#fff" stop-opacity="0"/></linearGradient></defs><g clip-path="url(#co2)"><rect width="40" height="20" fill="#FCD116"/><rect y="20" width="40" height="10" fill="#003893"/><rect y="30" width="40" height="10" fill="#CE1126"/><rect width="40" height="40" fill="url(#co2s)"/></g></svg></strong><small>Beauté · Bruxelles</small></span>
     </a>
     <nav class="nav" aria-label="Navigation principale">
       <a href="#soins">Soins</a>
+      <a href="#realisations">Réalisations</a>
       <a href="#tarifs">Tarifs</a>
       <a href="#deroulement">Déroulement</a>
       <a href="#questions">Questions</a>
@@ -55,52 +60,37 @@
 
 <main id="contenu">
   <section class="hero">
-    <div class="wrap hero__grid">
-      <div>
-        <p class="kicker">Sur rendez-vous · Bruxelles</p>
-        <h1>Des mains soignées,<br>une peau douce,<br><em>en toute intimité.</em></h1>
-        <p class="lead">Épilation à la cire, manucure, ongles en gel ou acrylique et pédicure médicale. Je vous reçois uniquement sur rendez-vous, à mon domicile à Bruxelles, dans un espace calme et privé.</p>
-        <div class="hero__actions">
-          <a class="btn btn--dark" href="#rendez-vous">Réserver un soin</a>
-          <a class="btn btn--line" href="#tarifs">Voir les tarifs</a>
-        </div>
-        <p class="hero__contact"><a href="tel:+32470701705">+32 470 70 17 05</a><a href="https://wa.me/32470701705" target="_blank" rel="noopener">WhatsApp</a></p>
-        <ul class="facts">
-          <li><span>dès 10 €</span>Épilation</li>
-          <li><span>dès 20 €</span>Manucure</li>
-          <li><span>40 €</span>Pédicure médicale</li>
-        </ul>
+    <picture class="hero__bg">
+      <source type="image/webp" srcset="img/hero-700.webp 700w, img/hero-1100.webp 1100w, img/hero-1920.webp 1920w" sizes="100vw">
+      <img src="img/hero-1100.jpg" srcset="img/hero-700.jpg 700w, img/hero-1100.jpg 1100w, img/hero-1920.jpg 1920w" sizes="100vw" width="1920" height="1378" fetchpriority="high" alt="Ongles en amande au vernis bordeaux, French rouge et nail art floral avec strass, réalisés par Sofia Nails">
+    </picture>
+    <div class="wrap hero__content">
+      <p class="kicker">Bruxelles · Sur rendez-vous</p>
+      <h1 class="wordmark">
+        <span class="wordmark__script">Sofia<svg class="flag flag--hero" viewBox="0 0 40 40" role="img" aria-label="Drapeau de la Colombie"><defs><clipPath id="co1"><circle cx="20" cy="20" r="20"/></clipPath><linearGradient id="co1s" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#fff" stop-opacity=".35"/><stop offset=".5" stop-color="#fff" stop-opacity="0"/></linearGradient></defs><g clip-path="url(#co1)"><rect width="40" height="20" fill="#FCD116"/><rect y="20" width="40" height="10" fill="#003893"/><rect y="30" width="40" height="10" fill="#CE1126"/><rect width="40" height="40" fill="url(#co1s)"/></g></svg></span>
+        <span class="wordmark__caps">Nails</span>
+        <span class="sr-only"> — ongles, manucure et épilation à la cire à Bruxelles</span>
+      </h1>
+      <p class="hero__tag">Ongles · Épilation à la cire · Pédicure médicale</p>
+      <p class="hero__lead">Des mains soignées et une peau douce, en toute intimité. Je vous reçois chez moi à Bruxelles, uniquement sur rendez-vous.</p>
+      <div class="hero__actions">
+        <a class="btn btn--light" href="#rendez-vous">Réserver un soin</a>
+        <a class="btn btn--ghost" href="#tarifs">Voir les tarifs</a>
       </div>
-      <div class="hero__art" aria-hidden="true">
-        <svg viewBox="0 0 480 560" class="art">
-          <defs>
-            <linearGradient id="g1" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#f3dcd2"/><stop offset="1" stop-color="#e7c3b4"/></linearGradient>
-            <linearGradient id="g2" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#d79a86"/><stop offset="1" stop-color="#b8705e"/></linearGradient>
-            <linearGradient id="wax" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#f2c97a"/><stop offset="1" stop-color="#d9a24c"/></linearGradient>
-          </defs>
-          <path d="M40 560V220a200 200 0 0 1 400 0v340z" fill="url(#g1)"/>
-          <circle cx="360" cy="120" r="46" fill="#fbeee7"/>
-          <!-- branche -->
-          <path d="M96 520C120 420 150 360 214 300" stroke="#8a9a7b" stroke-width="3" fill="none" stroke-linecap="round"/>
-          <g fill="#a3b394"><ellipse cx="128" cy="440" rx="26" ry="11" transform="rotate(-50 128 440)"/><ellipse cx="160" cy="380" rx="24" ry="10" transform="rotate(-40 160 380)"/><ellipse cx="112" cy="470" rx="22" ry="9" transform="rotate(30 112 470)"/><ellipse cx="190" cy="330" rx="20" ry="9" transform="rotate(-30 190 330)"/><ellipse cx="150" cy="410" rx="20" ry="8" transform="rotate(35 150 410)"/></g>
-          <!-- pot de cire -->
-          <ellipse cx="300" cy="470" rx="90" ry="18" fill="#c99a8b" opacity=".45"/>
-          <path d="M224 380h152v74a16 16 0 0 1-16 16H240a16 16 0 0 1-16-16z" fill="#fbeee7"/>
-          <ellipse cx="300" cy="380" rx="76" ry="16" fill="url(#wax)"/>
-          <path d="M226 400h148" stroke="#e7c3b4" stroke-width="3"/>
-          <path d="M318 384 L360 250" stroke="#c99a6a" stroke-width="10" stroke-linecap="round"/>
-          <path d="M322 372c-2 14-10 18-8 30" stroke="#d9a24c" stroke-width="7" fill="none" stroke-linecap="round"/>
-          <!-- flacon de vernis -->
-          <rect x="128" y="230" width="44" height="34" rx="4" fill="#4a2c34"/>
-          <path d="M116 264h68v74a18 18 0 0 1-18 18h-32a18 18 0 0 1-18-18z" fill="url(#g2)"/>
-          <path d="M130 278v54" stroke="#fff" stroke-width="5" stroke-linecap="round" opacity=".45"/>
-          <!-- touches -->
-          <circle cx="410" cy="300" r="5" fill="#b8705e"/><circle cx="80" cy="200" r="4" fill="#b8705e"/><circle cx="250" cy="150" r="3" fill="#4a2c34" opacity=".5"/>
-        </svg>
-        <p class="hero__badge"><small>Espace privé</small>Uniquement sur rendez-vous</p>
+      <div class="contact-pills">
+        <a class="pill" href="tel:+32470701705"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1.9.4 1.8.7 2.7a2 2 0 0 1-.5 2.1L8 9.8a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.4c.9.3 1.8.6 2.7.7a2 2 0 0 1 1.7 2z"/></svg><span><small>Appeler</small>+32 470 70 17 05</span></a>
+        <a class="pill pill--wa" href="https://wa.me/32470701705" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M17.5 14.4c-.3-.1-1.8-.9-2-1-.3-.1-.5-.1-.7.1-.2.3-.8 1-.9 1.2-.2.2-.3.2-.6.1-.3-.1-1.3-.5-2.4-1.5-.9-.8-1.5-1.8-1.7-2.1-.2-.3 0-.5.1-.6l.4-.5c.2-.2.2-.3.3-.5.1-.2 0-.4 0-.5l-.9-2.2c-.2-.6-.5-.5-.7-.5h-.6c-.2 0-.5.1-.8.4-.3.3-1 1-1 2.5s1.1 2.9 1.2 3.1c.1.2 2.1 3.2 5.1 4.5.7.3 1.3.5 1.7.6.7.2 1.4.2 1.9.1.6-.1 1.8-.7 2-1.4.2-.7.2-1.3.2-1.4-.1-.2-.3-.3-.6-.4zM12 21.8c-1.8 0-3.5-.5-5-1.4l-.4-.2-3.7 1 1-3.6-.2-.4a9.8 9.8 0 1 1 8.3 4.6zm8.4-18.2A11.8 11.8 0 0 0 1.7 17.8L0 24l6.3-1.7a11.8 11.8 0 0 0 5.7 1.4A11.9 11.9 0 0 0 20.4 3.6z"/></svg><span><small>Écrire sur</small>WhatsApp</span></a>
       </div>
     </div>
   </section>
+  <div class="facts-bar">
+    <ul class="wrap facts">
+      <li><span>dès 10 €</span>Épilation à la cire</li>
+      <li><span>dès 20 €</span>Manucure</li>
+      <li><span>dès 35 €</span>Gel et acrylique</li>
+      <li><span>40 €</span>Pédicure médicale</li>
+    </ul>
+  </div>
 
   <section class="section" id="soins">
     <div class="wrap">
@@ -123,7 +113,39 @@
     </div>
   </section>
 
-  <section class="section section--tint" id="tarifs">
+  <section class="section section--tint" id="realisations">
+    <div class="wrap">
+      <div class="head">
+        <div>
+          <p class="kicker">Réalisations</p>
+          <h2>Mes dernières<br><em>créations.</em></h2>
+        </div>
+        <p class="lead">French, nail art floral, bordeaux profond ou nude délicat : chaque pose est pensée pour vous.</p>
+      </div>
+      <ul class="gallery">
+        <li><button type="button" data-full="img/fleur-bordeaux-1200.jpg" data-caption="Fleur bordeaux et léopard"><figure class="gallery__fig">
+          <picture><source type="image/webp" srcset="img/fleur-bordeaux-600.webp 600w, img/fleur-bordeaux-1200.webp 1200w" sizes="(min-width: 900px) 50vw, 50vw"><img src="img/fleur-bordeaux-600.jpg" srcset="img/fleur-bordeaux-600.jpg 600w, img/fleur-bordeaux-1200.jpg 1200w" sizes="(min-width: 900px) 50vw, 50vw" loading="lazy" alt="Ongles amande nude avec fleur bordeaux, perles argentées, French bordeaux et motif léopard"></picture>
+          <figcaption>Fleur bordeaux et léopard</figcaption></figure></button></li>
+        <li><button type="button" data-full="img/fleur-or-1200.jpg" data-caption="Fleur peinte et perles dorées"><figure class="gallery__fig">
+          <picture><source type="image/webp" srcset="img/fleur-or-600.webp 600w, img/fleur-or-1200.webp 1200w" sizes="(min-width: 900px) 50vw, 50vw"><img src="img/fleur-or-600.jpg" srcset="img/fleur-or-600.jpg 600w, img/fleur-or-1200.jpg 1200w" sizes="(min-width: 900px) 50vw, 50vw" loading="lazy" alt="Ongles amande avec fleur rose peinte à la main, French blanche et perles dorées"></picture>
+          <figcaption>Fleur peinte et perles dorées</figcaption></figure></button></li>
+        <li><button type="button" data-full="img/bordeaux-aquarelle-1200.jpg" data-caption="Bordeaux et aquarelle"><figure class="gallery__fig">
+          <picture><source type="image/webp" srcset="img/bordeaux-aquarelle-600.webp 600w, img/bordeaux-aquarelle-1200.webp 1200w" sizes="(min-width: 900px) 50vw, 50vw"><img src="img/bordeaux-aquarelle-600.jpg" srcset="img/bordeaux-aquarelle-600.jpg 600w, img/bordeaux-aquarelle-1200.jpg 1200w" sizes="(min-width: 900px) 50vw, 50vw" loading="lazy" alt="Ongles amande bordeaux brillants et fleurs aquarelle rouges sur base rose"></picture>
+          <figcaption>Bordeaux et aquarelle</figcaption></figure></button></li>
+        <li><button type="button" data-full="img/french-v-1200.jpg" data-caption="French blanche en V"><figure class="gallery__fig">
+          <picture><source type="image/webp" srcset="img/french-v-600.webp 600w, img/french-v-1200.webp 1200w" sizes="(min-width: 900px) 50vw, 50vw"><img src="img/french-v-600.jpg" srcset="img/french-v-600.jpg 600w, img/french-v-1200.jpg 1200w" sizes="(min-width: 900px) 50vw, 50vw" loading="lazy" alt="Ongles carrés nude avec French blanche en V"></picture>
+          <figcaption>French blanche en V</figcaption></figure></button></li>
+      </ul>
+    </div>
+  </section>
+
+  <dialog class="lightbox" data-lightbox aria-label="Photo agrandie">
+    <button type="button" data-close aria-label="Fermer">&times;</button>
+    <img src="" alt="">
+    <p></p>
+  </dialog>
+
+  <section class="section" id="tarifs">
     <div class="wrap">
       <div class="head">
         <div>
@@ -225,6 +247,9 @@
       <div>
         <p class="kicker">Infos pratiques</p>
         <h2>À Bruxelles,<br><em>chez moi, sur rendez-vous.</em></h2>
+        <figure class="place__photo">
+          <picture><source type="image/webp" srcset="img/espace-600.webp 600w, img/espace-1200.webp 932w" sizes="(min-width: 900px) 45vw, 100vw"><img src="img/espace-600.jpg" srcset="img/espace-600.jpg 600w, img/espace-1200.jpg 932w" sizes="(min-width: 900px) 45vw, 100vw" loading="lazy" alt="L’espace de Sofia Nails : table de manucure blanche, lampe, étagère de vernis et fleurs"></picture>
+        </figure>
       </div>
       <ul class="info">
         <li><strong>Lieu</strong>Uniquement à mon domicile à Bruxelles. L’adresse exacte est communiquée lors de la confirmation.</li>
@@ -299,7 +324,7 @@
 <footer class="footer">
   <div class="wrap footer__in">
     <div>
-      <a class="brand" href="#haut"><span class="brand__mark" aria-hidden="true">SN</span><span class="brand__txt"><strong>Sofia Nails</strong><small>Beauté · Bruxelles</small></span></a>
+      <a class="brand" href="#haut"><img class="brand__mark" src="logo/symbole.svg" alt="" width="30" height="40"><span class="brand__txt"><strong>Sofia Nails<svg class="flag flag--sm" viewBox="0 0 40 40" role="img" aria-label="Drapeau de la Colombie"><defs><clipPath id="co3"><circle cx="20" cy="20" r="20"/></clipPath><linearGradient id="co3s" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#fff" stop-opacity=".35"/><stop offset=".5" stop-color="#fff" stop-opacity="0"/></linearGradient></defs><g clip-path="url(#co3)"><rect width="40" height="20" fill="#FCD116"/><rect y="20" width="40" height="10" fill="#003893"/><rect y="30" width="40" height="10" fill="#CE1126"/><rect width="40" height="40" fill="url(#co3s)"/></g></svg></strong><small>Beauté · Bruxelles</small></span></a>
       <p>Épilation à la cire · Manucure · Pédicure médicale<br>Uniquement sur rendez-vous, chez moi à Bruxelles.</p>
     </div>
     <div>
@@ -309,7 +334,11 @@
   </div>
 </footer>
 
-<a class="sticky" href="#rendez-vous" data-sticky>Prendre rendez-vous <span data-sticky-total></span></a>
+<nav class="mbar is-hidden" aria-label="Contact rapide" data-sticky>
+  <a href="tel:+32470701705"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1.9.4 1.8.7 2.7a2 2 0 0 1-.5 2.1L8 9.8a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.4c.9.3 1.8.6 2.7.7a2 2 0 0 1 1.7 2z"/></svg><span>Appeler</span></a>
+  <a class="mbar__main" href="#rendez-vous"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg><span>Réserver <b data-sticky-total></b></span></a>
+  <a href="https://wa.me/32470701705" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M17.5 14.4c-.3-.1-1.8-.9-2-1-.3-.1-.5-.1-.7.1-.2.3-.8 1-.9 1.2-.2.2-.3.2-.6.1-.3-.1-1.3-.5-2.4-1.5-.9-.8-1.5-1.8-1.7-2.1-.2-.3 0-.5.1-.6l.4-.5c.2-.2.2-.3.3-.5.1-.2 0-.4 0-.5l-.9-2.2c-.2-.6-.5-.5-.7-.5h-.6c-.2 0-.5.1-.8.4-.3.3-1 1-1 2.5s1.1 2.9 1.2 3.1c.1.2 2.1 3.2 5.1 4.5.7.3 1.3.5 1.7.6.7.2 1.4.2 1.9.1.6-.1 1.8-.7 2-1.4.2-.7.2-1.3.2-1.4-.1-.2-.3-.3-.6-.4zM12 21.8c-1.8 0-3.5-.5-5-1.4l-.4-.2-3.7 1 1-3.6-.2-.4a9.8 9.8 0 1 1 8.3 4.6zm8.4-18.2A11.8 11.8 0 0 0 1.7 17.8L0 24l6.3-1.7a11.8 11.8 0 0 0 5.7 1.4A11.9 11.9 0 0 0 20.4 3.6z"/></svg><span>WhatsApp</span></a>
+</nav>
 
 <script src="main.js" defer></script>
 </body>

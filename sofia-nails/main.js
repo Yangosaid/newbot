@@ -121,10 +121,29 @@
   });
   form.addEventListener('input', () => (err.textContent = ''));
 
-  // Bouton fixe masqué quand le formulaire est visible
+  // Barre mobile : visible seulement entre le hero et le formulaire
   const sticky = $('[data-sticky]');
   if ('IntersectionObserver' in window) {
-    new IntersectionObserver(([en]) => sticky.classList.toggle('is-hidden', en.isIntersecting), { threshold: .15 }).observe($('#rendez-vous'));
+    const seen = new Map();
+    const io = new IntersectionObserver((entries) => {
+      entries.forEach((en) => seen.set(en.target, en.isIntersecting));
+      sticky.classList.toggle('is-hidden', [...seen.values()].some(Boolean));
+    }, { threshold: 0.15 });
+    io.observe($('.hero')); io.observe($('#rendez-vous'));
+  } else sticky.classList.remove('is-hidden');
+
+  // Galerie : agrandissement
+  const box = $('[data-lightbox]');
+  if (box && box.showModal) {
+    $$('[data-full]').forEach((b) => b.addEventListener('click', () => {
+      const img = b.querySelector('img');
+      box.querySelector('img').src = b.dataset.full;
+      box.querySelector('img').alt = img.alt;
+      box.querySelector('p').textContent = b.dataset.caption;
+      box.showModal();
+    }));
+    $('[data-close]', box).addEventListener('click', () => box.close());
+    box.addEventListener('click', (e) => { if (e.target === box) box.close(); });
   }
 
   $('[data-year]').textContent = new Date().getFullYear();
