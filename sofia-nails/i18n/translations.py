@@ -266,7 +266,7 @@ T = {
 }
 
 # Textes identiques dans toutes les langues
-SAME = {'Sofia Nails', 'Sofia', 'Nails', 'WhatsApp', 'TikTok', '@adriana.torres886', 'adrianatorres679@gmail.com', 'Sofia Nails ·'}
+SAME = {'Sofia Nails', 'Sofia', 'Nails', 'WhatsApp', 'TikTok', '@adriana.torres886', 'contact@sofianailsbrussels.com', 'Sofia Nails ·'}
 
 # Textes du script (formulaire de réservation)
 JS = {

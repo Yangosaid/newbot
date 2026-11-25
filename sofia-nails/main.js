@@ -2,7 +2,7 @@
   'use strict';
   const $ = (s, r = document) => r.querySelector(s);
   const $$ = (s, r = document) => [...r.querySelectorAll(s)];
-  const EMAIL = 'adrianatorres679@gmail.com';
+  const EMAIL = 'contact@sofianailsbrussels.com';
   // Textes : français par défaut, remplacés par le bloc #i18n des autres langues
   const T = Object.assign({
     from: 'dès ', fromLong: 'à partir de ', later: 'à convenir', hello: 'Bonjour Sofia,',
