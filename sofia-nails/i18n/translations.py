@@ -159,10 +159,10 @@ T = {
         'Select your treatments in the form and tell me which day and time suit you.',
         'Selecciona los servicios en el formulario e indica el día y el momento que te vienen bien.'),
     'Je confirme le rendez-vous': ('Ik bevestig de afspraak', 'I confirm your appointment', 'Confirmo tu cita'),
-    'Je vous réponds rapidement pour confirmer la date et l’heure.': (
-        'Ik antwoord u snel om de datum en het uur te bevestigen.',
-        'I reply quickly to confirm the date and time.',
-        'Te respondo enseguida para confirmar la fecha y la hora.'),
+    'Je vous réponds rapidement pour confirmer la date, l’heure et l’adresse exacte.': (
+        'Ik antwoord u snel om de datum, het uur en het exacte adres te bevestigen.',
+        'I reply quickly to confirm the date, time and exact address.',
+        'Te respondo enseguida para confirmar la fecha, la hora y la dirección exacta.'),
     'Profitez du soin': ('Geniet van uw behandeling', 'Enjoy your treatment', 'Disfruta de tu cita'),
     'Vous êtes reçue dans un espace privé et tranquille, sans salle d’attente ni foule.': (
         'U wordt ontvangen in een rustige privéruimte, zonder wachtzaal of drukte.',
@@ -178,10 +178,13 @@ T = {
         'The Sofia Nails studio: white manicure table, lamp, polish shelf and flowers',
         'El espacio de Sofia Nails: mesa de manicura blanca, lámpara, estantería de esmaltes y flores'),
     'Adresse': ('Adres', 'Address', 'Dirección'),
-    'Avenue Coghen 169': ('Coghenlaan 169', 'Avenue Coghen 169', 'Avenue Coghen 169'),
-    '1180 Uccle, Bruxelles': ('1180 Ukkel, Brussel', '1180 Uccle, Brussels', '1180 Uccle, Bruselas'),
-    'Chez moi, uniquement sur rendez-vous.': ('Bij mij thuis, enkel op afspraak.', 'At my home, by appointment only.', 'En mi casa, solo con cita previa.'),
-    'Itinéraire sur Google Maps': ('Route via Google Maps', 'Directions on Google Maps', 'Cómo llegar en Google Maps'),
+    'Uccle, Bruxelles': ('Ukkel, Brussel', 'Uccle, Brussels', 'Uccle, Bruselas'),
+    'Près de l’arrêt Héros': ('Vlak bij de halte Helden', 'Near the Héros stop', 'Cerca de la parada Héros'),
+    'L’adresse exacte vous est envoyée à la confirmation du rendez-vous.': (
+        'Het exacte adres krijgt u bij de bevestiging van uw afspraak.',
+        'The exact address is sent when your appointment is confirmed.',
+        'La dirección exacta se envía al confirmar la cita.'),
+    'Voir le quartier sur Google Maps': ('Bekijk de buurt op Google Maps', 'See the area on Google Maps', 'Ver la zona en Google Maps'),
     'Rendez-vous': ('Afspraken', 'Appointments', 'Citas'),
     'Uniquement sur réservation, pour vous accorder tout le temps nécessaire.': (
         'Enkel op reservatie, zodat ik alle tijd voor u heb.',
@@ -195,10 +198,10 @@ T = {
     'Bon à savoir': ('Goed om te weten', 'Good to know', 'Conviene saber'),
     'avant de venir.': ('voor uw bezoek.', 'before you come.', 'antes de venir.'),
     'Où se déroulent les soins ?': ('Waar vinden de behandelingen plaats?', 'Where do treatments take place?', '¿Dónde se realizan los servicios?'),
-    'Chez moi, Avenue Coghen 169 à Uccle (Bruxelles), dans un espace dédié et privé. Je ne me déplace pas à domicile.': (
-        'Bij mij thuis, Coghenlaan 169 in Ukkel (Brussel), in een aparte privéruimte. Ik kom niet aan huis.',
-        'At my home, Avenue Coghen 169 in Uccle (Brussels), in a dedicated private space. I don’t do home visits.',
-        'En mi casa, Avenue Coghen 169 en Uccle (Bruselas), en un espacio privado y dedicado. No hago servicios a domicilio.'),
+    'Chez moi, à Uccle (Bruxelles), près de l’arrêt Héros, dans un espace dédié et privé. Je ne me déplace pas à domicile. L’adresse exacte vous est envoyée avec la confirmation du rendez-vous.': (
+        'Bij mij thuis in Ukkel (Brussel), vlak bij de halte Helden, in een aparte privéruimte. Ik kom niet aan huis. Het exacte adres krijgt u samen met de bevestiging van uw afspraak.',
+        'At my home in Uccle (Brussels), near the Héros stop, in a dedicated private space. I don’t do home visits. The exact address is sent with your booking confirmation.',
+        'En mi casa en Uccle (Bruselas), cerca de la parada Héros, en un espacio privado y dedicado. No hago servicios a domicilio. La dirección exacta se envía con la confirmación de la cita.'),
     'Comment réserver ?': ('Hoe reserveer ik?', 'How do I book?', '¿Cómo reservo?'),
     'Remplissez le formulaire de rendez-vous : il prépare un message WhatsApp ou un e-mail avec vos soins, le total indicatif et vos disponibilités. Vous pouvez aussi m’appeler ou m’écrire sur WhatsApp au +32 470 70 17 05.': (
         'Vul het afsprakenformulier in: het maakt een WhatsApp-bericht of e-mail klaar met uw behandelingen, het indicatieve totaal en uw beschikbaarheid. U kunt me ook bellen of een WhatsApp sturen op +32 470 70 17 05.',
