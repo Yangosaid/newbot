@@ -12,6 +12,13 @@ sys.path.insert(0, str(ROOT / 'i18n'))
 from translations import T, SAME, JS, LANGS, ORDER  # noqa: E402
 
 ALL = ('fr',) + ORDER
+SITE = 'https://sofianailsbrussels.com'
+
+
+def url(lang):
+    return SITE + '/' + ('' if lang == 'fr' else f'{lang}/')
+
+
 SHORT = {'fr': 'FR', **{k: v['short'] for k, v in LANGS.items()}}
 NAMES = {'fr': 'Français', **{k: v['name'] for k, v in LANGS.items()}}
 LABEL = {'fr': 'Langue', 'nl': 'Taal', 'en': 'Language', 'es': 'Idioma'}
@@ -35,8 +42,10 @@ def blocks(src, lang):
         f'<a href="{href_to(l, lang) or "./"}" hreflang="{l}" lang="{l}" title="{NAMES[l]}"'
         f'{" aria-current=\"true\"" if l == lang else ""}>{SHORT[l]}</a>' for l in ALL)
     nav = f'<nav class="langs" aria-label="{LABEL[lang]}">{links}</nav>'
-    alt = ''.join(f'<link rel="alternate" hreflang="{l}" href="{href_to(l, lang) or "./"}">' for l in ALL)
-    alt += f'<link rel="alternate" hreflang="x-default" href="{href_to("fr", lang) or "./"}">'
+    alt = ''.join(f'<link rel="alternate" hreflang="{l}" href="{url(l)}">' for l in ALL)
+    alt += f'<link rel="alternate" hreflang="x-default" href="{url("fr")}">'
+    canon = f'<link rel="canonical" href="{url(lang)}"><meta property="og:url" content="{url(lang)}">'
+    src = re.sub(r'<!--canon-->.*?<!--/canon-->', f'<!--canon-->{canon}<!--/canon-->', src, flags=re.S)
     src = re.sub(r'<!--langs-->.*?<!--/langs-->', f'<!--langs-->{nav}<!--/langs-->', src, flags=re.S)
     src = re.sub(r'<!--langs-foot-->.*?<!--/langs-foot-->', f'<!--langs-foot-->{nav}<!--/langs-foot-->', src, flags=re.S)
     src = re.sub(r'<!--hreflang-->.*?<!--/hreflang-->', f'<!--hreflang-->{alt}<!--/hreflang-->', src, flags=re.S)
@@ -73,6 +82,8 @@ def translate(src, lang):
     # Attributs
     def attr(m):
         name, val = m.group(1), m.group(2)
+        if val.startswith('http') or val.isdigit():
+            return m.group(0)
         if name == 'content' and LOCAL.match(val):
             return m.group(0)
         out = tr(val)
@@ -119,6 +130,16 @@ def main():
         out.parent.mkdir(exist_ok=True)
         out.write_text(page, encoding='utf-8')
         print(f'{lang}/index.html')
+
+    # Plan du site et robots.txt pour Google
+    from datetime import date
+    alts = ''.join(f'\n    <xhtml:link rel="alternate" hreflang="{l}" href="{url(l)}"/>' for l in ALL)
+    entries = ''.join(f'\n  <url>\n    <loc>{url(l)}</loc>\n    <lastmod>{date.today()}</lastmod>{alts}\n  </url>' for l in ALL)
+    (ROOT / 'sitemap.xml').write_text(
+        '<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" '
+        f'xmlns:xhtml="http://www.w3.org/1999/xhtml">{entries}\n</urlset>\n', encoding='utf-8')
+    (ROOT / 'robots.txt').write_text(f'User-agent: *\nAllow: /\n\nSitemap: {SITE}/sitemap.xml\n', encoding='utf-8')
+    print('sitemap.xml, robots.txt')
 
 
 if __name__ == '__main__':
