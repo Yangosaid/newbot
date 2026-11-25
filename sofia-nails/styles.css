@@ -410,3 +410,77 @@ img.brand__mark { width: 32px; height: 43px; border-radius: 0; background: none;
 .legal a:not(.btn) { color: var(--plum); }
 .legal__back { margin-top: 48px; }
 .page-legal .footer { padding-bottom: 50px; }
+
+/* ==========================================================
+   Élégance, deuxième passe : touches de boutique
+   ========================================================== */
+:root { --champ: #c9a27e; --champ-light: #ecd6b6; }
+
+/* Hero : cadre fin, NAILS doré, invitation à défiler */
+.hero__frame { position: absolute; z-index: 1; inset: 84px 22px 22px; border: 1px solid rgba(236, 214, 182, .38); pointer-events: none; }
+@media (max-width: 899px) { .hero__frame { inset: 78px 10px auto; height: calc(64svh - 88px); min-height: 292px; max-height: 532px; } }
+.wordmark__caps { background: linear-gradient(90deg, #f3dfc2, var(--champ) 50%, #f3dfc2); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.wordmark__caps::before, .wordmark__caps::after { background: var(--champ); opacity: .8; }
+.hero__scroll { display: none; }
+@media (min-width: 900px) {
+  .hero__scroll { position: absolute; z-index: 2; left: 50%; bottom: 40px; transform: translateX(-50%); display: grid; justify-items: center; gap: 12px; color: rgba(253, 248, 245, .8); font-size: .68rem; letter-spacing: .32em; text-transform: uppercase; text-decoration: none; }
+  .hero__scroll::after { content: ""; width: 1px; height: 46px; background: linear-gradient(var(--champ-light), rgba(236, 214, 182, 0)); transform-origin: top; animation: scrollcue 2.4s ease-in-out infinite; }
+}
+@keyframes scrollcue { 0% { transform: scaleY(0); opacity: 0; } 30% { opacity: 1; } 60% { transform: scaleY(1); opacity: 1; } 100% { transform: scaleY(1); opacity: 0; } }
+
+/* Bandeau défilant des spécialités */
+.marquee { display: flex; overflow: hidden; background: var(--cream); border-bottom: 1px solid var(--line); padding: 26px 0; user-select: none; }
+.marquee__track { display: flex; flex: none; list-style: none; margin: 0; padding: 0; animation: marquee 46s linear infinite; }
+.marquee__track li { display: flex; align-items: center; white-space: nowrap; font-family: var(--serif); font-style: italic; font-size: clamp(1.6rem, 3vw, 2.5rem); color: var(--plum); }
+.marquee__track li::after { content: "✦"; font-style: normal; font-size: .42em; color: var(--champ); margin: 0 clamp(26px, 4vw, 54px); }
+@keyframes marquee { to { transform: translateX(-100%); } }
+[dir="rtl"] .marquee__track { animation-direction: reverse; }
+
+/* Phrase de marque */
+.statement { position: relative; overflow: hidden; background: var(--plum); color: var(--cream); text-align: center; padding: clamp(84px, 12vw, 150px) 0; }
+.statement::before { content: ""; position: absolute; inset: 22px; border: 1px solid rgba(236, 214, 182, .22); pointer-events: none; }
+.statement__mark { color: var(--champ); font-size: 1.1rem; margin: 0 0 26px; }
+.statement__text { font-family: var(--serif); font-weight: 400; font-size: clamp(2.4rem, 6vw, 4.6rem); line-height: 1.08; margin: 0 auto; }
+.statement__text em { font-style: italic; color: var(--rose-soft); }
+.statement__sign { display: inline-flex; align-items: center; gap: 16px; margin: 34px 0 0; font-size: .72rem; letter-spacing: .32em; text-transform: uppercase; color: rgba(243, 220, 210, .72); }
+.statement__sign::before, .statement__sign::after { content: ""; width: 40px; height: 1px; background: var(--champ); opacity: .7; }
+
+/* Étoiles et filets champagne */
+.kicker::before { color: var(--champ); }
+.tip li::before, .marquee__track li::after { color: var(--champ); }
+.facts-bar .facts li { border-color: rgba(236, 214, 182, .22); }
+
+/* Boutons plus raffinés */
+.btn { font-size: .82rem; letter-spacing: .1em; text-transform: uppercase; font-weight: 500; padding: 0 28px; }
+.btn svg { flex: none; }
+
+/* Onglets soulignés */
+.tabs { background: none; border: 0; border-bottom: 1px solid var(--line); border-radius: 0; padding: 0; gap: 34px; display: flex; }
+.tab { position: relative; border-radius: 0; padding: 10px 0 14px; background: none; font-family: var(--serif); font-size: 1.4rem; color: var(--muted); }
+.tab[aria-selected="true"] { background: none; color: var(--plum); }
+.tab[aria-selected="true"]::after { content: ""; position: absolute; left: 0; right: 0; bottom: -1px; height: 2px; background: var(--plum); }
+
+/* Liens soulignés animés */
+.link { border-bottom: 0; padding-bottom: 3px; background: linear-gradient(var(--rose), var(--rose)) 0 100% / 100% 1px no-repeat; transition: background-size .45s ease; }
+.link:hover { background-size: 0 1px; background-position: 100% 100%; }
+
+/* Galerie : zoom lent et légende qui glisse */
+.gallery img { transition: transform 1.4s cubic-bezier(.2, .7, .2, 1); }
+.gallery button:hover img { transform: scale(1.06); }
+.gallery figcaption { transform: translateY(6px); opacity: .9; transition: transform .6s, opacity .6s; }
+.gallery button:hover figcaption { transform: none; opacity: 1; }
+
+/* Signature dans le pied de page */
+.footer { padding-top: 40px; }
+.footer__signature { margin: 0 0 34px; text-align: center; font-family: var(--serif); font-style: italic; font-size: clamp(4.2rem, 15vw, 11rem); line-height: 1; color: rgba(243, 220, 210, .1); letter-spacing: -.01em; user-select: none; overflow: hidden; white-space: nowrap; }
+.footer__signature span { font-family: var(--sans); font-style: normal; font-size: .2em; letter-spacing: .6em; vertical-align: middle; color: rgba(201, 162, 126, .4); }
+
+@media (prefers-reduced-motion: reduce) {
+  .marquee__track, .hero__scroll::after { animation: none; }
+}
+@media (max-width: 899px) {
+  .hero__frame { display: none; }
+  .btn { letter-spacing: .06em; font-size: .78rem; padding: 0 18px; }
+}
+.footer__signature::before { content: "Sofia"; }
+.footer__signature::after { content: "Nails"; font-family: var(--sans); font-style: normal; font-size: .2em; letter-spacing: .6em; vertical-align: middle; margin-inline-start: .5em; color: rgba(201, 162, 126, .4); }

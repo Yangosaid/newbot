@@ -351,6 +351,13 @@ T = {
         'Los enlaces a WhatsApp, TikTok y Google Maps abren servicios externos, sujetos a sus propias normas de privacidad.'),
     'Retour à l’accueil': ('Terug naar de startpagina', 'Back to home', 'Volver al inicio'),
 
+    # Élégance : hero, bandeau, phrase de marque
+    'Découvrir': ('Ontdekken', 'Discover', 'Descubrir'),
+    'Spécialités': ('Specialiteiten', 'Specialities', 'Especialidades'),
+    'Prendre le temps,': ('De tijd nemen,', 'Taking the time,', 'Tomarse el tiempo,'),
+    'soigner chaque détail.': ('voor elk detail zorgen.', 'caring for every detail.', 'cuidar cada detalle.'),
+    'Sofia Nails · Uccle': ('Sofia Nails · Ukkel', 'Sofia Nails · Uccle', 'Sofia Nails · Uccle'),
+
     # Pied de page
     'Épilation à la cire · Manucure · Pédicure médicale': (
         'Harsen · Manicure · Medische pedicure', 'Waxing · Manicure · Medical pedicure', 'Depilación con cera · Manicura · Pedicura médica'),
@@ -362,7 +369,7 @@ T = {
 }
 
 # Textes identiques dans toutes les langues
-SAME = {'Sofia Nails', 'Sofia', 'Nails', 'WhatsApp', 'TikTok', '@adriana.torres886', 'contact@sofianailsbrussels.com', 'Sofia Nails ·'}
+SAME = {'Sofia Nails', 'Sofia', 'Nails', 'WhatsApp', 'TikTok', 'French', 'Nail art', '@adriana.torres886', 'contact@sofianailsbrussels.com', 'Sofia Nails ·'}
 
 # Textes du script (formulaire de réservation)
 JS = {
