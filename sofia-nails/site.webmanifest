@@ -1,0 +1,16 @@
+{
+  "name": "Sofia Nails · Bruxelles",
+  "short_name": "Sofia Nails",
+  "description": "Ongles, manucure, épilation à la cire et pédicure médicale à Uccle, Bruxelles. Sur rendez-vous.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#fdf8f5",
+  "theme_color": "#4a2c34",
+  "lang": "fr-BE",
+  "icons": [
+    { "src": "logo/icone.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" },
+    { "src": "apple-touch-icon.png", "sizes": "180x180", "type": "image/png" },
+    { "src": "logo/instagram-profil-1080.png", "sizes": "1080x1080", "type": "image/png", "purpose": "any" }
+  ]
+}

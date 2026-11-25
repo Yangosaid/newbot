@@ -51,7 +51,7 @@
   // Sélecteur dans le formulaire
   const picker = $('[data-picker]');
   const groups = [...new Set(services.map((s) => s.group))];
-  picker.innerHTML = groups.map((g) => `<div><h4>${g}</h4><div class="chips">${services.filter((s) => s.group === g).map((s) =>
+  picker.innerHTML = groups.map((g) => `<div><p class="picker__group">${g}</p><div class="chips">${services.filter((s) => s.group === g).map((s) =>
     `<span class="chip"><input type="checkbox" id="${s.id}" value="${s.id}"><label for="${s.id}">${s.name} <b>${s.from ? T.from : ''}${euro(s.price)}</b></label></span>`).join('')}</div></div>`).join('');
 
   // Boutons « + » dans la grille des tarifs
@@ -164,7 +164,7 @@
 
   // Apparition douce des blocs au défilement
   if ('IntersectionObserver' in window && !matchMedia('(prefers-reduced-motion: reduce)').matches) {
-    const items = $$('.section .head, .section h2, .card, .gallery li, .group, .steps li, .info li, .faq details, .form, .place__photo');
+    const items = $$('.section .head, .section h2, .card, .gallery li, .group, .steps li, .tip, .info li, .faq details, .form, .place__photo');
     const io = new IntersectionObserver((entries) => entries.forEach((en) => {
       if (en.isIntersecting) { en.target.classList.add('is-in'); io.unobserve(en.target); }
     }), { rootMargin: '0px 0px -6% 0px' });

@@ -24,27 +24,34 @@ NAMES = {'fr': 'Français', **{k: v['name'] for k, v in LANGS.items()}}
 LABEL = {'fr': 'Langue', 'nl': 'Taal', 'en': 'Language', 'es': 'Idioma'}
 SAME = set(SAME) | set(SHORT.values()) | set(NAMES.values()) | set(LABEL.values()) | {'#4a2c34', 'fr_BE', 'summary_large_image', 'website', 'width=device-width, initial-scale=1', '×'}
 TRANS_ATTRS = ('alt', 'aria-label', 'placeholder', 'content', 'title', 'data-caption')
-LOCAL = re.compile(r'^(?!https?:|mailto:|tel:|#|/|\.\./|data:)(styles\.css|main\.js|favicon\.svg|apple-touch-icon\.png|img/|logo/)')
+LOCAL = re.compile(r'^(?!https?:|mailto:|tel:|#|/|\.\./|data:)(styles\.css|fonts\.css|fonts/|main\.js|favicon\.svg|apple-touch-icon\.png|site\.webmanifest|img/|logo/)')
 
 
 def norm(t):
     return ' '.join(unescape(t).split())
 
 
-def href_to(target, current):
-    """Lien relatif d'une page de langue vers une autre."""
+PAGES = ('index.html', 'confidentialite.html')
+
+
+def leaf(page):
+    return '' if page == 'index.html' else page
+
+
+def href_to(target, current, page='index.html'):
+    """Lien relatif vers la même page dans une autre langue."""
     up = '' if current == 'fr' else '../'
-    return up + ('' if target == 'fr' else f'{target}/') or './'
+    return (up + ('' if target == 'fr' else f'{target}/') + leaf(page)) or './'
 
 
-def blocks(src, lang):
+def blocks(src, lang, page='index.html'):
     links = ''.join(
-        f'<a href="{href_to(l, lang) or "./"}" hreflang="{l}" lang="{l}" title="{NAMES[l]}"'
+        f'<a href="{href_to(l, lang, page)}" hreflang="{l}" lang="{l}" title="{NAMES[l]}"'
         f'{" aria-current=\"true\"" if l == lang else ""}>{SHORT[l]}</a>' for l in ALL)
     nav = f'<nav class="langs" aria-label="{LABEL[lang]}">{links}</nav>'
-    alt = ''.join(f'<link rel="alternate" hreflang="{l}" href="{url(l)}">' for l in ALL)
-    alt += f'<link rel="alternate" hreflang="x-default" href="{url("fr")}">'
-    canon = f'<link rel="canonical" href="{url(lang)}"><meta property="og:url" content="{url(lang)}">'
+    alt = ''.join(f'<link rel="alternate" hreflang="{l}" href="{url(l) + leaf(page)}">' for l in ALL)
+    alt += f'<link rel="alternate" hreflang="x-default" href="{url("fr") + leaf(page)}">'
+    canon = f'<link rel="canonical" href="{url(lang) + leaf(page)}"><meta property="og:url" content="{url(lang) + leaf(page)}">'
     src = re.sub(r'<!--canon-->.*?<!--/canon-->', f'<!--canon-->{canon}<!--/canon-->', src, flags=re.S)
     src = re.sub(r'<!--langs-->.*?<!--/langs-->', f'<!--langs-->{nav}<!--/langs-->', src, flags=re.S)
     src = re.sub(r'<!--langs-foot-->.*?<!--/langs-foot-->', f'<!--langs-foot-->{nav}<!--/langs-foot-->', src, flags=re.S)
@@ -112,29 +119,33 @@ def relocate(src):
 
 
 def main():
-    src_path = ROOT / 'index.html'
-    src = blocks(src_path.read_text(encoding='utf-8'), 'fr')
-    src_path.write_text(src, encoding='utf-8')
+    for name in PAGES:
+        src_path = ROOT / name
+        src = blocks(src_path.read_text(encoding='utf-8'), 'fr', name)
+        src_path.write_text(src, encoding='utf-8')
 
-    for lang in ORDER:
-        L = LANGS[lang]
-        page = translate(blocks(src, lang), lang)
-        page = page.replace('<html lang="fr-BE">', f'<html lang="{L["html"]}">', 1)
-        page = page.replace('content="fr_BE"', f'content="{L["og"]}"', 1)
-        page = relocate(page)
-        data = json.dumps(JS[lang], ensure_ascii=False).replace('</', '<\\/')
-        page = page.replace('<script src="../main.js" defer></script>',
-                            f'<script id="i18n" type="application/json">{data}</script>\n<script src="../main.js" defer></script>', 1)
-        assert 'id="i18n"' in page
-        out = ROOT / lang / 'index.html'
-        out.parent.mkdir(exist_ok=True)
-        out.write_text(page, encoding='utf-8')
-        print(f'{lang}/index.html')
+        for lang in ORDER:
+            L = LANGS[lang]
+            page = translate(blocks(src, lang, name), lang)
+            page = page.replace('<html lang="fr-BE">', f'<html lang="{L["html"]}">', 1)
+            page = page.replace('content="fr_BE"', f'content="{L["og"]}"', 1)
+            page = relocate(page)
+            if '<script src="../main.js" defer></script>' in page:
+                data = json.dumps(JS[lang], ensure_ascii=False).replace('</', '<\\/')
+                page = page.replace('<script src="../main.js" defer></script>',
+                                    f'<script id="i18n" type="application/json">{data}</script>\n<script src="../main.js" defer></script>', 1)
+                assert 'id="i18n"' in page
+            out = ROOT / lang / name
+            out.parent.mkdir(exist_ok=True)
+            out.write_text(page, encoding='utf-8')
+            print(f'{lang}/{name}')
 
     # Plan du site et robots.txt pour Google
     from datetime import date
-    alts = ''.join(f'\n    <xhtml:link rel="alternate" hreflang="{l}" href="{url(l)}"/>' for l in ALL)
-    entries = ''.join(f'\n  <url>\n    <loc>{url(l)}</loc>\n    <lastmod>{date.today()}</lastmod>{alts}\n  </url>' for l in ALL)
+    entries = ''
+    for name in PAGES:
+        alts = ''.join(f'\n    <xhtml:link rel="alternate" hreflang="{l}" href="{url(l) + leaf(name)}"/>' for l in ALL)
+        entries += ''.join(f'\n  <url>\n    <loc>{url(l) + leaf(name)}</loc>\n    <lastmod>{date.today()}</lastmod>{alts}\n  </url>' for l in ALL)
     (ROOT / 'sitemap.xml').write_text(
         '<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" '
         f'xmlns:xhtml="http://www.w3.org/1999/xhtml">{entries}\n</urlset>\n', encoding='utf-8')

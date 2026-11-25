@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="fr-BE">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Page introuvable · Sofia Nails</title>
+  <meta name="robots" content="noindex">
+  <meta name="theme-color" content="#4a2c34">
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="/fonts.css">
+  <link rel="stylesheet" href="/styles.css">
+  <style>
+    .lost { min-height: 100svh; display: grid; place-items: center; text-align: center; padding: 40px 20px; background: var(--plum); color: var(--cream); }
+    .lost img { width: 64px; height: 86px; margin: 0 auto 26px; filter: brightness(0) invert(1); }
+    .lost h1 { font-style: italic; font-weight: 400; font-size: clamp(5rem, 18vw, 9rem); line-height: .9; color: #fff; }
+    .lost ul { list-style: none; padding: 0; margin: 26px 0 34px; display: grid; gap: 8px; }
+    .lost li { color: #e6d3cc; }
+    .lost li span { display: inline-block; min-width: 2.4em; font-size: .72rem; letter-spacing: .14em; color: var(--rose-soft); }
+    .lost .langs { justify-content: center; display: inline-flex; background: transparent; border-color: rgba(243, 220, 210, .3); }
+    .lost .langs a { color: var(--cream); padding: 7px 14px; }
+  </style>
+</head>
+<body>
+  <main class="lost">
+    <div>
+      <img src="/logo/symbole.svg" alt="" width="64" height="86">
+      <h1>404</h1>
+      <ul>
+        <li lang="fr"><span>FR</span>Cette page n’existe pas ou a été déplacée.</li>
+        <li lang="nl"><span>NL</span>Deze pagina bestaat niet of werd verplaatst.</li>
+        <li lang="en"><span>EN</span>This page doesn’t exist or has moved.</li>
+        <li lang="es"><span>ES</span>Esta página no existe o se ha movido.</li>
+      </ul>
+      <nav class="langs" aria-label="Accueil / Home">
+        <a href="/" lang="fr">Accueil</a><a href="/nl/" lang="nl">Startpagina</a><a href="/en/" lang="en">Home</a><a href="/es/" lang="es">Inicio</a>
+      </nav>
+    </div>
+  </main>
+</body>
+</html>

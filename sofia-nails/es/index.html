@@ -15,13 +15,13 @@
   <meta property="og:image:height" content="630">
   <!--canon--><link rel="canonical" href="https://sofianailsbrussels.com/es/"><meta property="og:url" content="https://sofianailsbrussels.com/es/"><!--/canon-->
   <meta name="twitter:card" content="summary_large_image">
-  <link rel="preload" as="image" type="image/webp" imagesrcset="../img/hero-700.webp 700w, ../img/hero-1100.webp 1100w, ../img/hero-1920.webp 1920w" imagesizes="100vw">
+  <link rel="preload" as="image" type="image/webp" fetchpriority="high" imagesrcset="../img/hero-700.webp 700w, ../img/hero-1100.webp 1100w, ../img/hero-1400.webp 1400w, ../img/hero-1920.webp 1920w" imagesizes="100vw">
   <!--hreflang--><link rel="alternate" hreflang="fr" href="https://sofianailsbrussels.com/"><link rel="alternate" hreflang="nl" href="https://sofianailsbrussels.com/nl/"><link rel="alternate" hreflang="en" href="https://sofianailsbrussels.com/en/"><link rel="alternate" hreflang="es" href="https://sofianailsbrussels.com/es/"><link rel="alternate" hreflang="x-default" href="https://sofianailsbrussels.com/"><!--/hreflang-->
   <link rel="icon" href="../favicon.svg" type="image/svg+xml">
   <link rel="apple-touch-icon" href="../apple-touch-icon.png">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Jost:wght@400;500;600&display=swap">
+  <link rel="manifest" href="../site.webmanifest">
+  <link rel="stylesheet" href="../fonts.css" media="print" onload="this.media='all'">
+  <noscript><link rel="stylesheet" href="../fonts.css"></noscript>
   <link rel="stylesheet" href="../styles.css">
   <script type="application/ld+json">
   {
@@ -52,7 +52,7 @@
 
 <header class="header" data-header>
   <div class="wrap header__in">
-    <a class="brand" href="#haut" aria-label="Sofia Nails, inicio">
+    <a class="brand" href="#haut">
       <img class="brand__mark" src="../logo/symbole.svg" alt="" width="30" height="40">
       <span class="brand__txt"><strong>Sofia Nails<svg class="flag flag--sm" viewBox="0 0 40 40" role="img" aria-label="Bandera de Colombia"><defs><clipPath id="co2"><circle cx="20" cy="20" r="20"/></clipPath><linearGradient id="co2s" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#fff" stop-opacity=".35"/><stop offset=".5" stop-color="#fff" stop-opacity="0"/></linearGradient></defs><g clip-path="url(#co2)"><rect width="40" height="20" fill="#FCD116"/><rect y="20" width="40" height="10" fill="#003893"/><rect y="30" width="40" height="10" fill="#CE1126"/><rect width="40" height="40" fill="url(#co2s)"/></g></svg></strong><small>Belleza · Bruselas</small></span>
     </a>
@@ -71,8 +71,8 @@
 <main id="contenu">
   <section class="hero">
     <picture class="hero__bg">
-      <source type="image/webp" srcset="../img/hero-700.webp 700w, ../img/hero-1100.webp 1100w, ../img/hero-1920.webp 1920w" sizes="100vw">
-      <img src="../img/hero-1100.jpg" srcset="../img/hero-700.jpg 700w, ../img/hero-1100.jpg 1100w, ../img/hero-1920.jpg 1920w" sizes="100vw" width="1920" height="1378" fetchpriority="high" alt="Uñas almendradas en burdeos, francesa roja y nail art floral con strass, realizadas por Sofia Nails">
+      <source type="image/webp" srcset="../img/hero-700.webp 700w, ../img/hero-1100.webp 1100w, ../img/hero-1400.webp 1400w, ../img/hero-1920.webp 1920w" sizes="100vw">
+      <img src="../img/hero-1100.jpg" srcset="../img/hero-700.jpg 700w, ../img/hero-1100.jpg 1100w, ../img/hero-1400.jpg 1400w, ../img/hero-1920.jpg 1920w" sizes="100vw" width="1920" height="1378" fetchpriority="high" alt="Uñas almendradas en burdeos, francesa roja y nail art floral con strass, realizadas por Sofia Nails">
     </picture>
     <div class="wrap hero__content">
       <p class="kicker">Bruselas · Con cita previa</p>
@@ -134,16 +134,16 @@
       </div>
       <ul class="gallery">
         <li><button type="button" data-full="img/fleur-bordeaux-1200.jpg" data-caption="Flor burdeos y leopardo"><figure class="gallery__fig">
-          <picture><source type="image/webp" srcset="../img/fleur-bordeaux-600.webp 600w, ../img/fleur-bordeaux-1200.webp 1200w" sizes="(min-width: 900px) 50vw, 50vw"><img src="../img/fleur-bordeaux-600.jpg" srcset="../img/fleur-bordeaux-600.jpg 600w, ../img/fleur-bordeaux-1200.jpg 1200w" sizes="(min-width: 900px) 50vw, 50vw" loading="lazy" alt="Uñas almendradas nude con flor burdeos, perlas plateadas, francesa burdeos y estampado de leopardo"></picture>
+          <picture><source type="image/webp" srcset="../img/fleur-bordeaux-600.webp 600w, ../img/fleur-bordeaux-1200.webp 1200w" sizes="(min-width: 900px) 540px, 50vw"><img src="../img/fleur-bordeaux-600.jpg" srcset="../img/fleur-bordeaux-600.jpg 600w, ../img/fleur-bordeaux-1200.jpg 1200w" sizes="(min-width: 900px) 540px, 50vw" loading="lazy" alt="Uñas almendradas nude con flor burdeos, perlas plateadas, francesa burdeos y estampado de leopardo"></picture>
           <figcaption>Flor burdeos y leopardo</figcaption></figure></button></li>
         <li><button type="button" data-full="img/fleur-or-1200.jpg" data-caption="Flor pintada y perlas doradas"><figure class="gallery__fig">
-          <picture><source type="image/webp" srcset="../img/fleur-or-600.webp 600w, ../img/fleur-or-1200.webp 1200w" sizes="(min-width: 900px) 50vw, 50vw"><img src="../img/fleur-or-600.jpg" srcset="../img/fleur-or-600.jpg 600w, ../img/fleur-or-1200.jpg 1200w" sizes="(min-width: 900px) 50vw, 50vw" loading="lazy" alt="Uñas almendradas con flor rosa pintada a mano, francesa blanca y perlas doradas"></picture>
+          <picture><source type="image/webp" srcset="../img/fleur-or-600.webp 600w, ../img/fleur-or-1200.webp 1200w" sizes="(min-width: 900px) 265px, 50vw"><img src="../img/fleur-or-600.jpg" srcset="../img/fleur-or-600.jpg 600w, ../img/fleur-or-1200.jpg 1200w" sizes="(min-width: 900px) 265px, 50vw" loading="lazy" alt="Uñas almendradas con flor rosa pintada a mano, francesa blanca y perlas doradas"></picture>
           <figcaption>Flor pintada y perlas doradas</figcaption></figure></button></li>
         <li><button type="button" data-full="img/bordeaux-aquarelle-1200.jpg" data-caption="Burdeos y acuarela"><figure class="gallery__fig">
-          <picture><source type="image/webp" srcset="../img/bordeaux-aquarelle-600.webp 600w, ../img/bordeaux-aquarelle-1200.webp 1200w" sizes="(min-width: 900px) 50vw, 50vw"><img src="../img/bordeaux-aquarelle-600.jpg" srcset="../img/bordeaux-aquarelle-600.jpg 600w, ../img/bordeaux-aquarelle-1200.jpg 1200w" sizes="(min-width: 900px) 50vw, 50vw" loading="lazy" alt="Uñas almendradas burdeos brillantes y flores rojas en acuarela sobre base rosa"></picture>
+          <picture><source type="image/webp" srcset="../img/bordeaux-aquarelle-600.webp 600w, ../img/bordeaux-aquarelle-1200.webp 1200w" sizes="(min-width: 900px) 265px, 50vw"><img src="../img/bordeaux-aquarelle-600.jpg" srcset="../img/bordeaux-aquarelle-600.jpg 600w, ../img/bordeaux-aquarelle-1200.jpg 1200w" sizes="(min-width: 900px) 265px, 50vw" loading="lazy" alt="Uñas almendradas burdeos brillantes y flores rojas en acuarela sobre base rosa"></picture>
           <figcaption>Burdeos y acuarela</figcaption></figure></button></li>
         <li><button type="button" data-full="img/french-v-1200.jpg" data-caption="Francesa blanca en V"><figure class="gallery__fig">
-          <picture><source type="image/webp" srcset="../img/french-v-600.webp 600w, ../img/french-v-1200.webp 1200w" sizes="(min-width: 900px) 50vw, 50vw"><img src="../img/french-v-600.jpg" srcset="../img/french-v-600.jpg 600w, ../img/french-v-1200.jpg 1200w" sizes="(min-width: 900px) 50vw, 50vw" loading="lazy" alt="Uñas cuadradas nude con francesa blanca en V"></picture>
+          <picture><source type="image/webp" srcset="../img/french-v-600.webp 600w, ../img/french-v-1200.webp 1200w" sizes="(min-width: 900px) 540px, 50vw"><img src="../img/french-v-600.jpg" srcset="../img/french-v-600.jpg 600w, ../img/french-v-1200.jpg 1200w" sizes="(min-width: 900px) 540px, 50vw" loading="lazy" alt="Uñas cuadradas nude con francesa blanca en V"></picture>
           <figcaption>Francesa blanca en V</figcaption></figure></button></li>
       </ul>
       <p class="gallery__more"><a class="btn btn--tiktok" href="https://www.tiktok.com/@adriana.torres886" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12.53.02C13.84 0 15.14.01 16.44 0c.08 1.53.63 3.09 1.75 4.17 1.12 1.11 2.7 1.62 4.24 1.79v4.03c-1.44-.05-2.89-.35-4.2-.97-.57-.26-1.1-.59-1.62-.93-.01 2.92.01 5.84-.02 8.75-.08 1.4-.54 2.79-1.35 3.94-1.31 1.92-3.58 3.17-5.91 3.21-1.43.08-2.86-.31-4.08-1.03-2.02-1.19-3.44-3.37-3.65-5.71-.02-.5-.03-1-.01-1.49.18-1.9 1.12-3.72 2.58-4.96 1.66-1.44 3.98-2.13 6.15-1.72.02 1.48-.04 2.96-.04 4.44-.99-.32-2.15-.23-3.02.37-.63.41-1.11 1.04-1.36 1.75-.21.51-.15 1.07-.14 1.61.24 1.64 1.82 3.02 3.5 2.87 1.12-.01 2.19-.66 2.77-1.61.19-.33.4-.67.41-1.06.1-1.79.06-3.57.07-5.36.01-4.03-.01-8.05.02-12.07z"/></svg><span>Más creaciones en TikTok</span></a></p>
@@ -253,6 +253,43 @@
     </div>
   </section>
 
+  <section class="section section--tint" id="conseils">
+    <div class="wrap">
+      <div class="head">
+        <div>
+          <p class="kicker">Consejos</p>
+          <h2>Cuidarte,<br><em>antes y después.</em></h2>
+        </div>
+        <p class="lead">Unos gestos sencillos para un resultado más limpio y duradero.</p>
+      </div>
+      <div class="tips">
+        <article class="tip">
+          <h3>Depilación con cera</h3>
+          <p class="tip__when">Antes de la cita</p>
+          <ul>
+            <li>Deja crecer el vello unos 5 mm, es decir, 2 o 3 semanas sin afeitar.</li>
+            <li>Exfolia la zona el día anterior y evita cremas o aceites el mismo día.</li>
+          </ul>
+          <p class="tip__when">Después del servicio</p>
+          <ul>
+            <li>Evita el sol, la sauna, la piscina y el deporte intenso durante 24 a 48 horas.</li>
+            <li>Exfolia suavemente 2 o 3 días después y luego hidrata con regularidad para evitar vellos encarnados.</li>
+          </ul>
+        </article>
+        <article class="tip">
+          <h3>Uñas</h3>
+          <p class="tip__when">En el día a día</p>
+          <ul>
+            <li>Aplica un poco de aceite de cutículas cada día para mantener las uñas flexibles.</li>
+            <li>Usa guantes para limpiar y fregar los platos.</li>
+            <li>No uses las uñas como herramienta y no retires el gel tú misma.</li>
+            <li>Programa un relleno o una nueva aplicación cada 3 o 4 semanas.</li>
+          </ul>
+        </article>
+      </div>
+    </div>
+  </section>
+
   <section class="section section--dark">
     <div class="wrap place">
       <div>
@@ -342,7 +379,7 @@
     <div>
       <p><a href="tel:+32470701705">+32 470 70 17 05</a> · <a href="https://wa.me/32470701705" target="_blank" rel="noopener">WhatsApp</a> · <a href="https://www.tiktok.com/@adriana.torres886" target="_blank" rel="noopener">TikTok</a><br><a href="mailto:contact@sofianailsbrussels.com">contact@sofianailsbrussels.com</a></p>
       <!--langs-foot--><nav class="langs" aria-label="Idioma"><a href="../" hreflang="fr" lang="fr" title="Français">FR</a><a href="../nl/" hreflang="nl" lang="nl" title="Nederlands">NL</a><a href="../en/" hreflang="en" lang="en" title="English">EN</a><a href="../es/" hreflang="es" lang="es" title="Español" aria-current="true">ES</a></nav><!--/langs-foot-->
-      <p class="small">© <span data-year>2026</span> Sofia Nails · <a href="#haut">Volver arriba ↑</a></p>
+      <p class="small">© <span data-year>2026</span> Sofia Nails · <a href="confidentialite.html">Privacidad</a> · <a href="#haut">Volver arriba ↑</a></p>
     </div>
   </div>
 </footer>

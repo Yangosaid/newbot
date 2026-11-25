@@ -32,4 +32,36 @@
     <xhtml:link rel="alternate" hreflang="en" href="https://sofianailsbrussels.com/en/"/>
     <xhtml:link rel="alternate" hreflang="es" href="https://sofianailsbrussels.com/es/"/>
   </url>
+  <url>
+    <loc>https://sofianailsbrussels.com/confidentialite.html</loc>
+    <lastmod>2026-11-25</lastmod>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://sofianailsbrussels.com/confidentialite.html"/>
+    <xhtml:link rel="alternate" hreflang="nl" href="https://sofianailsbrussels.com/nl/confidentialite.html"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://sofianailsbrussels.com/en/confidentialite.html"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://sofianailsbrussels.com/es/confidentialite.html"/>
+  </url>
+  <url>
+    <loc>https://sofianailsbrussels.com/nl/confidentialite.html</loc>
+    <lastmod>2026-11-25</lastmod>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://sofianailsbrussels.com/confidentialite.html"/>
+    <xhtml:link rel="alternate" hreflang="nl" href="https://sofianailsbrussels.com/nl/confidentialite.html"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://sofianailsbrussels.com/en/confidentialite.html"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://sofianailsbrussels.com/es/confidentialite.html"/>
+  </url>
+  <url>
+    <loc>https://sofianailsbrussels.com/en/confidentialite.html</loc>
+    <lastmod>2026-11-25</lastmod>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://sofianailsbrussels.com/confidentialite.html"/>
+    <xhtml:link rel="alternate" hreflang="nl" href="https://sofianailsbrussels.com/nl/confidentialite.html"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://sofianailsbrussels.com/en/confidentialite.html"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://sofianailsbrussels.com/es/confidentialite.html"/>
+  </url>
+  <url>
+    <loc>https://sofianailsbrussels.com/es/confidentialite.html</loc>
+    <lastmod>2026-11-25</lastmod>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://sofianailsbrussels.com/confidentialite.html"/>
+    <xhtml:link rel="alternate" hreflang="nl" href="https://sofianailsbrussels.com/nl/confidentialite.html"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://sofianailsbrussels.com/en/confidentialite.html"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://sofianailsbrussels.com/es/confidentialite.html"/>
+  </url>
 </urlset>

@@ -28,6 +28,11 @@ parenthèses et la langue du client est indiquée, pour que Sofia sache toujours
 ## Fichiers
 
 - `index.html`, `styles.css`, `main.js` : la page, le style, les interactions (tarifs, réservation, galerie).
+- `confidentialite.html` : confidentialité et mentions légales (traduite comme l'accueil par `i18n/build.py`).
+- `404.html` : page « introuvable » en quatre langues (servie automatiquement par Netlify).
+- `fonts.css`, `fonts/` : polices hébergées sur le site (aucun appel à Google, conforme RGPD).
+- `site.webmanifest` : ajout à l'écran d'accueil du téléphone. `_headers` : cache et sécurité sur Netlify.
+- `sitemap.xml`, `robots.txt` : générés par `i18n/build.py`.
 - `img/` : photos optimisées (WebP + JPG). `logo/` : logo en SVG et PNG (profil Instagram, versions claire et foncée).
 - Prix : attributs `data-price` **et** texte affiché dans `index.html`.
 

@@ -169,6 +169,51 @@ T = {
         'You are welcomed in a calm, private space, with no waiting room or crowds.',
         'Te recibo en un espacio privado y tranquilo, sin sala de espera ni aglomeraciones.'),
 
+    # Conseils
+    'Conseils': ('Tips', 'Advice', 'Consejos'),
+    'Prendre soin de vous,': ('Goed voor uzelf zorgen,', 'Taking care of yourself,', 'Cuidarte,'),
+    'avant et après.': ('voor en na.', 'before and after.', 'antes y después.'),
+    'Quelques gestes simples pour un résultat plus net et plus durable.': (
+        'Enkele eenvoudige tips voor een mooier en langer resultaat.',
+        'A few simple habits for a cleaner, longer-lasting result.',
+        'Unos gestos sencillos para un resultado más limpio y duradero.'),
+    'Avant le rendez-vous': ('Voor de afspraak', 'Before your appointment', 'Antes de la cita'),
+    'Laissez pousser les poils environ 5 mm, soit 2 à 3 semaines sans rasage.': (
+        'Laat de haartjes ongeveer 5 mm groeien, dus 2 à 3 weken niet scheren.',
+        'Let the hair grow to about 5 mm, which means 2 to 3 weeks without shaving.',
+        'Deja crecer el vello unos 5 mm, es decir, 2 o 3 semanas sin afeitar.'),
+    'Exfoliez la zone la veille et évitez crème ou huile le jour même.': (
+        'Scrub de zone de dag ervoor en gebruik op de dag zelf geen crème of olie.',
+        'Exfoliate the area the day before and avoid cream or oil on the day itself.',
+        'Exfolia la zona el día anterior y evita cremas o aceites el mismo día.'),
+    'Après le soin': ('Na de behandeling', 'After your treatment', 'Después del servicio'),
+    'Évitez soleil, sauna, piscine et sport intense pendant 24 à 48 heures.': (
+        'Vermijd zon, sauna, zwembad en intensief sporten gedurende 24 à 48 uur.',
+        'Avoid sun, sauna, swimming pools and intense exercise for 24 to 48 hours.',
+        'Evita el sol, la sauna, la piscina y el deporte intenso durante 24 a 48 horas.'),
+    'Exfoliez doucement 2 à 3 jours après, puis hydratez régulièrement pour éviter les poils incarnés.': (
+        'Scrub zachtjes 2 à 3 dagen later en hydrateer daarna regelmatig om ingegroeide haartjes te vermijden.',
+        'Exfoliate gently 2 to 3 days later, then moisturise regularly to prevent ingrown hairs.',
+        'Exfolia suavemente 2 o 3 días después y luego hidrata con regularidad para evitar vellos encarnados.'),
+    'Ongles': ('Nagels', 'Nails', 'Uñas'),
+    'Au quotidien': ('Elke dag', 'Every day', 'En el día a día'),
+    'Appliquez un peu d’huile à cuticules chaque jour pour garder des ongles souples.': (
+        'Breng elke dag een beetje nagelriemolie aan voor soepele nagels.',
+        'Apply a little cuticle oil every day to keep your nails supple.',
+        'Aplica un poco de aceite de cutículas cada día para mantener las uñas flexibles.'),
+    'Portez des gants pour le ménage et la vaisselle.': (
+        'Draag handschoenen bij het poetsen en de afwas.',
+        'Wear gloves for cleaning and washing up.',
+        'Usa guantes para limpiar y fregar los platos.'),
+    'N’utilisez pas vos ongles comme outils et ne retirez pas le gel vous-même.': (
+        'Gebruik uw nagels niet als werktuig en verwijder de gel niet zelf.',
+        'Don’t use your nails as tools, and don’t remove the gel yourself.',
+        'No uses las uñas como herramienta y no retires el gel tú misma.'),
+    'Prévoyez un remplissage ou une nouvelle pose toutes les 3 à 4 semaines.': (
+        'Plan elke 3 à 4 weken een opvulling of een nieuwe set.',
+        'Plan a fill or a new set every 3 to 4 weeks.',
+        'Programa un relleno o una nueva aplicación cada 3 o 4 semanas.'),
+
     # Infos pratiques
     'Infos pratiques': ('Praktische info', 'Practical information', 'Información práctica'),
     'À Bruxelles,': ('In Brussel,', 'In Brussels,', 'En Bruselas,'),
@@ -254,6 +299,57 @@ T = {
         'Deze site verstuurt geen gegevens: het bericht opent in WhatsApp of uw mailprogramma en u beslist zelf of u het verstuurt.',
         'This site sends no data: the message opens in WhatsApp or your email app and you decide whether to send it.',
         'Este sitio no envía ningún dato: el mensaje se abre en WhatsApp o en tu correo y tú decides si enviarlo.'),
+
+    # Page confidentialité
+    'Confidentialité et mentions légales · Sofia Nails': (
+        'Privacy en wettelijke vermeldingen · Sofia Nails', 'Privacy and legal notice · Sofia Nails', 'Privacidad y aviso legal · Sofia Nails'),
+    'Comment Sofia Nails traite vos données : aucun cookie, aucun suivi, messages de réservation utilisés uniquement pour organiser votre rendez-vous.': (
+        'Hoe Sofia Nails met uw gegevens omgaat: geen cookies, geen tracking, reservatieberichten enkel gebruikt om uw afspraak te regelen.',
+        'How Sofia Nails handles your data: no cookies, no tracking, booking messages used only to arrange your appointment.',
+        'Cómo trata Sofia Nails tus datos: sin cookies, sin seguimiento, mensajes de reserva usados solo para organizar tu cita.'),
+    'Informations légales': ('Wettelijke informatie', 'Legal information', 'Información legal'),
+    'Confidentialité': ('Privacy', 'Privacy', 'Privacidad'),
+    'et mentions légales.': ('en wettelijke vermeldingen.', 'and legal notice.', 'y aviso legal.'),
+    'Dernière mise à jour : novembre 2026': ('Laatst bijgewerkt: november 2026', 'Last updated: November 2026', 'Última actualización: noviembre de 2026'),
+    'Qui sommes-nous ?': ('Wie zijn we?', 'Who we are', '¿Quiénes somos?'),
+    'Sofia Nails : soins des ongles, épilation à la cire et pédicure médicale, sur rendez-vous à Uccle (Bruxelles).': (
+        'Sofia Nails: nagelverzorging, harsen en medische pedicure, op afspraak in Ukkel (Brussel).',
+        'Sofia Nails: nail care, waxing and medical pedicure, by appointment in Uccle (Brussels).',
+        'Sofia Nails: cuidado de uñas, depilación con cera y pedicura médica, con cita previa en Uccle (Bruselas).'),
+    'Contact :': ('Contact:', 'Contact:', 'Contacto:'),
+    'Données personnelles': ('Persoonsgegevens', 'Personal data', 'Datos personales'),
+    'Ce site ne collecte et n’enregistre aucune donnée : il n’envoie rien à un serveur et ne demande aucun compte.': (
+        'Deze site verzamelt en bewaart geen gegevens: hij stuurt niets naar een server en vraagt geen account.',
+        'This site does not collect or store any data: it sends nothing to a server and requires no account.',
+        'Este sitio no recoge ni guarda ningún dato: no envía nada a un servidor y no pide ninguna cuenta.'),
+    'Le formulaire de rendez-vous prépare un message sur votre appareil. Si vous choisissez de l’envoyer par WhatsApp ou par e-mail, Sofia Nails reçoit les informations que vous y avez indiquées (nom, téléphone, soins souhaités, message) et les utilise uniquement pour organiser votre rendez-vous. Elles ne sont ni vendues ni transmises à des tiers.': (
+        'Het afsprakenformulier maakt een bericht klaar op uw toestel. Als u het via WhatsApp of e-mail verstuurt, ontvangt Sofia Nails de informatie die u invulde (naam, gsm, gewenste behandelingen, bericht) en gebruikt die enkel om uw afspraak te regelen. Ze wordt niet verkocht en niet aan derden doorgegeven.',
+        'The booking form prepares a message on your device. If you choose to send it by WhatsApp or email, Sofia Nails receives the information you entered (name, phone, requested treatments, message) and uses it only to arrange your appointment. It is never sold or passed on to third parties.',
+        'El formulario de cita prepara un mensaje en tu dispositivo. Si decides enviarlo por WhatsApp o por correo, Sofia Nails recibe la información que has indicado (nombre, teléfono, servicios deseados, mensaje) y la usa únicamente para organizar tu cita. No se vende ni se cede a terceros.'),
+    'Durée de conservation': ('Bewaartermijn', 'How long we keep it', 'Plazo de conservación'),
+    'Ces informations sont conservées le temps nécessaire au suivi de vos rendez-vous, puis supprimées.': (
+        'Deze informatie wordt bewaard zolang nodig is voor de opvolging van uw afspraken en daarna verwijderd.',
+        'This information is kept only as long as needed to follow up your appointments, then deleted.',
+        'Esta información se conserva el tiempo necesario para el seguimiento de tus citas y después se elimina.'),
+    'Vos droits': ('Uw rechten', 'Your rights', 'Tus derechos'),
+    'Conformément au RGPD, vous pouvez demander l’accès à vos données, leur rectification ou leur suppression en écrivant à': (
+        'Volgens de AVG kunt u inzage, verbetering of verwijdering van uw gegevens vragen door te schrijven naar',
+        'Under the GDPR, you can ask to access, correct or delete your data by writing to',
+        'Según el RGPD, puedes solicitar el acceso, la rectificación o la supresión de tus datos escribiendo a'),
+    'Vous pouvez aussi introduire une réclamation auprès de l’': (
+        'U kunt ook een klacht indienen bij de', 'You can also file a complaint with the', 'También puedes presentar una reclamación ante la'),
+    'Autorité de protection des données': ('Gegevensbeschermingsautoriteit', 'Belgian Data Protection Authority', 'Autoridad belga de protección de datos'),
+    'Cookies et suivi': ('Cookies en tracking', 'Cookies and tracking', 'Cookies y seguimiento'),
+    'Ce site n’utilise aucun cookie, aucun outil de mesure d’audience et aucune publicité. Les polices sont hébergées sur le site lui-même : aucune ressource n’est chargée depuis un service tiers.': (
+        'Deze site gebruikt geen cookies, geen bezoekersstatistieken en geen reclame. De lettertypes staan op de site zelf: er wordt niets geladen van externe diensten.',
+        'This site uses no cookies, no analytics and no advertising. Fonts are hosted on the site itself: nothing is loaded from third-party services.',
+        'Este sitio no usa cookies, ni herramientas de medición de audiencia, ni publicidad. Las fuentes están alojadas en el propio sitio: no se carga nada desde servicios de terceros.'),
+    'Liens externes': ('Externe links', 'External links', 'Enlaces externos'),
+    'Les liens vers WhatsApp, TikTok et Google Maps ouvrent des services externes, soumis à leurs propres règles de confidentialité.': (
+        'De links naar WhatsApp, TikTok en Google Maps openen externe diensten, met hun eigen privacyregels.',
+        'Links to WhatsApp, TikTok and Google Maps open external services, which have their own privacy rules.',
+        'Los enlaces a WhatsApp, TikTok y Google Maps abren servicios externos, sujetos a sus propias normas de privacidad.'),
+    'Retour à l’accueil': ('Terug naar de startpagina', 'Back to home', 'Volver al inicio'),
 
     # Pied de page
     'Épilation à la cire · Manucure · Pédicure médicale': (
