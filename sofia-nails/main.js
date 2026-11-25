@@ -162,6 +162,15 @@
     box.addEventListener('click', (e) => { if (e.target === box) box.close(); });
   }
 
+  // Apparition douce des blocs au défilement
+  if ('IntersectionObserver' in window && !matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    const items = $$('.section .head, .section h2, .card, .gallery li, .group, .steps li, .info li, .faq details, .form, .place__photo');
+    const io = new IntersectionObserver((entries) => entries.forEach((en) => {
+      if (en.isIntersecting) { en.target.classList.add('is-in'); io.unobserve(en.target); }
+    }), { rootMargin: '0px 0px -6% 0px' });
+    items.forEach((el, i) => { el.classList.add('reveal'); el.style.transitionDelay = `${(i % 4) * 70}ms`; io.observe(el); });
+  }
+
   $('[data-year]').textContent = new Date().getFullYear();
   update();
 })();

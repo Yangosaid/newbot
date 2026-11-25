@@ -304,3 +304,80 @@ img.brand__mark { width: 32px; height: 43px; border-radius: 0; background: none;
 .btn--tiktok { gap: 10px; background: #111; color: #fff; }
 .btn--tiktok:hover { background: #000; }
 .btn--tiktok svg { width: 18px; height: 18px; filter: drop-shadow(-1.5px -1px 0 #25f4ee) drop-shadow(1.5px 1px 0 #fe2c55); }
+
+/* ==========================================================
+   Raffinements (élégance)
+   ========================================================== */
+
+/* En-tête transparent sur la photo, crème au défilement */
+.header { position: fixed; top: 0; left: 0; right: 0; transition: background .35s, border-color .35s, box-shadow .35s; }
+.header.is-scrolled { background: rgba(253, 248, 245, .94); box-shadow: 0 12px 30px -26px rgba(58, 33, 40, .55); }
+.header:not(.is-scrolled) { background: transparent; border-color: transparent; backdrop-filter: none; color: var(--cream); }
+.header:not(.is-scrolled) .brand__txt small { color: rgba(253, 248, 245, .78); }
+.header:not(.is-scrolled) .nav a { color: rgba(253, 248, 245, .86); }
+.header:not(.is-scrolled) .nav a:hover { color: #fff; }
+.header:not(.is-scrolled) img.brand__mark { filter: brightness(0) invert(1); }
+.header:not(.is-scrolled) .langs { background: rgba(253, 248, 245, .1); border-color: rgba(253, 248, 245, .3); }
+.header:not(.is-scrolled) .langs a { color: rgba(253, 248, 245, .85); }
+.header:not(.is-scrolled) .langs a[aria-current] { background: var(--cream); color: var(--plum); }
+.header:not(.is-scrolled) .header__cta { background: var(--cream); color: var(--plum); }
+.hero::before { content: ""; position: absolute; z-index: 1; inset: 0 0 auto 0; height: 170px; pointer-events: none; background: linear-gradient(rgba(33, 14, 20, .6), rgba(33, 14, 20, 0)); }
+
+/* Drapeau plus discret */
+.flag--hero { width: .16em; height: .16em; vertical-align: .62em; margin-inline-start: .07em; box-shadow: 0 0 0 1.5px rgba(255, 255, 255, .85), 0 3px 10px rgba(0, 0, 0, .25); }
+
+/* Contacts du hero plus légers */
+.hero .pill { background: transparent; border-color: transparent; backdrop-filter: none; padding-inline-start: 0; }
+.hero .pill:hover { background: transparent; }
+.hero .pill svg { background: transparent; color: var(--cream); border: 1px solid rgba(253, 248, 245, .45); }
+.hero .pill--wa svg { color: #4be38a; border-color: rgba(75, 227, 138, .5); }
+
+/* Petite étoile de marque devant les surtitres */
+.kicker::before { content: "✦"; margin-inline-end: 10px; letter-spacing: 0; font-size: .95em; }
+
+/* Bandeau des prix aligné sur la grille */
+.facts-bar .facts { margin: 0 auto; grid-template-columns: repeat(2, 1fr); gap: 18px 0; padding-top: 26px; padding-bottom: 26px; }
+.facts-bar .facts li { text-align: center; padding: 0 18px; border-inline-start: 1px solid rgba(243, 220, 210, .18); }
+.facts-bar .facts li:nth-child(odd) { border-inline-start: 0; }
+.facts-bar .facts span { font-size: 1.55rem; }
+@media (min-width: 760px) {
+  .facts-bar .facts { grid-template-columns: repeat(4, 1fr); }
+  .facts-bar .facts li:nth-child(odd) { border-inline-start: 1px solid rgba(243, 220, 210, .18); }
+  .facts-bar .facts li:first-child { border-inline-start: 0; }
+}
+
+/* Soins : mise en page éditoriale, sans boîtes */
+.cards { counter-reset: soin; gap: 44px 72px; border-top: 1px solid var(--line); }
+.card { counter-increment: soin; position: relative; background: transparent; border: 0; border-radius: 0; padding: 38px 0 0; gap: 12px; }
+.card::before { content: "0" counter(soin); font-family: var(--serif); font-style: italic; font-size: 3.4rem; line-height: 1; color: var(--rose-soft); }
+.card__ico { position: absolute; top: 46px; inset-inline-end: 0; width: 42px; height: 42px; opacity: .75; }
+.card h3 { font-size: clamp(1.8rem, 3vw, 2.2rem); }
+
+/* Tarifs : carte de spa avec points de conduite */
+.panel { background: #fff; border: 1px solid var(--line); border-radius: 26px; padding: clamp(24px, 4.5vw, 56px); box-shadow: 0 30px 60px -48px rgba(74, 44, 52, .5); }
+.groups, #panel-cire .groups { display: block; columns: 2 300px; column-gap: 76px; }
+.group { background: transparent; border: 0; border-radius: 0; padding: 0; margin: 0 0 34px; break-inside: avoid; }
+.group h3 { font-size: 1.65rem; padding-bottom: 10px; margin-bottom: 4px; border-bottom: 1px solid var(--line); }
+.prices li { border-bottom: 0; padding: 8px 0; gap: 0; }
+.prices li span { flex: 0 1 auto; order: 0; }
+.prices li::after { content: ""; order: 1; flex: 1; min-width: 18px; margin: 0 8px; border-bottom: 1px dotted #d3b5ab; transform: translateY(-5px); }
+.prices b { order: 2; }
+.add { order: 3; width: 30px; height: 30px; margin-inline-start: 12px; font-size: 1.05rem; }
+
+/* Galerie : légendes en italique */
+.gallery button { border-radius: 16px; }
+.gallery figcaption { font-family: var(--serif); font-style: italic; font-size: 1.12rem; padding: 40px 16px 14px; }
+
+/* Boutons accordés à la palette */
+.btn--wa { gap: 10px; background: var(--plum); color: var(--cream); }
+.btn--wa:hover { background: var(--plum-2); }
+.btn--wa svg { width: 18px; height: 18px; color: #4be38a; }
+.btn--tiktok { background: transparent; color: var(--plum); border-color: var(--plum); }
+.btn--tiktok:hover { background: var(--plum); color: var(--cream); }
+.text-link { background: none; border: 0; padding: 6px 4px; cursor: pointer; color: var(--muted); font-weight: 500; text-decoration: underline; text-underline-offset: 4px; }
+.text-link:hover { color: var(--plum); }
+
+/* Apparition douce */
+.reveal { opacity: 0; transform: translateY(18px); transition: opacity .9s ease, transform .9s cubic-bezier(.2, .7, .2, 1); }
+.reveal.is-in { opacity: 1; transform: none; }
+@media (prefers-reduced-motion: reduce) { .reveal { opacity: 1; transform: none; } }
