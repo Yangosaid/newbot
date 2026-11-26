@@ -75,6 +75,11 @@ input[type=checkbox]{width:20px;height:20px;accent-color:var(--hot)}
 #monL b{color:var(--ink)}
 #hint .g img{width:38px;height:38px;object-fit:contain;display:block}
 /* the three top supporters of this live (top-left), with photo, name and support */
+#arrivals{position:absolute;left:8px;top:30%;display:flex;flex-direction:column;gap:5px;pointer-events:none;max-width:58%;z-index:4}
+.arr{display:flex;align-items:center;gap:7px;padding:4px 12px 4px 4px;border-radius:999px;background:linear-gradient(90deg,rgba(255,61,139,.92),rgba(30,10,60,.85));border:1.5px solid rgba(255,255,255,.7);color:#fff;font:800 17px/1.1 var(--display);box-shadow:0 4px 14px rgba(0,0,0,.4);animation:arrIn .45s cubic-bezier(.2,.9,.3,1.3) both;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.arr.out{animation:arrOut .4s ease-in both}.arr .ph{width:38px;height:38px;border-radius:50%;overflow:hidden;flex:none;border:2px solid #fff;display:grid;place-items:center;font:800 17px/1 var(--display)}.arr .ph img{width:100%;height:100%;object-fit:cover}
+.arr .ic{font-size:18px}
+@keyframes arrIn{0%{opacity:0;transform:translateX(-40px) scale(.85)}100%{opacity:1;transform:none}}@keyframes arrOut{to{opacity:0;transform:translateX(-30px)}}
 #top3{position:absolute;left:8px;top:47%;display:flex;flex-direction:column;gap:5px;pointer-events:none;max-width:46%}
 #top3 .tp{display:flex;align-items:center;gap:6px;padding:4px 10px 4px 4px;border-radius:999px;background:rgba(8,4,20,.55);border:1px solid rgba(255,255,255,.12)}
 #top3 .tp.r1{background:linear-gradient(90deg,rgba(255,201,60,.38),rgba(8,4,20,.55));border-color:rgba(255,201,60,.7);box-shadow:0 0 14px rgba(255,201,60,.4)}
@@ -173,6 +178,7 @@ input[type=checkbox]{width:20px;height:20px;accent-color:var(--hot)}
 <body>
 <div id="stage">
   <canvas id="gl"></canvas>
+  <div id="arrivals" aria-hidden="true"></div>
   <div id="fade"></div>
   <div id="nogl" hidden>Este teléfono no puede mostrar gráficos 3D.<br>Vuelve a la batalla de buses desde ⚙.</div>
   <div id="hint" aria-hidden="true">
@@ -277,6 +283,8 @@ input[type=checkbox]{width:20px;height:20px;accent-color:var(--hot)}
       <div class="grp"><h3>Imagen</h3>
         <div class="ln"><label for="oQ">Calidad</label><select id="oQ"><option value="ultra">Ultra (brillo, sombras, 120 Hz)</option><option value="alta">Alta</option><option value="media">Media</option><option value="ahorro">Ahorro de batería</option></select></div>
         <label class="ln"><input type="checkbox" id="oAuto"><span>Bajar la calidad sola si el teléfono va lento</span></label>
+        <label class="ln"><input type="checkbox" id="oTapsOnly"><span>👆 Sala solo para los que tocan (los regalos, los comentarios y los que entran no ponen bailarines)</span></label>
+        <label class="ln"><input type="checkbox" id="oWallHost"><span>🖥️ La pantalla gigante muestra mi foto de TikTok</span></label>
         <label class="ln"><input type="checkbox" id="oSafe"><span>Encuadrar por encima del chat del directo</span></label>
         <label class="ln"><input type="checkbox" id="oTop3"><span>Los 3 que más apoyan en este directo, fijos arriba a la izquierda (foto, nombre y apoyo)</span></label>
         <label class="ln"><input type="checkbox" id="oKing">  <span>El número 1 en la pantalla gigante con su corona</span></label>
@@ -296,7 +304,7 @@ input[type=checkbox]{width:20px;height:20px;accent-color:var(--hot)}
       <div class="grp" id="gLikes"><h3>Toques en la pantalla (me gusta)</h3>
         <p class="note">El modo (completo, solo energía o apagado) se elige arriba en Control.</p>
         <div class="ln"><label for="oLikeN">Toques necesarios</label><select id="oLikeN"><option value="1">1</option><option value="3">3</option><option value="5">5</option><option value="15">15</option><option value="30">30</option><option value="100">100</option></select></div>
-        <div class="ln"><label for="oTapHold">Cada persona se queda en cámara al menos</label><select id="oTapHold"><option value="1">1 s</option><option value="1.5">1,5 s</option><option value="2.2">2,2 s</option><option value="2">2 s</option><option value="4">4 s</option><option value="8">8 s</option></select></div>
+        <div class="ln"><label for="oTapHold">Cada persona se queda en cámara al menos</label><select id="oTapHold"><option value="1">1 s</option><option value="1.5">1,5 s</option><option value="2.2">2,2 s</option><option value="2">2 s</option><option value="3.5">3,5 s</option><option value="4">4 s</option><option value="8">8 s</option></select></div>
         <div class="ln"><label for="oLikeCam">Cuando termina el turno de los regalos, la cámara pasa a quien toca tras</label><select id="oLikeCam"><option value="0">Nunca</option><option value="3">3 s</option><option value="5">5 s</option><option value="10">10 s</option><option value="20">20 s</option></select></div>
       </div>
       <div class="grp"><h3>Regalos grandes 👑</h3>
@@ -346,11 +354,11 @@ var SRC=APP&&BusApp.getSource?String(BusApp.getSource()):"tiktok",YT=SRC==="yout
 try{localStorage.setItem("game","party")}catch(e){}
 
 /* ---------- settings ---------- */
-var DEF={hostSnd:"mix",hintOn:false,per:2,max:24,fill:10,chat:YT,words:"",cd:YT?10:3,bpm:124,q:"ultra",auto:true,music:true,safe:true,hint:true,flag:true,prio:true,top3:true,kingScreen:true,memory:true,safeLive:true,flTaps:true,flGifts:true,flWall:true,flJoin:false,flSize:1,joinChar:true,host:false,hostSize:"m",hostShape2:"card",hostVx:50,hostVy:50,hostVz:1,hostVol:0,hostMirror:true,hostSup:true,hostX:null,hostY:null,hostIcon:"☕",hallMin:15,hall:"club",sync:false,syncSrc:"output",like:true,tapMode:"full",likeN:3,likeCam2:5,tapHold2:2.2,goal:2000,coinE:10,tapE:1,vipMin:100,vipLen:1};
+var DEF={hostSnd:"mix",hintOn:false,per:2,max:24,fill:10,chat:YT,words:"",cd:YT?10:3,bpm:124,q:"ultra",auto:true,music:true,safe:true,hint:true,flag:true,prio:true,top3:true,kingScreen:true,memory:true,safeLive:true,flTaps:true,flGifts:true,flWall:true,flJoin:false,flSize:1,joinChar:true,host:false,hostSize:"m",hostShape2:"card",hostVx:50,hostVy:50,hostVz:1,hostVol:0,hostMirror:true,hostSup:true,hostX:null,hostY:null,hostIcon:"☕",hallMin:15,hall:"club",sync:false,syncSrc:"output",like:true,tapMode:"full",likeN:3,likeCam2:5,tapHold2:3.5,tapsOnly:!YT,wallHost:true,goal:2000,coinE:10,tapE:1,vipMin:100,vipLen:1};
 var cfg=Object.assign({},DEF);
 /* TikTok-safe mode (on by default): no gift requests on screen, comments put viewers in the hall too */
 function safeLive(){return !!cfg.safeLive}
-try{var sv=JSON.parse(localStorage.getItem("party3d3")||"null");if(sv)cfg=Object.assign(cfg,sv);if(sv&&sv.likeN===15)cfg.likeN=3;if(sv&&+sv.tapHold2===1.5)cfg.tapHold2=2.2}catch(e){}
+try{var sv=JSON.parse(localStorage.getItem("party3d3")||"null");if(sv)cfg=Object.assign(cfg,sv);if(sv&&sv.likeN===15)cfg.likeN=3;if(sv&&(+sv.tapHold2===1.5||+sv.tapHold2===2.2))cfg.tapHold2=3.5}catch(e){}
 function save(){try{localStorage.setItem("party3d3",JSON.stringify(cfg))}catch(e){}}
 var QUALITY={ultra:{pr:2.5,samples:4,shadow:2048,bloom:true,shadows:true},alta:{pr:1.75,samples:4,shadow:1024,bloom:true,shadows:true},
   media:{pr:1.25,samples:0,shadow:1024,bloom:false,shadows:true},ahorro:{pr:1,samples:0,shadow:512,bloom:false,shadows:false}};
@@ -893,6 +901,8 @@ function paintMon(){$("mG").textContent=mon.g;$("mL").textContent=mon.l;$("mC").
 /* ---------- events from the live ---------- */
 function onEvent(e){if(!e||!e.type)return;monitor(e);
   if(e.type==="status"){setStatus(e.ok,e.text);return}
+  if(e.type==="host"){setHost(e);return}
+  if(cfg.tapsOnly&&(e.type==="gift"||e.type==="join"||e.type==="chat"))return;   /* the hall belongs to the people tapping */
   if(e.type==="join"){if(!cfg.joinChar||!ok3d)return;var uj=userOf(e),nj=perf();
     /* one dancer per visitor, once per live, at most ~2 a second so a busy live never floods the floor; no camera (that stays for gifts and taps) */
     if(uj.joined||uj.chars.length)return;uj.joined=true;joinQ.push(uj);if(joinQ.length>30)joinQ.shift();return}
@@ -902,7 +912,8 @@ function onEvent(e){if(!e||!e.type)return;monitor(e);
     if(tapOnly()&&cfg.tapMode==="full"&&ul.av&&perf()-(G.tapPic||0)>1500){G.tapPic=perf();paintHint(null,ul)}
     ul.likes=(ul.likes||0)+c;addEnergy(c*(+cfg.tapE||1));
     if(cfg.tapMode==="energy")return;
-    var nw=perf();ul.lastTap=nw;if(!ul.firstTap)ul.firstTap=nw;
+    var nw=perf(),gap=nw-(ul.lastTap||0);ul.lastTap=nw;if(!ul.firstTap)ul.firstTap=nw;
+    if(!ul.chars.length&&(!ul.waitFrom||ul.waitFrom<(ul.offAt||0)||gap>LIVEMS))ul.waitFrom=nw;   /* waiting (and tapping) since */
     if(ul.likes>=Math.max(1,cfg.likeN|0))actAdd(ul,nw);
     if(!ul.chars.length)return;                       /* their dancer comes through the fair scheduler */
     support(ul,{kind:"tap",taps:c});return}
@@ -933,18 +944,56 @@ setInterval(function(){var now=perf(),lim=Math.floor((now-LIVEMS)/1000);while(BK
   if((G.leaveTick=(G.leaveTick||0)+1)%10===0)chars.slice().forEach(function(c){var cu=c.u;if(cu.coins||cu===focus||vip&&vip.u===cu)return;if(now-Math.max(cu.lastTap||0,cu.lastSeen||0,cu.floorAt||0)>120000)removeChar(c)})},1000);
 function pool(){var n=ACT.length;if(n<=300)return ACT.slice();var a=[],seen={};for(var i=0;i<96;i++){var u=ACT[(Math.random()*n)|0];if(!seen[u.uid]){seen[u.uid]=1;a.push(u)}}return a}
 function tapCam(u,d,now){u.lastTap=now;actAdd(u,now)}
-/* new dancers for tappers who have none */
-setInterval(function(){if(!ok3d||cfg.tapMode!=="full")return;var now=perf(),wait=pool().filter(function(u){return !u.chars.length&&(u.likes||0)>=Math.max(1,cfg.likeN|0)});if(!wait.length)return;
-  /* never on the floor first (earliest tapper first), then whoever left the floor longest ago */
-  var key=function(u){return u.floorAt?(u.offAt||0):-1e12+(u.firstTap||0)};wait.sort(function(a,b){return key(a)-key(b)});var n=wait.length>=12?2:wait.length>=4?1:1,step=wait.length>=12?0:wait.length>=4?1:2;
-  if((G.spawnTick=(G.spawnTick||0)+1)%(step+1))return;   /* 250 ms ticks: 2 per tick in a crowd (~8/s), else every 2nd or 3rd tick */
-  for(var i=0;i<n&&i<wait.length;i++){var u=wait[i],d=addChar(u);if(d){u.floorAt=now;burst(d);hearts(d,4)}}},250);
-/* the camera for tappers */
+/* ---------- guaranteed turns (v3): nobody who keeps tapping is left out, and nobody flashes by too fast to see themselves ----------
+   1. Waiting: a tapper (still tapping in the last 12 s) without a dancer waits in line. Someone never on the floor goes first,
+      then whoever has been waiting (and tapping) longest; a tap in the last 3 s gives a little push.
+   2. A real turn: once on the floor a dancer stays at least 12-25 s (longer when few are waiting), so they have time to find
+      themselves; the newcomer's photo and name also slide in on the left of the screen for 3 s.
+   3. Their close-up: before anyone leaves the floor the camera gives them a close-up of 3.5 s (who has waited longest on the
+      floor without one goes first). A dancer still tapping who hasn't had their close-up is never taken off.
+   4. Leaving: when the floor is full and people wait, the one who stopped tapping longest ago leaves first, then whoever has
+      already had their close-up and their time; someone silent for 45 s makes room straight away.
+   Cost per tick is fixed (a sample of 96 waiting when more than 300 tap), so it holds from 1 to 1 000 000 tappers. */
+var FAIR={lastEvict:0,lastIn:0};
+function fairStay(waiting){return clamp(25000-waiting*150,12000,25000)}
+function canWait(u,now){return !u.chars.length&&(u.likes||0)>=Math.max(1,cfg.likeN|0)&&now-(u.lastTap||0)<=LIVEMS}
+function waitScore(u,now){return (u.floorAt?0:60000)+(now-(u.waitFrom||now))+(now-(u.lastTap||0)<3000?4000:0)}
+function hadCam(u){return !!u.floorAt&&u.camStint===u.floorAt}
+function pickLeaver(now,stay){var best=null,bs=-1;
+  chars.forEach(function(c){var u=c.u;if(u===focus||vip&&vip.u===u||(!cfg.tapsOnly&&u.coins>0))return;
+    var on=now-(u.floorAt||0),idle=now-(u.lastTap||0);
+    if(idle>45000&&on>6000){var s0=1e9+idle;if(s0>bs){bs=s0;best=c}return}
+    if(on<stay)return;
+    if(!hadCam(u)&&idle<5000&&on<stay*2)return;            /* still tapping and no close-up yet: protected */
+    var sc=on/1000+(idle>5000?100+idle/1000:0)+(hadCam(u)?30:0);if(sc>bs){bs=sc;best=c}});
+  return best}
+setInterval(function(){if(!ok3d||cfg.tapMode!=="full")return;var now=perf();
+  var wait=pool().filter(function(u){return canWait(u,now)});if(!wait.length)return;
+  wait.sort(function(a,b){return waitScore(b,now)-waitScore(a,now)});
+  var cap=Math.max(1,cfg.max|0),free=cap-chars.length,n=0;
+  if(free<=0){if(now-FAIR.lastEvict<400)return;var out=pickLeaver(now,fairStay(Math.max(wait.length,ACT.length-chars.length)));if(!out)return;
+    FAIR.lastEvict=now;var ou=out.u;ou.chars.slice().forEach(removeChar);free=cap-chars.length}
+  while(free>0&&n<2&&n<wait.length){var u=wait[n++],d=addChar(u);if(!d)break;u.floorAt=now;u.waitFrom=0;free--;burst(d);hearts(d,4);arrival(u)}},250);
+/* the camera for tappers: a close-up for everyone on the floor, the longest without one first */
 setInterval(function(){if(!ok3d||cfg.tapMode!=="full")return;var now=perf(),inVip=vip&&now<vip.until;
-  if(!(+cfg.likeCam2>0)||inVip||camQ.length||playing(now)||now-lastGiftAt<=(+cfg.likeCam2)*1000||now-focusAt<=Math.max(0.5,+cfg.tapHold2||2.2)*1000)return;
-  var best=null,bs=-1e18;pool().forEach(function(u){if(u===focus||!u.chars.length||now-(u.lastTap||0)>LIVEMS)return;
-    var sc=(u.camAt?(now-u.camAt)/1000*10:1e6-(u.firstTap||now)/1000)+(now-(u.lastTap||0)<3000?15:0);if(sc>bs){bs=sc;best=u}});
-  if(best){best.camAt=now;goTo(best,best.chars[best.chars.length-1],true)}},200);
+  if(!(+cfg.likeCam2>0)||inVip||camQ.length||playing(now)||(!cfg.tapsOnly&&now-lastGiftAt<=(+cfg.likeCam2)*1000)||now-focusAt<=Math.max(0.5,+cfg.tapHold2||3.5)*1000)return;
+  var best=null,bs=-1e18;chars.forEach(function(c){var u=c.u;if(u===focus&&chars.length>1)return;if(now-(u.lastTap||0)>LIVEMS)return;
+    var sc=(hadCam(u)?(now-(u.camAt||0))/100:1e6+(now-(u.floorAt||now)))+(now-(u.lastTap||0)<3000?15:0);if(sc>bs){bs=sc;best=u}});
+  if(best){best.camAt=now;best.camStint=best.floorAt;goTo(best,best.chars[best.chars.length-1],true)}},200);
+/* newcomers: photo and name slide in on the left for 3 s, so each one sees they're in (at most one every 0.7 s, three at a time) */
+var ARRQ=[];
+function arrival(u){ARRQ.push(u);if(ARRQ.length>8)ARRQ.splice(0,ARRQ.length-8)}
+setInterval(function(){if(!ARRQ.length)return;var u=ARRQ.shift(),box=$("arrivals");if(!box)return;ensurePhoto(u);
+  var src=u.img&&u.img.src||"",el=document.createElement("div");el.className="arr";
+  el.innerHTML='<span class="ph" style="background:hsl('+(u.hue||200)+',70%,45%)">'+(src?'<img alt="" src="'+esc(src)+'">':esc(initial(u.nick)))+'</span><span>'+esc(String(u.nick).slice(0,18))+'</span><span class="ic">🕺</span>';
+  box.appendChild(el);while(box.children.length>3)box.firstChild.remove();setTimeout(function(){el.classList.add("out");setTimeout(function(){el.remove()},400)},3000)},700);
+/* the host's own TikTok photo for the giant screen */
+var HOSTK={img:null,user:"",nick:"",hue:300};
+function setHost(e){var av=String(e.avatar||""),user=String(e.user||"");HOSTK.user=user;HOSTK.nick=String(e.nick||user);HOSTK.hue=hashHue(user);
+  try{localStorage.setItem("party_hostk",JSON.stringify({av:av,user:user,nick:HOSTK.nick}))}catch(x){}loadHostImg(av)}
+function loadHostImg(av){if(!av)return;var done=function(src){if(!src)return;var im=new Image();im.onload=function(){HOSTK.img=im};im.src=src};
+  if(APP&&BusApp.image){var id="i"+(++imgN);imgWait[id]=done;try{BusApp.image(av,id)}catch(x){}}else done(av)}
+try{var hk=JSON.parse(localStorage.getItem("party_hostk")||"null");if(hk){HOSTK.user=hk.user||"";HOSTK.nick=hk.nick||"";HOSTK.hue=hashHue(HOSTK.user);setTimeout(function(){loadHostImg(hk.av)},500)}}catch(x){}
 /* ---------- the host's own camera bubble: small, at the edge, draggable; a "busy" card when the host steps away ---------- */
 var HOST={stream:null,busy:cfg.hostIcon||"☕",busyAt:0,starting:false,frame:null};
 var HOSTSIZE={s:90,m:118,l:156};
@@ -1403,7 +1452,7 @@ function paintScreen(b,pulse){var c=screenCanvas,x=c.getContext("2d"),w=c.width,
     for(var k=0;k<24;k++){var a=k/24*Math.PI*2+b*0.4;x.strokeStyle="hsla("+((k*15+b*40)%360)+",100%,60%,.55)";x.lineWidth=6;x.beginPath();x.moveTo(cx+Math.cos(a)*r*1.05,cy+Math.sin(a)*r*1.05);x.lineTo(cx+Math.cos(a)*w,cy+Math.sin(a)*w);x.stroke()}
     x.save();x.beginPath();x.arc(cx,cy,r,0,7);x.clip();var im=vipImg,s2=Math.max(2*r/im.width,2*r/im.height);try{x.drawImage(im,cx-im.width*s2/2,cy-im.height*s2/2,im.width*s2,im.height*s2)}catch(e){}x.restore();
     x.lineWidth=10;x.strokeStyle="#ffc93c";x.beginPath();x.arc(cx,cy,r,0,7);x.stroke();screenTex.needsUpdate=true;return}
-  x.fillStyle="#07021a";x.fillRect(0,0,w,h);var n=40,bw=w/n,safe=safeLive(),king=safe?lastSup:cfg.kingScreen&&top3[0];
+  x.fillStyle="#07021a";x.fillRect(0,0,w,h);var n=40,bw=w/n,safe=safeLive(),king=cfg.wallHost&&HOSTK.img?HOSTK:safe?lastSup:cfg.kingScreen&&top3[0];
   for(var i=0;i<n;i++){var v=0.2+0.8*Math.abs(Math.sin(i*0.55+b*1.6)*Math.cos(i*0.27-b*0.85))*(0.55+0.45*pulse),bh=v*h*0.92*(king?0.55:1),seg=8;
     for(var y=0;y<bh;y+=seg){var hue=(i*9+b*18+y*0.4)%360;x.fillStyle="hsl("+hue+",95%,"+(king?30+y/h*20:45+y/h*25)+"%)";x.fillRect(i*bw+2,h-y-seg+1,bw-4,seg-2)}}
   if(king){var r=h*0.3,cx=w/2,cy=h*0.42;
@@ -1411,8 +1460,8 @@ function paintScreen(b,pulse){var c=screenCanvas,x=c.getContext("2d"),w=c.width,
     if(king.img){var im=king.img,s2=Math.max(2*r/im.width,2*r/im.height);try{x.drawImage(im,cx-im.width*s2/2,cy-im.height*s2/2,im.width*s2,im.height*s2)}catch(e){}}
     else{x.fillStyle="hsl("+king.hue+",70%,45%)";x.fillRect(cx-r,cy-r,2*r,2*r);x.fillStyle="#fff";x.textAlign="center";x.textBaseline="middle";x.font="800 80px 'Barlow Condensed',Arial";x.fillText(initial(king.nick),cx,cy+4)}
     x.restore();x.lineWidth=8;x.strokeStyle=safe?"#ffffff":"#ffc93c";x.shadowColor=x.strokeStyle;x.shadowBlur=20;x.beginPath();x.arc(cx,cy,r,0,7);x.stroke();x.shadowBlur=0;
-    x.textAlign="center";x.textBaseline="middle";if(!safe){x.font="64px serif";x.fillText("👑",cx,cy-r-8)}
-    var nm=king.nick.length>16?king.nick.slice(0,15)+"…":king.nick;x.font="800 44px 'Barlow Condensed',Arial,sans-serif";x.fillStyle="#fff";x.fillText((safe?"":"🥇 ")+nm,cx,cy+r+34)}
+    x.textAlign="center";x.textBaseline="middle";if(!safe&&king!==HOSTK){x.font="64px serif";x.fillText("👑",cx,cy-r-8)}
+    var nm=king.nick.length>16?king.nick.slice(0,15)+"…":king.nick;x.font="800 44px 'Barlow Condensed',Arial,sans-serif";x.fillStyle="#fff";x.fillText(king===HOSTK?"@"+HOSTK.user:(safe?"":"🥇 ")+nm,cx,cy+r+34)}
   screenTex.needsUpdate=true}
 
 /* ---------- render loop with automatic quality ---------- */
@@ -1506,7 +1555,7 @@ $("close").onclick=function(){openSheet(false)};
 Array.prototype.forEach.call(document.querySelectorAll(".tab"),function(b){b.onclick=function(){
   Array.prototype.forEach.call(document.querySelectorAll(".tab"),function(x){x.setAttribute("aria-selected",x===b);$(x.dataset.p).hidden=x!==b})}});
 function fill(){$("oPer").value=String(cfg.per);$("oMax").value=String(cfg.max);$("oFill").value=String(cfg.fill);$("oChat").checked=cfg.chat;$("oWords").value=cfg.words;
-  $("oCd").value=String(cfg.cd);$("oBpm").value=String(cfg.bpm);$("oQ").value=cfg.q;$("oAuto").checked=cfg.auto;$("oSafe").checked=cfg.safe;$("oHint").checked=cfg.hintOn;$("oFlag").checked=cfg.flag;$("oPrio").checked=cfg.prio;$("oTop3").checked=cfg.top3;$("oKing").checked=cfg.kingScreen;$("oMemory").checked=cfg.memory;$("oSafeLive").checked=cfg.safeLive;$("oHost").checked=cfg.host;$("oHostSize").value=cfg.hostSize;$("oHostShape").value=cfg.hostShape2;$("oHostMirror").checked=cfg.hostMirror;$("oHostSup").checked=cfg.hostSup;$("oJoin").checked=cfg.joinChar;$("oHallMin").value=String(cfg.hallMin);$("oSync").checked=cfg.sync;$("oSyncSrc").value=cfg.syncSrc;paintTapSeg();$("oLikeN").value=String(cfg.likeN);$("oLikeCam").value=String(cfg.likeCam2);$("oTapHold").value=String(cfg.tapHold2);$("oGoal").value=String(cfg.goal);$("oVipMin").value=String(cfg.vipMin);$("oVipLen").value=String(cfg.vipLen);musicLabel()}
+  $("oCd").value=String(cfg.cd);$("oBpm").value=String(cfg.bpm);$("oQ").value=cfg.q;$("oAuto").checked=cfg.auto;$("oSafe").checked=cfg.safe;$("oTapsOnly").checked=!!cfg.tapsOnly;$("oWallHost").checked=!!cfg.wallHost;$("oHint").checked=cfg.hintOn;$("oFlag").checked=cfg.flag;$("oPrio").checked=cfg.prio;$("oTop3").checked=cfg.top3;$("oKing").checked=cfg.kingScreen;$("oMemory").checked=cfg.memory;$("oSafeLive").checked=cfg.safeLive;$("oHost").checked=cfg.host;$("oHostSize").value=cfg.hostSize;$("oHostShape").value=cfg.hostShape2;$("oHostMirror").checked=cfg.hostMirror;$("oHostSup").checked=cfg.hostSup;$("oJoin").checked=cfg.joinChar;$("oHallMin").value=String(cfg.hallMin);$("oSync").checked=cfg.sync;$("oSyncSrc").value=cfg.syncSrc;paintTapSeg();$("oLikeN").value=String(cfg.likeN);$("oLikeCam").value=String(cfg.likeCam2);$("oTapHold").value=String(cfg.tapHold2);$("oGoal").value=String(cfg.goal);$("oVipMin").value=String(cfg.vipMin);$("oVipLen").value=String(cfg.vipLen);musicLabel()}
 function bind(id,key,num){var el=$(id);el.onchange=el.oninput=function(){cfg[key]=el.type==="checkbox"?el.checked:num?Math.max(0,+el.value||0):el.value;save();
   if(key==="flag"&&G.flag)G.flag.visible=cfg.flag;
   if(key==="prio"||key==="tapMode")paintPrio();
@@ -1517,7 +1566,7 @@ function bind(id,key,num){var el=$(id);el.onchange=el.oninput=function(){cfg[key
   if(key.indexOf("host")===0)hostLayout();
   if(key==="safeLive"){paintPrio();paintHint();lastTop3="";paintTop3();paintHappy();paintEnergy();for(var uk in users){var uu=users[uk];if(uu.label){uu.label.dispose();uu.label=null;relabel(uu)}}}
   if(key==="q")applyQuality();if(key==="fill")layoutFillers();if(key==="hintOn"||key==="safe")paintHint()}}
-bind("oPer","per",1);bind("oMax","max",1);bind("oFill","fill",1);bind("oChat","chat");bind("oWords","words");bind("oCd","cd",1);bind("oBpm","bpm",1);bind("oQ","q");bind("oAuto","auto");bind("oSafe","safe");bind("oHint","hintOn");bind("oFlag","flag");bind("oPrio","prio");bind("oTop3","top3");bind("oKing","kingScreen");bind("oMemory","memory");bind("oSafeLive","safeLive");bind("oHost","host");bind("oHostSize","hostSize");bind("oHostShape","hostShape2");bind("oHostMirror","hostMirror");bind("oHostSup","hostSup");bind("oJoin","joinChar");bind("oHallMin","hallMin",1);bind("oSync","sync");bind("oSyncSrc","syncSrc");bind("oLikeN","likeN",1);bind("oLikeCam","likeCam2",1);bind("oTapHold","tapHold2",1);bind("oGoal","goal",1);bind("oVipMin","vipMin",1);bind("oVipLen","vipLen",1);
+bind("oTapsOnly","tapsOnly");bind("oWallHost","wallHost");bind("oPer","per",1);bind("oMax","max",1);bind("oFill","fill",1);bind("oChat","chat");bind("oWords","words");bind("oCd","cd",1);bind("oBpm","bpm",1);bind("oQ","q");bind("oAuto","auto");bind("oSafe","safe");bind("oHint","hintOn");bind("oFlag","flag");bind("oPrio","prio");bind("oTop3","top3");bind("oKing","kingScreen");bind("oMemory","memory");bind("oSafeLive","safeLive");bind("oHost","host");bind("oHostSize","hostSize");bind("oHostShape","hostShape2");bind("oHostMirror","hostMirror");bind("oHostSup","hostSup");bind("oJoin","joinChar");bind("oHallMin","hallMin",1);bind("oSync","sync");bind("oSyncSrc","syncSrc");bind("oLikeN","likeN",1);bind("oLikeCam","likeCam2",1);bind("oTapHold","tapHold2",1);bind("oGoal","goal",1);bind("oVipMin","vipMin",1);bind("oVipLen","vipLen",1);
 var TAPNOTE={full:"Quien toca aparece con su personaje, se lleva la cámara un momento y llena la barra de energía.",
   energy:"Los toques solo llenan la barra de energía ⚡ entre todos. Personajes y cámara quedan para quien envía regalos.",
   off:"Los toques no hacen nada y el dibujo 👆 desaparece. Solo cuentan los regalos."};
@@ -1556,6 +1605,7 @@ $("lnNote").textContent=!APP?"Vista previa: abre esta página desde la app para 
 if(APP){try{$("apUser").value=BusApp.getUser();$("apKey").value=BusApp.getKey()}catch(e){}
   $("apGo").onclick=function(){var u=$("apUser").value.trim();if(!YT)u=u.replace(/^@/,"");$("apUser").value=u;$("apLog").textContent="";try{BusApp.connect(u,$("apKey").value.trim())}catch(e){}};
   window.__bus=function(e){try{onEvent(e)}catch(x){}};window.__busLog=appLog;try{BusApp.ready()}catch(e){}}
+else window.__bus=function(e){try{onEvent(e)}catch(x){}};   /* browser preview: tests can feed events */
 
 /* housekeeping: forget viewers who left without supporting, free whatever nobody shows */
 setInterval(function(){var now=perf(),n=0;for(var k in users){var u=users[k];if(u.chars.length||u===focus)continue;

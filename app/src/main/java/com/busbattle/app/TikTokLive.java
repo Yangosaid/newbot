@@ -137,6 +137,14 @@ public final class TikTokLive implements LiveSource {
 
     // ---------------------------------------------------------------- room id
 
+    /** The host's own name and profile photo, for the games' big screen. */
+    private void host(JSONObject u) {
+        if (u == null) return;
+        String av = u.optString("avatarLarger", u.optString("avatarMedium", u.optString("avatarThumb", "")));
+        if (!av.startsWith("https://") && !av.startsWith("http://")) av = "";
+        try { out.onEvent(new JSONObject().put("type", "host").put("user", u.optString("uniqueId", user)).put("nick", u.optString("nickname", user)).put("avatar", av).toString()); } catch (Exception ignored) {}
+    }
+
     private String roomId() throws Exception {
         List<String> errs = new ArrayList<>();
         try {
@@ -150,6 +158,7 @@ public final class TikTokLive implements LiveSource {
             if (lr != null && lr.optInt("status", 0) == 4) throw new Offline();
             String id = info.optJSONObject("user") == null ? "" : info.optJSONObject("user").optString("roomId", "");
             if (id.isEmpty() || id.equals("0")) throw new IOException("página sin roomId");
+            host(info.optJSONObject("user"));
             return id;
         } catch (Offline e) { throw e; } catch (Exception e) { errs.add("web: " + e.getMessage()); }
 
@@ -164,6 +173,7 @@ public final class TikTokLive implements LiveSource {
             if (lr != null && lr.optInt("status", 0) == 4) throw new Offline();
             String id = data == null || data.optJSONObject("user") == null ? "" : data.optJSONObject("user").optString("roomId", "");
             if (id.isEmpty() || id.equals("0")) throw new IOException("API sin roomId");
+            host(data.optJSONObject("user"));
             return id;
         } catch (Offline e) { throw e; } catch (Exception e) { errs.add("api: " + e.getMessage()); }
 

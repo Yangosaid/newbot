@@ -38,6 +38,7 @@ public class MainActivity extends Activity {
     static final boolean YOUTUBE = "youtube".equals(BuildConfig.FLAVOR);
     private final Handler ui = new Handler(Looper.getMainLooper());
     private volatile boolean pageReady;
+    private volatile String lastHost;
     private String lastStatus = "{\"type\":\"status\",\"ok\":false,\"text\":\"Escribe tu usuario de TikTok en Conexión\"}";
     private final ArrayDeque<String> logLines = new ArrayDeque<>();
     private ValueCallback<Uri[]> fileCallback;
@@ -156,6 +157,7 @@ public class MainActivity extends Activity {
         TikTokLive.Listener l = new TikTokLive.Listener() {
             @Override public void onEvent(String json) {
                 if (json.contains("\"type\":\"status\"")) lastStatus = json;
+                if (json.contains("\"type\":\"host\"")) { lastHost = json; js("window.__bus&&window.__bus(" + safe(json) + ")"); return; }
                 // a flood of taps must never delay gifts: drop taps when the page is behind
                 if (queued.get() > 300 && json.contains("\"type\":\"join\"")) return;
                 if (queued.get() > 600 && json.contains("\"type\":\"like\"")) return;
@@ -366,6 +368,7 @@ public class MainActivity extends Activity {
         @JavascriptInterface public void ready() {
             pageReady = true;
             StringBuilder b = new StringBuilder("window.__bus&&window.__bus(" + safe(lastStatus) + ");");
+            if (lastHost != null) b.append("window.__bus&&window.__bus(").append(safe(lastHost)).append(");");
             synchronized (logLines) {
                 for (String l : logLines) b.append("window.__busLog&&window.__busLog(").append(safe(JSONObject.quote(l))).append(");");
             }
