@@ -75,6 +75,13 @@ input[type=checkbox]{width:20px;height:20px;accent-color:var(--hot)}
 #monL b{color:var(--ink)}
 #hint .g img{width:38px;height:38px;object-fit:contain;display:block}
 /* the three top supporters of this live (top-left), with photo, name and support */
+#tapb{position:absolute;inset:0;pointer-events:none;overflow:hidden;z-index:3}
+.tb{position:absolute;top:60%;display:flex;flex-direction:column;align-items:center;gap:2px;animation:tbUp 3s ease-out forwards}
+.tb .ph{width:44px;height:44px;border-radius:50%;overflow:hidden;border:2.5px solid #fff;box-shadow:0 0 14px rgba(255,61,139,.8);display:grid;place-items:center;font:800 19px/1 var(--display);color:#fff}.tb .ph img{width:100%;height:100%;object-fit:cover}
+.tb .nm{font:800 13px/1 var(--display);color:#fff;text-shadow:0 1px 3px #000;max-width:90px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+@keyframes tbUp{0%{transform:translate(0,30px) scale(.4);opacity:0}12%{transform:translate(0,0) scale(1.1);opacity:1}25%{transform:scale(1)}100%{transform:translate(var(--dx),-170px) scale(.9);opacity:0}}
+#nextUp{position:absolute;right:8px;top:30%;display:flex;flex-direction:column;align-items:center;gap:5px;padding:6px 5px;border-radius:999px;background:rgba(20,10,40,.55);pointer-events:none;z-index:4}
+#nextUp .e{font-size:18px}#nextUp .ph{width:34px;height:34px;border-radius:50%;overflow:hidden;border:2px solid #fff;display:grid;place-items:center;font:800 15px/1 var(--display);color:#fff}#nextUp .ph img{width:100%;height:100%;object-fit:cover}
 #arrivals{position:absolute;left:8px;top:30%;display:flex;flex-direction:column;gap:5px;pointer-events:none;max-width:58%;z-index:4}
 .arr{display:flex;align-items:center;gap:7px;padding:4px 12px 4px 4px;border-radius:999px;background:linear-gradient(90deg,rgba(255,61,139,.92),rgba(30,10,60,.85));border:1.5px solid rgba(255,255,255,.7);color:#fff;font:800 17px/1.1 var(--display);box-shadow:0 4px 14px rgba(0,0,0,.4);animation:arrIn .45s cubic-bezier(.2,.9,.3,1.3) both;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .arr.out{animation:arrOut .4s ease-in both}.arr .ph{width:38px;height:38px;border-radius:50%;overflow:hidden;flex:none;border:2px solid #fff;display:grid;place-items:center;font:800 17px/1 var(--display)}.arr .ph img{width:100%;height:100%;object-fit:cover}
@@ -179,6 +186,8 @@ input[type=checkbox]{width:20px;height:20px;accent-color:var(--hot)}
 <div id="stage">
   <canvas id="gl"></canvas>
   <div id="arrivals" aria-hidden="true"></div>
+  <div id="tapb" aria-hidden="true"></div>
+  <div id="nextUp" aria-hidden="true" hidden></div>
   <div id="fade"></div>
   <div id="nogl" hidden>Este teléfono no puede mostrar gráficos 3D.<br>Vuelve a la batalla de buses desde ⚙.</div>
   <div id="hint" aria-hidden="true">
@@ -914,7 +923,7 @@ function onEvent(e){if(!e||!e.type)return;monitor(e);
     if(cfg.tapMode==="energy")return;
     var nw=perf(),gap=nw-(ul.lastTap||0);ul.lastTap=nw;if(!ul.firstTap)ul.firstTap=nw;
     if(!ul.chars.length&&(!ul.waitFrom||ul.waitFrom<(ul.offAt||0)||gap>LIVEMS))ul.waitFrom=nw;   /* waiting (and tapping) since */
-    if(ul.likes>=Math.max(1,cfg.likeN|0))actAdd(ul,nw);
+    if(ul.likes>=Math.max(1,cfg.likeN|0)){actAdd(ul,nw);if(!ul.chars.length){newcomer(ul);tapBubble(ul)}}
     if(!ul.chars.length)return;                       /* their dancer comes through the fair scheduler */
     support(ul,{kind:"tap",taps:c});return}
   if(e.type==="chat"){var sg=saidG(e.text);if(sg){var ug=userOf(e);changeG(ug,sg);return}}
@@ -960,20 +969,55 @@ function canWait(u,now){return !u.chars.length&&(u.likes||0)>=Math.max(1,cfg.lik
 function waitScore(u,now){return (u.floorAt?0:60000)+(now-(u.waitFrom||now))+(now-(u.lastTap||0)<3000?4000:0)}
 function hadCam(u){return !!u.floorAt&&u.camStint===u.floorAt}
 function pickLeaver(now,stay){var best=null,bs=-1;
-  chars.forEach(function(c){var u=c.u;if(u===focus||vip&&vip.u===u||(!cfg.tapsOnly&&u.coins>0))return;
+  chars.forEach(function(c){var u=c.u;if(u.lane||u===focus||vip&&vip.u===u||(!cfg.tapsOnly&&u.coins>0))return;
     var on=now-(u.floorAt||0),idle=now-(u.lastTap||0);
     if(idle>45000&&on>6000){var s0=1e9+idle;if(s0>bs){bs=s0;best=c}return}
     if(on<stay)return;
     if(!hadCam(u)&&idle<5000&&on<stay*2)return;            /* still tapping and no close-up yet: protected */
     var sc=on/1000+(idle>5000?100+idle/1000:0)+(hadCam(u)?30:0);if(sc>bs){bs=sc;best=c}});
   return best}
+/* the fast lane: a quarter of the floor (up to 6 spots) is kept for people tapping for the first time, 8 s each, so a newcomer
+   dances within seconds; afterwards they join the normal line for their full turn and close-up. First taps are kept in their own
+   queue (in tap order), so even in a huge crowd nobody new is missed by the sampling. */
+var NEWQ=[],FASTSTAY=8000;
+function laneCap(){return Math.min(6,Math.max(1,Math.floor(Math.max(1,cfg.max|0)/4)))}
+function newcomer(u){if(u.inNewQ||u.floorAt)return;u.inNewQ=true;NEWQ.push(u);if(NEWQ.length>5000){var o=NEWQ.shift();o.inNewQ=false}}
+function nextNew(now,skip){while(NEWQ.length){var u=NEWQ[0];if(u.floorAt||u.chars.length||now-(u.lastTap||0)>LIVEMS){NEWQ.shift();u.inNewQ=false;continue}break}
+  for(var i=0;i<NEWQ.length&&i<50;i++){var v=NEWQ[i];if(skip.indexOf(v)<0&&canWait(v,now))return v}return null}
 setInterval(function(){if(!ok3d||cfg.tapMode!=="full")return;var now=perf();
-  var wait=pool().filter(function(u){return canWait(u,now)});if(!wait.length)return;
+  /* lane dancers whose 8 s are over make room when someone waits; they keep their place in the normal line */
+  var anyWait=NEWQ.length>0||ACT.length>chars.length;
+  if(anyWait)chars.slice().forEach(function(c){var u=c.u;if(u.lane&&u!==focus&&now-(u.floorAt||0)>=FASTSTAY){u.lane=false;u.waitFrom=now;u.chars.slice().forEach(removeChar)}});
+  var wait=pool().filter(function(u){return canWait(u,now)});
   wait.sort(function(a,b){return waitScore(b,now)-waitScore(a,now)});
-  var cap=Math.max(1,cfg.max|0),free=cap-chars.length,n=0;
-  if(free<=0){if(now-FAIR.lastEvict<400)return;var out=pickLeaver(now,fairStay(Math.max(wait.length,ACT.length-chars.length)));if(!out)return;
-    FAIR.lastEvict=now;var ou=out.u;ou.chars.slice().forEach(removeChar);free=cap-chars.length}
-  while(free>0&&n<2&&n<wait.length){var u=wait[n++],d=addChar(u);if(!d)break;u.floorAt=now;u.waitFrom=0;free--;burst(d);hearts(d,4);arrival(u)}},250);
+  var cap=Math.max(1,cfg.max|0),laneN=0;chars.forEach(function(c){if(c.u.lane)laneN++});
+  var picked=[],nw=nextNew(now,picked);FAIR.next=[];
+  if(!nw&&!wait.length){paintNext();return}
+  var free=cap-chars.length;
+  if(free<=0&&!(nw&&laneN<laneCap())&&wait.length){if(now-FAIR.lastEvict>=400){var out=pickLeaver(now,fairStay(Math.max(wait.length,ACT.length-chars.length)));
+      if(out){FAIR.lastEvict=now;out.u.chars.slice().forEach(removeChar);free=cap-chars.length}}}
+  if(free<=0&&nw&&laneN<laneCap()){var out2=pickLeaver(now,fairStay(wait.length));if(out2){out2.u.chars.slice().forEach(removeChar);free=cap-chars.length}}
+  var n=0;
+  while(free>0&&n<2){var u=null,lane=false;nw=nextNew(now,picked);
+    if(nw&&laneN<laneCap()){u=nw;lane=true;laneN++}else{for(var i=0;i<wait.length;i++)if(picked.indexOf(wait[i])<0){u=wait[i];break}}
+    if(!u)break;picked.push(u);var d=addChar(u);if(!d)break;u.floorAt=now;u.waitFrom=0;u.lane=lane;n++;free--;burst(d);hearts(d,4);arrival(u)}
+  /* who's next (for the little board) */
+  var nx=[],seen=picked.slice();for(var k=0;k<3;k++){var a=nextNew(now,seen);if(!a)break;seen.push(a);nx.push(a)}
+  for(var j=0;j<wait.length&&nx.length<4;j++)if(seen.indexOf(wait[j])<0){nx.push(wait[j]);seen.push(wait[j])}
+  FAIR.next=nx;paintNext()},250);
+/* the "next" board: 👀 and the photos of the next four */
+var nextKeyH="";
+function paintNext(){var el=$("nextUp");if(!el)return;var nx=FAIR.next||[],key=nx.map(function(u){return u.uid}).join(",");if(key===nextKeyH)return;nextKeyH=key;
+  if(!nx.length){el.hidden=true;return}el.hidden=false;
+  el.innerHTML='<span class="e">👀</span>'+nx.map(function(u){ensurePhoto(u);var src=u.img&&u.img.src||"";return '<span class="ph" style="background:hsl('+(u.hue||200)+',70%,45%)">'+(src?'<img alt="" src="'+esc(src)+'">':esc(initial(u.nick)))+'</span>'}).join("")}
+/* instant bubble: within a second of someone's first taps their photo floats up into the hall (again every 25 s while they wait) */
+var BQ=[];
+function tapBubble(u){var now=perf();if(now-(u.bubAt||0)<25000)return;u.bubAt=now;ensurePhoto(u);
+  if(!u.floorAt)BQ.unshift(u);else BQ.push(u);if(BQ.length>12)BQ.length=12}
+setInterval(function(){if(!BQ.length)return;var u=BQ.shift(),box=$("tapb");if(!box)return;var src=u.img&&u.img.src||"",el=document.createElement("div");el.className="tb";
+  el.style.left=(52+Math.random()*30)+"%";el.style.setProperty("--dx",(Math.random()*40-20)+"px");
+  el.innerHTML='<span class="ph" style="background:hsl('+(u.hue||200)+',70%,45%)">'+(src?'<img alt="" src="'+esc(src)+'">':esc(initial(u.nick)))+'</span><span class="nm">'+esc(String(u.nick).slice(0,14))+'</span>';
+  box.appendChild(el);while(box.children.length>8)box.firstChild.remove();setTimeout(function(){el.remove()},3000)},250);
 /* the camera for tappers: a close-up for everyone on the floor, the longest without one first */
 setInterval(function(){if(!ok3d||cfg.tapMode!=="full")return;var now=perf(),inVip=vip&&now<vip.until;
   if(!(+cfg.likeCam2>0)||inVip||camQ.length||playing(now)||(!cfg.tapsOnly&&now-lastGiftAt<=(+cfg.likeCam2)*1000)||now-focusAt<=Math.max(0.5,+cfg.tapHold2||3.5)*1000)return;
